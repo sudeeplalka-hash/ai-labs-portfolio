@@ -17,8 +17,8 @@ const usd = (n: number) => {
   const s = n < 0 ? "-" : "";
   return a >= 1000 ? `${s}$${Math.round(a / 1000).toLocaleString()}k` : `${s}$${Math.round(a)}`;
 };
-const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "AI Ops", govern: "Govern", realize: "Realize" };
-const STAGE_HREF: Record<StageKey, string> = { frame: "/frame", data: "/data", build: "/build", deploy: "/deploy", govern: "/govern", realize: "/realize" };
+const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "AI Ops", govern: "Govern", realize: "Realize", operate: "Operate" };
+const STAGE_HREF: Record<StageKey, string> = { frame: "/frame", data: "/data", build: "/build", deploy: "/deploy", govern: "/govern", realize: "/realize", operate: "/operate" };
 
 function Src({ s }: { s: StageKey }) {
   return <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slatey-400">{STAGE_LABEL[s]}</span>;

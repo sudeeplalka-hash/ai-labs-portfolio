@@ -4,8 +4,8 @@ import Link from "next/link";
 import type { StageKey } from "@labs/program-core";
 import type { RiverFlow } from "../engine/types";
 
-const STAGE_HREF: Record<StageKey, string> = { frame: "/frame", data: "/data", build: "/build", deploy: "/deploy", govern: "/govern", realize: "/realize" };
-const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "AI Ops", govern: "Govern", realize: "Realize" };
+const STAGE_HREF: Record<StageKey, string> = { frame: "/frame", data: "/data", build: "/build", deploy: "/deploy", govern: "/govern", realize: "/realize", operate: "/operate" };
+const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "AI Ops", govern: "Govern", realize: "Realize", operate: "Operate" };
 const usd = (n: number) => {
   const a = Math.abs(n);
   const s = n < 0 ? "-" : "";
