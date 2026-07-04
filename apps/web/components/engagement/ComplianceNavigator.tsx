@@ -12,6 +12,7 @@ import { ArrowLeft, CheckCircle2, Circle } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Tier = "prohibited" | "high" | "limited" | "minimal";
 const ORDER: Record<Tier, number> = { prohibited: 3, high: 2, limited: 1, minimal: 0 };
@@ -73,6 +74,7 @@ export function ComplianceNavigator() {
   const [override, setOverride] = useState<Record<string, boolean>>({});
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL05_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL05_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     setOverride({});

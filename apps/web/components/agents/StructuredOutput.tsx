@@ -12,6 +12,7 @@ import { ArrowLeft, ArrowRight, ShieldCheck, XCircle, CheckCircle2, Database } f
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP04_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface Field { name: string; type: string; required: boolean }
 interface Sample {
@@ -70,6 +71,7 @@ export function StructuredOutput() {
   const [key, setKey] = useState(SAMPLES[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP04_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP04_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const s: Sample = activeUc
     ? { key: activeUc.id, label: activeUc.payload.label, raw: activeUc.payload.raw, schema: activeUc.payload.schema, hard: activeUc.payload.hard, attempt1: activeUc.payload.attempt1, errors: activeUc.payload.errors, retryNote: activeUc.payload.retryNote, final: activeUc.payload.final }
     : SAMPLES.find((x) => x.key === key)!;

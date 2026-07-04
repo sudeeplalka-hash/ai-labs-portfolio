@@ -12,6 +12,7 @@ import {
   INDUSTRIES,
   USE_CASE_COVERAGE,
   ALL_USE_CASES,
+  labHref,
   type IndustryKey,
 } from "@labs/kit";
 
@@ -44,12 +45,14 @@ const LAB_META: Record<string, { name: string; href: string; collection: string 
 
 export function IndustryAtlas() {
   const [filter, setFilter] = useState<IndustryKey | null>(null);
+  const [firstHandOnly, setFirstHandOnly] = useState(false);
   const cov = USE_CASE_COVERAGE;
 
   const industryKeys = (Object.keys(cov.byIndustry) as IndustryKey[]).sort(
     (a, b) => cov.byIndustry[b].total - cov.byIndustry[a].total || a.localeCompare(b),
   );
-  const shown = filter ? industryKeys.filter((k) => k === filter) : industryKeys;
+  const visible = industryKeys.filter((k) => !firstHandOnly || cov.byIndustry[k].firstHand > 0);
+  const shown = filter ? visible.filter((k) => k === filter) : visible;
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -59,6 +62,7 @@ export function IndustryAtlas() {
             <ArrowLeft className="h-4 w-4" /> Portfolio
           </Link>
           <span className="ml-1 font-mono text-xs text-slatey-500">Industry Atlas</span>
+          <Link href="/storylines" className="ml-auto text-xs font-medium text-primary hover:underline">Storylines →</Link>
         </div>
       </header>
 
@@ -90,7 +94,16 @@ export function IndustryAtlas() {
           >
             All industries
           </button>
-          {industryKeys.map((k) => {
+          <button
+            onClick={() => setFirstHandOnly((v) => !v)}
+            aria-pressed={firstHandOnly}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              firstHandOnly ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"
+            }`}
+          >
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" /> First-hand only
+          </button>
+          {visible.map((k) => {
             const ind = INDUSTRIES[k];
             const on = filter === k;
             return (
@@ -113,7 +126,7 @@ export function IndustryAtlas() {
           {shown.map((k) => {
             const ind = INDUSTRIES[k];
             const c = cov.byIndustry[k];
-            const cases = ALL_USE_CASES.filter((uc) => uc.industry === k);
+            const cases = ALL_USE_CASES.filter((uc) => uc.industry === k && (!firstHandOnly || uc.provenance.kind === "first-hand"));
             return (
               <div key={k} className="rounded-xl border bg-white p-4" style={{ borderColor: `${ind.accent}33`, borderLeftWidth: 3, borderLeftColor: ind.accent }}>
                 <div className="mb-2.5 flex items-center gap-2">
@@ -133,7 +146,7 @@ export function IndustryAtlas() {
                     return (
                       <li key={uc.id}>
                         <Link
-                          href={lab?.href ?? "/"}
+                          href={labHref(uc.labId, uc.id)}
                           className="group flex items-start gap-2 rounded-md border border-line px-2.5 py-1.5 transition hover:border-ink/30 hover:bg-slate-50"
                         >
                           <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: fh ? ind.accent : "#cbd5e1" }} title={fh ? "first-hand" : "studied"} />

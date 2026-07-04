@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL03_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Res = "none" | "hire" | "contract" | "upskill";
 interface Skill { key: string; label: string; capacity: number; demand: number }
@@ -35,6 +36,7 @@ export function CapacityPlanner() {
   const [res, setRes] = useState<Record<string, Res>>({});
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL03_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL03_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const skills: Skill[] = activeUc ? activeUc.payload.skills : SKILLS;
   const baseWeeks = activeUc ? activeUc.payload.baseWeeks : BASE_WEEKS;
   const baseMonthly = activeUc ? activeUc.payload.baseMonthly : BASE_MONTHLY;

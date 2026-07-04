@@ -11,6 +11,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C35_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const H = 3; // horizon years
 
@@ -40,6 +41,7 @@ export function RoiBuilder() {
   const set = (k: keyof P, v: number) => setP((cur) => ({ ...cur, [k]: v }));
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C35_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(C35_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? C35_USE_CASES.find((u) => u.id === id) : null;

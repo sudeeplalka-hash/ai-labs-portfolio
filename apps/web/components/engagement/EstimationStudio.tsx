@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL08_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface Task { phase: string; weeks: number; ai?: boolean }
 interface UseCase {
@@ -73,6 +74,7 @@ export function EstimationStudio() {
   const [scopeOn, setScopeOn] = useState(false);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL08_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL08_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => { setActiveUcId(id); setScopeOn(false); };
   const uc: UseCase = activeUc ? activeUc.payload.scenario : USE_CASES.find((u) => u.key === ucKey)!;
 

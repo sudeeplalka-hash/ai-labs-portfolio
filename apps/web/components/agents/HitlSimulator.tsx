@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP08_USE_CASES, type Gap08Tier } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Risk = "high" | "med" | "low";
 interface Item { risk: Risk; edge: boolean; sev: number }
@@ -49,6 +50,7 @@ export function HitlSimulator() {
   const [level, setLevel] = useState(1);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP08_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP08_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? GAP08_USE_CASES.find((u) => u.id === id) : null;

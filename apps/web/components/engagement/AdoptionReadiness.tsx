@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL01_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type FactorKey = "sponsorship" | "workflow" | "trust" | "training" | "incentives" | "comms";
 type Factors = Record<FactorKey, number>;
@@ -47,6 +48,7 @@ export function AdoptionReadiness() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL01_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL01_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const nativeScenario = SCENARIOS.find((s) => s.key === scenarioKey)!;
   const people = activeUc ? activeUc.payload.people : nativeScenario.people;
   const [factors, setFactors] = useState<Factors>(nativeScenario.defaults);

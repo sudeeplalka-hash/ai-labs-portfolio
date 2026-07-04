@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C33_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const CLUSTER_CAP_TOKENS = 2.5e9; // tokens/month per cluster at 100% utilization
 const CLUSTER_COST = 38000; // $/month amortized (hardware + power + DC)
@@ -30,6 +31,7 @@ export function InferenceForecaster() {
   const [opsFte, setOpsFte] = useState(1.5);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C33_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(C33_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? C33_USE_CASES.find((u) => u.id === id) : null;

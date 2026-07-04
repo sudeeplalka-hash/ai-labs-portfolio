@@ -13,6 +13,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp } from "@labs/design-system";
 import { EL10_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { SCENARIOS, healthIndex, type Scenario } from "./portfolioData";
 
 type ArtKey = "weekly" | "steering" | "qbr";
@@ -39,6 +40,7 @@ export function ExecCommStudio() {
   const [aud, setAud] = useState<AudKey>("cio");
 
   const activeUc = activeUcId ? EL10_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL10_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? EL10_USE_CASES.find((u) => u.id === id) ?? null : null;

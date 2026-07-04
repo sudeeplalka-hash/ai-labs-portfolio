@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C34_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type CKey = "capability" | "security" | "roadmap" | "lockin" | "support" | "price";
 const CRITERIA: { key: CKey; label: string }[] = [
@@ -39,6 +40,7 @@ export function VendorMonitor() {
   const [view, setView] = useState<"scorecard" | "risk">("scorecard");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C34_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(C34_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? C34_USE_CASES.find((u) => u.id === id) : null;

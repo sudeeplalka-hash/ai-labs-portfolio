@@ -158,9 +158,14 @@ export function CompetencyMap() {
           <p className="mt-4 font-mono text-[11px] leading-relaxed text-slate-400 md:text-xs">
             Engagement Manager, HCLTech @ American Express · STEM MBA (AI &amp; Quant, UT Austin) · PMP · AWS SA
           </p>
-          <Link href="/industries" className="mt-6 inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
-            Explore by industry <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/storylines" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
+              Follow a program end-to-end <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/industries" className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
+              Explore by industry <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -193,6 +198,7 @@ export function CompetencyMap() {
             <a href="mailto:sudeeplalka@gmail.com" className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline">
               <Mail className="h-4 w-4" /> Discussing a role? <ArrowRight className="h-4 w-4" />
             </a>
+            <Link href="/storylines" className="text-slatey-500 hover:text-ink hover:underline">Storylines</Link>
             <Link href="/industries" className="text-slatey-500 hover:text-ink hover:underline">Industry Atlas</Link>
             <Link href="/changelog" className="text-slatey-500 hover:text-ink hover:underline">Changelog</Link>
           </div>

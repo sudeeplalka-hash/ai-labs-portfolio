@@ -12,6 +12,7 @@ import { ArrowLeft, Brain, Wrench, Eye, XOctagon, Radar, LifeBuoy, CheckCircle2,
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Role = "thought" | "action" | "observation" | "failure" | "detect" | "recover" | "final";
 interface Step { role: Role; label: string; detail?: string }
@@ -100,6 +101,7 @@ export function LoopInspector() {
   const [fail, setFail] = useState("none");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP02_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP02_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => setActiveUcId(id);
   const trace = activeUc ? activeUc.payload.base : buildTrace(arch, fail);
   const [step, setStep] = useState(0);

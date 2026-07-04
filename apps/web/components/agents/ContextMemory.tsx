@@ -12,6 +12,7 @@ import { ArrowLeft, Check, X } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const WINDOW = 24; // k tokens working budget (small on purpose, to make overflow visible)
 type SKey = "full" | "sum" | "comp" | "handoff";
@@ -54,6 +55,7 @@ export function ContextMemory() {
   const [view, setView] = useState<"compare" | "memory">("compare");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP05_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP05_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? GAP05_USE_CASES.find((u) => u.id === id) : null;

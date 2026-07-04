@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL07_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Status = "met" | "partial" | "gap";
 interface Req { text: string; owner: string; evidence: string; status: Status }
@@ -72,6 +73,7 @@ export function RfpWarRoom() {
   const [rfpKey, setRfpKey] = useState(RFPS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL07_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL07_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => setActiveUcId(id);
   const rfp: Rfp = activeUc ? activeUc.payload.rfp : RFPS.find((r) => r.key === rfpKey)!;
 

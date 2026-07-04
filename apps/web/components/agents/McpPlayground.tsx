@@ -13,6 +13,7 @@ import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare } from "lucide-r
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP01_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type ArgType = "string" | "number" | "enum";
 interface Arg { name: string; type: ArgType; required: boolean; example: string; enumVals?: string[] }
@@ -64,6 +65,7 @@ export function McpPlayground() {
   const [sysKey, setSysKey] = useState(SYSTEMS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP01_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP01_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const sys: System = activeUc
     ? { key: activeUc.id, label: activeUc.payload.label, blurb: activeUc.payload.blurb, tools: activeUc.payload.tools, resources: activeUc.payload.resources, prompts: activeUc.payload.prompts }
     : SYSTEMS.find((s) => s.key === sysKey)!;

@@ -1,10 +1,11 @@
 import type { MetadataRoute } from "next";
+import { ALL_USE_CASES } from "@labs/kit";
 
 const BASE = "https://portfolio.sudeeplalka.com";
 
 // Layer 0 + the 23 new labs + Collection-1 stage roots + utility pages.
 const ROUTES = [
-  "", "/lifecycle", "/changelog",
+  "", "/lifecycle", "/changelog", "/industries", "/storylines",
   // Collection 1 (existing lifecycle)
   "/frame", "/data", "/build", "/deploy", "/govern", "/realize",
   // Collection 2 · Agent & Protocol
@@ -19,7 +20,8 @@ const ROUTES = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  return ROUTES.map((r) => ({
+  const ucPaths = ALL_USE_CASES.map((uc) => `/industries/uc/${uc.id}`);
+  return [...ROUTES, ...ucPaths].map((r) => ({
     url: `${BASE}${r || "/"}`,
     lastModified: now,
     changeFrequency: "monthly",

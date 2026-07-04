@@ -11,6 +11,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL06_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Path = "none" | "build" | "hire" | "partner";
 const PATH_MO: Record<Exclude<Path, "none">, number> = { build: 8, hire: 4, partner: 2 };
@@ -31,6 +32,7 @@ export function TalentPlanner() {
   const [paths, setPaths] = useState<Record<string, Path>>({});
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL06_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL06_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const caps: Cap[] = activeUc ? activeUc.payload.caps : CAPS;
   const stackMonths = activeUc ? activeUc.payload.stackMonths : STACK_MONTHS;
   const stackLabel = activeUc ? activeUc.payload.stackLabel : "Stack went agentic";

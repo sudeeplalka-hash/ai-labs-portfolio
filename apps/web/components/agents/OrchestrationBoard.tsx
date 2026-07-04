@@ -16,6 +16,7 @@ import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, type Luc
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { LIVE_MODEL, GAP03_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Role = "Researcher" | "Analyst" | "Writer" | "Critic";
 const ROLE_ICON: Record<Role, LucideIcon> = { Researcher: Search, Analyst: BarChart3, Writer: PenLine, Critic: ShieldAlert };
@@ -85,6 +86,7 @@ export function OrchestrationBoard() {
   const [presetKey, setPresetKey] = useState(PRESETS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP03_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP03_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const preset: Preset = activeUc ? { key: activeUc.id, label: activeUc.title, ...activeUc.payload } : PRESETS.find((p) => p.key === presetKey)!;
   const A = preset.agents.length;
 

@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type PKey = "fc" | "mcp" | "a2a" | "hybrid";
 const PROTO: Record<PKey, { label: string; blurb: string; rationale: string }> = {
@@ -54,6 +55,7 @@ export function ProtocolSelection() {
   const [ans, setAns] = useState<Record<string, number>>({ q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1 });
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP07_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP07_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? GAP07_USE_CASES.find((u) => u.id === id) : null;

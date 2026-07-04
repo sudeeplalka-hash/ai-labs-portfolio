@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp } from "@labs/design-system";
 import { MODEL_PRICING, modelPrice, modelLabel, COST_LEVERS, PRICING_AS_OF, LIVE_MODEL_CHEAP, GAP06_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const SAMPLE_PROMPT =
   "You are a card-servicing assistant. Using ONLY the account context and dispute policy below, draft a response to the member's question. Cite the policy sections you rely on, keep it under 120 words, and never invent account details.\n\n[account context ~1,200 tokens]\n[dispute policy excerpt ~1,800 tokens]";
@@ -31,6 +32,7 @@ export function CostSimulator() {
   const [batchShare, setBatchShare] = useState(0.3);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP06_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(GAP06_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? GAP06_USE_CASES.find((u) => u.id === id) : null;

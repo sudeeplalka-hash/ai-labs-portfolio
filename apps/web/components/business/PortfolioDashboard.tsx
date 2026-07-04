@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Stage = "discovery" | "pilot" | "scaling" | "production";
 type Rec = "kill" | "hold" | "scale";
@@ -58,6 +59,7 @@ export function PortfolioDashboard() {
   const [view, setView] = useState<View>("map");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C31_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(C31_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const items: Initiative[] = activeUc ? activeUc.payload.initiatives : INITIATIVES;
   const [selId, setSelId] = useState<string>("kyc");
   const sel = items.find((i) => i.id === selId) ?? items[0];

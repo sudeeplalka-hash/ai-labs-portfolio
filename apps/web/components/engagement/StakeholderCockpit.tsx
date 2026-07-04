@@ -12,6 +12,7 @@ import { ArrowLeft, TrendingDown } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface SH {
   key: string; name: string; role: string; power: number; interest: number; traj: number[];
@@ -55,6 +56,7 @@ export function StakeholderCockpit() {
   const [sel, setSel] = useState("cio");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL02_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL02_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const shs: SH[] = activeUc ? activeUc.payload.stakeholders : STAKEHOLDERS;
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);

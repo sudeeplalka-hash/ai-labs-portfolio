@@ -12,6 +12,7 @@ import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL09_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface Resource { key: string; role: string; loc: "Onshore" | "Offshore"; access: number }
 const RESOURCES: Resource[] = [
@@ -42,6 +43,7 @@ export function OnboardingTracker() {
   const [kt, setKt] = useState<Record<string, boolean>>({});
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL09_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL09_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const resources: Resource[] = activeUc ? activeUc.payload.resources : RESOURCES;
   const ktAreas: Area[] = activeUc ? activeUc.payload.ktAreas : KT_AREAS;
   const ktRoleLabel = activeUc ? activeUc.payload.ktRoleLabel : "Rolling off in 5 weeks · Lead ML Engineer";

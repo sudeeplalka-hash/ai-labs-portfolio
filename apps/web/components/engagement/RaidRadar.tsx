@@ -13,6 +13,7 @@ import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, FreshnessStamp } from "@labs/design-system";
 import { EL04_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import {
   SCENARIOS, HEALTH_LABEL, HEALTH_TONE, HEALTH_X, TREND_Y, SEV_TONE,
   statusWord, trendWord, healthIndex, type RaidItem, type Scenario,
@@ -22,6 +23,7 @@ export function RaidRadar() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL04_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  useUseCaseDeepLink(EL04_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const scenario: Scenario = activeUc ? activeUc.payload : SCENARIOS.find((s) => s.key === scenarioKey)!;
   const gapWs = scenario.workstreams.find((w) => w.reported !== w.actual) ?? scenario.workstreams[0];
   const [selectedId, setSelectedId] = useState(gapWs.id);
