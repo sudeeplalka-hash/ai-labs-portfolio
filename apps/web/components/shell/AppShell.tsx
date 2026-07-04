@@ -12,7 +12,7 @@ import { ProgramRail } from "@/components/lifecycle/ProgramRail";
 // Parent-frame + new-collection routes render chrome-free (no Collection-1 lifecycle
 // sidebar): the Competency Map (/) is the parent landing, the new collections, and
 // the changelog. Collection 1's own routes keep the AppShell.
-const BARE_PREFIXES = ["/agents", "/business", "/engagement", "/changelog"];
+const BARE_PREFIXES = ["/agents", "/business", "/engagement", "/changelog", "/industries"];
 function isBareRoute(pathname: string): boolean {
   if (pathname === "/") return true;
   return BARE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));

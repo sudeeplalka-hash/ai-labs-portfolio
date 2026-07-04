@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { GAP08_USE_CASES, type Gap08Tier } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Risk = "high" | "med" | "low";
 interface Item { risk: Risk; edge: boolean; sev: number }
@@ -45,6 +47,14 @@ const TIER_GUIDE = [
 
 export function HitlSimulator() {
   const [level, setLevel] = useState(1);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP08_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? GAP08_USE_CASES.find((u) => u.id === id) : null;
+    setLevel(uc ? uc.payload.defaultLevel : 1);
+  };
+  const tierGuide: Gap08Tier[] = activeUc ? activeUc.payload.tiers : TIER_GUIDE;
 
   const cells = ITEMS.map((it, idx) => {
     const rev = reviewed(level, it, idx);
@@ -75,10 +85,12 @@ export function HitlSimulator() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            An agent processes a queue of 20 items, four of them edge cases. Raise the autonomy level: throughput climbs,
-            human load falls — and at some point an edge case slips through unreviewed. Find the balance.
+            {activeUc ? `${activeUc.payload.taskLine} Raise the autonomy level: throughput climbs, human load falls — and at some point an edge case slips through. Find the balance.` : "An agent processes a queue of 20 items, four of them edge cases. Raise the autonomy level: throughput climbs, human load falls — and at some point an edge case slips through unreviewed. Find the balance."}
           </p>
         </div>
+
+        <UseCaseRail useCases={GAP08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <Panel className="mb-4">
           <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Autonomy level</label><span className="font-mono text-xs font-semibold text-ink">L{level} · {LEVELS[level - 1].label}</span></div>
@@ -125,7 +137,7 @@ export function HitlSimulator() {
           <Panel>
             <p className="stat-label mb-2">Autonomy by risk tier <span className="font-normal text-slatey-500">· bridges <Link href="/engagement/compliance" className="text-primary hover:underline">EL-05</Link> / <Link href="/govern" className="text-primary hover:underline">Govern</Link></span></p>
             <div className="space-y-1.5">
-              {TIER_GUIDE.map((g) => (
+              {tierGuide.map((g) => (
                 <div key={g.tier} className="flex items-center justify-between rounded-md border border-line px-2.5 py-1.5 text-xs">
                   <span className="flex items-center gap-1.5"><Badge tone={g.tone}>{g.tier}</Badge></span>
                   <span className="font-mono text-slatey-400">max {g.max}</span>
@@ -137,7 +149,7 @@ export function HitlSimulator() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Autonomy is set per risk tier, not per enthusiasm.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Autonomy is set per risk tier, not per enthusiasm."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

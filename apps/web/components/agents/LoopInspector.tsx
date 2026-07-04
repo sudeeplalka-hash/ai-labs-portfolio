@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Brain, Wrench, Eye, XOctagon, Radar, LifeBuoy, CheckCircle2, Play, StepForward, RotateCcw, type LucideIcon } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { GAP02_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Role = "thought" | "action" | "observation" | "failure" | "detect" | "recover" | "final";
 interface Step { role: Role; label: string; detail?: string }
@@ -96,12 +98,15 @@ function buildTrace(arch: string, fail: string): Step[] {
 export function LoopInspector() {
   const [arch, setArch] = useState("single");
   const [fail, setFail] = useState("none");
-  const trace = buildTrace(arch, fail);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP02_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => setActiveUcId(id);
+  const trace = activeUc ? activeUc.payload.base : buildTrace(arch, fail);
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => { setStep(0); setPlaying(false); if (timer.current) clearInterval(timer.current); }, [arch, fail]);
+  useEffect(() => { setStep(0); setPlaying(false); if (timer.current) clearInterval(timer.current); }, [arch, fail, activeUcId]);
   useEffect(() => {
     if (!playing) return;
     timer.current = setInterval(() => setStep((s) => { if (s >= trace.length) { if (timer.current) clearInterval(timer.current); setPlaying(false); return s; } return s + 1; }), 750);
@@ -128,11 +133,14 @@ export function LoopInspector() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Task: resolve a card dispute end-to-end. Step the loop, restructure it by architecture, then inject a failure —
-            the failure, its detection signal, and the recovery policy are the part you actually budget for.
+            {activeUc ? `${activeUc.payload.taskLine} Step the loop and watch the characteristic failure, its detection signal, and the recovery policy fire.` : "Task: resolve a card dispute end-to-end. Step the loop, restructure it by architecture, then inject a failure — the failure, its detection signal, and the recovery policy are the part you actually budget for."}
           </p>
         </div>
 
+        <UseCaseRail useCases={GAP02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        {!activeUc && (
         <div className="mb-4 grid gap-3 md:grid-cols-2">
           <Panel>
             <p className="stat-label mb-2">Architecture</p>
@@ -151,6 +159,7 @@ export function LoopInspector() {
             </div>
           </Panel>
         </div>
+        )}
 
         <div className="mb-3 flex items-center gap-2">
           <button onClick={() => setPlaying((p) => !p)} className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink/90"><Play className="h-3.5 w-3.5" /> {playing ? "Pause" : "Play"}</button>
@@ -197,7 +206,7 @@ export function LoopInspector() {
             A happy-path demo tells you nothing about production. The four failures above are what actually happen — and
             each is cheap to catch with the right signal and expensive to miss. That gap is the observability budget.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> You don&apos;t budget for agents; you budget for agents plus the harness that catches these four failures.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "You don't budget for agents; you budget for agents plus the harness that catches these four failures."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

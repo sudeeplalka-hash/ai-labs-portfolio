@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ShieldCheck, XCircle, CheckCircle2, Database } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { GAP04_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 interface Field { name: string; type: string; required: boolean }
 interface Sample {
@@ -66,11 +68,21 @@ const SAMPLES: Sample[] = [
 
 export function StructuredOutput() {
   const [key, setKey] = useState(SAMPLES[0].key);
-  const s = SAMPLES.find((x) => x.key === key)!;
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP04_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const s: Sample = activeUc
+    ? { key: activeUc.id, label: activeUc.payload.label, raw: activeUc.payload.raw, schema: activeUc.payload.schema, hard: activeUc.payload.hard, attempt1: activeUc.payload.attempt1, errors: activeUc.payload.errors, retryNote: activeUc.payload.retryNote, final: activeUc.payload.final }
+    : SAMPLES.find((x) => x.key === key)!;
   const [text, setText] = useState(s.raw);
   const [ran, setRan] = useState(false);
 
-  const onSample = (k: string) => { setKey(k); setText(SAMPLES.find((x) => x.key === k)!.raw); setRan(false); };
+  const onSample = (k: string) => { setKey(k); setActiveUcId(null); setText(SAMPLES.find((x) => x.key === k)!.raw); setRan(false); };
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? GAP04_USE_CASES.find((u) => u.id === id) : null;
+    setText(uc ? uc.payload.raw : SAMPLES[0].raw);
+    setRan(false);
+  };
   const edited = text.trim() !== s.raw.trim();
 
   return (
@@ -96,8 +108,11 @@ export function StructuredOutput() {
           </p>
         </div>
 
+        <UseCaseRail useCases={GAP04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          {SAMPLES.map((x) => (
+          {!activeUc && SAMPLES.map((x) => (
             <button key={x.key} onClick={() => onSample(x.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${x.key === key ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{x.label}{x.hard && " ⚠"}</button>
           ))}
@@ -165,7 +180,7 @@ export function StructuredOutput() {
             single corrective retry turns "usually valid" into "always valid or explicitly flagged." That&apos;s the
             difference between a demo and production.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Where outputs feed systems of record, the validation gate is not optional. I place it between the model and the write.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Where outputs feed systems of record, the validation gate is not optional. I place it between the model and the write."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

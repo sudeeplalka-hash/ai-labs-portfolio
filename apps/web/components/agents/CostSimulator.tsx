@@ -10,7 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp } from "@labs/design-system";
-import { MODEL_PRICING, modelPrice, modelLabel, COST_LEVERS, PRICING_AS_OF, LIVE_MODEL_CHEAP } from "@labs/kit";
+import { MODEL_PRICING, modelPrice, modelLabel, COST_LEVERS, PRICING_AS_OF, LIVE_MODEL_CHEAP, GAP06_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 const SAMPLE_PROMPT =
   "You are a card-servicing assistant. Using ONLY the account context and dispute policy below, draft a response to the member's question. Cite the policy sections you rely on, keep it under 120 words, and never invent account details.\n\n[account context ~1,200 tokens]\n[dispute policy excerpt ~1,800 tokens]";
@@ -28,6 +29,20 @@ export function CostSimulator() {
   const [cacheShare, setCacheShare] = useState(0.6);
   const [batching, setBatching] = useState(false);
   const [batchShare, setBatchShare] = useState(0.3);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP06_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? GAP06_USE_CASES.find((u) => u.id === id) : null;
+    if (uc) {
+      const p = uc.payload;
+      setModelId(p.modelId); setPrompt(p.prompt); setOutTok(p.outTok); setCallsPerDay(p.callsPerDay);
+      setCaching(p.caching); setCacheShare(p.cacheShare); setBatching(p.batching); setBatchShare(p.batchShare);
+    } else {
+      setModelId(LIVE_MODEL_CHEAP); setPrompt(SAMPLE_PROMPT); setOutTok(400); setCallsPerDay(5000);
+      setCaching(true); setCacheShare(0.6); setBatching(false); setBatchShare(0.3);
+    }
+  };
 
   const price = modelPrice(modelId) ?? MODEL_PRICING[0];
   const inTok = estTokens(prompt);
@@ -82,6 +97,9 @@ export function CostSimulator() {
             annual number is the build-vs-buy conversation — before anyone draws a box.
           </p>
         </div>
+
+        <UseCaseRail useCases={GAP06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           {/* Inputs */}
@@ -145,7 +163,7 @@ export function CostSimulator() {
 
         {/* Credibility */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Unit economics decide build-vs-buy long before architecture does. Size the call, then argue the design.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Unit economics decide build-vs-buy long before architecture does. Size the call, then argue the design."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, X } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { GAP05_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 const WINDOW = 24; // k tokens working budget (small on purpose, to make overflow visible)
 type SKey = "full" | "sum" | "comp" | "handoff";
@@ -43,16 +45,24 @@ function retained(key: SKey, fact: Fact, t: number): boolean {
   if (fact.t > t) return false; // not introduced yet
   if (key === "full") { const ctx = 4 + t * 3; const dropped = ctx > WINDOW ? Math.ceil((ctx - WINDOW) / 3) : 0; return fact.t > dropped; }
   if (key === "sum") return fact.key;
-  if (key === "comp") return fact.key || fact.f !== "Member prefers email";
+  if (key === "comp") return fact.key || fact.rel;
   return fact.rel; // handoff keeps only task-relevant
 }
 
 export function ContextMemory() {
   const [t, setT] = useState(6);
   const [view, setView] = useState<"compare" | "memory">("compare");
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP05_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? GAP05_USE_CASES.find((u) => u.id === id) : null;
+    if (uc) { setT(uc.payload.turns); setView(uc.payload.view); }
+  };
+  const facts: Fact[] = activeUc ? activeUc.payload.facts : FACTS;
   const rows = STRATS.map((s) => ({ ...s, ...metrics(s.key, t) }));
   const maxCost = Math.max(...rows.map((r) => r.costPer1k));
-  const introduced = FACTS.filter((f) => f.t <= t);
+  const introduced = facts.filter((f) => f.t <= t);
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -76,6 +86,9 @@ export function ContextMemory() {
             overflow risk climb while the others trade a little fidelity for a lot of headroom.
           </p>
         </div>
+
+        <UseCaseRail useCases={GAP05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <Panel className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -133,7 +146,7 @@ export function ContextMemory() {
             Full dump is right for a short, high-stakes exchange; summarize or compress for a long assistant thread; handoff
             when specialized sub-agents each need only their slice. The mistake is picking one and calling it the platform standard.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Context strategy is a cost-fidelity dial. I set it per use case, not per platform.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Context strategy is a cost-fidelity dial. I set it per use case, not per platform."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

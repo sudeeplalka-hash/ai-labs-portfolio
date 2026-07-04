@@ -4,7 +4,14 @@
 // nothing is asserted). Extend USE_CASES_BY_LAB as labs are added.
 
 import { type UseCase, coverageFrom } from "../industries";
+import { GAP01_USE_CASES } from "./gap01";
+import { GAP02_USE_CASES } from "./gap02";
 import { GAP03_USE_CASES } from "./gap03";
+import { GAP04_USE_CASES } from "./gap04";
+import { GAP05_USE_CASES } from "./gap05";
+import { GAP06_USE_CASES } from "./gap06";
+import { GAP07_USE_CASES } from "./gap07";
+import { GAP08_USE_CASES } from "./gap08";
 import { C31_USE_CASES } from "./c3-1";
 import { C32_USE_CASES } from "./c3-2";
 import { C33_USE_CASES } from "./c3-3";
@@ -12,7 +19,14 @@ import { C34_USE_CASES } from "./c3-4";
 import { C35_USE_CASES } from "./c3-5";
 import { EL01_USE_CASES } from "./el01";
 
+export * from "./gap01";
+export * from "./gap02";
 export * from "./gap03";
+export * from "./gap04";
+export * from "./gap05";
+export * from "./gap06";
+export * from "./gap07";
+export * from "./gap08";
 export * from "./c3-1";
 export * from "./c3-2";
 export * from "./c3-3";
@@ -21,7 +35,14 @@ export * from "./c3-5";
 export * from "./el01";
 
 export const USE_CASES_BY_LAB: Record<string, UseCase[]> = {
+  "GAP-01": GAP01_USE_CASES,
+  "GAP-02": GAP02_USE_CASES,
   "GAP-03": GAP03_USE_CASES,
+  "GAP-04": GAP04_USE_CASES,
+  "GAP-05": GAP05_USE_CASES,
+  "GAP-06": GAP06_USE_CASES,
+  "GAP-07": GAP07_USE_CASES,
+  "GAP-08": GAP08_USE_CASES,
   "C3-1": C31_USE_CASES,
   "C3-2": C32_USE_CASES,
   "C3-3": C33_USE_CASES,

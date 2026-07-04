@@ -10,7 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
-import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF } from "@labs/kit";
+import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type PKey = "fc" | "mcp" | "a2a" | "hybrid";
 const PROTO: Record<PKey, { label: string; blurb: string; rationale: string }> = {
@@ -51,6 +52,14 @@ const CON_COUNT = [1, 4, 12];
 
 export function ProtocolSelection() {
   const [ans, setAns] = useState<Record<string, number>>({ q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1 });
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP07_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? GAP07_USE_CASES.find((u) => u.id === id) : null;
+    setAns(uc ? uc.payload.answers : { q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1 });
+  };
+  const setAnswer = (key: string, i: number) => { setAns((a) => ({ ...a, [key]: i })); setActiveUcId(null); };
   const { scores, primary, runnerUp } = evaluate(ans);
   const maxScore = Math.max(...Object.values(scores)) || 1;
 
@@ -85,6 +94,9 @@ export function ProtocolSelection() {
           </div>
         </div>
 
+        <UseCaseRail useCases={GAP07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           {/* Questions */}
           <Panel className="space-y-3">
@@ -93,7 +105,7 @@ export function ProtocolSelection() {
                 <p className="mb-1 text-xs font-medium text-slatey-400">{qu.q}</p>
                 <div className="flex gap-1">
                   {qu.opts.map((o, i) => (
-                    <button key={o} onClick={() => setAns((a) => ({ ...a, [qu.key]: i }))}
+                    <button key={o} onClick={() => setAnswer(qu.key, i)}
                       className={`flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${ans[qu.key] === i ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{o}</button>
                   ))}
                 </div>
@@ -145,7 +157,7 @@ export function ProtocolSelection() {
             A recommendation without a runner-up is a quiz answer. The flip condition tells leadership exactly what would
             change the architecture — so the decision survives the next scale-up instead of being re-litigated.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> The protocol isn&apos;t the decision — the number of producers and consumers is. Count those first.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The protocol isn't the decision — the number of producers and consumers is. Count those first."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

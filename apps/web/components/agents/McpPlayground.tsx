@@ -11,6 +11,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { GAP01_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type ArgType = "string" | "number" | "enum";
 interface Arg { name: string; type: ArgType; required: boolean; example: string; enumVals?: string[] }
@@ -60,7 +62,11 @@ let idCounter = 41;
 
 export function McpPlayground() {
   const [sysKey, setSysKey] = useState(SYSTEMS[0].key);
-  const sys = SYSTEMS.find((s) => s.key === sysKey)!;
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP01_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const sys: System = activeUc
+    ? { key: activeUc.id, label: activeUc.payload.label, blurb: activeUc.payload.blurb, tools: activeUc.payload.tools, resources: activeUc.payload.resources, prompts: activeUc.payload.prompts }
+    : SYSTEMS.find((s) => s.key === sysKey)!;
   const [tab, setTab] = useState<"tools" | "resources" | "prompts">("tools");
   const [toolName, setToolName] = useState(sys.tools[0].name);
   const tool = sys.tools.find((t) => t.name === toolName) ?? sys.tools[0];
@@ -75,9 +81,18 @@ export function McpPlayground() {
 
   const onSystem = (k: string) => {
     const s = SYSTEMS.find((x) => x.key === k)!;
-    setSysKey(k); setToolName(s.tools[0].name);
+    setSysKey(k); setActiveUcId(null); setToolName(s.tools[0].name);
     setArgVals(Object.fromEntries(s.tools[0].args.map((a) => [a.name, a.example])));
     setFrames(null); setTab("tools");
+  };
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? GAP01_USE_CASES.find((u) => u.id === id) : null;
+    const tools = uc ? uc.payload.tools : SYSTEMS[0].tools;
+    setToolName(tools[0].name);
+    setArgVals(Object.fromEntries(tools[0].args.map((a) => [a.name, a.example])));
+    setFrames(null); setTab("tools");
+    setNSys(uc ? uc.payload.nSys : 8); setNCon(uc ? uc.payload.nCon : 6);
   };
   const onTool = (name: string) => {
     const t = sys.tools.find((x) => x.name === name)!;
@@ -145,8 +160,11 @@ export function McpPlayground() {
           </p>
         </div>
 
+        <UseCaseRail useCases={GAP01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          {SYSTEMS.map((s) => (
+          {!activeUc && SYSTEMS.map((s) => (
             <button key={s.key} onClick={() => onSystem(s.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${s.key === sysKey ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{s.label}</button>
           ))}
@@ -255,7 +273,7 @@ export function McpPlayground() {
           <InsightCard title="What the wire teaches" tone="info">
             Every tool call is the same envelope: a named tool, typed arguments, structured content back, typed errors on failure. That uniformity is the whole value — one contract, many systems, many consumers.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Deciding MCP vs bespoke isn&apos;t religious — it&apos;s how many systems and how many consumers. The crossover is earlier than teams expect.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Deciding MCP vs bespoke isn't religious — it's how many systems and how many consumers. The crossover is earlier than teams expect."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
