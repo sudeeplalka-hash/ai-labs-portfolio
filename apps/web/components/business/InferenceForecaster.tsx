@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { C33_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 const CLUSTER_CAP_TOKENS = 2.5e9; // tokens/month per cluster at 100% utilization
 const CLUSTER_COST = 38000; // $/month amortized (hardware + power + DC)
@@ -26,6 +28,14 @@ export function InferenceForecaster() {
   const [frontierShare, setFrontierShare] = useState(40); // %
   const [util, setUtil] = useState(60); // %
   const [opsFte, setOpsFte] = useState(1.5);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? C33_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? C33_USE_CASES.find((u) => u.id === id) : null;
+    const p = uc ? uc.payload : { startVol: 500_000, growth: 6, tokensPerCall: 3000, frontierShare: 40, util: 60, opsFte: 1.5 };
+    setStartVol(p.startVol); setGrowth(p.growth); setTokensPerCall(p.tokensPerCall); setFrontierShare(p.frontierShare); setUtil(p.util); setOpsFte(p.opsFte);
+  };
 
   const blendedPrice = CHEAP_PRICE + (frontierShare / 100) * (FRONTIER_PRICE - CHEAP_PRICE);
   const apiCostPerCall = (tokensPerCall / 1e6) * blendedPrice;
@@ -73,6 +83,9 @@ export function InferenceForecaster() {
             <Link href="/agents/cost-simulator" className="font-medium text-primary hover:underline">GAP-06</Link>.)
           </p>
         </div>
+
+        <UseCaseRail useCases={C33_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Inputs */}
@@ -133,7 +146,7 @@ export function InferenceForecaster() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> The cliff is real but further out than vendors say — utilization assumptions decide it, not sticker price.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The cliff is real but further out than vendors say — utilization assumptions decide it, not sticker price."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { C34_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type CKey = "capability" | "security" | "roadmap" | "lockin" | "support" | "price";
 const CRITERIA: { key: CKey; label: string }[] = [
@@ -35,13 +37,20 @@ const fmt = (v: number) => (v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.ro
 export function VendorMonitor() {
   const [w, setW] = useState<Weights>(PRESETS.Balanced);
   const [view, setView] = useState<"scorecard" | "risk">("scorecard");
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? C34_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? C34_USE_CASES.find((u) => u.id === id) : null;
+    setW(uc ? uc.payload.weights : PRESETS.Balanced);
+  };
 
   const sumW = CRITERIA.reduce((a, c) => a + w[c.key], 0) || 1;
   const scoreOf = (v: Vendor) => Math.round(CRITERIA.reduce((a, c) => a + w[c.key] * v.scores[c.key], 0) / sumW);
   const ranked = [...VENDORS].map((v) => ({ v, s: scoreOf(v) })).sort((a, b) => b.s - a.s);
   const top = ranked[0];
 
-  const applyPreset = (name: string) => setW(PRESETS[name]);
+  const applyPreset = (name: string) => { setW(PRESETS[name]); setActiveUcId(null); };
   const setWeight = (k: CKey, val: number) => setW((cur) => ({ ...cur, [k]: val }));
 
   return (
@@ -66,6 +75,9 @@ export function VendorMonitor() {
             matters: concentration and exit cost tell you what it costs to be wrong.
           </p>
         </div>
+
+        <UseCaseRail useCases={C34_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Weights */}
@@ -136,7 +148,7 @@ export function VendorMonitor() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> The scorecard picks the vendor; the concentration view tells you what it costs to be wrong.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The scorecard picks the vendor; the concentration view tells you what it costs to be wrong."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

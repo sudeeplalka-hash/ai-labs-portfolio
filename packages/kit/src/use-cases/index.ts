@@ -1,20 +1,32 @@
 // @labs/kit · use-cases — aggregation + computed coverage.
 // Each lab's use-cases live in their own file (typed payload). This index rolls
 // them up and computes coverage from the data (the Atlas reads USE_CASE_COVERAGE;
-// nothing is asserted). Extend USE_CASES_BY_LAB as labs are added in Phases B/C.
+// nothing is asserted). Extend USE_CASES_BY_LAB as labs are added.
 
 import { type UseCase, coverageFrom } from "../industries";
 import { GAP03_USE_CASES } from "./gap03";
 import { C31_USE_CASES } from "./c3-1";
+import { C32_USE_CASES } from "./c3-2";
+import { C33_USE_CASES } from "./c3-3";
+import { C34_USE_CASES } from "./c3-4";
+import { C35_USE_CASES } from "./c3-5";
 import { EL01_USE_CASES } from "./el01";
 
 export * from "./gap03";
 export * from "./c3-1";
+export * from "./c3-2";
+export * from "./c3-3";
+export * from "./c3-4";
+export * from "./c3-5";
 export * from "./el01";
 
 export const USE_CASES_BY_LAB: Record<string, UseCase[]> = {
   "GAP-03": GAP03_USE_CASES,
   "C3-1": C31_USE_CASES,
+  "C3-2": C32_USE_CASES,
+  "C3-3": C33_USE_CASES,
+  "C3-4": C34_USE_CASES,
+  "C3-5": C35_USE_CASES,
   "EL-01": EL01_USE_CASES,
 };
 

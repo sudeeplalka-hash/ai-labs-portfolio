@@ -9,6 +9,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { C35_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 const H = 3; // horizon years
 
@@ -36,6 +38,13 @@ const fmt = (v: number) => (v < 0 ? "-" : "") + (Math.abs(v) >= 1e6 ? `$${(Math.
 export function RoiBuilder() {
   const [p, setP] = useState<P>({ investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 });
   const set = (k: keyof P, v: number) => setP((cur) => ({ ...cur, [k]: v }));
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? C35_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? C35_USE_CASES.find((u) => u.id === id) : null;
+    setP(uc ? uc.payload : { investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 });
+  };
   const r = p.rate / 100;
 
   const cf = cashflows(p);
@@ -85,6 +94,9 @@ export function RoiBuilder() {
             <Link href="/engagement/adoption" className="font-medium text-primary hover:underline">EL-01</Link>.
           </p>
         </div>
+
+        <UseCaseRail useCases={C35_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           {/* Inputs */}
@@ -149,7 +161,7 @@ export function RoiBuilder() {
             A single NPV invites a fight about the assumption behind it. A tornado shows you already stress-tested it — and
             names the one driver leadership should actually govern. That&apos;s what moves a case from "interesting" to "funded."
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> I present the range, not the point. Points get challenged; ranges get funded.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "I present the range, not the point. Points get challenged; ranges get funded."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { C32_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type OKey = "api" | "ft" | "buy";
 const OPT: Record<OKey, { label: string; blurb: string }> = {
@@ -34,6 +36,14 @@ export function BuildBuyEvaluator() {
   const [diffNeed, setDiffNeed] = useState(1);
   const [latency, setLatency] = useState(1);
   const [teamSkill, setTeamSkill] = useState(1);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? C32_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? C32_USE_CASES.find((u) => u.id === id) : null;
+    const p = uc ? uc.payload : { volume: 1_000_000, dataSens: 1, diffNeed: 1, latency: 1, teamSkill: 1 };
+    setVolume(p.volume); setDataSens(p.dataSens); setDiffNeed(p.diffNeed); setLatency(p.latency); setTeamSkill(p.teamSkill);
+  };
 
   // --- TCO (3 years) ---
   const apiUsage = volume * 36 * COST_PER_CALL;
@@ -95,6 +105,9 @@ export function BuildBuyEvaluator() {
           </p>
         </div>
 
+        <UseCaseRail useCases={C32_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         {/* Inputs */}
         <Panel className="mb-6">
           <div className="grid gap-4 md:grid-cols-2">
@@ -148,7 +161,7 @@ export function BuildBuyEvaluator() {
             Cross the volume slider slowly and watch API and fine-tune trade places — the crossover is the whole decision.
             Buy wins on speed when differentiation is low; it loses the moment the capability becomes your edge.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> This decision is re-made every 18 months. The evaluator matters less than knowing your flip conditions.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "This decision is re-made every 18 months. The evaluator matters less than knowing your flip conditions."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
