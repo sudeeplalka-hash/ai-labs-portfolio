@@ -23,7 +23,9 @@ jobs:
           cache: pnpm
 
       - name: Install
-        run: pnpm install --frozen-lockfile
+        # Not --frozen-lockfile: this repo adds workspace packages between commits
+        # (e.g. @labs/engines), so allow pnpm to reconcile the lockfile in CI.
+        run: pnpm install --no-frozen-lockfile
 
       - name: Typecheck
         run: pnpm turbo run typecheck
