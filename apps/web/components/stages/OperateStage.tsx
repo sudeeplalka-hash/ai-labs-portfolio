@@ -59,6 +59,15 @@ export function OperateStage() {
     const nextAction = fb.toFrame?.title ?? fb.toBuild?.task ?? fb.toDeploy?.action ?? fb.decision.label;
     update((draft) => {
       draft.iteration = { ...(draft.iteration ?? {}), recommendedNextAction: nextAction };
+      draft.operate = {
+        decisionLabel: fb.decision.label,
+        loopTarget: fb.decision.loopTarget,
+        nextAction,
+        valueAtRiskUsd: fb.toRealize.valueAtRiskUsd,
+        evidenceNote: fb.toGovern.evidenceNote,
+        buildTask: fb.toBuild?.task,
+        issuedAt: fb.issuedAt,
+      };
     });
   };
 

@@ -385,6 +385,18 @@ export interface IterationSlice {
   assumptionsToRevise?: string[];
 }
 
+/** Operate → the loop. The day-2 remediation decision, persisted so Frame / Build /
+ * Govern can surface it cross-stage (written by the Operate stage on decision). */
+export interface OperateSlice {
+  decisionLabel?: string;   // "Re-index" · "Retrain / re-tune" · "Rollback / restrict" · "Re-scope"
+  loopTarget?: StageKey;    // where the loop-back points: frame | build | deploy
+  nextAction?: string;      // the concrete next action (mirrors iteration.recommendedNextAction)
+  valueAtRiskUsd?: number;  // annualized $ exposed while the breach stays open
+  evidenceNote?: string;    // one-line record for Govern's audit pack
+  buildTask?: string;       // the retrain / re-index task, when loopTarget is build
+  issuedAt?: string;
+}
+
 export interface ProgramState {
   initiative: Initiative;
   progress: Record<StageKey, StageStatus>;
@@ -394,6 +406,7 @@ export interface ProgramState {
   governance?: GovernanceSlice;
   outcomes?: OutcomesSlice;
   iteration?: IterationSlice; // Phase 1 — Realize→Strategy feedback
+  operate?: OperateSlice;     // Operate → the loop: the persisted day-2 remediation decision
   /** True when the curated sample program was loaded into live state. */
   seededSample?: boolean;
 }
