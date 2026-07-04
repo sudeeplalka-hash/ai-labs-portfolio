@@ -13,6 +13,7 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } 
 import { EL05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 type Tier = "prohibited" | "high" | "limited" | "minimal";
 const ORDER: Record<Tier, number> = { prohibited: 3, high: 2, limited: 1, minimal: 0 };
@@ -102,6 +103,41 @@ export function ComplianceNavigator() {
           : "Minimal-risk: internal, low-impact — voluntary measures.";
   const rationaleFull = rationale + (activeUc && (tier === "high" || tier === "limited") ? ` ${activeUc.payload.rationaleOverlay}` : "");
 
+  const buildAuditPacket = (): string => {
+    const fnLabel = activeUc ? activeUc.payload.fnLabel : (FUNCTIONS.find((f) => f.key === fn)?.label ?? fn);
+    const gapsList = controls.filter((c) => !c.met);
+    return [
+      "# AI Compliance — audit-readiness packet",
+      "",
+      `**Function:** ${fnLabel}`,
+      `**Classification:** ${TIER_LABEL[tier]}`,
+      tier === "prohibited"
+        ? "**Audit readiness:** N/A — prohibited practice, do not deploy"
+        : `**Audit readiness:** ${readiness}% (${controls.filter((c) => c.met).length}/${controls.length} controls in place)`,
+      "",
+      `**Rationale:** ${rationaleFull}`,
+      "",
+      "## Required controls",
+      "",
+      "| Control | Status |",
+      "| --- | --- |",
+      ...controls.map((c) => `| ${c.label} | ${c.met ? "In place" : "**GAP**"} |`),
+      "",
+      "## Open gaps",
+      "",
+      gapsList.length ? gapsList.map((c) => `- ${c.label}`).join("\n") : "_All required controls are in place._",
+      "",
+      "## Basis & caveat",
+      "",
+      `Tier and controls follow the EU AI Act structure${activeUc ? ` plus the ${activeUc.payload.overlayLabel}` : ""}, as of July 2026 (obligations phasing in). Illustrative, not legal advice — confirm classification and obligations with counsel for any real deployment.`,
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`audit-readiness-${activeUc ? activeUc.id : fn}`, buildAuditPacket(), {
+      scenario: `${activeUc ? activeUc.payload.fnLabel : (FUNCTIONS.find((f) => f.key === fn)?.label ?? fn)} · ${TIER_LABEL[tier]}`,
+      note: "Illustrative simplified compliance model as of July 2026 — not legal advice.",
+    });
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -178,7 +214,12 @@ export function ComplianceNavigator() {
                   </li>
                 ))}
               </ul>
-              {tier !== "prohibited" && <p className="mt-2 text-[11px] text-slatey-500">Export: print this page (⌘/Ctrl-P) for the audit pack — the checklist and readiness travel with it.</p>}
+              {tier !== "prohibited" && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <ArtifactButton label="Download the audit packet" onClick={onGenerate} title="Download this audit-readiness packet as Markdown" />
+                  <span className="text-[11px] text-slatey-500">or print this page (⌘/Ctrl-P) for a PDF.</span>
+                </div>
+              )}
             </Panel>
           </div>
         </div>

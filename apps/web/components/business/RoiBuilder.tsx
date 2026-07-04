@@ -12,6 +12,7 @@ import { Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@
 import { C35_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 const H = 3; // horizon years
 
@@ -72,6 +73,48 @@ export function RoiBuilder() {
   const rangeHigh = Math.max(...highs);
   const fundable = rangeLow > 0 ? "Fund" : baseNpv > 0 ? "Fund with conditions" : "Do not fund";
   const fundTone = rangeLow > 0 ? "emerald" : baseNpv > 0 ? "amber" : "rose";
+
+  const buildBusinessCase = (): string => {
+    const narrative = rangeLow > 0
+      ? "stays NPV-positive across the full ±30% sensitivity band"
+      : baseNpv > 0
+      ? "is positive at plan but turns negative under adverse assumptions — condition funding on the adoption ramp"
+      : "does not clear the hurdle rate at these assumptions";
+    return [
+      `# AI initiative — ${H}-year business case`,
+      "",
+      `**Recommendation: ${fundable}.**`,
+      "",
+      "## Headline",
+      "",
+      "| Metric | Value |",
+      "| --- | --- |",
+      `| NPV (base) | ${fmt(baseNpv)} @ ${p.rate}% discount |`,
+      `| NPV (±30% range) | ${fmt(rangeLow)} – ${fmt(rangeHigh)} |`,
+      `| IRR | ${Math.round(baseIrr * 100)}% |`,
+      `| Payback | ${pb ? `${pb.toFixed(1)} yr` : ">3 yr"} |`,
+      "",
+      "## Assumptions",
+      "",
+      `- Upfront investment: ${fmt(p.investment)}`,
+      `- Annual value @ full adoption: ${fmt(p.annualValue)}`,
+      `- Adoption ramp: ${p.rampMonths} months to full`,
+      `- Annual run cost: ${fmt(p.runCost)}`,
+      `- Discount rate: ${p.rate}%`,
+      "",
+      "## Sensitivity (tornado, ±30%)",
+      "",
+      ...drivers.map((d) => `- **${d.label}** — ${fmt(Math.min(d.low, d.high))} … ${fmt(Math.max(d.low, d.high))} (swing ${fmt(d.swing)})`),
+      "",
+      "## Recommendation",
+      "",
+      `${fundable}. The case ${narrative}. Largest lever to govern: **${drivers[0].label.toLowerCase()}**.`,
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`business-case-${activeUc ? activeUc.id : "custom"}`, buildBusinessCase(), {
+      scenario: activeUc ? activeUc.title : "Custom inputs",
+    });
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -154,6 +197,9 @@ export function RoiBuilder() {
               <p className="mt-3 text-xs leading-relaxed text-slatey-300">
                 Recommendation: <span className="font-semibold text-ink">{fundable}</span>. The case {rangeLow > 0 ? "stays NPV-positive across the full ±30% sensitivity band" : baseNpv > 0 ? "is positive at plan but turns negative under adverse assumptions — condition funding on the adoption ramp" : "does not clear the hurdle rate at these assumptions"}. Largest lever: <span className="font-semibold text-ink">{drivers[0].label.toLowerCase()}</span>.
               </p>
+              <div className="mt-3">
+                <ArtifactButton label="Download the one-pager" onClick={onGenerate} title="Download this business case as Markdown" />
+              </div>
             </div>
           </div>
         </div>

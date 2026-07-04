@@ -14,6 +14,7 @@ import { Panel, Badge, LiveBadge, FreshnessStamp } from "@labs/design-system";
 import { EL10_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 import { SCENARIOS, healthIndex, type Scenario } from "./portfolioData";
 
 type ArtKey = "weekly" | "steering" | "qbr";
@@ -150,6 +151,36 @@ export function ExecCommStudio() {
 
   const orderedKeys = audience.order.filter((k) => artifact.sections.includes(k));
 
+  const sectionMd: Record<string, () => string> = {
+    status: () =>
+      `${statusHeadline}\n\n- ${green} on track · ${amber} at risk · ${red} off track${gaps > 0 ? ` · ${gaps} reported-vs-actual gap${gaps === 1 ? "" : "s"}` : ""}\n- Adoption ${scenario.adoptionIndex}% · Burn ${scenario.burnVariance >= 0 ? "+" : ""}${scenario.burnVariance}% vs plan`,
+    outcomes: () =>
+      wins.length
+        ? `${wins.map((w) => `- ▲ **${w.name}** — ${w.brief.whatChanged}`).join("\n")}\n- Adoption reached ${scenario.adoptionIndex}% of target users across the portfolio.`
+        : "_No workstreams improved this quarter — the story is stabilization, not wins._",
+    decisions: () =>
+      decisions.length
+        ? decisions.map((w, i) => `${i + 1}. **${w.name}** — ${w.brief.ask}`).join("\n")
+        : "_No decisions required this cycle — informational update only._",
+    risks: () =>
+      highRisks.length
+        ? highRisks.map((r) => `- **[high]** ${r.text}\n  - _Mitigation:_ ${r.w.brief.ask} (${r.w.name} · ${r.w.owner})`).join("\n")
+        : "_No high-severity risks open._",
+    asks: () =>
+      ws.map((w) => `- ${isDecision(w.brief.ask) ? "**[Decision]**" : "[FYI]"} ${w.brief.ask}`).join("\n"),
+  };
+  const buildPreRead = (): string => {
+    const out: string[] = [`# ${artifact.label} — ${scenario.label}`, "", `**For ${audience.label}.** ${audience.frame}`];
+    for (const k of orderedKeys) {
+      out.push("", `## ${SECTION[k].title}`, `_Talk track — ${talk[k]}_`, "", sectionMd[k] ? sectionMd[k]() : "");
+    }
+    return out.join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`${artifact.key}-${scenario.key}-${audience.key}`, buildPreRead(), {
+      scenario: `${scenario.label} · ${artifact.label} · for ${audience.label}`,
+    });
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -212,9 +243,12 @@ export function ExecCommStudio() {
 
         {/* Generated artifact */}
         <Panel className="p-0">
-          <div className="border-b border-line bg-slate-50 px-5 py-3">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{artifact.label} · {scenario.label}</p>
-            <p className="mt-0.5 text-sm text-slatey-400"><span className="font-medium text-ink">For {audience.label}.</span> {audience.frame}</p>
+          <div className="flex items-start justify-between gap-3 border-b border-line bg-slate-50 px-5 py-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{artifact.label} · {scenario.label}</p>
+              <p className="mt-0.5 text-sm text-slatey-400"><span className="font-medium text-ink">For {audience.label}.</span> {audience.frame}</p>
+            </div>
+            <ArtifactButton label="Generate the pre-read" onClick={onGenerate} title="Download this pre-read as Markdown" />
           </div>
           <div className="divide-y divide-line">
             {orderedKeys.map((k) => {

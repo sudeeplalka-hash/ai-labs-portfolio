@@ -97,7 +97,7 @@ export const EL09_USE_CASES: UseCase<El09Payload>[] = assertUseCases<El09Payload
     id: "el09-fintech-feature-mobilization",
     labId: "EL-09",
     industry: "financial-services",
-    provenance: firstHand,
+    provenance: studied,
     title: "Fintech feature-team mobilization",
     oneLiner: "Prod-data and compliance access gate the ramp; the founding engineer holds every runbook.",
     context:
@@ -109,7 +109,7 @@ export const EL09_USE_CASES: UseCase<El09Payload>[] = assertUseCases<El09Payload
     stakes: "Lose the founding engineer before KT and the fraud rules and training pipeline have no owner overnight.",
     takeaway: "In a fintech, the founding engineer's bus-factor is the real risk — capture the knowledge before the ramp math.",
     sources: [
-      "Fintech / financial-services feature-team mobilization (first-hand, financial services)",
+      "Fintech / financial-services feature-team mobilization (studied)",
       "Bus-factor / single-point-of-failure knowledge capture",
     ],
     lastVerified: "2026-07-03",

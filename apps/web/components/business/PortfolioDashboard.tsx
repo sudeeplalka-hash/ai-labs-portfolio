@@ -13,6 +13,7 @@ import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, type Bad
 import { C31_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 type Stage = "discovery" | "pilot" | "scaling" | "production";
 type Rec = "kill" | "hold" | "scale";
@@ -75,6 +76,40 @@ export function PortfolioDashboard() {
   const totalRiskAdj = items.reduce((a, i) => a + riskAdj(i), 0);
   const killCount = items.filter((i) => recommend(i) === "kill").length;
 
+  const buildReviewPack = (): string => {
+    const kills = items.filter((i) => recommend(i) === "kill");
+    const rows = items
+      .slice()
+      .sort((a, b) => riskAdj(b) - riskAdj(a))
+      .map((i) => `| ${i.name} | ${i.domain} | ${i.stage} | ${fmtM(i.expValueM)} | ${fmtM(i.spendM)} | ${Math.round(prob(i) * 100)}% | ${fmtM(riskAdj(i))} | ${REC_LABEL[recommend(i)]} |`);
+    return [
+      "# AI Initiative Portfolio — review pack",
+      "",
+      `**Book:** ${activeUc ? activeUc.title : "Default (finserv + telecom)"}`,
+      `**Totals:** Expected value ${fmtM(totalValue)} · Run-rate spend ${fmtM(totalSpend)} · Risk-adjusted ${fmtM(totalRiskAdj)} · Kill list ${killCount}/${items.length}`,
+      "",
+      "## Initiatives (sorted by risk-adjusted value)",
+      "",
+      "| Initiative | Domain | Stage | Exp. value | Spend | P(success) | Risk-adj | Call |",
+      "| --- | --- | --- | --- | --- | --- | --- | --- |",
+      ...rows,
+      "",
+      "## Kill list",
+      "",
+      kills.length
+        ? kills.map((i) => `- **${i.name}** — risk-adjusted ${fmtM(riskAdj(i))} (negative return)`).join("\n")
+        : "_None — every initiative clears its risk-adjusted hurdle._",
+      "",
+      "## Method",
+      "",
+      "Risk-adjusted value = expected value × P(success by stage) − spend. **Kill** if risk-adjusted < 0; **Scale** if scaling/production AND risk-adjusted ≥ 1.5× spend AND risk < 0.6; else **Hold**.",
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`portfolio-review-pack-${activeUc ? activeUc.id : "default"}`, buildReviewPack(), {
+      scenario: activeUc ? activeUc.title : "Default book",
+    });
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -102,6 +137,10 @@ export function PortfolioDashboard() {
 
         <UseCaseRail useCases={C31_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        <div className="mb-4 flex justify-end">
+          <ArtifactButton label="Download the review pack" onClick={onGenerate} title="Download the portfolio review pack as Markdown" />
+        </div>
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Expected annual value" value={fmtM(totalValue)} tone="neutral" interpretation="Sum of unadjusted upside" />
