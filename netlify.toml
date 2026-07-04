@@ -1,0 +1,10 @@
+# Netlify deploy for the modular monolith (apps/web static export).
+[build]
+  command = "corepack enable && pnpm install && pnpm turbo run build --filter=@labs/web"
+  publish = "apps/web/out"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NEXT_PUBLIC_STATIC_DEMO = "1"
+
+# Static export pre-renders every route; trailingSlash keeps folder/index.html clean.

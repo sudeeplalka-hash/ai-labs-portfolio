@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+dist
+.turbo
+.vercel
+*.tsbuildinfo
+.env*
+!.env.example
+.DS_Store
+
+# Python (services)
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/

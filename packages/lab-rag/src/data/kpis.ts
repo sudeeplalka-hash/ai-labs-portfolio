@@ -1,0 +1,122 @@
+import type { KpiMetric } from "@rag/types";
+
+// Headline metrics for the Executive Overview. Story: improving but not production-ready.
+export const kpis: KpiMetric[] = [
+  {
+    id: "overall",
+    label: "Overall RAG Quality",
+    value: 78,
+    unit: "%",
+    target: 80,
+    trendValue: 2,
+    trendDirection: "up",
+    status: "Watch",
+    interpretation:
+      "Up from 76% last run, but still 2 points below the 80% production baseline. Held back by citation accuracy and high-risk failures.",
+    description: "Weighted composite of retrieval, faithfulness, citation accuracy, hallucination risk, reliability, and governance.",
+  },
+  {
+    id: "retrieval",
+    label: "Retrieval Quality",
+    value: 86,
+    unit: "%",
+    target: 85,
+    trendValue: 9,
+    trendDirection: "up",
+    status: "Healthy",
+    interpretation:
+      "Hybrid search plus reranking lifted retrieval quality above target. The retriever now surfaces the right evidence in most cases.",
+    description: "Blend of context relevance, retrieval completeness, and ranking quality (NDCG/MRR).",
+  },
+  {
+    id: "faithfulness",
+    label: "Answer Faithfulness",
+    value: 84,
+    unit: "%",
+    target: 85,
+    trendValue: 3,
+    trendDirection: "up",
+    status: "Watch",
+    interpretation:
+      "Answers are mostly grounded in retrieved evidence, but a few responses still over-generalize beyond the source.",
+    description: "Share of answer content directly supported by retrieved evidence.",
+  },
+  {
+    id: "citation",
+    label: "Citation Accuracy",
+    value: 82,
+    unit: "%",
+    target: 85,
+    trendValue: 4,
+    trendDirection: "up",
+    status: "At Risk",
+    interpretation:
+      "Below the 85% threshold. Most failures are citations that are topically related but do not directly support the specific claim.",
+    description: "Share of citations that directly support the claim they are attached to.",
+  },
+  {
+    id: "hallucination",
+    label: "Hallucination Risk",
+    value: 11,
+    unit: "%",
+    target: 8,
+    trendValue: -4,
+    trendDirection: "down",
+    status: "Watch",
+    interpretation:
+      "Down 4 points after the citation validator, but still above the 8% target. Remaining risk concentrates in policy-exception queries.",
+    description: "Estimated rate of unsupported or fabricated claims across evaluated answers.",
+  },
+  {
+    id: "critical-failures",
+    label: "Critical Failure Rate",
+    value: 2.0,
+    unit: "%",
+    target: 0,
+    trendValue: -1.3,
+    trendDirection: "down",
+    status: "At Risk",
+    interpretation:
+      "One critical compliance query still fails. Critical failures must reach zero before promotion to production.",
+    description: "Share of critical-risk queries that failed evaluation or required escalation.",
+  },
+  {
+    id: "high-risk-pass",
+    label: "High-Risk Pass Rate",
+    value: 87,
+    unit: "%",
+    target: 90,
+    trendValue: 5,
+    trendDirection: "up",
+    status: "At Risk",
+    interpretation:
+      "Improving but below the 90% bar. Finance and compliance queries remain the weakest segment.",
+    description: "Pass rate on high and critical-risk evaluation cases.",
+  },
+  {
+    id: "latency",
+    label: "Average Latency",
+    value: 2.6,
+    unit: "s",
+    target: 3.0,
+    trendValue: 0.4,
+    trendDirection: "up",
+    status: "Healthy",
+    interpretation:
+      "Average latency is within target, though reranking pushed P95 latency above the 4s SLA.",
+    description: "Mean end-to-end response time across evaluated queries.",
+  },
+  {
+    id: "cost",
+    label: "Cost per Query",
+    value: 0.042,
+    unit: "$",
+    target: 0.045,
+    trendValue: 0.006,
+    trendDirection: "up",
+    status: "Healthy",
+    interpretation:
+      "Cost rose with reranking and validation steps but remains under the $0.045 target.",
+    description: "Average fully-loaded inference and retrieval cost per query.",
+  },
+];

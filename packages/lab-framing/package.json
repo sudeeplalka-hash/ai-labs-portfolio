@@ -1,0 +1,33 @@
+{
+  "name": "@labs/lab-framing",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Strategy & Framing lab — forge a fuzzy ambition into a scoped, scored, falsifiable bet. Built on the shared foundation.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@labs/design-system": "workspace:*",
+    "@labs/program-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": ">=0.446.0",
+    "next": ">=14",
+    "react": "^18",
+    "react-dom": "^18",
+    "recharts": ">=2.12.7"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.3",
+    "lucide-react": "0.446.0",
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "recharts": "2.12.7",
+    "typescript": "5.5.3",
+    "vitest": "2.1.9"
+  }
+}

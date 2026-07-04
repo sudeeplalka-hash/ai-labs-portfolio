@@ -1,0 +1,13 @@
+import type { QualityGate } from "@rag/types";
+
+// Eight release gates. Citation accuracy + high-risk pass + P95 latency are the blockers.
+export const qualityGates: QualityGate[] = [
+  { id: "gate-overall", name: "Overall Quality Score", description: "Composite quality must meet the production baseline.", threshold: ">= 80%", currentValue: "78%", status: "Warning", severity: "High", remediation: "Close citation and high-risk gaps; 2 points from baseline." },
+  { id: "gate-citation", name: "Citation Accuracy", description: "Citations must directly support the claims they are attached to.", threshold: ">= 85%", currentValue: "82%", status: "Failed", severity: "High", remediation: "Add claim-level citation validation requiring direct evidence overlap before displaying a citation." },
+  { id: "gate-hallucination", name: "Critical Hallucination Failures", description: "No unsupported high-impact claims on critical-risk queries.", threshold: "= 0", currentValue: "1", status: "Failed", severity: "Critical", remediation: "Enforce claim-level grounding and refuse partial answers on critical policy queries (e.g. external AI tool data use)." },
+  { id: "gate-highrisk", name: "High-Risk Query Pass Rate", description: "Reliability on finance, legal, compliance, and security queries.", threshold: ">= 90%", currentValue: "87%", status: "Warning", severity: "Critical", remediation: "Improve finance and compliance retrieval with metadata filtering and clearer source documents." },
+  { id: "gate-latency", name: "P95 Latency", description: "95th-percentile end-to-end latency within SLA.", threshold: "<= 4.0s", currentValue: "4.25s", status: "Warning", severity: "Medium", remediation: "Cache reranker scores and reduce rerank candidate count to bring P95 under 4s." },
+  { id: "gate-cost", name: "Cost per Query", description: "Fully-loaded cost per query within budget.", threshold: "<= $0.045", currentValue: "$0.042", status: "Passed", severity: "Medium", remediation: "Within target. Monitor as evaluation passes expand." },
+  { id: "gate-regression", name: "Regression Limit", description: "No overall regression > 3% or citation regression > 5% vs prior run.", threshold: "Within limits", currentValue: "No regression", status: "Passed", severity: "High", remediation: "Latency is on watch but no metric regressed beyond tolerance this run." },
+  { id: "gate-review", name: "Human Review Completion", description: "All critical-domain cases have completed required human review.", threshold: "100% critical", currentValue: "100%", status: "Passed", severity: "Critical", remediation: "All critical-risk traces were routed and reviewed for this run." },
+];

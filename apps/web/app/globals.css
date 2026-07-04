@@ -1,0 +1,2 @@
+/* The whole platform's styles = the shared design system (one source of DNA). */
+@import "../../../packages/design-system/src/styles/globals.css";

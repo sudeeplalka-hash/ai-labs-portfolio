@@ -1,0 +1,84 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { Panel, Badge } from "@labs/design-system";
+
+export const metadata: Metadata = {
+  title: "Changelog",
+  description: "What's shipped and what's next on the AI delivery portfolio — dated and honest.",
+};
+
+interface Entry { date: string; tag: string; tone: "emerald" | "blue" | "amber"; title: string; items: string[] }
+
+const ENTRIES: Entry[] = [
+  {
+    date: "2026-07", tag: "Honesty pass", tone: "emerald", title: "Post-review corrections",
+    items: [
+      "LIVE-ready labs (multi-agent, structured output) relabeled to authored/illustrative — no LIVE badge without a wired call path.",
+      "Model catalog freshened: other-provider entries shown as generic tiers, not version-pinned; Anthropic models current.",
+      "Registry count fixed to the 23 new labs; internal QA audit trail corrected.",
+      "Public changelog shipped (this page).",
+    ],
+  },
+  {
+    date: "2026-07", tag: "Launch", tone: "blue", title: "Portfolio v1 — 23 interactive labs",
+    items: [
+      "Collection 2 · Agent & Protocol (8): MCP playground, loop/failure inspector, orchestration, structured output, context/memory, cost simulator, protocol selection, human-in-the-loop.",
+      "Collection 3 · Business of AI (5): portfolio dashboard, build-vs-buy, cost forecaster, vendor monitor, ROI builder.",
+      "Collection 4 · Engagement Leadership (10): adoption, stakeholders, capacity, RAID radar, compliance, talent, RFP, estimation, onboarding, exec comms.",
+      "Layer 0 Competency Map landing, driven by a shared labs registry.",
+    ],
+  },
+  {
+    date: "2026-07", tag: "Foundations", tone: "blue", title: "Shared spine",
+    items: [
+      "@labs/kit — dated model/pricing/protocol config + the registry that auto-updates the map as labs ship.",
+      "One design system across every new collection (matches the Command Center).",
+      "Credibility block on every lab: badge · freshness stamp · steering takeaway · how-it's-built · limitations.",
+    ],
+  },
+  {
+    date: "Next", tag: "Roadmap", tone: "amber", title: "In flight",
+    items: [
+      "Genuine LIVE calls on the flagship agent labs (once the deploy host is set).",
+      "Use-Case Layer — 3 real-world, cross-industry scenarios per lab + an Industry Atlas.",
+      "Collection index pages (the toolkit / gallery / control-room structures).",
+      "Shareability + a11y: per-lab OG images, sitemap, full accessibility pass.",
+    ],
+  },
+];
+
+export default function Page() {
+  return (
+    <div className="min-h-screen bg-canvas font-sans text-ink">
+      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 md:px-5">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
+          <span className="ml-1 font-mono text-xs text-slatey-500">Changelog</span>
+        </div>
+      </header>
+      <main className="mx-auto max-w-3xl px-4 py-8 md:px-5">
+        <p className="eyebrow mb-1">Building in public</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">Changelog</h1>
+        <p className="mt-2 text-sm leading-relaxed text-slatey-400">Dated and honest — what&apos;s shipped, what&apos;s corrected, and what&apos;s next. A fuller engineering log lives in the repo&apos;s <span className="font-mono text-[13px]">BUILD-LOG.md</span>.</p>
+        <div className="mt-6 space-y-4">
+          {ENTRIES.map((e, i) => (
+            <Panel key={i}>
+              <div className="mb-2 flex items-center gap-2">
+                <Badge tone={e.tone}>{e.tag}</Badge>
+                <span className="font-mono text-xs text-slatey-500">{e.date}</span>
+                <h2 className="text-sm font-semibold text-ink">{e.title}</h2>
+              </div>
+              <ul className="space-y-1.5 text-sm text-slatey-300">
+                {e.items.map((it, j) => (
+                  <li key={j} className="flex gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slatey-500" /><span className="leading-relaxed">{it}</span></li>
+                ))}
+              </ul>
+            </Panel>
+          ))}
+        </div>
+        <p className="mt-6 text-xs text-slatey-500">Honest by design: every lab states whether it&apos;s LIVE or SIMULATED, and every number expands to its formula.</p>
+      </main>
+    </div>
+  );
+}

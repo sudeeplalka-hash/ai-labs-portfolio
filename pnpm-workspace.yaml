@@ -1,0 +1,5 @@
+packages:
+  - "packages/*"
+  - "apps/web"
+  # NOTE: apps/governance is superseded by packages/lab-governance (folded into
+  # apps/web). It's intentionally excluded; delete the folder when convenient.

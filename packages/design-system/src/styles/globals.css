@@ -1,0 +1,65 @@
+@import url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap");
+@import "./tokens.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background-color: #f6f7f8;
+  color: #152433;
+  -webkit-font-smoothing: antialiased;
+}
+* {
+  border-color: #e4e7eb;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(21,36,51,0.16); border-radius: 9999px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(21,36,51,0.28); background-clip: content-box; }
+
+/* Gallery shelves: slim, branded horizontal scrollbar that only asserts itself
+   on hover, with scroll-snap. Keeps the browse rows feeling deliberate. */
+.shelf-row { scrollbar-width: thin; scrollbar-color: transparent transparent; scroll-snap-type: x proximity; scroll-padding-left: 4px; }
+.shelf-row:hover { scrollbar-color: rgba(21,36,51,0.22) transparent; }
+.shelf-row::-webkit-scrollbar { height: 8px; }
+.shelf-row::-webkit-scrollbar-track { background: transparent; }
+.shelf-row::-webkit-scrollbar-thumb { background: transparent; border-radius: 9999px; border: 2px solid transparent; background-clip: content-box; transition: background 0.2s; }
+.shelf-row:hover::-webkit-scrollbar-thumb { background: rgba(21,36,51,0.18); background-clip: content-box; }
+.shelf-row::-webkit-scrollbar-thumb:hover { background: rgba(21,36,51,0.34); background-clip: content-box; }
+.shelf-row > * { scroll-snap-align: start; }
+
+@layer components {
+  .panel { @apply rounded-xl border border-line bg-white shadow-card; }
+  .panel-hover { @apply transition-shadow hover:shadow-cardhover; }
+  .stat-label { @apply text-[11px] font-semibold uppercase tracking-wide text-slatey-500; }
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-wider text-primary; }
+  .data-table { @apply w-full border-collapse text-sm; }
+  .data-table th { @apply whitespace-nowrap border-b border-line bg-slate-50 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-slatey-500; }
+  .data-table td { @apply border-b border-line px-3 py-2.5 align-top text-slatey-300; }
+  .data-table tbody tr { @apply transition-colors hover:bg-slate-50; }
+}
+
+/* Keyboard focus — unlayered so it wins over Tailwind focus utilities. */
+a:focus-visible, button:focus-visible, [role="button"]:focus-visible,
+select:focus-visible, summary:focus-visible, input[type="range"]:focus-visible {
+  outline: 2px solid #1f6fc4; outline-offset: 2px; border-radius: 6px;
+}
+input:focus-visible, textarea:focus-visible { outline: 2px solid rgba(31,111,196,0.55); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print: drop the app chrome so a brief/report prints as a clean sheet. */
+@media print {
+  .no-print { display: none !important; }
+  main { padding: 0 !important; max-width: none !important; }
+  body { background: #fff !important; }
+}

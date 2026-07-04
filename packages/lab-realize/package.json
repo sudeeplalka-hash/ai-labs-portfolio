@@ -1,0 +1,30 @@
+{
+  "name": "@labs/lab-realize",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Realize / Business Outcome lab — the traceable, risk-adjusted ROI payoff. Value River, sensitivity, and the Initiative Dossier where every number traces to an upstream decision. Built on the shared foundation.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@labs/design-system": "workspace:*",
+    "@labs/program-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "lucide-react": ">=0.446.0",
+    "next": ">=14",
+    "react": "^18",
+    "react-dom": "^18"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.3",
+    "lucide-react": "0.446.0",
+    "react": "18.3.1",
+    "typescript": "5.5.3",
+    "vitest": "2.1.9"
+  }
+}

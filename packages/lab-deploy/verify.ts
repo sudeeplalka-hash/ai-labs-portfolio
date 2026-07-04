@@ -1,0 +1,15 @@
+import { deriveBaseline, computeOps, envelopeGrid, runIncident, deployVerdict } from "./src/engine/model";
+const state: any = { initiative: { params: { user: "Customers", job: "Answer", pain: "Too slow", posture: "Scattered", risk: "Balanced" }, scope: 0.5, scores: { value: 70, feasibility: 65, dataReadiness: 60 }, successMetric: null }, progress: {} };
+const lev = { volumePerDay: 500, tier: "small", cachePct: 0, reranker: false };
+const b = deriveBaseline(state);
+const low = computeOps(b, lev), high = computeOps(b, { ...lev, volumePerDay: 200000 });
+let f = 0; const ok = (n, c) => { console.log((c ? "OK  " : "XX  ") + n); if (!c) f++; };
+ok("scale->cost up", high.monthlyCost > low.monthlyCost);
+ok("scale->p95 up", high.p95 > low.p95);
+ok("extreme->red (util " + high.utilization + ")", high.zone === "red");
+ok("low->not red", low.zone !== "red");
+ok("cache lowers cost", computeOps(b, { ...lev, cachePct: 60 }).costPerQuery < low.costPerQuery);
+ok("envelope spans zones", new Set(envelopeGrid(b, lev).map(c => c.zone)).size > 1);
+ok("incident recovers", runIncident(b, lev, "outage").ticks.slice(-1)[0].phase === "recovered");
+ok("overload not healthy", deployVerdict(b, high).tone !== "healthy");
+console.log(f ? f + " FAILED" : "ALL PASSED");

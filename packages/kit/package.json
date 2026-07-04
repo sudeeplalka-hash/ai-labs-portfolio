@@ -1,0 +1,17 @@
+{
+  "name": "@labs/kit",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cross-collection foundation: LIVE_MODEL config, dated model/pricing/protocol data, freshness metadata, and the labs-registry that drives the Competency Map. Framework-agnostic — no React, no Collection-1 coupling. Every collection imports it; nothing copies these values.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "5.5.3",
+    "vitest": "2.0.5"
+  }
+}
