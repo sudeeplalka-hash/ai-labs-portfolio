@@ -13,6 +13,7 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } 
 import { EL02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 interface SH {
   key: string; name: string; role: string; power: number; interest: number; traj: number[];
@@ -65,6 +66,31 @@ export function StakeholderCockpit() {
   };
   const s = shs.find((x) => x.key === sel) ?? shs[0];
   const flags = shs.filter((x) => drifting(x.traj));
+
+  const buildBriefing = (): string => {
+    const targets: SH[] = flags.length ? flags : [s];
+    const block = (x: SH): string =>
+      [
+        `### ${x.name} — ${SENT[last(x.traj)]}${drifting(x.traj) ? " (drifting)" : ""}`,
+        `- **Why now:** ${x.brief.why}`,
+        `- **Who talks to them:** ${x.brief.who}`,
+        `- **The message:** ${x.brief.message}`,
+        `- **By when:** ${x.brief.before}`,
+        "",
+      ].join("\n");
+    return [
+      "# Pre-steering stakeholder briefing",
+      "",
+      `**Drifting stakeholders:** ${flags.length} of ${shs.length}`,
+      "",
+      ...targets.map(block),
+      "## The move",
+      "",
+      "Sentiment moves between meetings, not in them. Each 1:1 above is aimed to re-anchor a specific stakeholder before the room — who, what, from whom, by when.",
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown("stakeholder-briefing", buildBriefing(), { scenario: activeUc ? activeUc.title : "Default program" });
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -147,6 +173,7 @@ export function StakeholderCockpit() {
             <span className="text-sm font-semibold text-ink">{s.name}</span>
             <Badge tone={SENT_TONE[last(s.traj)]}>{SENT[last(s.traj)]}</Badge>
             {drifting(s.traj) && <Badge tone="rose">drifting</Badge>}
+            <span className="ml-auto"><ArtifactButton label="Download the briefing" onClick={onGenerate} title="Download the pre-steering briefing as Markdown" /></span>
           </div>
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             <Field k="Why now" v={s.brief.why} />

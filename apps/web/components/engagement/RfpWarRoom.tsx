@@ -13,6 +13,7 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } 
 import { EL07_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 type Status = "met" | "partial" | "gap";
 interface Req { text: string; owner: string; evidence: string; status: Status }
@@ -82,6 +83,45 @@ export function RfpWarRoom() {
   const portfolio = Math.round(rfp.fit * rfp.winProb * rfp.capacity * 100);
   const marginOk = rfp.marginPct >= rfp.marginFloor;
   const bid = marginOk && portfolio >= 35;
+
+  const buildBidMemo = (): string => {
+    const rec = bid
+      ? `Bid. Coverage ${coverage}%, red-team ${redTeam}/100, margin above floor — pursue it and thread the win themes through every scored section.`
+      : `No-bid. Margin ${rfp.marginPct}% vs a ${rfp.marginFloor}% floor and a pursuit score of ${portfolio} — chasing it burns senior time owed to winnable bids. Decline, and say why in one paragraph.`;
+    return [
+      `# Bid / No-bid memo — ${rfp.label}`,
+      "",
+      `**Decision: ${bid ? "BID" : "NO-BID"}**`,
+      "",
+      "## Qualification",
+      "",
+      "| Factor | Value |",
+      "| --- | --- |",
+      `| Requirement coverage | ${coverage}% |`,
+      `| Red-team score (vs their criteria) | ${redTeam}/100 |`,
+      `| Strategic fit | ${Math.round(rfp.fit * 100)} |`,
+      `| Win probability | ${Math.round(rfp.winProb * 100)} |`,
+      `| Delivery capacity | ${Math.round(rfp.capacity * 100)} |`,
+      `| Pursuit score (fit×win×capacity) | ${portfolio} |`,
+      `| Margin vs floor | ${rfp.marginPct}% / ${rfp.marginFloor}% |`,
+      "",
+      "## Compliance matrix",
+      "",
+      "| Requirement | Owner | Evidence | Status |",
+      "| --- | --- | --- | --- |",
+      ...rfp.requirements.map((q) => `| ${q.text} | ${q.owner} | ${q.evidence} | ${q.status} |`),
+      "",
+      "## Win themes",
+      "",
+      rfp.winThemes.map((t) => `- ${t}`).join("\n"),
+      "",
+      "## Recommendation",
+      "",
+      rec,
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`bid-memo-${rfp.key}`, buildBidMemo(), { scenario: rfp.label });
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -187,6 +227,7 @@ export function RfpWarRoom() {
               ? <>Coverage {coverage}%, red-team {redTeam}/100, margin above floor. Pursue it and thread the win themes through every section the RFP scores.</>
               : <>Margin {rfp.marginPct}% sits below the {rfp.marginFloor}% floor and the pursuit score is {portfolio}. Chasing it burns senior time you owe the bids you can win. Decline, and say why in one paragraph.</>}
           </InsightCard>
+          <div className="mt-3"><ArtifactButton label={bid ? "Download the bid memo" : "Download the no-bid memo"} onClick={onGenerate} title="Download this bid/no-bid memo as Markdown" /></div>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">

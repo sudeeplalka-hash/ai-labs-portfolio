@@ -13,6 +13,7 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/desi
 import { EL08_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 interface Task { phase: string; weeks: number; ai?: boolean }
 interface UseCase {
@@ -93,6 +94,43 @@ export function EstimationStudio() {
   const absorbedMargin = marginPct(effort, baseEffort);
   const coMargin = marginPct(effort, effort);
   const staffScale = Math.max(1, Math.round(effort / 33));
+
+  const buildChangeOrder = (): string => {
+    const schedDelta = duration(effort) - duration(baseEffort);
+    const price = changeWeeks * RATE.bill;
+    return [
+      "# Change order — draft",
+      "",
+      `**Engagement:** ${uc.label}`,
+      `**Estimation basis:** ${method === "pert" ? "PERT (three-point)" : method} · base effort ${baseEffort} person-weeks`,
+      "",
+      "## Scope change",
+      "",
+      uc.change.label,
+      "",
+      "## Impact",
+      "",
+      "| Dimension | Delta |",
+      "| --- | --- |",
+      `| Added effort | +${changeWeeks} person-weeks |`,
+      `| Schedule | +${schedDelta} weeks |`,
+      `| Price | +$${price.toLocaleString()}k |`,
+      `| Margin if absorbed silently | ${absorbedMargin}% (from ${baselineMargin}%) |`,
+      `| Margin with this change order | ${coMargin}% |`,
+      "",
+      "## Added-work breakdown",
+      "",
+      ...uc.change.add.map((t) => `- ${t.phase} — ${t.weeks}w${t.ai ? " *(AI-risk: data/eval)*" : ""}`),
+      "",
+      "## Recommendation",
+      "",
+      `Process as a formal change order. Absorbing the scope silently drops margin to ${absorbedMargin}%; the change order holds it at ${coMargin}%.`,
+      "",
+      "Approved by: ________________   Date: __________",
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`change-order-${uc.key}`, buildChangeOrder(), { scenario: `${uc.label} · ${uc.change.label}` });
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -190,6 +228,7 @@ export function EstimationStudio() {
               <div className="mt-3 rounded-md border border-line bg-slate-50 p-2.5 text-xs text-slatey-300">
                 <p className="font-semibold text-ink">Change order — draft</p>
                 <p className="mt-1">Scope: {uc.change.label}. Added effort +{changeWeeks} person-weeks; schedule +{duration(effort) - duration(baseEffort)} weeks; price +${(changeWeeks * RATE.bill).toLocaleString()}k. Absorbing it silently drops margin to {absorbedMargin}%; the change order holds it at {coMargin}%.</p>
+                <div className="mt-2"><ArtifactButton label="Download the change order" onClick={onGenerate} title="Download this change order as Markdown" /></div>
               </div>
             )}
           </Panel>

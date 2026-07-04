@@ -14,6 +14,7 @@ import { Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, Freshnes
 import { EL04_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadCsv, ArtifactButton } from "../artifact/artifact";
 import {
   SCENARIOS, HEALTH_LABEL, HEALTH_TONE, HEALTH_X, TREND_Y, SEV_TONE,
   statusWord, trendWord, healthIndex, type RaidItem, type Scenario,
@@ -45,6 +46,17 @@ export function RaidRadar() {
   const gaps = scenario.workstreams.filter((w) => w.reported !== w.actual).length;
   const idxTone = idx >= 80 ? "healthy" : idx >= 60 ? "watch" : idx >= 40 ? "risk" : "critical";
 
+  const onGenerateCsv = () => {
+    const rows: (string | number)[][] = [["Workstream", "Owner", "Reported", "Actual", "Trend", "Type", "Item", "Severity"]];
+    for (const w of scenario.workstreams) {
+      for (const r of w.raid.risks) rows.push([w.name, w.owner, w.reported, w.actual, w.trend, "Risk", r.text, r.sev ?? ""]);
+      for (const a of w.raid.assumptions) rows.push([w.name, w.owner, w.reported, w.actual, w.trend, "Assumption", a, ""]);
+      for (const i of w.raid.issues) rows.push([w.name, w.owner, w.reported, w.actual, w.trend, "Issue", i.text, i.sev ?? ""]);
+      for (const d of w.raid.dependencies) rows.push([w.name, w.owner, w.reported, w.actual, w.trend, "Dependency", d.text, d.sev ?? ""]);
+    }
+    downloadCsv(`raid-register-${scenario.key}`, rows);
+  };
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -73,6 +85,10 @@ export function RaidRadar() {
 
         <UseCaseRail useCases={EL04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        <div className="mb-4 flex justify-end">
+          <ArtifactButton label="Export RAID register (CSV)" onClick={onGenerateCsv} title="Download the RAID register as CSV" />
+        </div>
 
         <div className="mb-5 flex flex-wrap items-center gap-2">
           {!activeUc && SCENARIOS.map((s) => {

@@ -13,6 +13,7 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } 
 import { EL01_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
 type FactorKey = "sponsorship" | "workflow" | "trust" | "training" | "incentives" | "comms";
 type Factors = Record<FactorKey, number>;
@@ -70,6 +71,40 @@ export function AdoptionReadiness() {
   const weak = FACTORS.filter((x) => factors[x.key] < 70).sort((a, b) => factors[a.key] - factors[b.key]);
   const priorities = weak.slice(0, 3);
 
+  const buildAdoptionMemo = (): string => {
+    const gnarr = c >= 75
+      ? "Readiness clears the bar — scale."
+      : c >= 60
+      ? "Scale only with the fixes below committed and owned."
+      : "Hold — the people aren't ready. Fix the weakest factors before scaling; a technically-working pilot still fails without them.";
+    return [
+      "# Adoption readiness memo",
+      "",
+      `**Program:** ${activeUc ? activeUc.title : nativeScenario.label} (~${people} users)`,
+      `**Composite readiness:** ${c}/100 — ${gate.verdict}`,
+      "",
+      "## Factor scores",
+      "",
+      "| Factor | Weight | Score |",
+      "| --- | --- | --- |",
+      ...FACTORS.map((x) => `| ${x.label} | ${Math.round(x.weight * 100)}% | ${factors[x.key]} |`),
+      "",
+      "## Gate verdict",
+      "",
+      `${gate.verdict}. ${gnarr}`,
+      "",
+      "## Fix first (2-week plan)",
+      "",
+      priorities.length
+        ? priorities.map((x, i) => `${i + 1}. **${x.label}** (${factors[x.key]}/100) — ${ACTION[x.key]}`).join("\n")
+        : "_All factors above threshold — proceed to scale._",
+    ].join("\n");
+  };
+  const onGenerate = () =>
+    downloadMarkdown(`adoption-memo-${activeUc ? activeUc.id : scenarioKey}`, buildAdoptionMemo(), {
+      scenario: activeUc ? activeUc.title : nativeScenario.label,
+    });
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -95,6 +130,10 @@ export function AdoptionReadiness() {
 
         <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        <div className="mb-4 flex justify-end">
+          <ArtifactButton label="Download the readiness memo" onClick={onGenerate} title="Download the adoption readiness memo as Markdown" />
+        </div>
 
         <div className="mb-5 flex flex-wrap gap-2">
           {!activeUc && SCENARIOS.map((s) => (
