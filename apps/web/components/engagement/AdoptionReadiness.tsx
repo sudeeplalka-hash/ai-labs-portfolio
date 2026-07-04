@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { EL01_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type FactorKey = "sponsorship" | "workflow" | "trust" | "training" | "incentives" | "comms";
 type Factors = Record<FactorKey, number>;
@@ -43,12 +45,21 @@ const gateFor = (c: number): Gate => (c >= 75 ? { verdict: "Scale", tone: "emera
 
 export function AdoptionReadiness() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
-  const scenario = SCENARIOS.find((s) => s.key === scenarioKey)!;
-  const [factors, setFactors] = useState<Factors>(scenario.defaults);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL01_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const nativeScenario = SCENARIOS.find((s) => s.key === scenarioKey)!;
+  const people = activeUc ? activeUc.payload.people : nativeScenario.people;
+  const [factors, setFactors] = useState<Factors>(nativeScenario.defaults);
 
   const onScenario = (k: string) => {
     setScenarioKey(k);
+    setActiveUcId(null);
     setFactors(SCENARIOS.find((s) => s.key === k)!.defaults);
+  };
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? EL01_USE_CASES.find((u) => u.id === id) : null;
+    setFactors(uc ? uc.payload.defaults : nativeScenario.defaults);
   };
   const setF = (key: FactorKey, v: number) => setFactors((f) => ({ ...f, [key]: v }));
 
@@ -80,8 +91,11 @@ export function AdoptionReadiness() {
           </p>
         </div>
 
+        <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-5 flex flex-wrap gap-2">
-          {SCENARIOS.map((s) => (
+          {!activeUc && SCENARIOS.map((s) => (
             <button key={s.key} onClick={() => onScenario(s.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${s.key === scenarioKey ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{s.label}</button>
           ))}
@@ -137,7 +151,7 @@ export function AdoptionReadiness() {
                   ))}
                 </ol>
               )}
-              <p className="mt-3 text-xs text-slatey-400"><span className="font-semibold text-ink">Always on:</span> one floor champion per ~{Math.max(10, Math.round(scenario.people / 60))} users, a two-week feedback loop, and a visible fix log so users see their input ship.</p>
+              <p className="mt-3 text-xs text-slatey-400"><span className="font-semibold text-ink">Always on:</span> one floor champion per ~{Math.max(10, Math.round(people / 60))} users, a two-week feedback loop, and a visible fix log so users see their input ship.</p>
             </Panel>
           </div>
         </div>
@@ -149,8 +163,8 @@ export function AdoptionReadiness() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> The model was never the risk. The {scenario.people} people who have to trust it were.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — Gen AI rollouts at AMEX; the adoption half of the 4.5× scale story.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : `The model was never the risk. The ${people} people who have to trust it were.`}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — Gen AI rollouts at AMEX; the adoption half of the 4.5× scale story.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

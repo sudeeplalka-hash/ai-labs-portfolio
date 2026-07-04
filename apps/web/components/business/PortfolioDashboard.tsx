@@ -10,11 +10,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, type BadgeTone } from "@labs/design-system";
+import { C31_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Stage = "discovery" | "pilot" | "scaling" | "production";
 type Rec = "kill" | "hold" | "scale";
 interface Initiative {
-  id: string; name: string; domain: "Finserv" | "Telecom"; stage: Stage;
+  id: string; name: string; domain: string; stage: Stage;
   expValueM: number; spendM: number; risk: number; planVar: number;
 }
 
@@ -54,14 +56,22 @@ type View = "map" | "financials" | "gate";
 
 export function PortfolioDashboard() {
   const [view, setView] = useState<View>("map");
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? C31_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const items: Initiative[] = activeUc ? activeUc.payload.initiatives : INITIATIVES;
   const [selId, setSelId] = useState<string>("kyc");
-  const sel = INITIATIVES.find((i) => i.id === selId)!;
+  const sel = items.find((i) => i.id === selId) ?? items[0];
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const book = id ? (C31_USE_CASES.find((u) => u.id === id)?.payload.initiatives ?? INITIATIVES) : INITIATIVES;
+    setSelId(book[0].id);
+  };
 
-  const maxVal = Math.max(...INITIATIVES.map((i) => i.expValueM));
-  const totalValue = INITIATIVES.reduce((a, i) => a + i.expValueM, 0);
-  const totalSpend = INITIATIVES.reduce((a, i) => a + i.spendM, 0);
-  const totalRiskAdj = INITIATIVES.reduce((a, i) => a + riskAdj(i), 0);
-  const killCount = INITIATIVES.filter((i) => recommend(i) === "kill").length;
+  const maxVal = Math.max(...items.map((i) => i.expValueM));
+  const totalValue = items.reduce((a, i) => a + i.expValueM, 0);
+  const totalSpend = items.reduce((a, i) => a + i.spendM, 0);
+  const totalRiskAdj = items.reduce((a, i) => a + riskAdj(i), 0);
+  const killCount = items.filter((i) => recommend(i) === "kill").length;
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -88,11 +98,14 @@ export function PortfolioDashboard() {
           </p>
         </div>
 
+        <UseCaseRail useCases={C31_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Expected annual value" value={fmtM(totalValue)} tone="neutral" interpretation="Sum of unadjusted upside" />
           <KpiCard label="Run-rate spend" value={fmtM(totalSpend)} tone="watch" interpretation="Annualized" />
           <KpiCard label="Risk-adjusted value" value={fmtM(totalRiskAdj)} tone={totalRiskAdj > 0 ? "healthy" : "critical"} interpretation="Value × P(success) − spend" />
-          <KpiCard label="Recommend to kill" value={`${killCount}/12`} tone={killCount >= 1 ? "critical" : "healthy"} interpretation="Negative risk-adjusted ROI" />
+          <KpiCard label="Recommend to kill" value={`${killCount}/${items.length}`} tone={killCount >= 1 ? "critical" : "healthy"} interpretation="Negative risk-adjusted ROI" />
         </div>
 
         {/* View toggle */}
@@ -116,7 +129,7 @@ export function PortfolioDashboard() {
                   <span className="absolute bottom-1 right-2 text-[10px] text-slatey-500">high risk →</span>
                   <div className="absolute inset-y-0 left-1/2 border-l border-dashed border-line" />
                   <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-line" />
-                  {INITIATIVES.map((i) => {
+                  {items.map((i) => {
                     const rec = recommend(i);
                     const size = 14 + i.spendM * 20;
                     const left = `${i.risk * 88 + 6}%`;
@@ -143,7 +156,7 @@ export function PortfolioDashboard() {
                 <table className="data-table">
                   <thead><tr><th>Initiative</th><th>Stage</th><th>Value</th><th>Spend</th><th>Risk-adj</th><th>Plan var</th></tr></thead>
                   <tbody>
-                    {INITIATIVES.map((i) => (
+                    {items.map((i) => (
                       <tr key={i.id} className="cursor-pointer" onClick={() => setSelId(i.id)}>
                         <td className="font-medium text-ink">{i.name}</td>
                         <td className="capitalize">{i.stage}</td>
@@ -163,9 +176,9 @@ export function PortfolioDashboard() {
               <div className="grid gap-3 sm:grid-cols-3">
                 {(["scale", "hold", "kill"] as Rec[]).map((r) => (
                   <div key={r} className="rounded-xl border border-line bg-white p-3">
-                    <div className="mb-2 flex items-center gap-1.5"><span className={`h-2.5 w-2.5 rounded-full ${REC_DOT[r]}`} /><p className="text-sm font-semibold text-ink">{REC_LABEL[r]}</p><span className="text-[11px] text-slatey-500">{INITIATIVES.filter((i) => recommend(i) === r).length}</span></div>
+                    <div className="mb-2 flex items-center gap-1.5"><span className={`h-2.5 w-2.5 rounded-full ${REC_DOT[r]}`} /><p className="text-sm font-semibold text-ink">{REC_LABEL[r]}</p><span className="text-[11px] text-slatey-500">{items.filter((i) => recommend(i) === r).length}</span></div>
                     <div className="space-y-1.5">
-                      {INITIATIVES.filter((i) => recommend(i) === r).map((i) => (
+                      {items.filter((i) => recommend(i) === r).map((i) => (
                         <button key={i.id} onClick={() => setSelId(i.id)} className={`block w-full rounded-md border px-2 py-1.5 text-left text-xs transition ${i.id === selId ? "border-primary bg-primary-soft" : "border-line hover:border-primary/40"}`}>
                           <span className="font-medium text-ink">{i.name}</span>
                           <span className="block text-[11px] text-slatey-500">{fmtM(riskAdj(i))} risk-adj</span>
@@ -202,15 +215,15 @@ export function PortfolioDashboard() {
               </details>
             </Panel>
 
-            <InsightCard title="The two that should die" tone="danger">
-              {killCount} of 12 carry a negative risk-adjusted ROI. Keeping them funds optionality theatre — the capital
+            <InsightCard title={killCount > 0 ? `${killCount} to cut this quarter` : "No kills — a lean book"} tone={killCount > 0 ? "danger" : "info"}>
+              {killCount} of {items.length} carry a negative risk-adjusted ROI. Keeping them funds optionality theatre — the capital
               they hold is the capital the Scale column needs.
             </InsightCard>
           </div>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> A portfolio where nothing gets killed isn&apos;t governed — it&apos;s unattended. Two of these twelve should die this quarter.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "A portfolio where nothing gets killed isn't governed — it's unattended. Two of these twelve should die this quarter."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

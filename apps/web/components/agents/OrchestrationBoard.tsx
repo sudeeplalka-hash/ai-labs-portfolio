@@ -14,7 +14,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, type LucideIcon } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
-import { LIVE_MODEL } from "@labs/kit";
+import { LIVE_MODEL, GAP03_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Role = "Researcher" | "Analyst" | "Writer" | "Critic";
 const ROLE_ICON: Record<Role, LucideIcon> = { Researcher: Search, Analyst: BarChart3, Writer: PenLine, Critic: ShieldAlert };
@@ -82,7 +83,9 @@ const STEP_MS = 950;
 
 export function OrchestrationBoard() {
   const [presetKey, setPresetKey] = useState(PRESETS[0].key);
-  const preset = PRESETS.find((p) => p.key === presetKey)!;
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? GAP03_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const preset: Preset = activeUc ? { key: activeUc.id, label: activeUc.title, ...activeUc.payload } : PRESETS.find((p) => p.key === presetKey)!;
   const A = preset.agents.length;
 
   const [runId, setRunId] = useState(0);
@@ -101,7 +104,8 @@ export function OrchestrationBoard() {
     return () => { if (timer.current) clearInterval(timer.current); };
   }, [runId, A]);
 
-  const onPreset = (k: string) => { setPresetKey(k); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
+  const onPreset = (k: string) => { setPresetKey(k); setActiveUcId(null); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
   const run = () => setRunId((r) => r + 1);
 
   const idle = progress === -1;
@@ -135,8 +139,11 @@ export function OrchestrationBoard() {
           <p className="mt-1 text-[11px] text-slatey-500">Authored, deterministic run — the steps and the cost/latency/quality figures are hand-built to teach the tradeoff, not captured from a live model. A real-model variant is on the roadmap.</p>
         </div>
 
+        <UseCaseRail useCases={GAP03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          {PRESETS.map((p) => (
+          {!activeUc && PRESETS.map((p) => (
             <button key={p.key} onClick={() => onPreset(p.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${p.key === presetKey ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{p.label}</button>
           ))}
@@ -219,7 +226,7 @@ export function OrchestrationBoard() {
           <InsightCard title="When multi-agent is worth it" tone="info">
             Decompose only when the subtasks genuinely differ (research vs critique) and quality matters more than the 2–3× cost. For high-volume, low-stakes calls, a single agent wins. Budget for the harness, not the party trick.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Multi-agent bought +{qualityDelta}% quality on this task class for {costMult}× cost. That ratio, not the demo, is the decision.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : `Multi-agent bought +${qualityDelta}% quality on this task class for ${costMult}× cost. That ratio, not the demo, is the decision.`}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
