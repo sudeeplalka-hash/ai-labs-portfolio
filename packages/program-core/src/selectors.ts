@@ -6,6 +6,7 @@
 import type { ProgramState, StageKey } from "./types";
 import { buildDataReadinessHandoff, buildBuildOutputContract, deriveGovernanceDecision, deriveOpenFindings } from "./contracts";
 import { computeReleaseReadiness } from "./operate";
+import { deriveOpsSeries, detectSignals, valueAtRisk } from "./operate-day2";
 
 export interface StageHeadline {
   key: StageKey;
@@ -29,7 +30,7 @@ const short = (decision?: string): string | null => {
 export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
   const hasLive = !!s.initiative?.name;
   if (!hasLive) {
-    return (["frame", "data", "build", "deploy", "govern", "realize"] as StageKey[]).map((key) => ({ key, value: null, detail: null }));
+    return (["frame", "data", "build", "deploy", "govern", "realize", "operate"] as StageKey[]).map((key) => ({ key, value: null, detail: null }));
   }
 
   const sc = s.initiative.scores;
@@ -45,6 +46,10 @@ export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
   const roi = s.outcomes?.roi;
   const payback = s.outcomes?.paybackMonths;
 
+  const opsSeries = deriveOpsSeries(s);
+  const opsSignals = detectSignals(opsSeries, s.initiative?.meta?.governanceTier);
+  const opsVaR = valueAtRisk(s, opsSeries);
+
   return [
     { key: "frame", value: overall !== null ? `${overall}` : "✓", detail: s.initiative.name },
     { key: "data", value: `${handoff.dataReadinessScore}`, detail: blocked ? `${blocked} blocked source(s)` : "readiness /100" },
@@ -57,6 +62,13 @@ export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
       detail: roi !== undefined
         ? (payback !== undefined && Number.isFinite(payback) ? `payback ${Math.round(payback)}mo` : "risk-adjusted ROI")
         : "visit Realize to compute ROI",
+    },
+    {
+      key: "operate",
+      value: `${opsSignals.length}`,
+      detail: opsSignals.length
+        ? `${opsSignals.length} signal(s) · $${Math.round(opsVaR.valueAtRiskUsd / 1000)}k/yr at risk`
+        : "systems steady",
     },
   ];
 }

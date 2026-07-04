@@ -20,7 +20,7 @@ export function blankState(): ProgramState {
     },
     // All stages browsable by default — visitors can explore any lab without
     // completing Framing first. (Framing still threads the initiative through.)
-    progress: { frame: "active", data: "active", build: "active", deploy: "active", govern: "active", realize: "active" },
+    progress: { frame: "active", data: "active", build: "active", deploy: "active", govern: "active", realize: "active", operate: "active" },
   };
 }
 
@@ -85,7 +85,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
     },
     governance: { riskTier: "Medium", controls: 8, status: "ok" },
     outcomes: { roi: 180, adoption: 0.62, riskAdjustedValue: 2400000, paybackMonths: 8 },
-    progress: { frame: "done", data: "done", build: "done", deploy: "done", govern: "done", realize: "active" },
+    progress: { frame: "done", data: "done", build: "done", deploy: "done", govern: "done", realize: "active", operate: "active" },
   };
 
   switch (archetype) {

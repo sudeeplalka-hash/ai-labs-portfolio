@@ -4,7 +4,7 @@
 // every lab can read/write it.
 // ============================================================================
 
-export type StageKey = "frame" | "data" | "build" | "deploy" | "govern" | "realize";
+export type StageKey = "frame" | "data" | "build" | "deploy" | "govern" | "realize" | "operate";
 export type StageStatus = "locked" | "active" | "done";
 
 export interface TriangleScores {

@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, Lock, Check, ChevronDown, BookOpen, type LucideIcon,
+  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, Lock, Check, ChevronDown, BookOpen, type LucideIcon,
 } from "lucide-react";
 import { useProgram, STAGES, type StageKey, type StageStatus } from "@labs/program-core";
 import { cn } from "@labs/design-system";
 
 const ICONS: Record<StageKey, LucideIcon> = {
-  frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp,
+  frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp, operate: RefreshCcw,
 };
 
 // Each lab's sub-pages, surfaced in the sidebar so they aren't hidden behind the

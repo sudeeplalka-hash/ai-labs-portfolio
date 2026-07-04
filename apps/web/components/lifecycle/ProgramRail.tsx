@@ -16,7 +16,7 @@ import {
 import { cn } from "@labs/design-system";
 
 const SHORT_LABEL: Record<StageKey, string> = {
-  frame: "Strategy", data: "Data", build: "Build", deploy: "Operate", govern: "Govern", realize: "Realize",
+  frame: "Strategy", data: "Data", build: "Build", deploy: "Deploy", govern: "Govern", realize: "Realize", operate: "Operate",
 };
 
 const dotCls = (status: StageStatus) =>

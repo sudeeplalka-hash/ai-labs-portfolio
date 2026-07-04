@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import {
-  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, ArrowRight, Workflow, MousePointerClick, BookOpen, type LucideIcon,
+  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, ArrowRight, Workflow, MousePointerClick, BookOpen, type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@labs/design-system";
 import { STAGES, useProgram, selectStageHeadlines, type StageKey, type StageHeadline } from "@labs/program-core";
@@ -12,7 +12,7 @@ import { LoadSampleButton } from "@/components/reviewer/SampleProgram";
 import { Welcome } from "@/components/shell/Welcome";
 
 const ICONS: Record<StageKey, LucideIcon> = {
-  frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp,
+  frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp, operate: RefreshCcw,
 };
 
 // Compose each stage headline into a one-line "now:" reading for the loop cards.

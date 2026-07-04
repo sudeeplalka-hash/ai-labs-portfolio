@@ -61,6 +61,12 @@ export const LABS: LabEntry[] = [
     problem: "Which use cases need which controls before they ship?",
     decision: "Risk-tier a use case; map required guardrails.", href: "/govern",
   },
+  {
+    id: "C1-operate", collection: 1, title: "Operate — Day-2 Observability", status: "in-build", live: "SIMULATED",
+    problem: "Is the system still working — and what do we do when it isn't?",
+    decision: "Retrain / re-index / rollback / re-scope, triggered by the right signal — the loop back to Frame.",
+    href: "/operate",
+  },
 
   // Collection 2 — Agent & Protocol Labs (toolkit)
   {
@@ -236,8 +242,8 @@ export const DOMAINS: Domain[] = [
   },
   {
     id: "program-delivery", title: "AI Program Delivery & Governance",
-    claim: "Runs the governed lifecycle, gate by gate.",
-    labIds: ["C1", "C1-backlog", "C1-rag", "C1-govern"],
+    claim: "Runs the governed lifecycle, gate by gate — and the day-2 loop after it.",
+    labIds: ["C1", "C1-backlog", "C1-rag", "C1-govern", "C1-operate"],
     engagementEvidence: ["Multi-portfolio AI delivery at AMEX", "4.5× portfolio scale"],
   },
   {

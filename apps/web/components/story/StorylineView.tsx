@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, ArrowRight, ArrowDownRight, CheckCircle2, Circle, type LucideIcon,
+  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, ArrowRight, ArrowDownRight, CheckCircle2, Circle, type LucideIcon,
 } from "lucide-react";
 import {
   useProgramSource, STORY_SPINE, storyProgress,
@@ -13,7 +13,7 @@ import {
 import { ArchetypeExplorer } from "./ArchetypeExplorer";
 
 const ICONS: Record<StageKey, LucideIcon> = {
-  frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp,
+  frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp, operate: RefreshCcw,
 };
 
 const CHIP: Record<StoryTone, string> = {

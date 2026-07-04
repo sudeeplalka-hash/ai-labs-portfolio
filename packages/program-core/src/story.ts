@@ -12,6 +12,7 @@
 
 import type { ProgramState, StageKey } from "./types";
 import { STAGE_MAP } from "./stages";
+import { deriveOpsSeries, detectSignals, valueAtRisk } from "./operate-day2";
 
 export type StoryTone = "healthy" | "watch" | "risk" | "neutral";
 
@@ -220,6 +221,33 @@ export const STORY_SPINE: StoryBeat[] = [
       const rav = num(s.outcomes?.riskAdjustedValue);
       if (roi === null) return "Business case not yet assembled — the payoff is still a hypothesis.";
       return `The defensible case: ${rav !== null ? `${usd(rav)}/yr` : "value"} at ${Math.round(roi)}% ROI, every number traceable upstream.`;
+    },
+  ),
+
+  beat(
+    "operate",
+    "Is it still working — and what do we do when it isn't?",
+    "Read the signals, then retrain / re-index / rollback / re-scope — and loop it back.",
+    "the live system + its defended business case",
+    "the next Frame — the loop closes",
+    (s) => {
+      if (!s.initiative?.name) return [{ label: "Signals", value: DASH, tone: "neutral" }];
+      const series = deriveOpsSeries(s);
+      const signals = detectSignals(series, s.initiative?.meta?.governanceTier);
+      const vaR = valueAtRisk(s, series);
+      return [
+        { label: "Open signals", value: `${signals.length}`, tone: signals.length === 0 ? "healthy" : signals.some((x) => x.severity === "high") ? "risk" : "watch" },
+        { label: "Value at risk", value: vaR.valueAtRiskUsd > 0 ? `${usd(vaR.valueAtRiskUsd)}/yr` : DASH, tone: vaR.valueAtRiskUsd > 0 ? "risk" : "healthy" },
+      ];
+    },
+    (s) => !!s.iteration?.recommendedNextAction,
+    (s) => {
+      if (!s.initiative?.name) return "Nothing in production yet — Operate begins the day you deploy.";
+      const series = deriveOpsSeries(s);
+      const signals = detectSignals(series, s.initiative?.meta?.governanceTier);
+      if (!signals.length) return "In production and steady — SLOs green and canary evals holding.";
+      const vaR = valueAtRisk(s, series);
+      return `${signals.length} open signal${signals.length === 1 ? "" : "s"}: SLOs read green while the answers decay, ${usd(vaR.valueAtRiskUsd)}/yr at risk. The remediation call loops back to the next Frame.`;
     },
   ),
 ];

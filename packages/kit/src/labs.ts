@@ -9,6 +9,8 @@ export interface LabRoute {
 }
 
 export const LAB_ROUTES: Record<string, LabRoute> = {
+  // Collection 1 · Enterprise AI Lifecycle (stages that storylines/atlas may reference)
+  "C1-operate": { name: "Operate — Day-2 Observability", href: "/operate", collection: "Enterprise AI Lifecycle" },
   // Collection 2 · Agent & Protocol Engineering
   "GAP-01": { name: "MCP Server Playground", href: "/agents/mcp-playground", collection: "Agent & Protocol" },
   "GAP-02": { name: "Agent Loop & Failure Inspector", href: "/agents/loop-inspector", collection: "Agent & Protocol" },

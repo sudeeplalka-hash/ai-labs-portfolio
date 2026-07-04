@@ -7,7 +7,7 @@ const BASE = "https://portfolio.sudeeplalka.com";
 const ROUTES = [
   "", "/lifecycle", "/changelog", "/industries", "/storylines",
   // Collection 1 (existing lifecycle)
-  "/frame", "/data", "/build", "/deploy", "/govern", "/realize",
+  "/frame", "/data", "/build", "/deploy", "/govern", "/realize", "/operate",
   // Collection 2 · Agent & Protocol
   "/agents/mcp-playground", "/agents/loop-inspector", "/agents/orchestration", "/agents/structured-output",
   "/agents/context-memory", "/agents/cost-simulator", "/agents/protocol-selection", "/agents/hitl",

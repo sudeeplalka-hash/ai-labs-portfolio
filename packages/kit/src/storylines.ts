@@ -40,6 +40,7 @@ export const STORYLINES: Storyline[] = [
       { labId: "EL-05", ucId: "el05-lending-credit-decisioning", stage: "What must be true to ship?", headline: "Design compliance in as the lending overlay", detail: "High-risk and rights-affecting: fair-lending and model-risk stack on the Act. Compliance is a design input at the start, not a gate at the end." },
       { labId: "EL-04", stage: "Is it actually on track?", headline: "See the workstream that reads green but is sinking", detail: "Reported status hides trajectory. Green with a downward arrow is yellow — report the trajectory or get surprised at go-live." },
       { labId: "EL-10", stage: "Force the decision", headline: "Turn the RAID into a board ask", detail: "Consume the same delivery data and reframe it for the room. An exec update that contains no decision request is a diary entry." },
+      { labId: "C1-operate", stage: "…then run it", headline: "Week 7: the SLOs stay green while the answers decay", detail: "Day-2 is where programs are won: a stale index, a silent canary slide, and the retrain / re-index / rollback / re-scope call that loops back to the next Frame. Shipping was the middle of the story, not the end." },
     ],
   },
   {

@@ -5,7 +5,7 @@ import { ALL_USE_CASES } from "./use-cases";
 
 describe("LAB_ROUTES", () => {
   it("covers all 23 labs with a name, an absolute href, and a collection", () => {
-    expect(Object.keys(LAB_ROUTES)).toHaveLength(23);
+    expect(Object.keys(LAB_ROUTES)).toHaveLength(24);
     for (const [id, r] of Object.entries(LAB_ROUTES)) {
       expect(r.name.length, id).toBeGreaterThan(0);
       expect(r.href.startsWith("/"), id).toBe(true);

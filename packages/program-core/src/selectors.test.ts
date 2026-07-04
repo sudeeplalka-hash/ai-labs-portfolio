@@ -8,7 +8,7 @@ import { trainingRelevant } from "./training";
 describe("selectStageHeadlines", () => {
   it("is all-null on blank state (no initiative framed)", () => {
     const h = selectStageHeadlines(blankState());
-    expect(h).toHaveLength(6);
+    expect(h).toHaveLength(7);
     expect(h.every((x) => x.value === null)).toBe(true);
   });
 
@@ -25,7 +25,7 @@ describe("selectStageHeadlines", () => {
 
   it("keeps stage order frame→realize", () => {
     expect(selectStageHeadlines(demoState()).map((x) => x.key)).toEqual([
-      "frame", "data", "build", "deploy", "govern", "realize",
+      "frame", "data", "build", "deploy", "govern", "realize", "operate",
     ]);
   });
 });
@@ -49,7 +49,7 @@ describe("demo archetypes", () => {
   it("every archetype yields a fully populated program (all six headlines)", () => {
     for (const a of DEMO_ARCHETYPES) {
       const h = selectStageHeadlines(demoState(a.id));
-      expect(h.filter((x) => x.value !== null).length, a.id).toBe(6);
+      expect(h.filter((x) => x.value !== null).length, a.id).toBe(7);
     }
   });
 

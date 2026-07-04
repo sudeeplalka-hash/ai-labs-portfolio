@@ -3,7 +3,7 @@ import { STORY_SPINE, STORY_MAP, storyNeighbors, storyProgress } from "./story";
 import { blankState, demoState } from "./store";
 import type { StageKey } from "./types";
 
-const ORDER: StageKey[] = ["frame", "data", "build", "deploy", "govern", "realize"];
+const ORDER: StageKey[] = ["frame", "data", "build", "deploy", "govern", "realize", "operate"];
 
 describe("story spine", () => {
   it("has one beat per stage, in order", () => {
@@ -32,14 +32,15 @@ describe("story spine", () => {
   it("a blank state is mostly not-done; a demo state advances the story", () => {
     const blank = storyProgress(blankState());
     const demo = storyProgress(demoState());
-    expect(blank.total).toBe(6);
+    expect(blank.total).toBe(7);
     expect(demo.done).toBeGreaterThan(blank.done);
   });
 
   it("neighbors thread correctly end to end", () => {
     expect(storyNeighbors("frame").prev).toBeNull();
     expect(storyNeighbors("frame").next?.key).toBe("data");
-    expect(storyNeighbors("realize").next).toBeNull();
+    expect(storyNeighbors("realize").next?.key).toBe("operate");
+    expect(storyNeighbors("operate").next).toBeNull();
     expect(storyNeighbors("deploy").prev?.key).toBe("build");
   });
 

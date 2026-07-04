@@ -12,6 +12,15 @@ interface Entry { date: string; tag: string; tone: "emerald" | "blue" | "amber";
 
 const ENTRIES: Entry[] = [
   {
+    date: "2026-07", tag: "Operate", tone: "emerald", title: "Operate — the 7th stage: day-2 observability + the loop back to Frame",
+    items: [
+      "Day-2 observability added to the Enterprise AI Program lifecycle: the four signal families (system SLOs · model-quality canary · RAG freshness/staleness · agent & cost) on a 12-week time axis.",
+      "The engineered week-7 incident: SLOs stay green while the answers decay — silent drift caught by canary evals, not infra dashboards.",
+      "The loop closes: a retrain / re-index / rollback / re-scope decision routes a typed feedback contract back to Frame, Build, Deploy, Realize, and Govern — a lifecycle line becomes a program loop.",
+      "Two downloadable artifacts (weekly ops review · incident report), the first real artifact-engine implementations.",
+    ],
+  },
+  {
     date: "2026-07", tag: "Honesty pass", tone: "emerald", title: "Post-review corrections",
     items: [
       "LIVE-ready labs (multi-agent, structured output) relabeled to authored/illustrative — no LIVE badge without a wired call path.",
