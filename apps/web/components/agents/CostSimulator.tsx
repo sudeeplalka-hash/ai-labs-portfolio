@@ -20,7 +20,7 @@ const usd4 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD"
 const estTokens = (t: string) => Math.max(1, Math.ceil(t.length / 4));
 
 export function CostSimulator() {
-  const [modelId, setModelId] = useState(LIVE_MODEL_CHEAP);
+  const [modelId, setModelId] = useState<string>(LIVE_MODEL_CHEAP);
   const [prompt, setPrompt] = useState(SAMPLE_PROMPT);
   const [outTok, setOutTok] = useState(400);
   const [callsPerDay, setCallsPerDay] = useState(5000);
