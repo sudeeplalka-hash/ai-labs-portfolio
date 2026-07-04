@@ -5,6 +5,8 @@
 Live → **[portfolio.sudeeplalka.com](https://portfolio.sudeeplalka.com)**
 Built by **Sudeep Lalka** — AI delivery leadership (Engagement Manager, TPM).
 
+[![CI](https://github.com/sudeeplalka-hash/ai-labs-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/sudeeplalka-hash/ai-labs-portfolio/actions/workflows/ci.yml) — the decision engines (`@labs/engines`) and the honesty system (`@labs/kit`) are unit-tested on every push.
+
 This is an interactive portfolio, not a slide deck. It's a single static web app: a
 Layer 0 **Competency Map** landing (a gallery of every capability) that opens into 23
 hands-on labs across four collections. Every lab runs entirely in the browser — you can
