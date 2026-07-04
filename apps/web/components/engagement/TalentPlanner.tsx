@@ -9,6 +9,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { EL06_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Path = "none" | "build" | "hire" | "partner";
 const PATH_MO: Record<Exclude<Path, "none">, number> = { build: 8, hire: 4, partner: 2 };
@@ -27,8 +29,14 @@ const STACK_MONTHS = 18;
 
 export function TalentPlanner() {
   const [paths, setPaths] = useState<Record<string, Path>>({});
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL06_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const caps: Cap[] = activeUc ? activeUc.payload.caps : CAPS;
+  const stackMonths = activeUc ? activeUc.payload.stackMonths : STACK_MONTHS;
+  const stackLabel = activeUc ? activeUc.payload.stackLabel : "Stack went agentic";
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); setPaths({}); };
 
-  const rows = CAPS.map((c) => {
+  const rows = caps.map((c) => {
     const gap = Math.max(0, c.target - c.current);
     const p = paths[c.key] ?? "none";
     const resolved = gap === 0 || p !== "none";
@@ -63,16 +71,19 @@ export function TalentPlanner() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The capabilities that ran the last stack aren&apos;t the ones the agentic stack needs. Map the gap, then choose
+            {activeUc ? activeUc.oneLiner : "The capabilities that ran the last stack aren't the ones the agentic stack needs."} Map the gap, then choose
             how to close each one — build is cheap but slow, hire is permanent but pricey, partner is fast but rented.
           </p>
         </div>
+
+        <UseCaseRail useCases={EL06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Readiness now" value={`${readyNow}%`} tone={readyNow >= 70 ? "watch" : "risk"} interpretation="Avg coverage vs target" />
           <KpiCard label="Readiness after plan" value={`${readyAfter}%`} tone="healthy" interpretation="If gaps closed" />
           <KpiCard label="Open gaps" value={`${openGaps}/${gaps.length}`} tone={openGaps > 0 ? "critical" : "healthy"} interpretation="No pathway chosen" />
-          <KpiCard label="Time to ready" value={teamMonths !== null ? `${teamMonths} mo` : "—"} tone={teamMonths !== null && teamMonths > STACK_MONTHS ? "risk" : "watch"} interpretation={`Stack moved in ${STACK_MONTHS} mo`} />
+          <KpiCard label="Time to ready" value={teamMonths !== null ? `${teamMonths} mo` : "—"} tone={teamMonths !== null && teamMonths > stackMonths ? "risk" : "watch"} interpretation={`Stack moved in ${stackMonths} mo`} />
         </div>
 
         <Panel>
@@ -116,13 +127,13 @@ export function TalentPlanner() {
         <Panel className="mt-4">
           <p className="stat-label mb-2">The stack moves faster than the team</p>
           <div className="space-y-2 text-xs">
-            <TimeBar label="Stack went agentic" months={STACK_MONTHS} max={26} color="bg-primary" />
-            <TimeBar label="Team ready (this plan)" months={teamMonths ?? 24} max={26} color={teamMonths !== null && teamMonths <= STACK_MONTHS ? "bg-emerald-500" : "bg-rose-500"} note={teamMonths === null ? "close every gap to compute" : undefined} />
+            <TimeBar label={stackLabel} months={stackMonths} max={26} color="bg-primary" />
+            <TimeBar label="Team ready (this plan)" months={teamMonths ?? 24} max={26} color={teamMonths !== null && teamMonths <= stackMonths ? "bg-emerald-500" : "bg-rose-500"} note={teamMonths === null ? "close every gap to compute" : undefined} />
           </div>
         </Panel>
 
         <div className="mt-6">
-          <InsightCard title={openGaps > 0 ? `${openGaps} capability gaps have no plan` : teamMonths !== null && teamMonths <= STACK_MONTHS ? "Team keeps pace with the stack" : "Plan set — but slower than the stack"} tone={openGaps > 0 ? "danger" : teamMonths !== null && teamMonths <= STACK_MONTHS ? "success" : "warn"}>
+          <InsightCard title={openGaps > 0 ? `${openGaps} capability gaps have no plan` : teamMonths !== null && teamMonths <= stackMonths ? "Team keeps pace with the stack" : "Plan set — but slower than the stack"} tone={openGaps > 0 ? "danger" : teamMonths !== null && teamMonths <= stackMonths ? "success" : "warn"}>
             {openGaps > 0
               ? <>Orchestration and eval are the widest gaps and the newest skills — build-only there takes eight months. Mix in partner for speed on the critical path and build for what must live in-house.</>
               : <>Partner buys speed where you can&apos;t wait; build owns what becomes your edge. The mix, not the method, is the plan.</>}
@@ -130,12 +141,12 @@ export function TalentPlanner() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> The stack went agentic in 18 months. Teams take 24. Start the people plan before the platform plan.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — team capability building across delivery portfolios.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The stack went agentic in 18 months. Teams take 24. Start the people plan before the platform plan."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — team capability building across delivery portfolios.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Each capability has current coverage vs an agentic-era target; gap = target − current. A pathway (build 8mo / hire 4mo / partner 2mo) closes it; team time-to-ready = the slowest chosen pathway, compared against the {STACK_MONTHS}-month stack shift.</p>
+              <p>Each capability has current coverage vs an agentic-era target; gap = target − current. A pathway (build 8mo / hire 4mo / partner 2mo) closes it; team time-to-ready = the slowest chosen pathway, compared against the {stackMonths}-month stack shift.</p>
               <p>Stack: Next.js (static) + shared design system; deterministic client-side.</p>
             </div>
           </details>

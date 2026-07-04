@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Circle } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { EL05_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Tier = "prohibited" | "high" | "limited" | "minimal";
 const ORDER: Record<Tier, number> = { prohibited: 3, high: 2, limited: 1, minimal: 0 };
@@ -69,16 +71,25 @@ export function ComplianceNavigator() {
   const [data, setData] = useState("sensitive");
   const [impact, setImpact] = useState("significant");
   const [override, setOverride] = useState<Record<string, boolean>>({});
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL05_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    setOverride({});
+    const uc = id ? EL05_USE_CASES.find((u) => u.id === id) ?? null : null;
+    if (uc) { setAutonomy(uc.payload.autonomy); setData(uc.payload.data); setImpact(uc.payload.impact); }
+  };
 
-  const base = FUNCTIONS.find((f) => f.key === fn)!.base;
+  const base = activeUc ? activeUc.payload.base : FUNCTIONS.find((f) => f.key === fn)!.base;
   let tier: Tier = base;
   const bump = (t: Tier) => { if (ORDER[t] > ORDER[tier]) tier = t; };
   if (impact === "rights") bump("high");
   if (data === "sensitive" && autonomy === "auto") bump("limited");
-  const finserv = data === "sensitive";
-  const isContent = fn === "content";
+  const finserv = !activeUc && data === "sensitive";
+  const isContent = !activeUc && fn === "content";
 
-  const controls = controlsFor(tier, finserv, isContent).map((c) => ({ ...c, met: override[c.label] ?? c.met }));
+  const overlay = activeUc && (tier === "high" || tier === "limited") ? activeUc.payload.overlay : [];
+  const controls = [...controlsFor(tier, finserv, isContent), ...overlay].map((c) => ({ ...c, met: override[c.label] ?? c.met }));
   const met = controls.filter((c) => c.met).length;
   const readiness = tier === "prohibited" ? 0 : Math.round((met / controls.length) * 100);
 
@@ -87,6 +98,7 @@ export function ComplianceNavigator() {
       : tier === "high" ? `High-risk: ${impact === "rights" ? "rights-affecting impact" : "decisioning on people or essential services"}${finserv ? " with sensitive data (finserv overlay applies)" : ""}.`
         : tier === "limited" ? "Limited-risk: user-facing system with transparency obligations."
           : "Minimal-risk: internal, low-impact — voluntary measures.";
+  const rationaleFull = rationale + (activeUc && (tier === "high" || tier === "limited") ? ` ${activeUc.payload.rationaleOverlay}` : "");
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -112,16 +124,23 @@ export function ComplianceNavigator() {
           </p>
         </div>
 
+        <UseCaseRail useCases={EL05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Inputs */}
           <Panel className="space-y-4">
             <div>
               <p className="mb-1 text-xs font-medium text-slatey-400">Function</p>
-              <div className="grid grid-cols-2 gap-1">
-                {FUNCTIONS.map((f) => (
-                  <button key={f.key} onClick={() => setFn(f.key)} className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${fn === f.key ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{f.label}</button>
-                ))}
-              </div>
+              {activeUc ? (
+                <div className="rounded-md border border-primary bg-primary-soft px-2.5 py-2 text-[11px] font-medium text-ink">{activeUc.payload.fnLabel}<span className="ml-2 font-normal text-slatey-500">· preset</span></div>
+              ) : (
+                <div className="grid grid-cols-2 gap-1">
+                  {FUNCTIONS.map((f) => (
+                    <button key={f.key} onClick={() => setFn(f.key)} className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${fn === f.key ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{f.label}</button>
+                  ))}
+                </div>
+              )}
             </div>
             <Seg label="Autonomy" value={autonomy} onChange={setAutonomy} opts={AUTONOMY} />
             <Seg label="Data" value={data} onChange={setData} opts={DATA} />
@@ -135,7 +154,7 @@ export function ComplianceNavigator() {
                 <p className="stat-label">Classification</p>
                 <Badge tone={TIER_TONE[tier]}>{TIER_LABEL[tier]}</Badge>
               </div>
-              <p className="mt-2 text-sm text-slatey-300">{rationale}</p>
+              <p className="mt-2 text-sm text-slatey-300">{rationaleFull}</p>
               {tier !== "prohibited" && (
                 <div className="mt-3">
                   <div className="mb-1 flex items-center justify-between text-xs"><span className="text-slatey-400">Audit readiness</span><span className="font-mono font-semibold text-ink">{readiness}%</span></div>
@@ -145,7 +164,7 @@ export function ComplianceNavigator() {
             </Panel>
 
             <Panel>
-              <p className="stat-label mb-2">Required controls <span className="font-normal text-slatey-500">· tap to mark in place</span></p>
+              <p className="stat-label mb-2">Required controls <span className="font-normal text-slatey-500">· {activeUc ? `incl. ${activeUc.payload.overlayLabel}` : "tap to mark in place"}</span></p>
               <ul className="space-y-1">
                 {controls.map((c) => (
                   <li key={c.label}>
@@ -171,8 +190,8 @@ export function ComplianceNavigator() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Compliance isn&apos;t a gate at the end; it&apos;s a design input at the start. Retrofit costs 10×.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — regulated-industry delivery across AMEX, Morgan Stanley, and S&P/CRISIL.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Compliance isn't a gate at the end; it's a design input at the start. Retrofit costs 10×."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — regulated-industry delivery across AMEX, Morgan Stanley, and S&P/CRISIL.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

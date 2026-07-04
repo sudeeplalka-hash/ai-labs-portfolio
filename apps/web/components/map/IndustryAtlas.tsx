@@ -31,6 +31,15 @@ const LAB_META: Record<string, { name: string; href: string; collection: string 
   "C3-4": { name: "Vendor Evaluation & Risk Monitor", href: "/business/vendor-monitor", collection: "Business of AI" },
   "C3-5": { name: "Business Case / ROI Builder", href: "/business/roi-builder", collection: "Business of AI" },
   "EL-01": { name: "Adoption & Change Readiness", href: "/engagement/adoption", collection: "Engagement Leadership" },
+  "EL-02": { name: "Stakeholder & Sponsor Cockpit", href: "/engagement/stakeholders", collection: "Engagement Leadership" },
+  "EL-03": { name: "Capacity & Resourcing Planner", href: "/engagement/capacity", collection: "Engagement Leadership" },
+  "EL-04": { name: "Delivery Health & RAID Radar", href: "/engagement/raid-radar", collection: "Engagement Leadership" },
+  "EL-05": { name: "AI Compliance Readiness Navigator", href: "/engagement/compliance", collection: "Engagement Leadership" },
+  "EL-06": { name: "Talent & Upskilling Planner", href: "/engagement/talent", collection: "Engagement Leadership" },
+  "EL-07": { name: "RFP/RFI Response War Room", href: "/engagement/rfp", collection: "Engagement Leadership" },
+  "EL-08": { name: "Estimation & Scoping Studio", href: "/engagement/estimation", collection: "Engagement Leadership" },
+  "EL-09": { name: "Onboarding & KT Tracker", href: "/engagement/onboarding", collection: "Engagement Leadership" },
+  "EL-10": { name: "Executive Communication Studio", href: "/engagement/exec-comms", collection: "Engagement Leadership" },
 };
 
 export function IndustryAtlas() {

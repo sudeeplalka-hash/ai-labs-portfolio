@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { EL03_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Res = "none" | "hire" | "contract" | "upskill";
 interface Skill { key: string; label: string; capacity: number; demand: number }
@@ -31,8 +33,15 @@ const BASE_MONTHLY = 30 * 16; // $k (30 FTE × $16k loaded)
 
 export function CapacityPlanner() {
   const [res, setRes] = useState<Record<string, Res>>({});
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL03_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const skills: Skill[] = activeUc ? activeUc.payload.skills : SKILLS;
+  const baseWeeks = activeUc ? activeUc.payload.baseWeeks : BASE_WEEKS;
+  const baseMonthly = activeUc ? activeUc.payload.baseMonthly : BASE_MONTHLY;
+  const teamLabel = activeUc ? activeUc.payload.teamLabel : "30 FTE";
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); setRes({}); };
 
-  const rows = SKILLS.map((s) => {
+  const rows = skills.map((s) => {
     const gap = Math.max(0, s.demand - s.capacity);
     const r = res[s.key] ?? "none";
     const added = gap > 0 && r !== "none" ? gap : 0;
@@ -46,12 +55,12 @@ export function CapacityPlanner() {
   let addedCost = 0;
   for (const r of gapRows) {
     if (r.r !== "none") { slip = Math.max(slip, LEAD[r.r]); addedCost += r.gap * RATE[r.r]; }
-    else slip = Math.max(slip, Math.round((r.demand / r.capacity - 1) * BASE_WEEKS));
+    else slip = Math.max(slip, Math.round((r.demand / r.capacity - 1) * baseWeeks));
   }
-  const deliveryWeeks = BASE_WEEKS + slip;
-  const monthly = BASE_MONTHLY + addedCost;
+  const deliveryWeeks = baseWeeks + slip;
+  const monthly = baseMonthly + addedCost;
   const unresolved = gapRows.filter((r) => r.r === "none").length;
-  const totalGap = SKILLS.reduce((a, s) => a + Math.max(0, s.demand - s.capacity), 0);
+  const totalGap = skills.reduce((a, s) => a + Math.max(0, s.demand - s.capacity), 0);
   const bottleneck = [...gapRows].sort((a, b) => b.demand / b.capacity - a.demand / a.capacity)[0];
 
   return (
@@ -72,14 +81,16 @@ export function CapacityPlanner() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Thirty people, five short — but only in three skills. The heatmap shows where the portfolio is over-allocated;
-            the toggles show what hire, contract, or upskill each does to the date and the cost. This one is personal — it
-            mirrors a 31-resource intelligence mapping I ran.
+            {activeUc ? activeUc.oneLiner : "Thirty people, five short — but only in three skills."} The heatmap shows where the portfolio is over-allocated;
+            the toggles show what hire, contract, or upskill each does to the date and the cost.{!activeUc && " This one is personal — it mirrors a 31-resource intelligence mapping I ran."}
           </p>
         </div>
 
+        <UseCaseRail useCases={EL03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <KpiCard label="Team" value="30 FTE" tone="neutral" interpretation={`${totalGap} FTE short in skills`} />
+          <KpiCard label="Team" value={teamLabel} tone="neutral" interpretation={`${totalGap} FTE short in skills`} />
           <KpiCard label="Delivery" value={`~${deliveryWeeks} wk`} tone={slip > 6 ? "risk" : slip > 0 ? "watch" : "healthy"} interpretation={slip > 0 ? `+${slip} wk vs plan` : "on plan"} />
           <KpiCard label="Monthly cost" value={`$${monthly}k`} tone={addedCost > 0 ? "watch" : "neutral"} interpretation={addedCost > 0 ? `+$${addedCost}k added` : "base team"} />
           <KpiCard label="Unresolved gaps" value={`${unresolved}/${gapRows.length}`} tone={unresolved > 0 ? "critical" : "healthy"} interpretation="Over-allocated skills" />
@@ -130,8 +141,8 @@ export function CapacityPlanner() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Capacity plans fail on skills, not headcount. Thirty people ≠ thirty people.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — a direct mirror of the 31-resource AMEX intelligence mapping; the most personal instrument on the site.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Capacity plans fail on skills, not headcount. Thirty people ≠ thirty people."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — a direct mirror of the 31-resource AMEX intelligence mapping; the most personal instrument on the site.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

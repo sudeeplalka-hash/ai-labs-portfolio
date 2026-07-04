@@ -11,7 +11,9 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp } from "@labs/design-system";
-import { SCENARIOS, healthIndex } from "./portfolioData";
+import { EL10_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { SCENARIOS, healthIndex, type Scenario } from "./portfolioData";
 
 type ArtKey = "weekly" | "steering" | "qbr";
 type AudKey = "cio" | "sponsor" | "procurement";
@@ -32,10 +34,18 @@ const isDecision = (ask: string) => /decision needed|decide|steering call today|
 
 export function ExecCommStudio() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const [art, setArt] = useState<ArtKey>("steering");
   const [aud, setAud] = useState<AudKey>("cio");
 
-  const scenario = SCENARIOS.find((s) => s.key === scenarioKey)!;
+  const activeUc = activeUcId ? EL10_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? EL10_USE_CASES.find((u) => u.id === id) ?? null : null;
+    if (uc) { setArt(uc.payload.defaultArtifact); setAud(uc.payload.defaultAud); }
+  };
+
+  const scenario: Scenario = activeUc ? activeUc.payload.portfolio : SCENARIOS.find((s) => s.key === scenarioKey)!;
   const artifact = ARTIFACTS.find((a) => a.key === art)!;
   const audience = AUDIENCES.find((a) => a.key === aud)!;
   const ws = scenario.workstreams;
@@ -163,13 +173,18 @@ export function ExecCommStudio() {
           </p>
         </div>
 
+        <UseCaseRail useCases={EL10_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         {/* Controls */}
         <div className="mb-4 grid gap-3 md:grid-cols-3">
-          <Control label="Portfolio">
-            {SCENARIOS.map((s) => (
-              <Chip key={s.key} on={s.key === scenarioKey} onClick={() => setScenarioKey(s.key)}>{s.label}</Chip>
-            ))}
-          </Control>
+          {!activeUc && (
+            <Control label="Portfolio">
+              {SCENARIOS.map((s) => (
+                <Chip key={s.key} on={s.key === scenarioKey} onClick={() => setScenarioKey(s.key)}>{s.label}</Chip>
+              ))}
+            </Control>
+          )}
           <Control label="Artifact">
             {ARTIFACTS.map((a) => (
               <Chip key={a.key} on={a.key === art} onClick={() => setArt(a.key)}>{a.label}</Chip>
@@ -185,7 +200,9 @@ export function ExecCommStudio() {
         {/* Data-in strip — proves it consumes EL-04's delivery data */}
         <div className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-line bg-white px-3 py-2 text-[11px] text-slatey-500">
           <span className="font-mono uppercase tracking-wide text-slatey-400">Data in →</span>
-          <Link href="/engagement/raid-radar" className="font-medium text-primary hover:underline">RAID from EL-04</Link>
+          {activeUc
+            ? <span className="font-medium text-ink">{scenario.label}</span>
+            : <Link href="/engagement/raid-radar" className="font-medium text-primary hover:underline">RAID from EL-04</Link>}
           <span>· {green}G / {amber}A / {red}R</span>
           <span>· Adoption {scenario.adoptionIndex}%</span>
           <span>· Burn {scenario.burnVariance >= 0 ? "+" : ""}{scenario.burnVariance}% vs plan</span>
@@ -214,9 +231,9 @@ export function ExecCommStudio() {
         {/* Credibility block */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <p className="text-sm leading-relaxed text-ink">
-            <span className="font-semibold">Steering-committee takeaway:</span> An exec update that contains no decision request is a diary entry. Every pre-read I send asks for something.
+            <span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "An exec update that contains no decision request is a diary entry. Every pre-read I send asks for something."}
           </p>
-          <p className="text-xs italic text-slatey-500">Resume echo — weekly leadership updates and QBRs across multiple AMEX portfolios.</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — weekly leadership updates and QBRs across multiple AMEX portfolios.</p>}
 
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>

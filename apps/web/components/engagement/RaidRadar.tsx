@@ -11,21 +11,30 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, FreshnessStamp } from "@labs/design-system";
+import { EL04_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import {
   SCENARIOS, HEALTH_LABEL, HEALTH_TONE, HEALTH_X, TREND_Y, SEV_TONE,
-  statusWord, trendWord, healthIndex, type RaidItem,
+  statusWord, trendWord, healthIndex, type RaidItem, type Scenario,
 } from "./portfolioData";
 
 export function RaidRadar() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
-  const scenario = SCENARIOS.find((s) => s.key === scenarioKey)!;
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL04_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const scenario: Scenario = activeUc ? activeUc.payload : SCENARIOS.find((s) => s.key === scenarioKey)!;
   const gapWs = scenario.workstreams.find((w) => w.reported !== w.actual) ?? scenario.workstreams[0];
   const [selectedId, setSelectedId] = useState(gapWs.id);
   const selected = scenario.workstreams.find((w) => w.id === selectedId) ?? gapWs;
 
   const onScenario = (k: string) => {
-    setScenarioKey(k);
+    setScenarioKey(k); setActiveUcId(null);
     const s = SCENARIOS.find((x) => x.key === k)!;
+    setSelectedId((s.workstreams.find((w) => w.reported !== w.actual) ?? s.workstreams[0]).id);
+  };
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const s: Scenario = id ? (EL04_USE_CASES.find((u) => u.id === id)?.payload ?? SCENARIOS[0]) : SCENARIOS[0];
     setSelectedId((s.workstreams.find((w) => w.reported !== w.actual) ?? s.workstreams[0]).id);
   };
 
@@ -60,8 +69,11 @@ export function RaidRadar() {
           </p>
         </div>
 
+        <UseCaseRail useCases={EL04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
-          {SCENARIOS.map((s) => {
+          {!activeUc && SCENARIOS.map((s) => {
             const on = s.key === scenarioKey;
             return (
               <button key={s.key} onClick={() => onScenario(s.key)}
@@ -181,9 +193,9 @@ export function RaidRadar() {
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <p className="text-sm leading-relaxed text-ink">
-            <span className="font-semibold">Steering-committee takeaway:</span> Green with a downward arrow is yellow. Report trajectory or get surprised.
+            <span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Green with a downward arrow is yellow. Report trajectory or get surprised."}
           </p>
-          <p className="text-xs italic text-slatey-500">Resume echo — the weekly reality of multi-portfolio EM work at AMEX.</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — the weekly reality of multi-portfolio EM work at AMEX.</p>}
 
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>

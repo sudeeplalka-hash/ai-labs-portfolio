@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, TrendingDown } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { EL02_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 interface SH {
   key: string; name: string; role: string; power: number; interest: number; traj: number[];
@@ -51,8 +53,16 @@ function Spark({ traj }: { traj: number[] }) {
 
 export function StakeholderCockpit() {
   const [sel, setSel] = useState("cio");
-  const s = STAKEHOLDERS.find((x) => x.key === sel)!;
-  const flags = STAKEHOLDERS.filter((x) => drifting(x.traj));
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL02_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const shs: SH[] = activeUc ? activeUc.payload.stakeholders : STAKEHOLDERS;
+  const selectUseCase = (id: string | null) => {
+    setActiveUcId(id);
+    const uc = id ? EL02_USE_CASES.find((u) => u.id === id) ?? null : null;
+    setSel((uc ? uc.payload.stakeholders : STAKEHOLDERS)[0].key);
+  };
+  const s = shs.find((x) => x.key === sel) ?? shs[0];
+  const flags = shs.filter((x) => drifting(x.traj));
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -73,9 +83,12 @@ export function StakeholderCockpit() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             A snapshot lies; a trajectory tells the truth. The grid places each stakeholder by power and interest, the
-            sparklines show where sentiment is heading — and {flags.length} are drifting, including the sponsor.
+            sparklines show where sentiment is heading — {activeUc ? activeUc.payload.drivingLine : `and ${flags.length} are drifting, including the sponsor.`}
           </p>
         </div>
+
+        <UseCaseRail useCases={EL02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Grid */}
@@ -88,7 +101,7 @@ export function StakeholderCockpit() {
               <span className="absolute right-2 top-1 text-[10px] text-slatey-500">Manage closely</span>
               <span className="absolute bottom-1 left-2 text-[10px] text-slatey-500">Monitor</span>
               <span className="absolute bottom-1 right-2 text-[10px] text-slatey-500">Keep informed</span>
-              {STAKEHOLDERS.map((x) => {
+              {shs.map((x) => {
                 const cur = last(x.traj);
                 const on = x.key === sel;
                 return (
@@ -106,7 +119,7 @@ export function StakeholderCockpit() {
           <Panel>
             <p className="stat-label mb-2">Stakeholders <span className="font-normal text-slatey-500">· 6-week trajectory</span></p>
             <div className="space-y-1">
-              {STAKEHOLDERS.map((x) => {
+              {shs.map((x) => {
                 const cur = last(x.traj);
                 const on = x.key === sel;
                 return (
@@ -146,8 +159,8 @@ export function StakeholderCockpit() {
             Sentiment moves between meetings, not in them. The sponsor cooling from champion to neutral is invisible on a
             status report and obvious on a trajectory — and it&apos;s recoverable with one well-aimed 1:1 before the room.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> Programs don&apos;t lose sponsors in meetings; they lose them in the silence between meetings.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — multi-stakeholder consulting delivery (Deloitte/Verizon, Genpact/Morgan Stanley).</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Programs don't lose sponsors in meetings; they lose them in the silence between meetings."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — multi-stakeholder consulting delivery (Deloitte/Verizon, Genpact/Morgan Stanley).</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

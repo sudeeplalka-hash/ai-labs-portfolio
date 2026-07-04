@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { EL07_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 type Status = "met" | "partial" | "gap";
 interface Req { text: string; owner: string; evidence: string; status: Status }
@@ -68,7 +70,10 @@ const RFPS: Rfp[] = [
 
 export function RfpWarRoom() {
   const [rfpKey, setRfpKey] = useState(RFPS[0].key);
-  const rfp = RFPS.find((r) => r.key === rfpKey)!;
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL07_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => setActiveUcId(id);
+  const rfp: Rfp = activeUc ? activeUc.payload.rfp : RFPS.find((r) => r.key === rfpKey)!;
 
   const coverage = Math.round((rfp.requirements.reduce((a, r) => a + STATUS_W[r.status], 0) / rfp.requirements.length) * 100);
   const redTeam = Math.round(rfp.criteria.reduce((a, c) => a + c.weight * c.score, 0));
@@ -99,12 +104,17 @@ export function RfpWarRoom() {
           </p>
         </div>
 
-        <div className="mb-5 flex flex-wrap gap-2">
-          {RFPS.map((r) => (
-            <button key={r.key} onClick={() => setRfpKey(r.key)}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${r.key === rfpKey ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{r.label}</button>
-          ))}
-        </div>
+        <UseCaseRail useCases={EL07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        {!activeUc && (
+          <div className="mb-5 flex flex-wrap gap-2">
+            {RFPS.map((r) => (
+              <button key={r.key} onClick={() => setRfpKey(r.key)}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${r.key === rfpKey ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{r.label}</button>
+            ))}
+          </div>
+        )}
 
         <Panel className="mb-4">
           <p className="stat-label mb-1">RFP excerpt</p>
@@ -178,8 +188,8 @@ export function RfpWarRoom() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> The RFPs you decline fund the ones you win. Bid/no-bid is a portfolio decision, not a reflex.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — $9M pipeline — the instrument of how a pipeline gets built, one qualified pursuit at a time.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The RFPs you decline fund the ones you win. Bid/no-bid is a portfolio decision, not a reflex."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — $9M pipeline — the instrument of how a pipeline gets built, one qualified pursuit at a time.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

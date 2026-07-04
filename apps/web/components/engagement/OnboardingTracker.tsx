@@ -10,6 +10,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { EL09_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 interface Resource { key: string; role: string; loc: "Onshore" | "Offshore"; access: number }
 const RESOURCES: Resource[] = [
@@ -38,20 +40,26 @@ export function OnboardingTracker() {
   const [view, setView] = useState<"onboard" | "kt">("onboard");
   const [pre, setPre] = useState(false);
   const [kt, setKt] = useState<Record<string, boolean>>({});
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL09_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const resources: Resource[] = activeUc ? activeUc.payload.resources : RESOURCES;
+  const ktAreas: Area[] = activeUc ? activeUc.payload.ktAreas : KT_AREAS;
+  const ktRoleLabel = activeUc ? activeUc.payload.ktRoleLabel : "Rolling off in 5 weeks · Lead ML Engineer";
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); setPre(false); setKt({}); };
 
-  const rows = RESOURCES.map((r) => {
+  const rows = resources.map((r) => {
     const access = pre ? Math.min(r.access, 5) : r.access;
     return { ...r, access, days: ttp(access), blocked: access > 14, carry: ttp(access) * rate(r.loc) };
   });
   const avg = Math.round(rows.reduce((a, r) => a + r.days, 0) / rows.length);
   const blocked = rows.filter((r) => r.blocked).length;
-  const carryFull = RESOURCES.reduce((a, r) => a + ttp(r.access) * rate(r.loc), 0);
-  const carryPre = RESOURCES.reduce((a, r) => a + ttp(Math.min(r.access, 5)) * rate(r.loc), 0);
+  const carryFull = resources.reduce((a, r) => a + ttp(r.access) * rate(r.loc), 0);
+  const carryPre = resources.reduce((a, r) => a + ttp(Math.min(r.access, 5)) * rate(r.loc), 0);
   const current = pre ? carryPre : carryFull;
   const savings = carryFull - carryPre;
   const maxDays = 60;
 
-  const spofs = KT_AREAS.filter((a) => (kt[a.area] ? a.bus + 1 : a.bus) < 2).length;
+  const spofs = ktAreas.filter((a) => (kt[a.area] ? a.bus + 1 : a.bus) < 2).length;
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -76,6 +84,9 @@ export function OnboardingTracker() {
           </p>
         </div>
 
+        <UseCaseRail useCases={EL09_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {(["onboard", "kt"] as const).map((v) => (
             <button key={v} onClick={() => setView(v)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${v === view ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{v === "onboard" ? "Onboarding" : "Knowledge transfer"}</button>
@@ -86,7 +97,7 @@ export function OnboardingTracker() {
           <>
             <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
               <KpiCard label="Avg time-to-productive" value={`${avg} d`} tone={avg > 42 ? "risk" : "watch"} interpretation="Access + ramp" />
-              <KpiCard label="Blocked on access" value={`${blocked}/6`} tone={blocked > 0 ? "critical" : "healthy"} interpretation="Access > 14 days" />
+              <KpiCard label="Blocked on access" value={`${blocked}/${resources.length}`} tone={blocked > 0 ? "critical" : "healthy"} interpretation="Access > 14 days" />
               <KpiCard label="Ramp carrying cost" value={fmt(current)} tone="watch" interpretation="Cost before productive" />
               <KpiCard label="Compression saves" value={fmt(savings)} tone={savings > 0 ? "healthy" : "neutral"} interpretation="Pre-provision access" />
             </div>
@@ -127,10 +138,10 @@ export function OnboardingTracker() {
         ) : (
           <>
             <Panel className="mb-4">
-              <p className="stat-label mb-1">Rolling off in 5 weeks · Lead ML Engineer</p>
+              <p className="stat-label mb-1">{ktRoleLabel}</p>
               <p className="mb-3 text-xs text-slatey-400">Map their knowledge to bus-factor, then schedule KT to close single points of failure before they leave.</p>
               <div className="space-y-2">
-                {KT_AREAS.map((a) => {
+                {ktAreas.map((a) => {
                   const on = !!kt[a.area];
                   const bus = on ? a.bus + 1 : a.bus;
                   const spof = bus < 2;
@@ -153,8 +164,8 @@ export function OnboardingTracker() {
         )}
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> A resource is a cost from day one and an asset from day forty. Onboarding compression is the cheapest margin lever nobody manages.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — resource-lead reality of the 31-resource AMEX portfolio; onshore/offshore mobilization.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "A resource is a cost from day one and an asset from day forty. Onboarding compression is the cheapest margin lever nobody manages."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — resource-lead reality of the 31-resource AMEX portfolio; onshore/offshore mobilization.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">

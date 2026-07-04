@@ -10,6 +10,8 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { EL08_USE_CASES } from "@labs/kit";
+import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 
 interface Task { phase: string; weeks: number; ai?: boolean }
 interface UseCase {
@@ -69,7 +71,10 @@ export function EstimationStudio() {
   const [ucKey, setUcKey] = useState(USE_CASES[0].key);
   const [method, setMethod] = useState<Method>("pert");
   const [scopeOn, setScopeOn] = useState(false);
-  const uc = USE_CASES.find((u) => u.key === ucKey)!;
+  const [activeUcId, setActiveUcId] = useState<string | null>(null);
+  const activeUc = activeUcId ? EL08_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); setScopeOn(false); };
+  const uc: UseCase = activeUc ? activeUc.payload.scenario : USE_CASES.find((u) => u.key === ucKey)!;
 
   const bottomUp = sumWeeks(uc.wbs);
   const analogous = Math.round(uc.analogous.baseWeeks * uc.analogous.factor);
@@ -110,12 +115,17 @@ export function EstimationStudio() {
           </p>
         </div>
 
-        <div className="mb-5 flex flex-wrap gap-2">
-          {USE_CASES.map((u) => (
-            <button key={u.key} onClick={() => { setUcKey(u.key); setScopeOn(false); }}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${u.key === ucKey ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{u.label}</button>
-          ))}
-        </div>
+        <UseCaseRail useCases={EL08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        {!activeUc && (
+          <div className="mb-5 flex flex-wrap gap-2">
+            {USE_CASES.map((u) => (
+              <button key={u.key} onClick={() => { setUcKey(u.key); setScopeOn(false); }}
+                className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${u.key === ucKey ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{u.label}</button>
+            ))}
+          </div>
+        )}
 
         {/* Three methods */}
         <div className="grid gap-3 md:grid-cols-3">
@@ -184,8 +194,8 @@ export function EstimationStudio() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> AI estimates blow up in data discovery and evaluation, not modeling. Price the unknowns as line items or eat them later.</p>
-          <p className="text-xs italic text-slatey-500">Resume echo — consulting delivery estimation across HCLTech/Genpact/Deloitte.</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "AI estimates blow up in data discovery and evaluation, not modeling. Price the unknowns as line items or eat them later."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — consulting delivery estimation across HCLTech/Genpact/Deloitte.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
