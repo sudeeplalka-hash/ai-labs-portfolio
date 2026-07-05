@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@labs/design-system": "workspace:*",
+    "@labs/engines": "workspace:*",
     "@labs/kit": "workspace:*",
     "@labs/lab-deploy": "workspace:*",
     "@labs/lab-framing": "workspace:*",

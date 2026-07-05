@@ -86,3 +86,26 @@ export function projectAdoption(currentPct: number, selected: AdoptionInterventi
   const uplift = selected.reduce((s, i) => s + i.upliftPts, 0);
   return Math.min(ADOPTION_CEILING, Math.round(currentPct + uplift));
 }
+
+// EL-01 · Adoption & change readiness — the weighted composite the gate reads.
+// Readiness factors (0..100) combined with visible, editable weights, then
+// normalized by the weight sum so the score stays on a 0..100 scale for ANY weights
+// (that's what keeps a user-edited "your model" honest). Pure and framework-agnostic;
+// tone/labels for the UI live in the component, not here.
+export type ReadinessVerdict = "Scale" | "Scale with conditions" | "Hold";
+
+/** Sum of the weights over the given keys; never zero (guards divide-by-zero). */
+export const weightSumOf = <K extends string>(weights: Record<K, number>, keys: readonly K[]): number =>
+  keys.reduce((a, k) => a + weights[k], 0) || 1;
+
+/** Weight-normalized composite readiness, rounded to an integer 0..100. */
+export const readinessComposite = <K extends string>(
+  factors: Record<K, number>,
+  weights: Record<K, number>,
+  keys: readonly K[],
+): number =>
+  Math.round(keys.reduce((a, k) => a + weights[k] * factors[k], 0) / weightSumOf(weights, keys));
+
+/** The gate verdict from a composite and the two (editable) cutoffs. */
+export const readinessGate = (composite: number, scaleCut: number, condCut: number): ReadinessVerdict =>
+  composite >= scaleCut ? "Scale" : composite >= condCut ? "Scale with conditions" : "Hold";

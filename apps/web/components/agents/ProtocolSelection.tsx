@@ -11,6 +11,7 @@ import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost } from "@labs/design-system";
 import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES } from "@labs/kit";
+import { sensitivity as protocolSensitivity } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -105,16 +106,8 @@ export function ProtocolSelection() {
   const bespoke = systems * consumers;
   const proto = systems + consumers;
 
-  // Sensitivity: which single answer change would flip the primary recommendation?
-  const sensitivity = QUESTIONS.map((qu) => {
-    const cur = ans[qu.key];
-    for (let i = 0; i < qu.opts.length; i++) {
-      if (i === cur) continue;
-      const alt = evaluate({ ...ans, [qu.key]: i }, W);
-      if (alt.primary !== primary) return { key: qu.key, q: qu.q, to: qu.opts[i], newPrimary: alt.primary };
-    }
-    return null;
-  }).filter((s): s is { key: string; q: string; to: string; newPrimary: PKey } => s !== null);
+  // Sensitivity: which single answer change would flip the call? (engine)
+  const sensitivity = protocolSensitivity(ans, QUESTIONS, (a) => evaluate(a, W).primary);
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">

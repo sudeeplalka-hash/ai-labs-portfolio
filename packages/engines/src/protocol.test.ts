@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { evaluate, type PKey } from "./protocol";
+import { evaluate, sensitivity, type PKey, type SensitivityQuestion } from "./protocol";
 
 const ans = (q1: number, q2: number, q3: number, q4: number, q5: number, q6: number) => ({ q1, q2, q3, q4, q5, q6 });
 
@@ -28,5 +28,50 @@ describe("evaluate", () => {
     const { scores, primary } = evaluate(ans(1, 2, 0, 1, 2, 1));
     const max = Math.max(...Object.values(scores));
     expect(scores[primary]).toBeCloseTo(max, 6);
+  });
+});
+
+describe("sensitivity", () => {
+  const QS: SensitivityQuestion[] = [
+    { key: "q1", q: "Scale?", opts: ["low", "med", "high"] },
+    { key: "q2", q: "Noise?", opts: ["a", "b", "c"] },
+  ];
+
+  it("finds the first alternative answer that flips the call, per question", () => {
+    const primaryOf = (a: Record<string, number>) => (a.q1 >= 1 ? "X" : "Y");
+    const flips = sensitivity({ q1: 0, q2: 0 }, QS, primaryOf);
+    expect(flips).toEqual([{ key: "q1", q: "Scale?", to: "med", newPrimary: "X" }]);
+  });
+
+  it("returns an empty array when no single answer flips the call (robust)", () => {
+    expect(sensitivity({ q1: 1, q2: 1 }, QS, () => "MCP")).toEqual([]);
+  });
+
+  it("returns the first flipping option, skipping alternatives that don't flip", () => {
+    // primary changes only at q1===2, so q1===1 must be skipped and q1===2 reported.
+    const primaryOf = (a: Record<string, number>) => (a.q1 === 2 ? "Z" : "X");
+    expect(sensitivity({ q1: 0, q2: 0 }, QS, primaryOf)).toEqual([
+      { key: "q1", q: "Scale?", to: "high", newPrimary: "Z" },
+    ]);
+  });
+
+  it("never reports the current answer as a flip", () => {
+    const primaryOf = (a: Record<string, number>) => (a.q2 === 1 ? "B" : "A");
+    const flips = sensitivity({ q1: 0, q2: 1 }, QS, primaryOf); // q2 already the 'B' answer
+    expect(flips.every((f) => f.to !== "b")).toBe(true);
+  });
+
+  it("is self-consistent with the engine's own scoring", () => {
+    const QN: SensitivityQuestion[] = [1, 2, 3, 4, 5, 6].map((n) => ({ key: `q${n}`, q: `q${n}`, opts: ["0", "1", "2"] }));
+    const answers = { q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1 };
+    const primaryOf = (a: Record<string, number>): PKey => evaluate(a).primary;
+    const base = primaryOf(answers);
+    const flips = sensitivity(answers, QN, primaryOf);
+    expect(flips.length).toBeLessThanOrEqual(QN.length);
+    for (const f of flips) {
+      const moved = primaryOf({ ...answers, [f.key]: Number(f.to) }); // `to` encodes the option index
+      expect(moved).toBe(f.newPrimary);
+      expect(moved).not.toBe(base);
+    }
   });
 });

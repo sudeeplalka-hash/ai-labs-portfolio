@@ -6,11 +6,13 @@
 // Stage-gate views. Thread: capital allocation under uncertainty — nothing scored
 // by a black box. SIMULATED; every number is a stated formula over visible inputs.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, Download, X, Plus, PencilLine } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, type BadgeTone } from "@labs/design-system";
-import { C31_USE_CASES } from "@labs/kit";
+import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
+import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, svgElementToPng, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
+import { C31_USE_CASES, LABS } from "@labs/kit";
+import { greedyFund } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -75,6 +77,8 @@ export function PortfolioDashboard() {
   const [selId, setSelId] = useState<string>("kyc");
   const [editMode, setEditMode] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
+  const scatterRef = useRef<SVGSVGElement>(null);
+  const router = useRouter();
   const sel = items.find((i) => i.id === selId) ?? items[0];
   const baseBook = activeUc ? activeUc.payload.initiatives : INITIATIVES;
   const bookEdited = JSON.stringify(items) !== JSON.stringify(baseBook);
@@ -144,13 +148,12 @@ export function PortfolioDashboard() {
   const totalRiskAdj = items.reduce((a, i) => a + riskAdj(i), 0);
   const killCount = items.filter((i) => recommend(i) === "kill").length;
 
-  // Budget-constrained funding — greedy by risk-adjusted return per $ of spend.
+  // Budget-constrained funding — greedy by risk-adjusted return per $ (engine).
   const [budgetM, setBudgetM] = useState(5);
-  const fundRanked = items.filter((i) => riskAdj(i) > 0).slice().sort((a, b) => riskAdj(b) / b.spendM - riskAdj(a) / a.spendM);
-  const funded = new Set<string>();
-  let fundSpent = 0;
-  for (const i of fundRanked) { if (fundSpent + i.spendM <= budgetM) { funded.add(i.id); fundSpent += i.spendM; } }
-  const fundCaptured = items.filter((i) => funded.has(i.id)).reduce((a, i) => a + riskAdj(i), 0);
+  const fund = greedyFund(items, budgetM, riskAdj);
+  const funded = new Set(fund.funded);
+  const fundSpent = fund.spent;
+  const fundCaptured = fund.captured;
 
   const buildReviewPack = (): string => {
     const kills = items.filter((i) => recommend(i) === "kill");
@@ -185,6 +188,68 @@ export function PortfolioDashboard() {
     downloadMarkdown(`portfolio-review-pack-${activeUc ? activeUc.id : "default"}`, buildReviewPack(), {
       scenario: activeUc ? activeUc.title : "Default book",
     });
+
+  // ---- Export suite + command palette — all export the *visible* model (honest). ----
+  const slug = activeUc ? activeUc.id : "default";
+  const exportCsv = () => {
+    const headers = ["Initiative", "Domain", "Stage", "Expected value ($M)", "Spend ($M)", "P(success)", "Risk-adjusted ($M)", "Call"];
+    const rows = items.slice().sort((a, b) => riskAdj(b) - riskAdj(a)).map((i) => [
+      i.name, i.domain, i.stage, i.expValueM, i.spendM, Math.round(prob(i) * 100) / 100, Number(riskAdj(i).toFixed(3)), REC_LABEL[recommend(i)],
+    ]);
+    downloadCsv(`portfolio-${slug}`, headers, rows);
+    toast("Initiatives exported as CSV");
+  };
+  const exportPng = () => {
+    if (!scatterRef.current) { setView("map"); toast("Switch to the Map view, then export the chart"); return; }
+    svgElementToPng(scatterRef.current, `portfolio-map-${slug}`).then((ok) => toast(ok ? "Chart exported as PNG" : "Couldn't render the chart"));
+  };
+  const exportScenario = () => {
+    downloadJson(`portfolio-scenario-${slug}`, { version: 1, view, selId, assumptions: A, items });
+    toast("Scenario exported as JSON");
+  };
+  const importScenario = async () => {
+    const text = await pickTextFile();
+    if (!text) return;
+    try {
+      const cfg = parseScenarioJson<{ view?: View; selId?: string; assumptions?: Partial<Assumptions>; items?: Initiative[] }>(text);
+      if (cfg.items && Array.isArray(cfg.items) && cfg.items.length) { setItems(cfg.items); setSelId(cfg.items[0].id); }
+      if (cfg.view) setView(cfg.view);
+      if (cfg.selId) setSelId(cfg.selId);
+      if (cfg.assumptions) {
+        const a = cfg.assumptions;
+        setAssumptions({
+          prob: { ...DEFAULT_ASSUMPTIONS.prob, ...(a.prob ?? {}) },
+          scaleMultiple: a.scaleMultiple ?? DEFAULT_ASSUMPTIONS.scaleMultiple,
+          scaleRiskCutoff: a.scaleRiskCutoff ?? DEFAULT_ASSUMPTIONS.scaleRiskCutoff,
+        });
+      }
+      toast("Scenario imported");
+    } catch { toast("That file isn't a valid scenario"); }
+  };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "Initiatives as CSV", hint: "The financials table", onSelect: exportCsv },
+    { id: "png", label: "Value \u00d7 risk chart as PNG", hint: "The bubble map", onSelect: exportPng },
+    { id: "json", label: "Export scenario (JSON)", hint: "Book + assumptions, re-importable", onSelect: exportScenario },
+    { id: "import", label: "Import scenario (JSON)\u2026", hint: "Load a saved .json", onSelect: importScenario },
+    { id: "memo", label: "Review pack (Markdown)", hint: "The full decision memo", onSelect: onGenerate },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-assumptions", label: "Edit assumptions", group: "action", keywords: "your model weights", run: () => setDrawerOpen(true) },
+    { id: "act-share", label: "Copy share link", group: "action", keywords: "permalink url scenario", run: shareScenario },
+    { id: "act-reset", label: "Reset to defaults", group: "action", run: resetAll },
+    { id: "view-map", label: "View: Value \u00d7 risk map", group: "view", run: () => setView("map") },
+    { id: "view-fin", label: "View: Financials", group: "view", run: () => setView("financials") },
+    { id: "view-gate", label: "View: Stage-gate", group: "view", run: () => setView("gate") },
+    { id: "view-fund", label: "View: Funding", group: "view", run: () => setView("fund") },
+    { id: "exp-csv", label: "Export initiatives as CSV", group: "export", run: exportCsv },
+    { id: "exp-png", label: "Export chart as PNG", group: "export", run: exportPng },
+    { id: "exp-json", label: "Export scenario as JSON", group: "export", run: exportScenario },
+    { id: "exp-import", label: "Import scenario\u2026", group: "export", run: importScenario },
+    { id: "exp-memo", label: "Download review pack", group: "export", run: onGenerate },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -229,9 +294,10 @@ export function PortfolioDashboard() {
           <ToolbarButton onClick={resetAll} title="Reset the book and assumptions to defaults">
             <RotateCcw className="h-3.5 w-3.5" /> Reset
           </ToolbarButton>
-          <ToolbarButton onClick={onGenerate} className="ml-auto" title="Download the portfolio review pack as Markdown">
-            <Download className="h-3.5 w-3.5" /> Review pack
+          <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
+            ⌘K
           </ToolbarButton>
+          <ExportMenu actions={exportActions} />
         </LabToolbar>
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -264,7 +330,7 @@ export function PortfolioDashboard() {
                   const rf = (spend: number) => 6 + spend * 11;
                   const hov = items.find((i) => i.id === hoverId) ?? null;
                   return (
-                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
+                    <svg ref={scatterRef} viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
                       aria-label="Initiatives plotted by expected value (vertical) against risk (horizontal); bubble size is run-rate spend; color is the kill / hold / scale call.">
                       {/* quadrant split */}
                       <line x1={xf(0.5)} y1={padT} x2={xf(0.5)} y2={H - padB} stroke="#e4e7eb" strokeDasharray="3 3" />
@@ -510,6 +576,7 @@ export function PortfolioDashboard() {
           </div>
         </Drawer>
         <ToastHost />
+        <CommandPalette commands={paletteCommands} />
       </main>
     </div>
   );

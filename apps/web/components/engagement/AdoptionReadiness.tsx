@@ -11,6 +11,7 @@ import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, Download } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, type BadgeTone } from "@labs/design-system";
 import { EL01_USE_CASES } from "@labs/kit";
+import { weightSumOf, readinessComposite, readinessGate, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -51,12 +52,13 @@ const DEFAULT_ASSUMPTIONS: Assumptions = {
   weights: { sponsorship: 0.25, trust: 0.20, workflow: 0.15, training: 0.15, comms: 0.15, incentives: 0.10 },
   scaleCut: 75, condCut: 60,
 };
-const weightSum = (w: Record<FactorKey, number>) => FACTOR_KEYS.reduce((a, k) => a + w[k], 0) || 1;
-const compositeOf = (f: Factors, w: Record<FactorKey, number>) =>
-  Math.round(FACTOR_KEYS.reduce((a, k) => a + w[k] * f[k], 0) / weightSum(w));
-type Gate = { verdict: string; tone: BadgeTone };
-const gateForOf = (c: number, A: Assumptions): Gate =>
-  c >= A.scaleCut ? { verdict: "Scale", tone: "emerald" } : c >= A.condCut ? { verdict: "Scale with conditions", tone: "amber" } : { verdict: "Hold", tone: "rose" };
+const VERDICT_TONE: Record<ReadinessVerdict, BadgeTone> = {
+  "Scale": "emerald", "Scale with conditions": "amber", "Hold": "rose",
+};
+const gateForOf = (c: number, A: Assumptions): { verdict: ReadinessVerdict; tone: BadgeTone } => {
+  const verdict = readinessGate(c, A.scaleCut, A.condCut);
+  return { verdict, tone: VERDICT_TONE[verdict] };
+};
 
 export function AdoptionReadiness() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
@@ -118,7 +120,7 @@ export function AdoptionReadiness() {
   };
   const resetAssumptions = () => { setAssumptions(DEFAULT_ASSUMPTIONS); toast("Assumptions reset to defaults"); };
 
-  const c = compositeOf(factors, A.weights);
+  const c = readinessComposite(factors, A.weights, FACTOR_KEYS);
   const gate = gateForOf(c, A);
   const weak = FACTORS.filter((x) => factors[x.key] < 70).sort((a, b) => factors[a.key] - factors[b.key]);
   const priorities = weak.slice(0, 3);
@@ -139,7 +141,7 @@ export function AdoptionReadiness() {
       "",
       "| Factor | Weight | Score |",
       "| --- | --- | --- |",
-      ...FACTORS.map((x) => `| ${x.label} | ${Math.round(A.weights[x.key] / weightSum(A.weights) * 100)}% | ${factors[x.key]} |`),
+      ...FACTORS.map((x) => `| ${x.label} | ${Math.round(A.weights[x.key] / weightSumOf(A.weights, FACTOR_KEYS) * 100)}% | ${factors[x.key]} |`),
       "",
       "## Gate verdict",
       "",
@@ -213,7 +215,7 @@ export function AdoptionReadiness() {
             {FACTORS.map((x) => (
               <div key={x.key}>
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <label className="text-xs font-medium text-slatey-400">{x.label} <span className="text-slatey-500">· {Math.round(A.weights[x.key] / weightSum(A.weights) * 100)}%</span></label>
+                  <label className="text-xs font-medium text-slatey-400">{x.label} <span className="text-slatey-500">· {Math.round(A.weights[x.key] / weightSumOf(A.weights, FACTOR_KEYS) * 100)}%</span></label>
                   <span className={`font-mono text-xs font-semibold ${factors[x.key] < 55 ? "text-rose-600" : factors[x.key] < 70 ? "text-amber-600" : "text-emerald-700"}`}>{factors[x.key]}</span>
                 </div>
                 <input type="range" min={0} max={100} step={1} value={factors[x.key]} onChange={(e) => setF(x.key, Number(e.target.value))} className="w-full accent-primary" />

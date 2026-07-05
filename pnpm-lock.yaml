@@ -20,6 +20,9 @@ importers:
       '@labs/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@labs/engines':
+        specifier: workspace:*
+        version: link:../../packages/engines
       '@labs/kit':
         specifier: workspace:*
         version: link:../../packages/kit
@@ -121,6 +124,18 @@ importers:
       typescript:
         specifier: 5.5.3
         version: 5.5.3
+      vitest:
+        specifier: 2.1.9
+        version: 2.1.9(@types/node@20.14.10)
+
+  packages/engines:
+    devDependencies:
+      typescript:
+        specifier: 5.5.3
+        version: 5.5.3
+      vitest:
+        specifier: 2.0.5
+        version: 2.0.5(@types/node@20.14.10)
 
   packages/kit:
     devDependencies:

@@ -34,3 +34,45 @@ export function recommend(i: Initiative): Rec {
   if ((i.stage === "scaling" || i.stage === "production") && r >= 1.5 * i.spendM && i.risk < 0.6) return "scale";
   return "hold";
 }
+
+// Budget-constrained funding — a greedy first cut, not a solved knapsack optimum.
+// Rank the positive-value items by value-per-$ of spend (descending) and take them
+// in that order while the budget can still fit the next one. `value` is supplied by
+// the caller (e.g. riskAdj under the current, possibly user-edited assumptions) so
+// the rule the UI shows is exactly the one under test.
+export interface FundResult {
+  /** ids funded, in the greedy order they were taken. */
+  funded: string[];
+  /** total spend committed across the funded items. */
+  spent: number;
+  /** total `value` captured by the funded items. */
+  captured: number;
+  /** ids not funded — either non-positive value, or positive but didn't fit. */
+  cut: string[];
+}
+
+export function greedyFund<T extends { id: string; spendM: number }>(
+  items: T[],
+  budgetM: number,
+  value: (i: T) => number,
+): FundResult {
+  const ranked = items
+    .filter((i) => value(i) > 0)
+    .slice()
+    .sort((a, b) => value(b) / b.spendM - value(a) / a.spendM);
+  const funded = new Set<string>();
+  let spent = 0;
+  for (const i of ranked) {
+    if (spent + i.spendM <= budgetM) {
+      funded.add(i.id);
+      spent += i.spendM;
+    }
+  }
+  const captured = items.filter((i) => funded.has(i.id)).reduce((a, i) => a + value(i), 0);
+  return {
+    funded: [...funded],
+    spent,
+    captured,
+    cut: items.filter((i) => !funded.has(i.id)).map((i) => i.id),
+  };
+}

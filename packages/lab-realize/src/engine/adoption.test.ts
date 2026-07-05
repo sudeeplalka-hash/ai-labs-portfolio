@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING } from "./adoption";
+import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate } from "./adoption";
 
 describe("deriveAdoptionPlan", () => {
   it("always offers a plan with at least two recommended interventions", () => {
@@ -39,5 +39,59 @@ describe("projectAdoption", () => {
     expect(projectAdoption(60, [])).toBe(60);
     expect(projectAdoption(60, plan.slice(0, 2))).toBeGreaterThan(60);
     expect(projectAdoption(88, plan)).toBe(ADOPTION_CEILING);
+  });
+});
+
+type FK = "a" | "b" | "c";
+const KEYS: readonly FK[] = ["a", "b", "c"];
+
+describe("weightSumOf", () => {
+  it("sums the weights over the given keys", () => {
+    expect(weightSumOf({ a: 0.25, b: 0.2, c: 0.15 }, KEYS)).toBeCloseTo(0.6, 6);
+  });
+  it("falls back to 1 when the weights sum to zero (divide-by-zero guard)", () => {
+    expect(weightSumOf({ a: 0, b: 0, c: 0 }, KEYS)).toBe(1);
+  });
+});
+
+describe("readinessComposite", () => {
+  it("is the weight-normalized average of the factors", () => {
+    // weights sum to 1 -> 0.5*80 + 0.3*60 + 0.2*40 = 66
+    expect(readinessComposite({ a: 80, b: 60, c: 40 }, { a: 0.5, b: 0.3, c: 0.2 }, KEYS)).toBe(66);
+  });
+  it("normalizes so weights that don't sum to 1 give the same 0..100 score", () => {
+    // same ratios scaled x10 -> identical composite
+    expect(readinessComposite({ a: 80, b: 60, c: 40 }, { a: 5, b: 3, c: 2 }, KEYS)).toBe(66);
+  });
+  it("returns the common value when all factors are equal, for any weights", () => {
+    expect(readinessComposite({ a: 70, b: 70, c: 70 }, { a: 1, b: 9, c: 4 }, KEYS)).toBe(70);
+  });
+  it("rounds to an integer", () => {
+    // 0.5*75 + 0.5*70 = 72.5 -> 73
+    expect(readinessComposite({ a: 75, b: 70, c: 0 }, { a: 0.5, b: 0.5, c: 0 }, KEYS)).toBe(73);
+  });
+  it("guards against an all-zero weight vector (no NaN)", () => {
+    const c = readinessComposite({ a: 80, b: 60, c: 40 }, { a: 0, b: 0, c: 0 }, KEYS);
+    expect(Number.isNaN(c)).toBe(false);
+    expect(c).toBe(0);
+  });
+});
+
+describe("readinessGate", () => {
+  it("returns Scale at or above the scale cutoff (inclusive)", () => {
+    expect(readinessGate(75, 75, 60)).toBe("Scale");
+    expect(readinessGate(92, 75, 60)).toBe("Scale");
+  });
+  it("returns 'Scale with conditions' from the conditional cutoff up to the scale cutoff", () => {
+    expect(readinessGate(60, 75, 60)).toBe("Scale with conditions"); // cond cutoff inclusive
+    expect(readinessGate(74, 75, 60)).toBe("Scale with conditions");
+  });
+  it("returns Hold below the conditional cutoff", () => {
+    expect(readinessGate(59, 75, 60)).toBe("Hold");
+    expect(readinessGate(0, 75, 60)).toBe("Hold");
+  });
+  it("honors edited (non-default) cutoffs", () => {
+    expect(readinessGate(70, 80, 65)).toBe("Scale with conditions");
+    expect(readinessGate(64, 80, 65)).toBe("Hold");
   });
 });
