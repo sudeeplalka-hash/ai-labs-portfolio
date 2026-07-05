@@ -72,8 +72,8 @@ export function Home() {
           <div className="flex items-center gap-2 text-primary"><Workflow className="h-5 w-5" /><span className="text-[11px] font-semibold uppercase tracking-wider">Guided</span></div>
           <h2 className="mt-2 text-lg font-semibold text-ink">Walk the program end-to-end</h2>
           <p className="mt-1 text-sm leading-relaxed text-slatey-400">
-            Start at Framing, build one bet, and carry it through Data → Build → AI Ops → Govern → Realize. Every
-            number in the final business case traces back to a decision you made.
+            Start at Framing, build one bet, and carry it through Data → Build → Deploy → Govern → Realize → Operate.
+            Every number in the final business case traces back to a decision you made.
           </p>
           <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
             {framed ? "Continue your initiative" : "Start with Framing"} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -92,7 +92,7 @@ export function Home() {
 
       {/* Lab cards */}
       <div>
-        <p className="stat-label mb-3">The six stages</p>
+        <p className="stat-label mb-3">The seven stages</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {STAGES.map((s) => {
             const Icon = ICONS[s.key];

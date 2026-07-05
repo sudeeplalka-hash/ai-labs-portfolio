@@ -136,11 +136,36 @@ type KpiTone = "healthy" | "watch" | "risk" | "critical" | "neutral";
 const KPI_ACCENT: Record<KpiTone, string> = {
   healthy: "bg-emerald-500", watch: "bg-amber-500", risk: "bg-orange-500", critical: "bg-rose-500", neutral: "bg-slate-300",
 };
+const SPARK_STROKE: Record<KpiTone, string> = {
+  healthy: "#16a34a", watch: "#d97706", risk: "#ea580c", critical: "#e11d48", neutral: "#94a3b8",
+};
+
+// Tiny inline sparkline (no axes) — compresses a short series into the card so the
+// KPI shows its direction of travel, not just today's number. Pure SVG, no hooks.
+function Sparkline({ data, tone = "neutral" }: { data: number[]; tone?: KpiTone }) {
+  if (!data || data.length < 2) return null;
+  const w = 68, h = 20, p = 2;
+  const min = Math.min(...data), max = Math.max(...data), span = max - min || 1;
+  const x = (i: number) => p + (i / (data.length - 1)) * (w - p * 2);
+  const y = (v: number) => h - p - ((v - min) / span) * (h - p * 2);
+  const pts = data.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const lx = x(data.length - 1), ly = y(data[data.length - 1]);
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" className="shrink-0">
+      <polyline points={pts} fill="none" stroke={SPARK_STROKE[tone]} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={lx} cy={ly} r="1.8" fill={SPARK_STROKE[tone]} />
+    </svg>
+  );
+}
+
+export interface KpiTrend { direction: "up" | "down" | "flat"; value?: number; suffix?: string; goodWhen?: "up" | "down"; }
+
 export function KpiCard({
-  label, value, suffix, tone = "neutral", target, tooltip, interpretation,
+  label, value, suffix, tone = "neutral", target, tooltip, interpretation, spark, trend,
 }: {
   label: string; value: string | number; suffix?: string; tone?: KpiTone;
   target?: string; tooltip?: string; interpretation?: string;
+  spark?: number[]; trend?: KpiTrend;
 }) {
   return (
     <div className="panel panel-hover relative flex flex-col gap-2 p-4 pt-[18px] animate-fade-in">
@@ -148,10 +173,12 @@ export function KpiCard({
       <div className="flex items-center gap-1.5">
         <span className="stat-label">{label}</span>
         {tooltip && <MetricTooltip text={tooltip} />}
+        {spark && <span className="ml-auto"><Sparkline data={spark} tone={tone} /></span>}
       </div>
-      <div className="flex items-end gap-1">
+      <div className="flex items-end gap-1.5">
         <span className="text-2xl font-semibold tracking-tight text-ink">{value}</span>
         {suffix && <span className="pb-0.5 text-sm text-slatey-400">{suffix}</span>}
+        {trend && <span className="pb-0.5"><TrendIndicator {...trend} /></span>}
       </div>
       {target && <div className="text-[11px] text-slatey-500">{target}</div>}
       {interpretation && <p className="text-xs leading-relaxed text-slatey-400">{interpretation}</p>}

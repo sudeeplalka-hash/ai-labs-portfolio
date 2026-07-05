@@ -7,6 +7,7 @@
 // nothing downloads without its date, scenario, and SIMULATED/LIVE label attached.
 
 import { Download } from "lucide-react";
+import { CURRENT_SITE } from "@/lib/site";
 
 export interface ArtifactProvenance {
   scenario: string;                 // which authored scenario / inputs produced this
@@ -20,7 +21,7 @@ export function provenanceFooter(p: ArtifactProvenance): string {
   return [
     "",
     "---",
-    `*Generated ${date} · Scenario: ${p.scenario} · ${mode} · AI Labs Portfolio — portfolio.sudeeplalka.com*`,
+    `*Generated ${date} · Scenario: ${p.scenario} · ${mode} · ${CURRENT_SITE.attribution}*`,
     `*${p.note ?? "Illustrative: figures are authored sample data unless a live model is connected. Structure and reasoning are the point, not the numbers."}*`,
   ].join("\n");
 }

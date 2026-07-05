@@ -2,15 +2,17 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ProgramProvider } from "@labs/program-core";
 import { AppShell } from "@/components/shell/AppShell";
+import { CURRENT_SITE } from "@/lib/site";
 
+// Site identity comes from the build-time SITE flag (lib/site.ts). On the portfolio
+// deploy these values are identical to before; the command-center deploy gets its own.
 export const metadata: Metadata = {
-  metadataBase: new URL("https://portfolio.sudeeplalka.com"),
+  metadataBase: new URL(CURRENT_SITE.domain),
   title: {
-    default: "Sudeep Lalka — AI Delivery Leadership Portfolio",
-    template: "%s · Sudeep Lalka",
+    default: CURRENT_SITE.titleDefault,
+    template: CURRENT_SITE.titleTemplate,
   },
-  description:
-    "One AI delivery leader at four altitudes — the protocol wire, the program lifecycle, the P&L, and the people. A portfolio of working instruments, each mapped to a real enterprise decision.",
+  description: CURRENT_SITE.description,
 };
 
 export const viewport: Viewport = { themeColor: "#152433" };

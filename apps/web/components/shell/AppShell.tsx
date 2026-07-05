@@ -8,13 +8,16 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { StoryThread } from "@/components/story/StoryThread";
 import { ProgramRail } from "@/components/lifecycle/ProgramRail";
+import { IS_COMMAND_CENTER } from "@/lib/site";
 
 // Parent-frame + new-collection routes render chrome-free (no Collection-1 lifecycle
-// sidebar): the Competency Map (/) is the parent landing, the new collections, and
-// the changelog. Collection 1's own routes keep the AppShell.
+// sidebar): the new collections and the changelog. Collection 1's own routes keep the
+// AppShell. The landing "/" depends on the deploy: on the portfolio site it's the
+// full-bleed Competency Map (bare); on the command-center site it's the lifecycle Home,
+// which keeps the shell so the sidebar/header/program-rail frame it.
 const BARE_PREFIXES = ["/agents", "/business", "/engagement", "/changelog", "/industries", "/storylines"];
 function isBareRoute(pathname: string): boolean {
-  if (pathname === "/") return true;
+  if (pathname === "/") return !IS_COMMAND_CENTER;
   return BARE_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 

@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
 import { ALL_USE_CASES } from "@labs/kit";
+import { CURRENT_SITE } from "@/lib/site";
 
-const BASE = "https://portfolio.sudeeplalka.com";
+const BASE = CURRENT_SITE.domain;
 
 // Layer 0 + the 23 new labs + Collection-1 stage roots + utility pages.
 const ROUTES = [
