@@ -25,3 +25,25 @@ describe("scenario JSON round-trip", () => {
     expect(() => parseScenarioJson("{not json")).toThrow();
   });
 });
+
+import { parseCsv } from "./export";
+
+describe("parseCsv", () => {
+  it("parses a header row into keyed objects", () => {
+    expect(parseCsv("a,b\n1,2\n3,4")).toEqual([{ a: "1", b: "2" }, { a: "3", b: "4" }]);
+  });
+  it("handles quoted fields with commas and escaped quotes", () => {
+    expect(parseCsv('x,y\n"a,b","he said ""hi"""')).toEqual([{ x: "a,b", y: 'he said "hi"' }]);
+  });
+  it("tolerates CRLF endings and trailing blank lines", () => {
+    expect(parseCsv("a,b\r\n1,2\r\n")).toEqual([{ a: "1", b: "2" }]);
+  });
+  it("round-trips with toCsv for simple values", () => {
+    expect(parseCsv(toCsv(["name", "n"], [["Alpha", 2], ["Beta", 3]]))).toEqual([
+      { name: "Alpha", n: "2" }, { name: "Beta", n: "3" },
+    ]);
+  });
+  it("returns an empty array for empty input", () => {
+    expect(parseCsv("")).toEqual([]);
+  });
+});

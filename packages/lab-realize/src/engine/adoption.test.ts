@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate, planToReachGate } from "./adoption";
+import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity } from "./adoption";
 
 describe("deriveAdoptionPlan", () => {
   it("always offers a plan with at least two recommended interventions", () => {
@@ -141,5 +141,35 @@ describe("planToReachGate", () => {
     const applied: Record<"a" | "b" | "c", number> = { ...factors };
     for (const m of p.moves) applied[m.key] = m.to;
     expect(readinessComposite(applied, weights, keys)).toBe(p.projected);
+  });
+});
+
+describe("factorSensitivity", () => {
+  const keys = ["a", "b", "c"] as const;
+  const weights = { a: 0.5, b: 0.3, c: 0.2 };
+
+  it("impact equals weight-share times headroom, sorted descending", () => {
+    const lev = factorSensitivity({ a: 60, b: 40, c: 90 }, weights, keys);
+    // a: 0.5*40=20 ; b: 0.3*60=18 ; c: 0.2*10=2
+    expect(lev.map((l) => l.key)).toEqual(["a", "b", "c"]);
+    expect(lev[0]).toMatchObject({ key: "a", headroom: 40 });
+    expect(lev[0].impact).toBeCloseTo(20, 6);
+    expect(lev[1].impact).toBeCloseTo(18, 6);
+    expect(lev[2].impact).toBeCloseTo(2, 6);
+  });
+
+  it("a maxed factor has zero impact and headroom", () => {
+    const lev = factorSensitivity({ a: 100, b: 50, c: 50 }, weights, keys);
+    const a = lev.find((l) => l.key === "a")!;
+    expect(a.impact).toBe(0);
+    expect(a.headroom).toBe(0);
+  });
+
+  it("impacts sum to (ceiling minus the un-rounded weighted average)", () => {
+    const factors = { a: 52, b: 66, c: 45 };
+    const W = weightSumOf(weights, keys);
+    const avg = keys.reduce((s, k) => s + weights[k] * factors[k], 0) / W;
+    const total = factorSensitivity(factors, weights, keys).reduce((s, l) => s + l.impact, 0);
+    expect(total).toBeCloseTo(100 - avg, 6);
   });
 });

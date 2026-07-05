@@ -133,3 +133,44 @@ export function pickTextFile(accept = "application/json,.json"): Promise<string 
     input.click();
   });
 }
+
+/** Parse CSV text into rows of cells (RFC-4180-ish: quoted fields may contain commas,
+ *  newlines, and "" escapes; tolerates CRLF or LF). Pure. */
+export function parseCsvRows(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  let i = 0;
+  const endField = () => { row.push(field); field = ""; };
+  const endRow = () => { endField(); rows.push(row); row = []; };
+  while (i < text.length) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ",") { endField(); i++; continue; }
+    if (c === "\r") { i++; continue; }
+    if (c === "\n") { endRow(); i++; continue; }
+    field += c; i++;
+  }
+  if (field.length > 0 || row.length > 0) endRow();
+  return rows.filter((r) => !(r.length === 1 && r[0] === "")); // drop blank lines
+}
+
+/** Parse CSV with a header row into objects keyed by (trimmed) header. Pure. */
+export function parseCsv(text: string): Record<string, string>[] {
+  const rows = parseCsvRows(text);
+  if (rows.length === 0) return [];
+  const headers = rows[0].map((h) => h.trim());
+  return rows.slice(1).map((r) => {
+    const obj: Record<string, string> = {};
+    headers.forEach((h, i) => { obj[h] = (r[i] ?? "").trim(); });
+    return obj;
+  });
+}

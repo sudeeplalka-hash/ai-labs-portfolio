@@ -143,3 +143,50 @@ export function reallocateKills<T extends { id: string; spendM: number }>(
     afterRedeployRiskAdjM: afterCutRiskAdjM + redeployedValueM,
   };
 }
+
+// Bring-your-own-book CSV import. Maps rows (keyed by header) to initiatives: lenient
+// on header names, coerces numbers (tolerating $, %, commas, trailing "M"), clamps
+// risk to 0..1, and skips rows missing a name / valid stage / value / positive spend.
+// Pure — the parsing of the CSV text itself lives in the design system.
+const CSV_STAGES: Stage[] = ["discovery", "pilot", "scaling", "production"];
+export interface CsvImportResult {
+  items: Initiative[];
+  skipped: number;
+}
+export function initiativesFromCsvRows(rows: Record<string, string>[]): CsvImportResult {
+  const toNum = (v: string | undefined): number => {
+    const s = String(v ?? "").replace(/[$,%\s]/g, "").replace(/m$/i, "").trim();
+    return s === "" ? NaN : Number(s);
+  };
+  const get = (row: Record<string, string>, aliases: string[]): string | undefined => {
+    for (const key of Object.keys(row)) {
+      if (aliases.includes(key.toLowerCase().trim())) return row[key];
+    }
+    return undefined;
+  };
+  const items: Initiative[] = [];
+  let skipped = 0;
+  rows.forEach((row, i) => {
+    const name = (get(row, ["name", "initiative"]) ?? "").trim();
+    const stage = ((get(row, ["stage"]) ?? "").toLowerCase().trim()) as Stage;
+    const expValueM = toNum(get(row, ["expvaluem", "expected value", "expected value ($m)", "value"]));
+    const spendM = toNum(get(row, ["spendm", "spend", "spend ($m)"]));
+    if (!name || !CSV_STAGES.includes(stage) || !Number.isFinite(expValueM) || !Number.isFinite(spendM) || spendM <= 0) {
+      skipped++;
+      return;
+    }
+    const risk = toNum(get(row, ["risk"]));
+    const planVar = toNum(get(row, ["planvar", "plan var", "plan variance"]));
+    items.push({
+      id: `csv-${i}`,
+      name,
+      domain: (get(row, ["domain"]) ?? "Custom").trim() || "Custom",
+      stage,
+      expValueM,
+      spendM,
+      risk: Number.isFinite(risk) ? Math.max(0, Math.min(1, risk)) : 0.5,
+      planVar: Number.isFinite(planVar) ? planVar : 0,
+    });
+  });
+  return { items, skipped };
+}

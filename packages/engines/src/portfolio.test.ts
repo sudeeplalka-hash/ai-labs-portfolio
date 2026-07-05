@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { prob, riskAdj, recommend, greedyFund, reallocateKills, STAGE_PROB, type Initiative } from "./portfolio";
+import { prob, riskAdj, recommend, greedyFund, reallocateKills, initiativesFromCsvRows, STAGE_PROB, type Initiative } from "./portfolio";
 
 const mk = (over: Partial<Initiative> = {}): Initiative => ({
   id: "x", name: "X", domain: "Finserv", stage: "scaling",
@@ -187,5 +187,41 @@ describe("reallocateKills", () => {
     expect(r.targets).toEqual([]);
     expect(r.redeployedValueM).toBe(0);
     expect(r.reserveM).toBe(r.freedCapitalM);
+  });
+});
+
+describe("initiativesFromCsvRows", () => {
+  it("maps valid rows to initiatives with generated ids", () => {
+    const rows = [
+      { name: "Alpha", domain: "Finserv", stage: "pilot", expValueM: "2.5", spendM: "1", risk: "0.4", planVar: "5" },
+      { name: "Beta", domain: "Telecom", stage: "production", expValueM: "$4.0M", spendM: "1.2", risk: "0.3", planVar: "-3" },
+    ];
+    const r = initiativesFromCsvRows(rows);
+    expect(r.skipped).toBe(0);
+    expect(r.items).toHaveLength(2);
+    expect(r.items[0]).toMatchObject({ id: "csv-0", name: "Alpha", domain: "Finserv", stage: "pilot", expValueM: 2.5, spendM: 1, risk: 0.4, planVar: 5 });
+    expect(r.items[1].expValueM).toBe(4); // "$4.0M" coerced
+  });
+
+  it("skips rows missing name / valid stage / value / positive spend", () => {
+    const rows = [
+      { name: "", stage: "pilot", expValueM: "2", spendM: "1" },
+      { name: "X", stage: "bogus", expValueM: "2", spendM: "1" },
+      { name: "Y", stage: "pilot", expValueM: "", spendM: "1" },
+      { name: "Z", stage: "pilot", expValueM: "2", spendM: "0" },
+    ];
+    const r = initiativesFromCsvRows(rows);
+    expect(r.items).toEqual([]);
+    expect(r.skipped).toBe(4);
+  });
+
+  it("matches headers leniently and defaults domain / risk / planVar", () => {
+    const rows = [{ Initiative: "Gamma", Stage: "Scaling", "Expected value ($M)": "3", "Spend ($M)": "1.5" }];
+    const r = initiativesFromCsvRows(rows);
+    expect(r.items[0]).toMatchObject({ name: "Gamma", stage: "scaling", expValueM: 3, spendM: 1.5, domain: "Custom", risk: 0.5, planVar: 0 });
+  });
+
+  it("clamps risk into 0..1", () => {
+    expect(initiativesFromCsvRows([{ name: "R", stage: "pilot", expValueM: "2", spendM: "1", risk: "5" }]).items[0].risk).toBe(1);
   });
 });

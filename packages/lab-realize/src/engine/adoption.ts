@@ -164,3 +164,31 @@ export function planToReachGate<K extends string>(
   const totalAdded = moves.reduce((a, m) => a + m.add, 0);
   return { reachable: projected >= target, moves, totalAdded, projected };
 }
+
+// Sensitivity tornado — which factor has the most leverage on the composite right now.
+// Raising factor k by Δ moves the (weight-normalized) composite by (weight_k/Σw)·Δ, so
+// the most a single factor can add is its weight-share × its headroom to the ceiling.
+// Ranked, that's where to spend the effort. Neat identity: the impacts sum to
+// (ceiling − composite) — maxing everything lands exactly at the ceiling. Pure.
+export interface FactorLever<K extends string = string> {
+  key: K;
+  /** composite points gained if this factor is raised to the ceiling. */
+  impact: number;
+  headroom: number;
+  weightShare: number;
+}
+export function factorSensitivity<K extends string>(
+  factors: Record<K, number>,
+  weights: Record<K, number>,
+  keys: readonly K[],
+  ceiling = 100,
+): FactorLever<K>[] {
+  const W = weightSumOf(weights, keys);
+  return keys
+    .map((k) => {
+      const weightShare = weights[k] / W;
+      const headroom = Math.max(0, ceiling - factors[k]);
+      return { key: k, weightShare, headroom, impact: weightShare * headroom };
+    })
+    .sort((a, b) => b.impact - a.impact);
+}

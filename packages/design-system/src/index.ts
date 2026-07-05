@@ -7,7 +7,7 @@ export {
 export { MetricTooltip, Tabs, SectionTabs, Drawer, toast, ToastHost } from "./components/ui-client";
 export {
   toCsv, scenarioToJson, parseScenarioJson,
-  downloadText, downloadCsv, downloadJson, copyToClipboard, svgElementToPng, pickTextFile,
+  downloadText, downloadCsv, downloadJson, copyToClipboard, svgElementToPng, pickTextFile, parseCsv, parseCsvRows,
 } from "./lib/export";
 export { filterCommands, type Command } from "./lib/command";
 export { sortBy, nextSort, type SortDir, type SortState } from "./lib/table";

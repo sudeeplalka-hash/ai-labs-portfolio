@@ -10,9 +10,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, svgElementToPng, sortBy, nextSort, type ExportAction, type Command, type SortState, type BadgeTone } from "@labs/design-system";
+import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, type ExportAction, type Command, type SortState, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES, LABS } from "@labs/kit";
-import { greedyFund, reallocateKills } from "@labs/engines";
+import { greedyFund, reallocateKills, initiativesFromCsvRows } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -250,11 +250,21 @@ export function PortfolioDashboard() {
       toast("Scenario imported");
     } catch { toast("That file isn't a valid scenario"); }
   };
+  const importCsv = async () => {
+    const text = await pickTextFile("text/csv,.csv");
+    if (!text) return;
+    const { items: parsed, skipped } = initiativesFromCsvRows(parseCsv(text));
+    if (parsed.length === 0) { toast(skipped ? `No valid rows \u2014 ${skipped} skipped` : "No rows found in that CSV"); return; }
+    setItems(parsed);
+    setSelId(parsed[0].id);
+    toast(`Imported ${parsed.length} initiative${parsed.length === 1 ? "" : "s"}${skipped ? ` \u00b7 ${skipped} skipped` : ""}`);
+  };
   const exportActions: ExportAction[] = [
     { id: "csv", label: "Initiatives as CSV", hint: "The financials table", onSelect: exportCsv },
     { id: "png", label: "Value \u00d7 risk chart as PNG", hint: "The bubble map", onSelect: exportPng },
     { id: "json", label: "Export scenario (JSON)", hint: "Book + assumptions, re-importable", onSelect: exportScenario },
     { id: "import", label: "Import scenario (JSON)\u2026", hint: "Load a saved .json", onSelect: importScenario },
+    { id: "import-csv", label: "Import book (CSV)\u2026", hint: "Columns: name, domain, stage, expValueM, spendM, risk, planVar", onSelect: importCsv },
     { id: "memo", label: "Review pack (Markdown)", hint: "The full decision memo", onSelect: onGenerate },
   ];
   const paletteCommands: Command[] = [

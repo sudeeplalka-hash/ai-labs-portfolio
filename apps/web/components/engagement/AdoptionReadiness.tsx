@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
 import { EL01_USE_CASES, LABS } from "@labs/kit";
-import { weightSumOf, readinessComposite, readinessGate, planToReachGate, type ReadinessVerdict } from "@labs/lab-realize";
+import { weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -128,6 +128,7 @@ export function AdoptionReadiness() {
   const c = readinessComposite(factors, A.weights, FACTOR_KEYS);
   const gate = gateForOf(c, A);
   const gatePlan = planToReachGate(factors, A.weights, FACTOR_KEYS, A.scaleCut);
+  const levers = factorSensitivity(factors, A.weights, FACTOR_KEYS);
   const factorLabel = (k: FactorKey) => FACTORS.find((f) => f.key === k)?.label ?? k;
   const weak = FACTORS.filter((x) => factors[x.key] < 70).sort((a, b) => factors[a.key] - factors[b.key]);
   const priorities = weak.slice(0, 3);
@@ -266,8 +267,9 @@ export function AdoptionReadiness() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Sliders */}
-          <Panel className="space-y-4">
+          {/* Sliders + levers */}
+          <div className="space-y-4">
+            <Panel className="space-y-4">
             <p className="stat-label">Readiness factors <span className="font-normal text-slatey-500">· weight shown</span></p>
             {FACTORS.map((x) => (
               <div key={x.key}>
@@ -279,7 +281,29 @@ export function AdoptionReadiness() {
                 <p className="mt-0.5 text-[11px] text-slatey-500">{x.hint}</p>
               </div>
             ))}
-          </Panel>
+            </Panel>
+            <Panel>
+              <p className="stat-label mb-2">Biggest levers <span className="font-normal text-slatey-500">· where a point moves the score most</span></p>
+              <div className="space-y-1.5">
+                {levers.map((lev) => {
+                  const label = FACTORS.find((f) => f.key === lev.key)?.label ?? lev.key;
+                  const max = levers[0].impact || 1;
+                  return (
+                    <div key={lev.key}>
+                      <div className="mb-0.5 flex items-center justify-between text-[11px]">
+                        <span className="text-slatey-400">{label}</span>
+                        <span className="font-mono text-slatey-500">+{lev.impact.toFixed(1)} pts</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div className="h-full rounded-full bg-primary/70" style={{ width: `${(lev.impact / max) * 100}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-[11px] text-slatey-500">Max composite gain if that factor alone were raised to 100 (weight &times; current gap) &mdash; the bars sum to your distance from a perfect 100.</p>
+            </Panel>
+          </div>
 
           {/* Verdict + plan */}
           <div className="space-y-4">
