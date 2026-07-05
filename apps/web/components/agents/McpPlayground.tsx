@@ -7,10 +7,10 @@
 // rejected at the contract boundary. MCP is just a disciplined contract; this
 // reads the wire. SIMULATED (frames are constructed deterministically).
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare, Share2, RotateCcw, Eye } from "lucide-react";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost } from "@labs/design-system";
 import { GAP01_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
@@ -21,6 +21,8 @@ interface Tool { name: string; description: string; args: Arg[]; result: (a: Rec
 interface Resource { uri: string; name: string }
 interface Prompt { name: string; args: string[] }
 interface System { key: string; label: string; blurb: string; tools: Tool[]; resources: Resource[]; prompts: Prompt[] }
+type Frame = { dir: "req" | "res"; body: object; note: string; error?: boolean };
+interface Call { id: number; tool: string; sysLabel: string; frames: Frame[]; error: boolean; ms: number; bytes: number }
 
 const SYSTEMS: System[] = [
   {
@@ -75,7 +77,8 @@ export function McpPlayground() {
   const [argVals, setArgVals] = useState<Record<string, string>>(() => Object.fromEntries(sys.tools[0].args.map((a) => [a.name, a.example])));
   const [annotate, setAnnotate] = useState(true);
   const [malformed, setMalformed] = useState(false);
-  const [frames, setFrames] = useState<{ dir: "req" | "res"; body: object; note: string; error?: boolean }[] | null>(null);
+  const [history, setHistory] = useState<Call[]>([]);
+  const [viewCallId, setViewCallId] = useState<number | null>(null);
 
   // systems × consumers crossover
   const [nSys, setNSys] = useState(8);
@@ -85,7 +88,7 @@ export function McpPlayground() {
     const s = SYSTEMS.find((x) => x.key === k)!;
     setSysKey(k); setActiveUcId(null); setToolName(s.tools[0].name);
     setArgVals(Object.fromEntries(s.tools[0].args.map((a) => [a.name, a.example])));
-    setFrames(null); setTab("tools");
+    setHistory([]); setViewCallId(null); setTab("tools");
   };
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
@@ -93,14 +96,13 @@ export function McpPlayground() {
     const tools = uc ? uc.payload.tools : SYSTEMS[0].tools;
     setToolName(tools[0].name);
     setArgVals(Object.fromEntries(tools[0].args.map((a) => [a.name, a.example])));
-    setFrames(null); setTab("tools");
+    setHistory([]); setViewCallId(null); setTab("tools");
     setNSys(uc ? uc.payload.nSys : 8); setNCon(uc ? uc.payload.nCon : 6);
   };
   const onTool = (name: string) => {
     const t = sys.tools.find((x) => x.name === name)!;
     setToolName(name);
     setArgVals(Object.fromEntries(t.args.map((a) => [a.name, a.example])));
-    setFrames(null);
   };
 
   const send = () => {
@@ -118,23 +120,55 @@ export function McpPlayground() {
     const missing = tool.args.find((a) => a.required && !String(argVals[a.name] ?? "").trim());
     const badNum = malformed && numArg ? numArg : tool.args.find((a) => a.type === "number" && argVals[a.name] !== "" && Number.isNaN(Number(argVals[a.name])));
 
+    const reqFrame: Frame = { dir: "req", body: request, note: "The client asks the server to run one named tool with typed arguments — nothing else is on the wire." };
+    let frames: Frame[]; let isError: boolean;
     if (missing || badNum) {
       const field = missing?.name ?? badNum!.name;
       const message = missing ? `Missing required parameter: ${field}` : `Invalid type for parameter '${field}': expected number`;
       const error = { jsonrpc: "2.0", id, error: { code: -32602, message, data: { param: field } } };
-      setFrames([
-        { dir: "req", body: request, note: "The client asks the server to run one named tool with typed arguments — nothing else is on the wire." },
-        { dir: "res", body: error, note: "Bad arguments are rejected at the contract boundary with a typed JSON-RPC error (-32602) — not a 500, not a hallucinated answer.", error: true },
-      ]);
-      return;
+      frames = [reqFrame, { dir: "res", body: error, note: "Bad arguments are rejected at the contract boundary with a typed JSON-RPC error (-32602) — not a 500, not a hallucinated answer.", error: true }];
+      isError = true;
+    } else {
+      const response = { jsonrpc: "2.0", id, result: { content: [{ type: "text", text: JSON.stringify(tool.result(argVals)) }], isError: false } };
+      frames = [reqFrame, { dir: "res", body: response, note: "The server returns structured content the client can trust the shape of — the same envelope for every tool." }];
+      isError = false;
     }
-
-    const response = { jsonrpc: "2.0", id, result: { content: [{ type: "text", text: JSON.stringify(tool.result(argVals)) }], isError: false } };
-    setFrames([
-      { dir: "req", body: request, note: "The client asks the server to run one named tool with typed arguments — nothing else is on the wire." },
-      { dir: "res", body: response, note: "The server returns structured content the client can trust the shape of — the same envelope for every tool." },
-    ]);
+    // Byte size is real (serialized frames); latency is a deterministic pseudo-figure, labeled as illustrative in the log.
+    const bytes = frames.reduce((n, f) => n + JSON.stringify(f.body).length, 0);
+    const ms = 38 + tool.name.length * 3 + Object.keys(argVals).length * 7;
+    setHistory((h) => [{ id, tool: tool.name, sysLabel: sys.label, frames, error: isError, ms, bytes }, ...h]);
+    setViewCallId(id);
   };
+
+  // Restore a shared call (?cfg=) once on mount.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("cfg");
+    if (!raw) return;
+    try {
+      const cfg = JSON.parse(atob(raw)) as { sys?: string; tool?: string; args?: Record<string, string>; nSys?: number; nCon?: number; tab?: "tools" | "resources" | "prompts"; ann?: boolean; mal?: boolean };
+      if (cfg.sys) setSysKey(cfg.sys);
+      if (cfg.tool) setToolName(cfg.tool);
+      if (cfg.args) setArgVals(cfg.args);
+      if (typeof cfg.nSys === "number") setNSys(cfg.nSys);
+      if (typeof cfg.nCon === "number") setNCon(cfg.nCon);
+      if (cfg.tab) setTab(cfg.tab);
+      if (typeof cfg.ann === "boolean") setAnnotate(cfg.ann);
+      if (typeof cfg.mal === "boolean") setMalformed(cfg.mal);
+    } catch { /* ignore malformed link */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const shareScenario = () => {
+    const cfg = btoa(JSON.stringify({ sys: sysKey, tool: toolName, args: argVals, nSys, nCon, tab, ann: annotate, mal: malformed }));
+    const params = new URLSearchParams(window.location.search);
+    params.set("cfg", cfg);
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", url);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact call"), () => toast("Link is in the address bar"));
+    } else { toast("Link is in the address bar"); }
+  };
+  const resetLab = () => { onSystem(SYSTEMS[0].key); setNSys(8); setNCon(6); setMalformed(false); setAnnotate(true); toast("Playground reset"); };
 
   const bespoke = nSys * nCon;
   const mcp = nSys + nCon;
@@ -165,15 +199,24 @@ export function McpPlayground() {
         <UseCaseRail useCases={GAP01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
 
+        <LabToolbar>
+          <ToolbarButton onClick={shareScenario} title="Copy a link that reproduces this exact call">
+            <Share2 className="h-3.5 w-3.5" /> Share
+          </ToolbarButton>
+          <ToolbarButton onClick={resetLab} title="Reset the playground to defaults">
+            <RotateCcw className="h-3.5 w-3.5" /> Reset
+          </ToolbarButton>
+          <ToolbarButton onClick={() => setAnnotate((v) => !v)} active={annotate} title="Toggle the plain-English annotation under each frame">
+            <Eye className="h-3.5 w-3.5" /> Exec annotations
+          </ToolbarButton>
+        </LabToolbar>
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
           {!activeUc && SYSTEMS.map((s) => (
             <button key={s.key} onClick={() => onSystem(s.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${s.key === sysKey ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{s.label}</button>
           ))}
           <span className="text-[11px] text-slatey-500">{sys.blurb}</span>
-          <label className="ml-auto inline-flex items-center gap-1.5 text-[11px] text-slatey-500">
-            <input type="checkbox" checked={annotate} onChange={(e) => setAnnotate(e.target.checked)} className="accent-teal-600" /> Exec annotations
-          </label>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
@@ -239,18 +282,48 @@ export function McpPlayground() {
               </div>
             </Panel>
 
-            {frames && (
-              <div className="space-y-2">
-                {frames.map((f, i) => (
-                  <div key={i}>
-                    <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide">
-                      {f.dir === "req" ? <span className="text-slatey-500">→ request</span> : <span className={f.error ? "text-rose-600" : "text-teal-700"}>← response{f.error ? " · error" : ""}</span>}
+            {history.length > 0 && (() => {
+              const viewCall = history.find((c) => c.id === viewCallId) ?? history[0];
+              return (
+                <div className="space-y-2">
+                  {viewCall.frames.map((f, i) => (
+                    <div key={i}>
+                      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide">
+                        {f.dir === "req"
+                          ? <span className="text-slatey-500">→ request <span className="font-normal normal-case">#{viewCall.id} · {viewCall.tool}</span></span>
+                          : <span className={f.error ? "text-rose-600" : "text-teal-700"}>← response{f.error ? " · error" : ""}</span>}
+                      </div>
+                      <pre className={`overflow-x-auto rounded-lg border p-3 font-mono text-[11px] leading-relaxed ${f.error ? "border-rose-200 bg-rose-50 text-rose-900" : "border-line bg-ink text-slate-100"}`}>{JSON.stringify(f.body, null, 2)}</pre>
+                      {annotate && <p className="mt-1 text-[11px] italic text-slatey-500">{f.note}</p>}
                     </div>
-                    <pre className={`overflow-x-auto rounded-lg border p-3 font-mono text-[11px] leading-relaxed ${f.error ? "border-rose-200 bg-rose-50 text-rose-900" : "border-line bg-ink text-slate-100"}`}>{JSON.stringify(f.body, null, 2)}</pre>
-                    {annotate && <p className="mt-1 text-[11px] italic text-slatey-500">{f.note}</p>}
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {history.length > 0 && (
+              <Panel>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="stat-label">Session log <span className="font-normal text-slatey-500">· {history.length} call{history.length > 1 ? "s" : ""}</span></p>
+                  <button onClick={() => { setHistory([]); setViewCallId(null); }} className="text-[11px] font-medium text-slatey-400 hover:text-ink">Clear</button>
+                </div>
+                <ul className="space-y-1">
+                  {history.map((c) => {
+                    const on = c.id === (viewCallId ?? history[0].id);
+                    return (
+                      <li key={c.id}>
+                        <button onClick={() => setViewCallId(c.id)} className={`flex w-full items-center gap-2 rounded-md border px-2 py-1 text-left text-[11px] transition ${on ? "border-teal-500 bg-teal-50/60" : "border-line hover:border-teal-500/40"}`}>
+                          <span className="font-mono text-slatey-500">#{c.id}</span>
+                          <span className="font-mono font-semibold text-ink">{c.tool}</span>
+                          <Badge tone={c.error ? "rose" : "emerald"}>{c.error ? "error" : "ok"}</Badge>
+                          <span className="ml-auto font-mono text-slatey-500">~{c.ms}ms · {c.bytes}B</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="mt-2 text-[10px] text-slatey-500">Byte sizes are the real serialized frames; latency is illustrative.</p>
+              </Panel>
             )}
           </div>
         </div>
@@ -285,6 +358,7 @@ export function McpPlayground() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> a real MCP server adds capability negotiation, auth, streaming, and pagination; this shows the core request/response contract, not the full lifecycle.</p>
         </div>
+        <ToastHost />
       </main>
     </div>
   );

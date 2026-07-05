@@ -12,8 +12,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, type LucideIcon } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, Share2, RotateCcw, Gauge, type LucideIcon } from "lucide-react";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost } from "@labs/design-system";
 import { LIVE_MODEL, GAP03_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
@@ -80,7 +80,7 @@ const PRESETS: Preset[] = [
 ];
 
 // SIMULATED — the run is authored and deterministic; a live-model variant is on the roadmap (no live call path is wired today).
-const STEP_MS = 950;
+const BASE_STEP_MS = 950;
 
 export function OrchestrationBoard() {
   const [presetKey, setPresetKey] = useState(PRESETS[0].key);
@@ -93,6 +93,8 @@ export function OrchestrationBoard() {
   const [runId, setRunId] = useState(0);
   const [progress, setProgress] = useState(-1); // -1 idle · 0..A running · >A done
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [speed, setSpeed] = useState(1); // replay speed: 0.5× / 1× / 2×
+  const stepMs = Math.round(BASE_STEP_MS / speed);
 
   useEffect(() => {
     if (runId === 0) return;
@@ -102,13 +104,40 @@ export function OrchestrationBoard() {
         if (p >= A + 1) { if (timer.current) clearInterval(timer.current); return p; }
         return p + 1;
       });
-    }, STEP_MS);
+    }, stepMs);
     return () => { if (timer.current) clearInterval(timer.current); };
+    // stepMs intentionally omitted: speed applies to the next run, not mid-run.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId, A]);
 
   const onPreset = (k: string) => { setPresetKey(k); setActiveUcId(null); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
   const selectUseCase = (id: string | null) => { setActiveUcId(id); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
   const run = () => setRunId((r) => r + 1);
+  const cycleSpeed = () => setSpeed((s) => (s === 1 ? 2 : s === 2 ? 0.5 : 1));
+
+  // Restore a shared run setup (?cfg=) once on mount.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("cfg");
+    if (!raw) return;
+    try {
+      const cfg = JSON.parse(atob(raw)) as { p?: string; sp?: number };
+      if (cfg.p) setPresetKey(cfg.p);
+      if (typeof cfg.sp === "number") setSpeed(cfg.sp);
+    } catch { /* ignore malformed link */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const shareScenario = () => {
+    const cfg = btoa(JSON.stringify({ p: activeUc ? undefined : presetKey, sp: speed }));
+    const params = new URLSearchParams(window.location.search);
+    params.set("cfg", cfg);
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", url);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast("Link copied — this run setup"), () => toast("Link is in the address bar"));
+    } else { toast("Link is in the address bar"); }
+  };
+  const resetLab = () => { onPreset(PRESETS[0].key); setSpeed(1); toast("Board reset"); };
 
   const idle = progress === -1;
   const done = progress > A;
@@ -116,6 +145,7 @@ export function OrchestrationBoard() {
 
   const qualityDelta = Math.round((preset.multi.quality / preset.single.quality - 1) * 100);
   const costMult = (preset.multi.costUsd / preset.single.costUsd).toFixed(1);
+  const frac = idle ? 0 : Math.min(progress, A) / A; // fraction of the run complete — drives the live meter
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -144,12 +174,26 @@ export function OrchestrationBoard() {
         <UseCaseRail useCases={GAP03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
 
+        <LabToolbar>
+          <ToolbarButton onClick={run} active title="Run / re-run the orchestration">
+            <Play className="h-3.5 w-3.5" /> {idle ? "Run" : "Re-run"}
+          </ToolbarButton>
+          <ToolbarButton onClick={cycleSpeed} title="Replay speed for the next run">
+            <Gauge className="h-3.5 w-3.5" /> {speed}× speed
+          </ToolbarButton>
+          <ToolbarButton onClick={shareScenario} title="Copy a link to this run setup">
+            <Share2 className="h-3.5 w-3.5" /> Share
+          </ToolbarButton>
+          <ToolbarButton onClick={resetLab} title="Reset the board">
+            <RotateCcw className="h-3.5 w-3.5" /> Reset
+          </ToolbarButton>
+        </LabToolbar>
+
         <div className="mb-5 flex flex-wrap items-center gap-2">
           {!activeUc && PRESETS.map((p) => (
             <button key={p.key} onClick={() => onPreset(p.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${p.key === presetKey ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{p.label}</button>
           ))}
-          <button onClick={run} className="ml-auto inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink/90"><Play className="h-3.5 w-3.5" /> {idle ? "Run" : "Re-run"}</button>
         </div>
 
         <div className="mb-3 rounded-lg border border-line bg-white px-3 py-2 text-sm">
@@ -214,6 +258,13 @@ export function OrchestrationBoard() {
 
             <Panel>
               <p className="stat-label mb-2">Multi-agent vs single-agent</p>
+              {!idle && (
+                <div className="mb-3 rounded-md bg-slate-50 px-3 py-2">
+                  <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Run cost so far</span><span className="font-mono font-semibold text-ink">${(preset.multi.costUsd * frac).toFixed(3)}<span className="text-slatey-500"> / ${preset.multi.costUsd.toFixed(3)}</span></span></div>
+                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-teal-600 transition-all duration-300" style={{ width: `${frac * 100}%` }} /></div>
+                  <div className="mt-1.5 flex items-center justify-between text-[11px]"><span className="text-slatey-500">Elapsed</span><span className="font-mono text-ink">{(preset.multi.latencyS * frac).toFixed(1)}s / {preset.multi.latencyS}s</span></div>
+                </div>
+              )}
               <Compare label="Quality" single={`${preset.single.quality}`} multi={`${preset.multi.quality}`} sVal={preset.single.quality} mVal={preset.multi.quality} betterHigh />
               <Compare label="Cost / run" single={`$${preset.single.costUsd.toFixed(3)}`} multi={`$${preset.multi.costUsd.toFixed(3)}`} sVal={preset.single.costUsd} mVal={preset.multi.costUsd} />
               <Compare label="Latency" single={`${preset.single.latencyS}s`} multi={`${preset.multi.latencyS}s`} sVal={preset.single.latencyS} mVal={preset.multi.latencyS} />
@@ -239,6 +290,7 @@ export function OrchestrationBoard() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the outputs and the cost/latency/quality figures are authored illustrations of a typical run on this task class, not measured from a live execution. The +{qualityDelta}% / {costMult}× ratio is representative, not a benchmarked result.</p>
         </div>
+        <ToastHost />
       </main>
     </div>
   );

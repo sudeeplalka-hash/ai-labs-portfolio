@@ -6,14 +6,14 @@
 // → a two-week adoption plan that rewrites as the weakest factors move. SIMULATED;
 // weighted composite with visible weights and a defended threshold.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, Download } from "lucide-react";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, type BadgeTone } from "@labs/design-system";
 import { EL01_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
-import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
+import { downloadMarkdown } from "../artifact/artifact";
 
 type FactorKey = "sponsorship" | "workflow" | "trust" | "training" | "incentives" | "comms";
 type Factors = Record<FactorKey, number>;
@@ -41,9 +41,22 @@ const SCENARIOS: { key: string; label: string; people: number; defaults: Factors
   { key: "noc", label: "Network-ops copilot · 300 NOC engineers", people: 300, defaults: { sponsorship: 70, trust: 48, workflow: 58, training: 55, comms: 60, incentives: 50 } },
 ];
 
-const composite = (f: Factors) => Math.round(FACTORS.reduce((a, x) => a + x.weight * f[x.key], 0));
+const FACTOR_KEYS = FACTORS.map((x) => x.key);
+
+// Editable model assumptions — the six factor weights + the two gate cutoffs.
+// Defaults are the original values; editing makes it "your model" (still SIMULATED).
+// Composite is normalized by the weight sum so it stays 0–100 for any weights.
+interface Assumptions { weights: Record<FactorKey, number>; scaleCut: number; condCut: number }
+const DEFAULT_ASSUMPTIONS: Assumptions = {
+  weights: { sponsorship: 0.25, trust: 0.20, workflow: 0.15, training: 0.15, comms: 0.15, incentives: 0.10 },
+  scaleCut: 75, condCut: 60,
+};
+const weightSum = (w: Record<FactorKey, number>) => FACTOR_KEYS.reduce((a, k) => a + w[k], 0) || 1;
+const compositeOf = (f: Factors, w: Record<FactorKey, number>) =>
+  Math.round(FACTOR_KEYS.reduce((a, k) => a + w[k] * f[k], 0) / weightSum(w));
 type Gate = { verdict: string; tone: BadgeTone };
-const gateFor = (c: number): Gate => (c >= 75 ? { verdict: "Scale", tone: "emerald" } : c >= 60 ? { verdict: "Scale with conditions", tone: "amber" } : { verdict: "Hold", tone: "rose" });
+const gateForOf = (c: number, A: Assumptions): Gate =>
+  c >= A.scaleCut ? { verdict: "Scale", tone: "emerald" } : c >= A.condCut ? { verdict: "Scale with conditions", tone: "amber" } : { verdict: "Hold", tone: "rose" };
 
 export function AdoptionReadiness() {
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
@@ -66,15 +79,54 @@ export function AdoptionReadiness() {
   };
   const setF = (key: FactorKey, v: number) => setFactors((f) => ({ ...f, [key]: v }));
 
-  const c = composite(factors);
-  const gate = gateFor(c);
+  const [assumptions, setAssumptions] = useState<Assumptions>(DEFAULT_ASSUMPTIONS);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const A = assumptions;
+  const edited = JSON.stringify(A) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
+
+  // Restore a shared scenario (?cfg=) once on mount — scenario, factors, assumptions.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("cfg");
+    if (!raw) return;
+    try {
+      const cfg = JSON.parse(atob(raw)) as { f?: Factors; a?: Partial<Assumptions>; sc?: string };
+      if (cfg.sc) setScenarioKey(cfg.sc);
+      if (cfg.f) setFactors(cfg.f);
+      if (cfg.a) {
+        const a = cfg.a;
+        setAssumptions({
+          weights: { ...DEFAULT_ASSUMPTIONS.weights, ...(a.weights ?? {}) },
+          scaleCut: a.scaleCut ?? DEFAULT_ASSUMPTIONS.scaleCut,
+          condCut: a.condCut ?? DEFAULT_ASSUMPTIONS.condCut,
+        });
+      }
+    } catch { /* ignore malformed link */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const shareScenario = () => {
+    const cfg = btoa(JSON.stringify({ f: factors, a: A, sc: activeUc ? undefined : scenarioKey }));
+    const params = new URLSearchParams(window.location.search);
+    params.set("cfg", cfg);
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", url);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact scenario"), () => toast("Link is in the address bar"));
+    } else {
+      toast("Link is in the address bar");
+    }
+  };
+  const resetAssumptions = () => { setAssumptions(DEFAULT_ASSUMPTIONS); toast("Assumptions reset to defaults"); };
+
+  const c = compositeOf(factors, A.weights);
+  const gate = gateForOf(c, A);
   const weak = FACTORS.filter((x) => factors[x.key] < 70).sort((a, b) => factors[a.key] - factors[b.key]);
   const priorities = weak.slice(0, 3);
 
   const buildAdoptionMemo = (): string => {
-    const gnarr = c >= 75
+    const gnarr = c >= A.scaleCut
       ? "Readiness clears the bar — scale."
-      : c >= 60
+      : c >= A.condCut
       ? "Scale only with the fixes below committed and owned."
       : "Hold — the people aren't ready. Fix the weakest factors before scaling; a technically-working pilot still fails without them.";
     return [
@@ -87,7 +139,7 @@ export function AdoptionReadiness() {
       "",
       "| Factor | Weight | Score |",
       "| --- | --- | --- |",
-      ...FACTORS.map((x) => `| ${x.label} | ${Math.round(x.weight * 100)}% | ${factors[x.key]} |`),
+      ...FACTORS.map((x) => `| ${x.label} | ${Math.round(A.weights[x.key] / weightSum(A.weights) * 100)}% | ${factors[x.key]} |`),
       "",
       "## Gate verdict",
       "",
@@ -131,9 +183,21 @@ export function AdoptionReadiness() {
         <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
 
-        <div className="mb-4 flex justify-end">
-          <ArtifactButton label="Download the readiness memo" onClick={onGenerate} title="Download the adoption readiness memo as Markdown" />
-        </div>
+        <LabToolbar>
+          <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's weights and gate cutoffs">
+            <SlidersHorizontal className="h-3.5 w-3.5" /> Assumptions
+            {edited && <span className="ml-1 rounded bg-white/25 px-1 py-px text-[10px] font-bold uppercase tracking-wide">your model</span>}
+          </ToolbarButton>
+          <ToolbarButton onClick={shareScenario} title="Copy a link that reproduces this exact scenario">
+            <Share2 className="h-3.5 w-3.5" /> Share
+          </ToolbarButton>
+          <ToolbarButton onClick={resetAssumptions} title="Reset assumptions to the defaults">
+            <RotateCcw className="h-3.5 w-3.5" /> Reset
+          </ToolbarButton>
+          <ToolbarButton onClick={onGenerate} className="ml-auto" title="Download the adoption readiness memo as Markdown">
+            <Download className="h-3.5 w-3.5" /> Readiness memo
+          </ToolbarButton>
+        </LabToolbar>
 
         <div className="mb-5 flex flex-wrap gap-2">
           {!activeUc && SCENARIOS.map((s) => (
@@ -149,7 +213,7 @@ export function AdoptionReadiness() {
             {FACTORS.map((x) => (
               <div key={x.key}>
                 <div className="mb-1 flex items-center justify-between gap-2">
-                  <label className="text-xs font-medium text-slatey-400">{x.label} <span className="text-slatey-500">· {Math.round(x.weight * 100)}%</span></label>
+                  <label className="text-xs font-medium text-slatey-400">{x.label} <span className="text-slatey-500">· {Math.round(A.weights[x.key] / weightSum(A.weights) * 100)}%</span></label>
                   <span className={`font-mono text-xs font-semibold ${factors[x.key] < 55 ? "text-rose-600" : factors[x.key] < 70 ? "text-amber-600" : "text-emerald-700"}`}>{factors[x.key]}</span>
                 </div>
                 <input type="range" min={0} max={100} step={1} value={factors[x.key]} onChange={(e) => setF(x.key, Number(e.target.value))} className="w-full accent-primary" />
@@ -169,13 +233,13 @@ export function AdoptionReadiness() {
                 <Badge tone={gate.tone}>{gate.verdict}</Badge>
               </div>
               <div className="relative mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
-                <div className="absolute inset-y-0 left-0 bg-rose-200" style={{ width: "60%" }} />
-                <div className="absolute inset-y-0 bg-amber-200" style={{ left: "60%", width: "15%" }} />
-                <div className="absolute inset-y-0 right-0 bg-emerald-200" style={{ left: "75%" }} />
+                <div className="absolute inset-y-0 left-0 bg-rose-200" style={{ width: `${A.condCut}%` }} />
+                <div className="absolute inset-y-0 bg-amber-200" style={{ left: `${A.condCut}%`, width: `${A.scaleCut - A.condCut}%` }} />
+                <div className="absolute inset-y-0 right-0 bg-emerald-200" style={{ left: `${A.scaleCut}%` }} />
                 <div className="absolute -top-0.5 h-4 w-[3px] rounded bg-ink" style={{ left: `calc(${c}% - 1px)` }} />
               </div>
-              <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>Hold</span><span>60</span><span>75</span><span>Scale</span></div>
-              <p className="mt-3 text-xs italic text-slatey-500">I gate below 60 because I&apos;ve watched pilots that scaled anyway die at week six — the trust wasn&apos;t there and the floor knew it.</p>
+              <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>Hold</span><span>{A.condCut}</span><span>{A.scaleCut}</span><span>Scale</span></div>
+              <p className="mt-3 text-xs italic text-slatey-500">I gate below {A.condCut} because I&apos;ve watched pilots that scaled anyway die at week six — the trust wasn&apos;t there and the floor knew it.</p>
             </Panel>
 
             <Panel>
@@ -216,7 +280,57 @@ export function AdoptionReadiness() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> weights are defensible defaults, not calibrated against outcome data; scoring is judgment-based. The instrument structures the readiness conversation — it doesn&apos;t replace it.</p>
         </div>
+
+        <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Model assumptions">
+          <div className="space-y-5">
+            <p className="text-xs leading-relaxed text-slatey-400">
+              These set how much each factor counts and where the gate draws its lines. Editing makes this{" "}
+              <span className="font-semibold text-ink">your model</span> — still SIMULATED, now on your weights.
+            </p>
+
+            <div>
+              <p className="stat-label mb-2">Factor weights <span className="font-normal text-slatey-500">· normalized to 100%</span></p>
+              <div className="space-y-3">
+                {FACTORS.map((x) => (
+                  <AssumptionRow key={x.key} label={x.label} value={Math.round(A.weights[x.key] * 100)} min={0} max={40} step={1} suffix="%"
+                    onChange={(v) => setAssumptions((p) => ({ ...p, weights: { ...p.weights, [x.key]: v / 100 } }))} />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="stat-label mb-2">Gate cutoffs</p>
+              <div className="space-y-3">
+                <AssumptionRow label="Scale at ≥" value={A.scaleCut} min={A.condCut + 1} max={95} step={1}
+                  onChange={(v) => setAssumptions((p) => ({ ...p, scaleCut: Math.max(v, p.condCut + 1) }))} />
+                <AssumptionRow label="Conditions at ≥" value={A.condCut} min={20} max={A.scaleCut - 1} step={1}
+                  onChange={(v) => setAssumptions((p) => ({ ...p, condCut: Math.min(v, p.scaleCut - 1) }))} />
+              </div>
+            </div>
+
+            <button onClick={resetAssumptions} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slatey-400 transition-colors hover:border-primary/40 hover:text-ink">
+              <RotateCcw className="h-3.5 w-3.5" /> Reset to defaults
+            </button>
+          </div>
+        </Drawer>
+        <ToastHost />
       </main>
+    </div>
+  );
+}
+
+function AssumptionRow({
+  label, value, min, max, step, suffix, fixed, onChange,
+}: {
+  label: string; value: number; min: number; max: number; step: number; suffix?: string; fixed?: number; onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <label className="text-xs font-medium text-slatey-400">{label}</label>
+        <span className="font-mono text-xs font-semibold text-ink">{fixed !== undefined ? value.toFixed(fixed) : value}{suffix ?? ""}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-primary" />
     </div>
   );
 }

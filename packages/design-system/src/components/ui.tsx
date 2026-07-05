@@ -186,6 +186,34 @@ export function KpiCard({
   );
 }
 
+/* ---------------- Lab toolbar ----------------
+ * A consistent action strip a lab mounts under its header: scenario / assumptions
+ * / share / export / reset. Presentational; the lab composes ToolbarButtons. */
+export function LabToolbar({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("mb-5 flex flex-wrap items-center gap-1.5 rounded-xl border border-line bg-white p-2 shadow-card", className)} role="toolbar" aria-label="Lab controls">
+      {children}
+    </div>
+  );
+}
+
+export function ToolbarButton({
+  onClick, children, active = false, title, className,
+}: {
+  onClick?: () => void; children: React.ReactNode; active?: boolean; title?: string; className?: string;
+}) {
+  return (
+    <button type="button" onClick={onClick} title={title} aria-pressed={active}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors",
+        active ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink",
+        className,
+      )}>
+      {children}
+    </button>
+  );
+}
+
 /* ---------------- PageIntro ---------------- */
 export function PageIntro({
   eyebrow, title, icon: Icon, children,

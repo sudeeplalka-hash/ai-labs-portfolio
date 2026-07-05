@@ -6,10 +6,10 @@
 // condition. Showing the runner-up and what flips it is what makes this architecture
 // judgment, not a quiz. SIMULATED — deterministic scoring over visible inputs.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost } from "@labs/design-system";
 import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
@@ -37,12 +37,17 @@ const QUESTIONS: { key: string; q: string; opts: string[] }[] = [
   { key: "q6", q: "Simplicity sensitivity?", opts: ["Keep it minimal", "Moderate", "Complexity is fine"] },
 ];
 
-function evaluate(a: Record<string, number>) {
+// Editable weights: interpretable multipliers on each signal. All 1.0 reproduces the
+// original model exactly; tilting them makes it "your model" (still SIMULATED).
+interface Weights { scale: number; coordination: number; governance: number; simplicity: number }
+const DEFAULT_WEIGHTS: Weights = { scale: 1, coordination: 1, governance: 1, simplicity: 1 };
+
+function evaluate(a: Record<string, number>, W: Weights) {
   const { q1, q2, q3, q4, q5, q6 } = a;
-  const mcp = q1 * 1.6 + q2 * 1.1 + q4 * 1.0 + q5 * 1.1;
-  const a2a = q3 * 2.4 + q2 * 0.8;
-  const fc = (2 - q1) * 1.7 + (2 - q3) * 1.6 + (q2 === 0 ? 1.5 : 0) + (q6 === 0 ? 1.0 : 0);
-  const hybrid = Math.min(mcp, a2a) * 1.15 + q4 * 0.7;
+  const mcp = (q1 * 1.6 + q5 * 1.1) * W.scale + q2 * 1.1 + q4 * 1.0 * W.governance;
+  const a2a = q3 * 2.4 * W.coordination + q2 * 0.8;
+  const fc = ((2 - q1) * 1.7 + (2 - q3) * 1.6 + (q2 === 0 ? 1.5 : 0) + (q6 === 0 ? 1.0 : 0)) * W.simplicity;
+  const hybrid = Math.min(mcp, a2a) * 1.15 + q4 * 0.7 * W.governance;
   const scores: Record<PKey, number> = { fc, mcp, a2a, hybrid };
   const ranked = (Object.entries(scores) as [PKey, number][]).sort((x, y) => y[1] - x[1]);
   return { scores, primary: ranked[0][0], runnerUp: ranked[1][0] };
@@ -62,13 +67,54 @@ export function ProtocolSelection() {
     setAns(uc ? uc.payload.answers : { q1: 1, q2: 1, q3: 1, q4: 1, q5: 1, q6: 1 });
   };
   const setAnswer = (key: string, i: number) => { setAns((a) => ({ ...a, [key]: i })); setActiveUcId(null); };
-  const { scores, primary, runnerUp } = evaluate(ans);
+
+  const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const W = weights;
+  const edited = JSON.stringify(W) !== JSON.stringify(DEFAULT_WEIGHTS);
+
+  // Restore a shared recommendation (?cfg=) once on mount — answers + weights.
+  useEffect(() => {
+    const raw = new URLSearchParams(window.location.search).get("cfg");
+    if (!raw) return;
+    try {
+      const cfg = JSON.parse(atob(raw)) as { ans?: Record<string, number>; w?: Partial<Weights> };
+      if (cfg.ans) setAns(cfg.ans);
+      if (cfg.w) { const w = cfg.w; setWeights({ scale: w.scale ?? 1, coordination: w.coordination ?? 1, governance: w.governance ?? 1, simplicity: w.simplicity ?? 1 }); }
+    } catch { /* ignore malformed link */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const shareScenario = () => {
+    const cfg = btoa(JSON.stringify({ ans, w: W }));
+    const params = new URLSearchParams(window.location.search);
+    params.set("cfg", cfg);
+    const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", url);
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact recommendation"), () => toast("Link is in the address bar"));
+    } else { toast("Link is in the address bar"); }
+  };
+  const resetWeights = () => { setWeights(DEFAULT_WEIGHTS); toast("Weights reset to defaults"); };
+
+  const { scores, primary, runnerUp } = evaluate(ans, W);
   const maxScore = Math.max(...Object.values(scores)) || 1;
 
   const systems = SYS_COUNT[ans.q1];
   const consumers = CON_COUNT[ans.q2];
   const bespoke = systems * consumers;
   const proto = systems + consumers;
+
+  // Sensitivity: which single answer change would flip the primary recommendation?
+  const sensitivity = QUESTIONS.map((qu) => {
+    const cur = ans[qu.key];
+    for (let i = 0; i < qu.opts.length; i++) {
+      if (i === cur) continue;
+      const alt = evaluate({ ...ans, [qu.key]: i }, W);
+      if (alt.primary !== primary) return { key: qu.key, q: qu.q, to: qu.opts[i], newPrimary: alt.primary };
+    }
+    return null;
+  }).filter((s): s is { key: string; q: string; to: string; newPrimary: PKey } => s !== null);
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -98,6 +144,19 @@ export function ProtocolSelection() {
 
         <UseCaseRail useCases={GAP07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+
+        <LabToolbar>
+          <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Tune how much each signal counts">
+            <SlidersHorizontal className="h-3.5 w-3.5" /> Weights
+            {edited && <span className="ml-1 rounded bg-white/25 px-1 py-px text-[10px] font-bold uppercase tracking-wide">your model</span>}
+          </ToolbarButton>
+          <ToolbarButton onClick={shareScenario} title="Copy a link that reproduces this recommendation">
+            <Share2 className="h-3.5 w-3.5" /> Share
+          </ToolbarButton>
+          <ToolbarButton onClick={resetWeights} title="Reset weights to defaults">
+            <RotateCcw className="h-3.5 w-3.5" /> Reset
+          </ToolbarButton>
+        </LabToolbar>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           {/* Questions */}
@@ -151,6 +210,22 @@ export function ProtocolSelection() {
                 <span className="rounded bg-teal-50 px-2 py-1 font-mono text-teal-700">{proto} protocol</span>
               </div>
             </Panel>
+
+            <Panel>
+              <p className="stat-label mb-2">What would change the call <span className="font-normal text-slatey-500">· sensitivity</span></p>
+              {sensitivity.length === 0 ? (
+                <p className="text-xs text-slatey-500">Robust — no single answer change flips the recommendation. That&apos;s a strong signal the call survives the next scale-up.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {sensitivity.map((s) => (
+                    <li key={s.key} className="rounded-md border border-line p-2 text-xs">
+                      <span className="text-slatey-400">{s.q}</span>
+                      <span className="mt-0.5 flex flex-wrap items-center gap-1 text-ink">→ answer <span className="font-semibold">&ldquo;{s.to}&rdquo;</span> and it flips to <Badge tone="amber">{PROTO[s.newPrimary].label}</Badge></span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Panel>
           </div>
         </div>
 
@@ -170,7 +245,46 @@ export function ProtocolSelection() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> weights are heuristic judgment, not a benchmarked model; real selection also weighs vendor support, team skill, and existing investments. It structures the call and its sensitivity, not a procurement decision.</p>
         </div>
+
+        <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Scoring weights">
+          <div className="space-y-5">
+            <p className="text-xs leading-relaxed text-slatey-400">
+              Each slider multiplies how much a signal counts. All at <span className="font-mono">1.0</span> is the default model; tilt them to reflect your context. Editing makes this{" "}
+              <span className="font-semibold text-ink">your model</span> — still SIMULATED.
+            </p>
+            <div className="space-y-3">
+              <AssumptionRow label="Scale (systems × consumers → MCP)" value={W.scale} min={0} max={2} step={0.1} fixed={1}
+                onChange={(v) => setWeights((p) => ({ ...p, scale: v }))} />
+              <AssumptionRow label="Coordination (multi-agent → A2A)" value={W.coordination} min={0} max={2} step={0.1} fixed={1}
+                onChange={(v) => setWeights((p) => ({ ...p, coordination: v }))} />
+              <AssumptionRow label="Governance (central control → MCP / hybrid)" value={W.governance} min={0} max={2} step={0.1} fixed={1}
+                onChange={(v) => setWeights((p) => ({ ...p, governance: v }))} />
+              <AssumptionRow label="Simplicity (keep it minimal → function calling)" value={W.simplicity} min={0} max={2} step={0.1} fixed={1}
+                onChange={(v) => setWeights((p) => ({ ...p, simplicity: v }))} />
+            </div>
+            <button onClick={resetWeights} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slatey-400 transition-colors hover:border-primary/40 hover:text-ink">
+              <RotateCcw className="h-3.5 w-3.5" /> Reset to defaults
+            </button>
+          </div>
+        </Drawer>
+        <ToastHost />
       </main>
+    </div>
+  );
+}
+
+function AssumptionRow({
+  label, value, min, max, step, suffix, fixed, onChange,
+}: {
+  label: string; value: number; min: number; max: number; step: number; suffix?: string; fixed?: number; onChange: (v: number) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between gap-2">
+        <label className="text-xs font-medium text-slatey-400">{label}</label>
+        <span className="font-mono text-xs font-semibold text-ink">{fixed !== undefined ? value.toFixed(fixed) : value}{suffix ?? ""}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-teal-600" />
     </div>
   );
 }

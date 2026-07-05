@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Info, X } from "lucide-react";
 import { cn } from "../lib/cn";
 
 export function MetricTooltip({ text, className }: { text: string; className?: string }) {
@@ -96,6 +96,65 @@ export function SectionTabs({
         </button>
       ))}
     </nav>
+  );
+}
+
+/* ---------------- Drawer ----------------
+ * Right-side panel for advanced controls (e.g. an Assumptions editor). Overlay +
+ * ESC to close; body scroll locked while open. Client-only. */
+export function Drawer({
+  open, onClose, title, children,
+}: {
+  open: boolean; onClose: () => void; title: string; children: React.ReactNode;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", onKey); };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-ink/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div role="dialog" aria-label={title} className="animate-fade-in absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l border-line bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-line px-4 py-3">
+          <p className="text-sm font-semibold text-ink">{title}</p>
+          <button onClick={onClose} aria-label="Close" className="rounded-md p-1 text-slatey-400 transition-colors hover:bg-slate-100 hover:text-ink"><X className="h-4 w-4" /></button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- Toasts (provider-free) ----------------
+ * A tiny module-level pub/sub so any component can `toast("Copied")` without a
+ * context provider. Mount <ToastHost/> once per lab (or globally). */
+type ToastItem = { id: number; message: string };
+let toastListeners: ((t: ToastItem) => void)[] = [];
+let toastSeq = 0;
+export function toast(message: string) {
+  const item: ToastItem = { id: ++toastSeq, message };
+  toastListeners.forEach((l) => l(item));
+}
+export function ToastHost() {
+  const [items, setItems] = useState<ToastItem[]>([]);
+  useEffect(() => {
+    const listener = (t: ToastItem) => {
+      setItems((prev) => [...prev, t]);
+      setTimeout(() => setItems((prev) => prev.filter((x) => x.id !== t.id)), 2600);
+    };
+    toastListeners.push(listener);
+    return () => { toastListeners = toastListeners.filter((l) => l !== listener); };
+  }, []);
+  return (
+    <div className="pointer-events-none fixed bottom-4 left-1/2 z-[60] flex -translate-x-1/2 flex-col items-center gap-2" aria-live="polite" aria-atomic="true">
+      {items.map((t) => (
+        <div key={t.id} className="animate-fade-in pointer-events-auto rounded-lg bg-ink px-3.5 py-2 text-xs font-medium text-white shadow-lg">{t.message}</div>
+      ))}
+    </div>
   );
 }
 
