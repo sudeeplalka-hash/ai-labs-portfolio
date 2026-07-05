@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, type ExportAction, type Command, type SortState, type BadgeTone } from "@labs/design-system";
+import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, pushRecent, loadRecent, saveRecent, type ExportAction, type Command, type SortState, type RecentEntry, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES, LABS } from "@labs/kit";
 import { greedyFund, reallocateKills, initiativesFromCsvRows } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
@@ -66,6 +66,7 @@ const fmtM = (v: number) => `${v < 0 ? "-" : ""}$${Math.abs(v).toFixed(1)}M`;
 const STAGES_LIST: Stage[] = ["discovery", "pilot", "scaling", "production"];
 
 type View = "map" | "financials" | "gate" | "fund" | "reallocate";
+const RECENT_KEY = "portfolio-recent";
 
 export function PortfolioDashboard() {
   const [view, setView] = useState<View>("map");
@@ -77,6 +78,8 @@ export function PortfolioDashboard() {
   const [selId, setSelId] = useState<string>("kyc");
   const [editMode, setEditMode] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
+  const [recent, setRecent] = useState<RecentEntry[]>([]);
+  useEffect(() => setRecent(loadRecent(RECENT_KEY)), []);
   const scatterRef = useRef<SVGSVGElement>(null);
   const router = useRouter();
   const sel = items.find((i) => i.id === selId) ?? items[0];
@@ -129,6 +132,9 @@ export function PortfolioDashboard() {
 
   const shareScenario = () => {
     const cfg = btoa(JSON.stringify({ v: view, s: selId, a: A, b: bookEdited ? items : undefined }));
+    const nextRecent = pushRecent(loadRecent(RECENT_KEY), { cfg, label: `${items.length} initiatives · ${view}`, at: Date.now() });
+    saveRecent(RECENT_KEY, nextRecent);
+    setRecent(nextRecent);
     const params = new URLSearchParams(window.location.search);
     params.set("cfg", cfg);
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
@@ -281,6 +287,10 @@ export function PortfolioDashboard() {
     { id: "exp-json", label: "Export scenario as JSON", group: "export", run: exportScenario },
     { id: "exp-import", label: "Import scenario\u2026", group: "export", run: importScenario },
     { id: "exp-memo", label: "Download review pack", group: "export", run: onGenerate },
+    ...recent.map((r, i) => ({
+      id: `recent-${i}`, label: `Recent: ${r.label}`, group: "recent", keywords: "history scenario",
+      run: () => { window.location.search = `?cfg=${encodeURIComponent(r.cfg)}`; },
+    })),
     ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
       id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
     })),
