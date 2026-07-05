@@ -109,3 +109,58 @@ export const readinessComposite = <K extends string>(
 /** The gate verdict from a composite and the two (editable) cutoffs. */
 export const readinessGate = (composite: number, scaleCut: number, condCut: number): ReadinessVerdict =>
   composite >= scaleCut ? "Scale" : composite >= condCut ? "Scale with conditions" : "Hold";
+
+// Flip-the-gate — the minimal factor increases that lift the composite to a target
+// (e.g. the Scale cutoff). The composite is a weight-normalized average, so each
+// point added to a factor moves it by weight / Σweights; the cheapest way to close
+// the gap is to spend points on the highest-weight factors that still have headroom.
+// Greedy highest-weight-first therefore uses the fewest total points. Deterministic.
+export interface GateMove<K extends string = string> {
+  key: K;
+  from: number;
+  to: number;
+  /** points added to this factor. */
+  add: number;
+}
+export interface GatePlan<K extends string = string> {
+  /** can the target be reached within the ceiling? */
+  reachable: boolean;
+  /** the factor increases, highest-leverage first. */
+  moves: GateMove<K>[];
+  /** total points moved across all factors. */
+  totalAdded: number;
+  /** the composite that results from applying the moves. */
+  projected: number;
+}
+
+export function planToReachGate<K extends string>(
+  factors: Record<K, number>,
+  weights: Record<K, number>,
+  keys: readonly K[],
+  target: number,
+  ceiling = 100,
+): GatePlan<K> {
+  const W = weightSumOf(weights, keys);
+  const num = keys.reduce((a, k) => a + weights[k] * factors[k], 0);
+  if (Math.round(num / W) >= target) {
+    return { reachable: true, moves: [], totalAdded: 0, projected: Math.round(num / W) };
+  }
+  // Aim for num/W >= target, which guarantees the rounded composite clears the gate.
+  let deficit = target * W - num;
+  const order = [...keys].sort((a, b) => weights[b] - weights[a]); // highest leverage first
+  const next = { ...factors } as Record<K, number>;
+  const moves: GateMove<K>[] = [];
+  for (const k of order) {
+    if (deficit <= 1e-9) break;
+    const headroom = ceiling - factors[k];
+    if (headroom <= 0 || weights[k] <= 0) continue;
+    const add = Math.min(headroom, Math.ceil(deficit / weights[k]));
+    if (add <= 0) continue;
+    next[k] = factors[k] + add;
+    moves.push({ key: k, from: factors[k], to: next[k], add });
+    deficit -= weights[k] * add;
+  }
+  const projected = readinessComposite(next, weights, keys);
+  const totalAdded = moves.reduce((a, m) => a + m.add, 0);
+  return { reachable: projected >= target, moves, totalAdded, projected };
+}

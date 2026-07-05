@@ -4,5 +4,6 @@ export {
   deriveInputs, applyOverrides, computeRoi, valueRiver, sensitivity, dossier,
 } from "./engine/model";
 export {
-  weightSumOf, readinessComposite, readinessGate, type ReadinessVerdict,
+  weightSumOf, readinessComposite, readinessGate, planToReachGate,
+  type ReadinessVerdict, type GateMove, type GatePlan,
 } from "./engine/adoption";

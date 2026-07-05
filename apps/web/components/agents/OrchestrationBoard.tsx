@@ -11,10 +11,12 @@
 // such, never fake-streamed as if live (§B2 / §A4.4).
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, Share2, RotateCcw, Gauge, type LucideIcon } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost } from "@labs/design-system";
-import { LIVE_MODEL, GAP03_USE_CASES } from "@labs/kit";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { LIVE_MODEL, GAP03_USE_CASES, LABS } from "@labs/kit";
+import { agentTimeline } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -127,6 +129,7 @@ export function OrchestrationBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const router = useRouter();
   const shareScenario = () => {
     const cfg = btoa(JSON.stringify({ p: activeUc ? undefined : presetKey, sp: speed }));
     const params = new URLSearchParams(window.location.search);
@@ -139,6 +142,36 @@ export function OrchestrationBoard() {
   };
   const resetLab = () => { onPreset(PRESETS[0].key); setSpeed(1); toast("Board reset"); };
 
+  // ---- Export suite + command palette ----
+  const exportCsv = () => {
+    const headers = ["Approach", "Quality", "Cost (USD)", "Latency (s)"];
+    const rows = [
+      ["Single-agent baseline", preset.single.quality, preset.single.costUsd, preset.single.latencyS],
+      ["Multi-agent", preset.multi.quality, preset.multi.costUsd, preset.multi.latencyS],
+    ];
+    downloadCsv(`orchestration-${presetKey}`, headers, rows);
+    toast("Run metrics exported as CSV");
+  };
+  const exportRun = () => {
+    downloadJson(`orchestration-${presetKey}`, { version: 1, preset: presetKey, goal: preset.goal, speed, single: preset.single, multi: preset.multi, assembled: preset.assembled });
+    toast("Run exported as JSON");
+  };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "Run metrics as CSV", hint: "Single vs multi-agent", onSelect: exportCsv },
+    { id: "json", label: "Export run (JSON)", hint: "Setup + assembled result", onSelect: exportRun },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-run", label: "Run / re-run", group: "action", keywords: "start orchestration", run },
+    { id: "act-speed", label: "Cycle replay speed", group: "action", run: cycleSpeed },
+    { id: "act-share", label: "Copy share link", group: "action", keywords: "permalink url", run: shareScenario },
+    { id: "act-reset", label: "Reset the board", group: "action", run: resetLab },
+    { id: "exp-csv", label: "Export run metrics as CSV", group: "export", run: exportCsv },
+    { id: "exp-json", label: "Export run as JSON", group: "export", run: exportRun },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
+
   const idle = progress === -1;
   const done = progress > A;
   const agentStatus = (i: number): "idle" | "working" | "done" => idle ? "idle" : progress > i ? "done" : progress === i ? "working" : "idle";
@@ -146,6 +179,7 @@ export function OrchestrationBoard() {
   const qualityDelta = Math.round((preset.multi.quality / preset.single.quality - 1) * 100);
   const costMult = (preset.multi.costUsd / preset.single.costUsd).toFixed(1);
   const frac = idle ? 0 : Math.min(progress, A) / A; // fraction of the run complete — drives the live meter
+  const timeline = agentTimeline(preset.agents.map((a) => a.role), preset.multi.latencyS);
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -187,6 +221,10 @@ export function OrchestrationBoard() {
           <ToolbarButton onClick={resetLab} title="Reset the board">
             <RotateCcw className="h-3.5 w-3.5" /> Reset
           </ToolbarButton>
+          <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
+            ⌘K
+          </ToolbarButton>
+          <ExportMenu actions={exportActions} />
         </LabToolbar>
 
         <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -272,6 +310,37 @@ export function OrchestrationBoard() {
                 <span className="font-semibold">The ratio:</span> multi-agent bought <span className="font-semibold">+{qualityDelta}% quality</span> for <span className="font-semibold">{costMult}× cost</span> on this task class. That ratio — not the demo — is the decision.
               </div>
             </Panel>
+
+            <Panel>
+              <p className="stat-label mb-2">Agent timeline <span className="font-normal text-slatey-500">· why multi-agent is slower</span></p>
+              <div className="space-y-2">
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-[11px] text-slatey-500"><span>Multi-agent (sequential handoff)</span><span className="font-mono">{preset.multi.latencyS}s</span></div>
+                  <div className="flex h-6 w-full overflow-hidden rounded-md border border-line">
+                    {timeline.map((sp, i) => {
+                      const isAgent = sp.label !== "Decompose" && sp.label !== "Assemble";
+                      return (
+                        <div key={i} title={`${sp.label} · ~${sp.durationS.toFixed(1)}s`}
+                          style={{ width: `${(sp.durationS / preset.multi.latencyS) * 100}%` }}
+                          className={`flex items-center justify-center border-r border-white/70 text-[9px] font-medium ${isAgent ? "bg-teal-100 text-teal-800" : "bg-slate-100 text-slate-600"}`}>
+                          <span className="truncate px-1">{sp.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-1 flex items-center justify-between text-[11px] text-slatey-500"><span>Single agent (baseline)</span><span className="font-mono">{preset.single.latencyS}s</span></div>
+                  <div className="h-6 w-full rounded-md border border-line bg-slate-50">
+                    <div style={{ width: `${(preset.single.latencyS / preset.multi.latencyS) * 100}%` }}
+                      className="flex h-full items-center justify-center rounded-l-md bg-slate-300 text-[9px] font-medium text-slate-700">
+                      <span className="truncate px-1">one pass</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-slatey-500">The agents run in series &mdash; each hands off to the next &mdash; so their spans add up. That&apos;s the latency you buy for the quality. Per-agent durations are an even split of the authored {preset.multi.latencyS}s (illustrative); the sequence is the point.</p>
+            </Panel>
           </div>
         </div>
 
@@ -291,6 +360,7 @@ export function OrchestrationBoard() {
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the outputs and the cost/latency/quality figures are authored illustrations of a typical run on this task class, not measured from a live execution. The +{qualityDelta}% / {costMult}× ratio is representative, not a benchmarked result.</p>
         </div>
         <ToastHost />
+        <CommandPalette commands={paletteCommands} />
       </main>
     </div>
   );

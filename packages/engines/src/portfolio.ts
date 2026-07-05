@@ -76,3 +76,70 @@ export function greedyFund<T extends { id: string; spendM: number }>(
     cut: items.filter((i) => !funded.has(i.id)).map((i) => i.id),
   };
 }
+
+// Redeploy-the-kills — cut the negative-value initiatives and reallocate their freed
+// capital into the Scale column. Two honest parts: (1) the *cut* is pure accounting —
+// removing negative risk-adjusted value raises the portfolio total by exactly that
+// drag, guaranteed; (2) the *redeploy* is illustrative — freed capital is offered to
+// scale targets greedily by risk-adjusted return-per-$, each capped at `topUpMultiple`
+// × its current spend, and credited at that initiative's *current* return-per-$ (a
+// visible ratio, not an invented scaling curve). `value` and `isScaleTarget` are
+// supplied by the caller so the assumptions the UI shows are the ones computed here.
+export interface ReallocTarget {
+  id: string;
+  allocatedM: number;
+  addedValueM: number; // illustrative, at current return-per-$
+}
+export interface ReallocationResult {
+  killed: string[];
+  freedCapitalM: number;
+  dragRemovedM: number;            // positive: the negative value removed by cutting
+  targets: ReallocTarget[];
+  redeployedM: number;             // capital actually absorbed by caps (<= freed)
+  redeployedValueM: number;        // illustrative added value
+  reserveM: number;                // freed capital left unallocated after caps
+  baseRiskAdjM: number;            // portfolio risk-adjusted value, before
+  afterCutRiskAdjM: number;        // after cutting the kills (real)
+  afterRedeployRiskAdjM: number;   // after cut + illustrative redeploy
+}
+
+export function reallocateKills<T extends { id: string; spendM: number }>(
+  items: T[],
+  value: (i: T) => number,
+  isScaleTarget: (i: T) => boolean,
+  topUpMultiple = 1,
+): ReallocationResult {
+  const killed = items.filter((i) => value(i) < 0);
+  const killedValue = killed.reduce((a, i) => a + value(i), 0); // negative
+  const freedCapitalM = killed.reduce((a, i) => a + i.spendM, 0);
+  const baseRiskAdjM = items.reduce((a, i) => a + value(i), 0);
+  const afterCutRiskAdjM = baseRiskAdjM - killedValue;
+
+  const ranked = items
+    .filter((i) => isScaleTarget(i) && value(i) > 0 && i.spendM > 0)
+    .slice()
+    .sort((a, b) => value(b) / b.spendM - value(a) / a.spendM);
+  let remaining = freedCapitalM;
+  const targets: ReallocTarget[] = [];
+  for (const i of ranked) {
+    if (remaining <= 1e-9) break;
+    const cap = topUpMultiple * i.spendM;
+    const alloc = Math.min(cap, remaining);
+    if (alloc <= 0) continue;
+    targets.push({ id: i.id, allocatedM: alloc, addedValueM: alloc * (value(i) / i.spendM) });
+    remaining -= alloc;
+  }
+  const redeployedValueM = targets.reduce((a, t) => a + t.addedValueM, 0);
+  return {
+    killed: killed.map((i) => i.id),
+    freedCapitalM,
+    dragRemovedM: -killedValue,
+    targets,
+    redeployedM: freedCapitalM - remaining,
+    redeployedValueM,
+    reserveM: remaining,
+    baseRiskAdjM,
+    afterCutRiskAdjM,
+    afterRedeployRiskAdjM: afterCutRiskAdjM + redeployedValueM,
+  };
+}

@@ -52,3 +52,36 @@ export function sensitivity<K extends string = PKey>(
     })
     .filter((s): s is Flip<K> => s !== null);
 }
+
+// Integration economics — the N×M vs N+M argument behind protocols. Point-to-point
+// integrations grow as producers × consumers (bespoke glue); a shared protocol grows
+// as producers + consumers plus a one-off adoption cost. The crossover in consumers is
+// where the protocol starts winning — the quantitative case for MCP/A2A over bespoke.
+// Pure and framework-agnostic.
+export interface IntegrationModel {
+  /** cost of one bespoke point-to-point integration. */
+  perLink?: number;
+  /** cost of exposing/consuming one endpoint on the shared protocol. */
+  perEndpoint?: number;
+  /** one-off cost of adopting the protocol. */
+  protocolFixed?: number;
+}
+
+export const bespokeCost = (producers: number, consumers: number, perLink = 1): number =>
+  producers * consumers * perLink;
+
+export const protocolCost = (producers: number, consumers: number, model: IntegrationModel = {}): number => {
+  const { perEndpoint = 1, protocolFixed = 0 } = model;
+  return (producers + consumers) * perEndpoint + protocolFixed;
+};
+
+/** The consumer count at which the protocol becomes cheaper than bespoke, for a fixed
+ *  producer count. Returns null when adding consumers never makes the protocol win
+ *  (denominator ≤ 0) — e.g. a single producer, where bespoke is already minimal. */
+export function crossoverConsumers(producers: number, model: IntegrationModel = {}): number | null {
+  const { perLink = 1, perEndpoint = 1, protocolFixed = 0 } = model;
+  const denom = producers * perLink - perEndpoint;
+  if (denom <= 0) return null;
+  const consumers = (producers * perEndpoint + protocolFixed) / denom;
+  return consumers > 0 ? consumers : null;
+}

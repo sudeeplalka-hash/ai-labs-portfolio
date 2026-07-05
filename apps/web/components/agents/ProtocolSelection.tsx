@@ -7,11 +7,12 @@
 // judgment, not a quiz. SIMULATED — deterministic scoring over visible inputs.
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost } from "@labs/design-system";
-import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES } from "@labs/kit";
-import { sensitivity as protocolSensitivity } from "@labs/engines";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, type ExportAction, type Command } from "@labs/design-system";
+import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES, LABS } from "@labs/kit";
+import { sensitivity as protocolSensitivity, bespokeCost, protocolCost, crossoverConsumers } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -73,6 +74,7 @@ export function ProtocolSelection() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const W = weights;
   const edited = JSON.stringify(W) !== JSON.stringify(DEFAULT_WEIGHTS);
+  const router = useRouter();
 
   // Restore a shared recommendation (?cfg=) once on mount — answers + weights.
   useEffect(() => {
@@ -105,9 +107,52 @@ export function ProtocolSelection() {
   const consumers = CON_COUNT[ans.q2];
   const bespoke = systems * consumers;
   const proto = systems + consumers;
+  const crossoverM = crossoverConsumers(systems);
 
   // Sensitivity: which single answer change would flip the call? (engine)
   const sensitivity = protocolSensitivity(ans, QUESTIONS, (a) => evaluate(a, W).primary);
+
+  // ---- Export suite + command palette ----
+  const exportCsv = () => {
+    const order: PKey[] = ["fc", "mcp", "a2a", "hybrid"];
+    const headers = ["Protocol", "Score", "Fit %", "Role"];
+    const rows = order.map((k) => [PROTO[k].label, Number(scores[k].toFixed(2)), Math.round((scores[k] / maxScore) * 100), k === primary ? "Primary" : k === runnerUp ? "Runner-up" : ""]);
+    downloadCsv("protocol-scores", headers, rows);
+    toast("Protocol scores exported as CSV");
+  };
+  const exportScenario = () => {
+    downloadJson("protocol-scenario", { version: 1, answers: ans, weights: W });
+    toast("Scenario exported as JSON");
+  };
+  const importScenario = async () => {
+    const text = await pickTextFile();
+    if (!text) return;
+    try {
+      const cfg = parseScenarioJson<{ answers?: Record<string, number>; weights?: Partial<Weights> }>(text);
+      if (cfg.answers) setAns(cfg.answers);
+      if (cfg.weights) {
+        const w = cfg.weights;
+        setWeights({ scale: w.scale ?? 1, coordination: w.coordination ?? 1, governance: w.governance ?? 1, simplicity: w.simplicity ?? 1 });
+      }
+      toast("Scenario imported");
+    } catch { toast("That file isn't a valid scenario"); }
+  };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "Protocol scores as CSV", hint: "All four, with fit %", onSelect: exportCsv },
+    { id: "json", label: "Export scenario (JSON)", hint: "Answers + weights, re-importable", onSelect: exportScenario },
+    { id: "import", label: "Import scenario (JSON)…", hint: "Load a saved .json", onSelect: importScenario },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-weights", label: "Edit scoring weights", group: "action", keywords: "your model assumptions", run: () => setDrawerOpen(true) },
+    { id: "act-share", label: "Copy share link", group: "action", keywords: "permalink url", run: shareScenario },
+    { id: "act-reset", label: "Reset weights", group: "action", run: resetWeights },
+    { id: "exp-csv", label: "Export protocol scores as CSV", group: "export", run: exportCsv },
+    { id: "exp-json", label: "Export scenario as JSON", group: "export", run: exportScenario },
+    { id: "exp-import", label: "Import scenario…", group: "export", run: importScenario },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -149,6 +194,10 @@ export function ProtocolSelection() {
           <ToolbarButton onClick={resetWeights} title="Reset weights to defaults">
             <RotateCcw className="h-3.5 w-3.5" /> Reset
           </ToolbarButton>
+          <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
+            ⌘K
+          </ToolbarButton>
+          <ExportMenu actions={exportActions} />
         </LabToolbar>
 
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
@@ -202,6 +251,39 @@ export function ProtocolSelection() {
                 <span className="ml-auto rounded bg-rose-50 px-2 py-1 font-mono text-rose-700">{bespoke} bespoke</span>
                 <span className="rounded bg-teal-50 px-2 py-1 font-mono text-teal-700">{proto} protocol</span>
               </div>
+              {(() => {
+                const maxM = Math.max(12, consumers + 3);
+                const maxCost = Math.max(1, bespokeCost(systems, maxM));
+                const W = 320, H = 132, padL = 6, padR = 6, padT = 12, padB = 16;
+                const plotW = W - padL - padR, plotH = H - padT - padB;
+                const X = (m: number) => padL + (m / maxM) * plotW;
+                const Y = (cost: number) => padT + (1 - cost / maxCost) * plotH;
+                const cross = crossoverM;
+                return (
+                  <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full" role="img"
+                    aria-label={`Integration cost versus number of consumers: bespoke ${bespoke} vs protocol ${proto} at ${consumers} consumers${cross ? `, protocol overtakes at about ${Math.ceil(cross)}` : ""}.`}>
+                    <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} stroke="#cbd2d9" />
+                    <line x1={padL} y1={padT} x2={padL} y2={H - padB} stroke="#cbd2d9" />
+                    {cross && cross <= maxM && (
+                      <g>
+                        <line x1={X(cross)} y1={padT} x2={X(cross)} y2={H - padB} stroke="#94a3b8" strokeDasharray="3 3" />
+                        <text x={X(cross) + 3} y={padT + 7} fontSize="8" fill="#64748b">crossover ~{Math.ceil(cross)}</text>
+                      </g>
+                    )}
+                    <line x1={X(0)} y1={Y(bespokeCost(systems, 0))} x2={X(maxM)} y2={Y(bespokeCost(systems, maxM))} stroke="#e11d48" strokeWidth="2" />
+                    <line x1={X(0)} y1={Y(protocolCost(systems, 0))} x2={X(maxM)} y2={Y(protocolCost(systems, maxM))} stroke="#0d9488" strokeWidth="2" />
+                    <line x1={X(consumers)} y1={padT} x2={X(consumers)} y2={H - padB} stroke="#152433" strokeWidth="1" opacity="0.2" />
+                    <circle cx={X(consumers)} cy={Y(bespoke)} r="3" fill="#e11d48" />
+                    <circle cx={X(consumers)} cy={Y(proto)} r="3" fill="#0d9488" />
+                    <text x={W - padR} y={padT + 6} fontSize="8" textAnchor="end" fill="#e11d48">bespoke</text>
+                    <text x={W - padR} y={H - padB - 3} fontSize="8" textAnchor="end" fill="#0d9488">protocol</text>
+                    <text x={X(consumers)} y={H - 4} fontSize="8" textAnchor="middle" fill="#64748b">you ({consumers})</text>
+                  </svg>
+                );
+              })()}
+              <p className="mt-1 text-[11px] text-slatey-500">
+                Bespoke point-to-point integrations grow as producers&times;consumers; a shared protocol grows as producers+consumers. {crossoverM ? <>Past ~{Math.ceil(crossoverM)} consumer{Math.ceil(crossoverM) === 1 ? "" : "s"} the protocol wins &mdash; you&apos;re at {consumers}.</> : <>With a single producer, bespoke is already minimal.</>}
+              </p>
             </Panel>
 
             <Panel>
@@ -261,6 +343,7 @@ export function ProtocolSelection() {
           </div>
         </Drawer>
         <ToastHost />
+        <CommandPalette commands={paletteCommands} />
       </main>
     </div>
   );

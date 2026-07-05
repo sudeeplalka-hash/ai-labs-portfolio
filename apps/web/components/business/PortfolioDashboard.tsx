@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
 import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, svgElementToPng, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES, LABS } from "@labs/kit";
-import { greedyFund } from "@labs/engines";
+import { greedyFund, reallocateKills } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -65,7 +65,7 @@ const REC_HEX: Record<Rec, string> = { kill: "#ef4444", hold: "#f59e0b", scale: 
 const fmtM = (v: number) => `${v < 0 ? "-" : ""}$${Math.abs(v).toFixed(1)}M`;
 const STAGES_LIST: Stage[] = ["discovery", "pilot", "scaling", "production"];
 
-type View = "map" | "financials" | "gate" | "fund";
+type View = "map" | "financials" | "gate" | "fund" | "reallocate";
 
 export function PortfolioDashboard() {
   const [view, setView] = useState<View>("map");
@@ -154,6 +154,7 @@ export function PortfolioDashboard() {
   const funded = new Set(fund.funded);
   const fundSpent = fund.spent;
   const fundCaptured = fund.captured;
+  const realloc = reallocateKills(items, riskAdj, (i) => recommend(i) === "scale");
 
   const buildReviewPack = (): string => {
     const kills = items.filter((i) => recommend(i) === "kill");
@@ -241,6 +242,7 @@ export function PortfolioDashboard() {
     { id: "view-fin", label: "View: Financials", group: "view", run: () => setView("financials") },
     { id: "view-gate", label: "View: Stage-gate", group: "view", run: () => setView("gate") },
     { id: "view-fund", label: "View: Funding", group: "view", run: () => setView("fund") },
+    { id: "view-realloc", label: "View: Reallocate the kills", group: "view", run: () => setView("reallocate") },
     { id: "exp-csv", label: "Export initiatives as CSV", group: "export", run: exportCsv },
     { id: "exp-png", label: "Export chart as PNG", group: "export", run: exportPng },
     { id: "exp-json", label: "Export scenario as JSON", group: "export", run: exportScenario },
@@ -309,10 +311,10 @@ export function PortfolioDashboard() {
 
         {/* View toggle */}
         <div className="mb-4 flex flex-wrap gap-1.5">
-          {(["map", "financials", "gate", "fund"] as View[]).map((v) => (
+          {(["map", "financials", "gate", "fund", "reallocate"] as View[]).map((v) => (
             <button key={v} onClick={() => setView(v)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition ${v === view ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>
-              {v === "gate" ? "Stage-gate" : v === "fund" ? "Funding" : v}
+              {v === "gate" ? "Stage-gate" : v === "fund" ? "Funding" : v === "reallocate" ? "Reallocate" : v}
             </button>
           ))}
         </div>
@@ -494,6 +496,53 @@ export function PortfolioDashboard() {
                 <p className="mt-3 rounded-md bg-primary/[0.05] px-3 py-2 text-xs text-ink">
                   <span className="font-semibold">With {fmtM(budgetM)} you fund {funded.size} of {items.length}</span>, capturing {fmtM(fundCaptured)}/yr of risk-adjusted value. Greedy by return-per-dollar — a defensible first cut, not a solved optimum.
                 </p>
+              </Panel>
+            )}
+            {view === "reallocate" && (
+              <Panel>
+                <p className="stat-label mb-2">Redeploy the kills <span className="font-normal text-slatey-500">· cut the losers, fund the winners</span></p>
+                {realloc.killed.length === 0 ? (
+                  <p className="text-sm text-slatey-400">No initiative carries a negative risk-adjusted ROI — nothing to cut. The book is already clean.</p>
+                ) : (
+                  <>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-rose-700">Cut ({realloc.killed.length}) · frees {fmtM(realloc.freedCapitalM)}</p>
+                        <div className="space-y-1">
+                          {realloc.killed.map((id) => { const i = items.find((x) => x.id === id); return i ? (
+                            <button key={id} onClick={() => setSelId(id)} className="block w-full rounded-md border border-rose-200 bg-rose-50/50 px-2 py-1 text-left text-xs">
+                              <span className="font-medium text-ink">{i.name}</span>
+                              <span className="block text-[10px] text-slatey-500">{fmtM(i.spendM)} freed · {fmtM(riskAdj(i))} risk-adj drag</span>
+                            </button>
+                          ) : null; })}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Redeploy into Scale ({realloc.targets.length})</p>
+                        <div className="space-y-1">
+                          {realloc.targets.map((t) => { const i = items.find((x) => x.id === t.id); return i ? (
+                            <button key={t.id} onClick={() => setSelId(t.id)} className="block w-full rounded-md border border-emerald-200 bg-emerald-50/50 px-2 py-1 text-left text-xs">
+                              <span className="font-medium text-ink">{i.name}</span>
+                              <span className="block text-[10px] text-slatey-500">+{fmtM(t.allocatedM)} capital → +{fmtM(t.addedValueM)}/yr (illustrative)</span>
+                            </button>
+                          ) : null; })}
+                          {realloc.targets.length === 0 && <p className="text-[11px] text-slatey-500">No Scale-rated initiative to redeploy into — hold the freed capital.</p>}
+                          {realloc.reserveM > 0.05 && <p className="text-[11px] text-slatey-500">{fmtM(realloc.reserveM)} held in reserve (past the 1× double-down cap).</p>}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between gap-2 rounded-md bg-slate-50 px-3 py-2 text-xs">
+                      <div className="text-center"><p className="text-[10px] uppercase tracking-wide text-slatey-500">Now</p><p className="font-mono font-semibold text-ink">{fmtM(realloc.baseRiskAdjM)}</p></div>
+                      <span className="text-slatey-500">→</span>
+                      <div className="text-center"><p className="text-[10px] uppercase tracking-wide text-slatey-500">After cut <span className="text-emerald-700">(real)</span></p><p className="font-mono font-semibold text-ink">{fmtM(realloc.afterCutRiskAdjM)}</p></div>
+                      <span className="text-slatey-500">→</span>
+                      <div className="text-center"><p className="text-[10px] uppercase tracking-wide text-slatey-500">After redeploy <span className="text-slatey-400">(illustrative)</span></p><p className="font-mono font-semibold text-ink">{fmtM(realloc.afterRedeployRiskAdjM)}</p></div>
+                    </div>
+                    <p className="mt-3 rounded-md bg-primary/[0.05] px-3 py-2 text-xs text-ink">
+                      Cutting the kills lifts risk-adjusted value by <span className="font-semibold">{fmtM(realloc.dragRemovedM)}/yr</span> — that part is just accounting. Redeploying the freed {fmtM(realloc.freedCapitalM)} into your Scale initiatives at their current return-per-dollar <span className="italic">could</span> add ~{fmtM(realloc.redeployedValueM)}/yr — illustrative (each dollar credited at the initiative&apos;s current efficiency, capped at a 1× double-down), not a guaranteed return.
+                    </p>
+                  </>
+                )}
               </Panel>
             )}
           </div>

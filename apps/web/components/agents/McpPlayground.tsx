@@ -8,10 +8,12 @@
 // reads the wire. SIMULATED (frames are constructed deterministically).
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare, Share2, RotateCcw, Eye } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost } from "@labs/design-system";
-import { GAP01_USE_CASES } from "@labs/kit";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { GAP01_USE_CASES, LABS } from "@labs/kit";
+import { diffManifests } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -83,9 +85,11 @@ export function McpPlayground() {
   // systems × consumers crossover
   const [nSys, setNSys] = useState(8);
   const [nCon, setNCon] = useState(6);
+  const [prevSys, setPrevSys] = useState<System | null>(null);
 
   const onSystem = (k: string) => {
     const s = SYSTEMS.find((x) => x.key === k)!;
+    setPrevSys(sys);
     setSysKey(k); setActiveUcId(null); setToolName(s.tools[0].name);
     setArgVals(Object.fromEntries(s.tools[0].args.map((a) => [a.name, a.example])));
     setHistory([]); setViewCallId(null); setTab("tools");
@@ -158,6 +162,7 @@ export function McpPlayground() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const router = useRouter();
   const shareScenario = () => {
     const cfg = btoa(JSON.stringify({ sys: sysKey, tool: toolName, args: argVals, nSys, nCon, tab, ann: annotate, mal: malformed }));
     const params = new URLSearchParams(window.location.search);
@@ -169,6 +174,36 @@ export function McpPlayground() {
     } else { toast("Link is in the address bar"); }
   };
   const resetLab = () => { onSystem(SYSTEMS[0].key); setNSys(8); setNCon(6); setMalformed(false); setAnnotate(true); toast("Playground reset"); };
+
+  const manifestDiff = prevSys && prevSys.key !== sys.key ? diffManifests(prevSys, sys) : null;
+
+  // ---- Export suite + command palette ----
+  const exportCsv = () => {
+    const headers = ["#", "Tool", "System", "Status", "Latency (ms)", "Bytes"];
+    const rows = history.map((c) => [c.id, c.tool, c.sysLabel, c.error ? "error" : "ok", c.ms, c.bytes]);
+    downloadCsv("mcp-session-log", headers, rows);
+    toast(history.length ? "Session log exported as CSV" : "No calls yet — run one first");
+  };
+  const exportSession = () => {
+    downloadJson("mcp-session", { version: 1, system: sysKey, tool: toolName, args: argVals, calls: history });
+    toast("Session exported as JSON");
+  };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "Session log as CSV", hint: "Every call: latency + bytes", onSelect: exportCsv },
+    { id: "json", label: "Export session (JSON)", hint: "Calls + current config", onSelect: exportSession },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-share", label: "Copy share link", group: "action", keywords: "permalink url call", run: shareScenario },
+    { id: "act-reset", label: "Reset playground", group: "action", run: resetLab },
+    { id: "act-annot", label: "Toggle exec annotations", group: "action", run: () => setAnnotate((v) => !v) },
+    { id: "act-malformed", label: "Toggle malformed arguments", group: "action", keywords: "error -32602", run: () => setMalformed((v) => !v) },
+    { id: "act-clear", label: "Clear session log", group: "action", run: () => { setHistory([]); setViewCallId(null); toast("Session log cleared"); } },
+    { id: "exp-csv", label: "Export session log as CSV", group: "export", run: exportCsv },
+    { id: "exp-json", label: "Export session as JSON", group: "export", run: exportSession },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
 
   const bespoke = nSys * nCon;
   const mcp = nSys + nCon;
@@ -209,6 +244,10 @@ export function McpPlayground() {
           <ToolbarButton onClick={() => setAnnotate((v) => !v)} active={annotate} title="Toggle the plain-English annotation under each frame">
             <Eye className="h-3.5 w-3.5" /> Exec annotations
           </ToolbarButton>
+          <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
+            ⌘K
+          </ToolbarButton>
+          <ExportMenu actions={exportActions} />
         </LabToolbar>
 
         <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -218,6 +257,28 @@ export function McpPlayground() {
           ))}
           <span className="text-[11px] text-slatey-500">{sys.blurb}</span>
         </div>
+
+        {manifestDiff && manifestDiff.changed && (
+          <div className="mb-5 rounded-lg border border-line bg-white px-3 py-2 text-xs shadow-card">
+            <p className="mb-1 font-semibold text-ink">Switched from {prevSys?.label} <span className="font-normal text-slatey-500">· what the contract changed</span></p>
+            <div className="flex flex-wrap gap-x-5 gap-y-1">
+              {([["Tools", manifestDiff.tools], ["Resources", manifestDiff.resources], ["Prompts", manifestDiff.prompts]] as const).map(([label, d]) => (
+                <span key={label} className="inline-flex flex-wrap items-center gap-1.5">
+                  <span className="text-slatey-500">{label}:</span>
+                  {d.added.length === 0 && d.removed.length === 0 ? (
+                    <span className="text-slatey-400">unchanged</span>
+                  ) : (
+                    <>
+                      {d.added.map((n) => <span key={n} className="rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-emerald-700">+{n}</span>)}
+                      {d.removed.map((n) => <span key={n} className="rounded bg-rose-50 px-1.5 py-0.5 font-mono text-rose-700 line-through">{n}</span>)}
+                    </>
+                  )}
+                </span>
+              ))}
+            </div>
+            <p className="mt-1.5 text-[10px] text-slatey-500">Same protocol, different surface — a client written to the MCP contract adapts without new integration code.</p>
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           {/* Manifest */}
@@ -359,6 +420,7 @@ export function McpPlayground() {
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> a real MCP server adds capability negotiation, auth, streaming, and pagination; this shows the core request/response contract, not the full lifecycle.</p>
         </div>
         <ToastHost />
+        <CommandPalette commands={paletteCommands} />
       </main>
     </div>
   );

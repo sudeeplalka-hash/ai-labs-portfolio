@@ -7,11 +7,12 @@
 // weighted composite with visible weights and a defended threshold.
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, Download } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, type BadgeTone } from "@labs/design-system";
-import { EL01_USE_CASES } from "@labs/kit";
-import { weightSumOf, readinessComposite, readinessGate, type ReadinessVerdict } from "@labs/lab-realize";
+import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
+import { EL01_USE_CASES, LABS } from "@labs/kit";
+import { weightSumOf, readinessComposite, readinessGate, planToReachGate, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -85,6 +86,7 @@ export function AdoptionReadiness() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const A = assumptions;
   const edited = JSON.stringify(A) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
+  const router = useRouter();
 
   // Restore a shared scenario (?cfg=) once on mount — scenario, factors, assumptions.
   useEffect(() => {
@@ -122,6 +124,8 @@ export function AdoptionReadiness() {
 
   const c = readinessComposite(factors, A.weights, FACTOR_KEYS);
   const gate = gateForOf(c, A);
+  const gatePlan = planToReachGate(factors, A.weights, FACTOR_KEYS, A.scaleCut);
+  const factorLabel = (k: FactorKey) => FACTORS.find((f) => f.key === k)?.label ?? k;
   const weak = FACTORS.filter((x) => factors[x.key] < 70).sort((a, b) => factors[a.key] - factors[b.key]);
   const priorities = weak.slice(0, 3);
 
@@ -158,6 +162,55 @@ export function AdoptionReadiness() {
     downloadMarkdown(`adoption-memo-${activeUc ? activeUc.id : scenarioKey}`, buildAdoptionMemo(), {
       scenario: activeUc ? activeUc.title : nativeScenario.label,
     });
+
+  // ---- Export suite + command palette ----
+  const scen = activeUc ? activeUc.id : scenarioKey;
+  const exportCsv = () => {
+    const headers = ["Factor", "Weight %", "Score"];
+    const rows = FACTORS.map((x) => [x.label, Math.round((A.weights[x.key] / weightSumOf(A.weights, FACTOR_KEYS)) * 100), factors[x.key]]);
+    downloadCsv(`adoption-factors-${scen}`, headers, rows);
+    toast("Factors exported as CSV");
+  };
+  const exportScenario = () => {
+    downloadJson(`adoption-scenario-${scen}`, { version: 1, factors, assumptions: A, scenarioKey });
+    toast("Scenario exported as JSON");
+  };
+  const importScenario = async () => {
+    const text = await pickTextFile();
+    if (!text) return;
+    try {
+      const cfg = parseScenarioJson<{ factors?: Factors; assumptions?: Partial<Assumptions>; scenarioKey?: string }>(text);
+      if (cfg.scenarioKey) setScenarioKey(cfg.scenarioKey);
+      if (cfg.factors) setFactors(cfg.factors);
+      if (cfg.assumptions) {
+        const a = cfg.assumptions;
+        setAssumptions({
+          weights: { ...DEFAULT_ASSUMPTIONS.weights, ...(a.weights ?? {}) },
+          scaleCut: a.scaleCut ?? DEFAULT_ASSUMPTIONS.scaleCut,
+          condCut: a.condCut ?? DEFAULT_ASSUMPTIONS.condCut,
+        });
+      }
+      toast("Scenario imported");
+    } catch { toast("That file isn't a valid scenario"); }
+  };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "Factor scores as CSV", hint: "Six factors + weights", onSelect: exportCsv },
+    { id: "json", label: "Export scenario (JSON)", hint: "Factors + assumptions, re-importable", onSelect: exportScenario },
+    { id: "import", label: "Import scenario (JSON)…", hint: "Load a saved .json", onSelect: importScenario },
+    { id: "memo", label: "Readiness memo (Markdown)", hint: "The full memo", onSelect: onGenerate },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-assumptions", label: "Edit assumptions", group: "action", keywords: "weights gate your model", run: () => setDrawerOpen(true) },
+    { id: "act-share", label: "Copy share link", group: "action", keywords: "permalink url", run: shareScenario },
+    { id: "act-reset", label: "Reset assumptions", group: "action", run: resetAssumptions },
+    { id: "exp-csv", label: "Export factors as CSV", group: "export", run: exportCsv },
+    { id: "exp-json", label: "Export scenario as JSON", group: "export", run: exportScenario },
+    { id: "exp-import", label: "Import scenario…", group: "export", run: importScenario },
+    { id: "exp-memo", label: "Download readiness memo", group: "export", run: onGenerate },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -196,9 +249,10 @@ export function AdoptionReadiness() {
           <ToolbarButton onClick={resetAssumptions} title="Reset assumptions to the defaults">
             <RotateCcw className="h-3.5 w-3.5" /> Reset
           </ToolbarButton>
-          <ToolbarButton onClick={onGenerate} className="ml-auto" title="Download the adoption readiness memo as Markdown">
-            <Download className="h-3.5 w-3.5" /> Readiness memo
+          <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
+            ⌘K
           </ToolbarButton>
+          <ExportMenu actions={exportActions} />
         </LabToolbar>
 
         <div className="mb-5 flex flex-wrap gap-2">
@@ -243,6 +297,27 @@ export function AdoptionReadiness() {
               <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>Hold</span><span>{A.condCut}</span><span>{A.scaleCut}</span><span>Scale</span></div>
               <p className="mt-3 text-xs italic text-slatey-500">I gate below {A.condCut} because I&apos;ve watched pilots that scaled anyway die at week six — the trust wasn&apos;t there and the floor knew it.</p>
             </Panel>
+
+            {c < A.scaleCut && (
+              <Panel>
+                <p className="stat-label mb-2">Flip the gate <span className="font-normal text-slatey-500">· smallest moves to reach Scale ({A.scaleCut})</span></p>
+                {gatePlan.reachable ? (
+                  <>
+                    <ol className="space-y-1.5 text-sm">
+                      {gatePlan.moves.map((m) => (
+                        <li key={m.key} className="flex items-center justify-between gap-2 rounded-md border border-line bg-white px-2.5 py-1.5">
+                          <span className="font-medium text-ink">{factorLabel(m.key)}</span>
+                          <span className="font-mono text-xs text-slatey-400">{m.from} <span className="text-slatey-500">&rarr;</span> <span className="font-semibold text-emerald-700">{m.to}</span> <span className="text-slatey-500">(+{m.add})</span></span>
+                        </li>
+                      ))}
+                    </ol>
+                    <p className="mt-2 text-[11px] text-slatey-500">The fewest total points to clear the gate &mdash; highest-leverage (highest-weight) factors first. Lands the composite at ~{gatePlan.projected}.</p>
+                  </>
+                ) : (
+                  <p className="text-sm text-slatey-400">Even maxing every factor can&apos;t reach {A.scaleCut} under these weights &mdash; revisit the model, not just the rollout.</p>
+                )}
+              </Panel>
+            )}
 
             <Panel>
               <p className="stat-label mb-2">Two-week adoption plan</p>
@@ -316,6 +391,7 @@ export function AdoptionReadiness() {
           </div>
         </Drawer>
         <ToastHost />
+        <CommandPalette commands={paletteCommands} />
       </main>
     </div>
   );

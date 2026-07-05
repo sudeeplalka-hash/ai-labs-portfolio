@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { evaluate, sensitivity, type PKey, type SensitivityQuestion } from "./protocol";
+import { evaluate, sensitivity, bespokeCost, protocolCost, crossoverConsumers, type PKey, type SensitivityQuestion } from "./protocol";
 
 const ans = (q1: number, q2: number, q3: number, q4: number, q5: number, q6: number) => ({ q1, q2, q3, q4, q5, q6 });
 
@@ -73,5 +73,41 @@ describe("sensitivity", () => {
       expect(moved).toBe(f.newPrimary);
       expect(moved).not.toBe(base);
     }
+  });
+});
+
+describe("integration economics", () => {
+  it("bespoke cost grows as producers × consumers", () => {
+    expect(bespokeCost(7, 4)).toBe(28);
+    expect(bespokeCost(7, 4, 2)).toBe(56);
+  });
+
+  it("protocol cost grows as producers + consumers, plus fixed overhead", () => {
+    expect(protocolCost(7, 4)).toBe(11);
+    expect(protocolCost(7, 4, { protocolFixed: 5 })).toBe(16);
+  });
+
+  it("finds the crossover consumer count (bespoke == protocol there)", () => {
+    const n = 7;
+    const c = crossoverConsumers(n)!;
+    expect(c).toBeCloseTo(7 / 6, 6); // (n)/(n-1)
+    expect(bespokeCost(n, c)).toBeCloseTo(protocolCost(n, c), 6);
+  });
+
+  it("a fixed protocol overhead pushes the crossover to the right", () => {
+    const bare = crossoverConsumers(7)!;
+    const withFixed = crossoverConsumers(7, { protocolFixed: 6 })!;
+    expect(withFixed).toBeGreaterThan(bare);
+    expect(withFixed).toBeCloseTo(13 / 6, 6); // (7 + 6)/(7 - 1)
+  });
+
+  it("past the crossover, the protocol is cheaper; before it, bespoke is", () => {
+    const n = 10, c = crossoverConsumers(n)!;
+    expect(bespokeCost(n, Math.ceil(c) + 1)).toBeGreaterThan(protocolCost(n, Math.ceil(c) + 1));
+    expect(bespokeCost(n, 1)).toBeLessThan(protocolCost(n, 1));
+  });
+
+  it("returns null when the protocol never wins by adding consumers (single producer)", () => {
+    expect(crossoverConsumers(1)).toBeNull();
   });
 });

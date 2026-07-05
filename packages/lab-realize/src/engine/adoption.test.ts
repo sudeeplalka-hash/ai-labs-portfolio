@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate } from "./adoption";
+import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate, planToReachGate } from "./adoption";
 
 describe("deriveAdoptionPlan", () => {
   it("always offers a plan with at least two recommended interventions", () => {
@@ -93,5 +93,53 @@ describe("readinessGate", () => {
   it("honors edited (non-default) cutoffs", () => {
     expect(readinessGate(70, 80, 65)).toBe("Scale with conditions");
     expect(readinessGate(64, 80, 65)).toBe("Hold");
+  });
+});
+
+describe("planToReachGate", () => {
+  const keys = ["a", "b", "c"] as const;
+  const weights = { a: 0.5, b: 0.3, c: 0.2 }; // a is the highest-leverage factor
+
+  it("returns no moves when the composite already meets the target", () => {
+    const p = planToReachGate({ a: 80, b: 80, c: 80 }, weights, keys, 75);
+    expect(p.reachable).toBe(true);
+    expect(p.moves).toEqual([]);
+    expect(p.totalAdded).toBe(0);
+  });
+
+  it("produces a plan whose projected composite clears the gate", () => {
+    const p = planToReachGate({ a: 50, b: 50, c: 50 }, weights, keys, 75);
+    expect(p.reachable).toBe(true);
+    expect(p.projected).toBeGreaterThanOrEqual(75);
+  });
+
+  it("spends points on the highest-weight factor first (fewest total points)", () => {
+    const p = planToReachGate({ a: 50, b: 50, c: 50 }, weights, keys, 75);
+    expect(p.moves[0].key).toBe("a");
+  });
+
+  it("moves to the next factor when the first runs out of headroom", () => {
+    const p = planToReachGate({ a: 98, b: 40, c: 40 }, weights, keys, 75);
+    const moved = p.moves.map((m) => m.key);
+    expect(moved).toContain("a");
+    expect(moved).toContain("b");
+  });
+
+  it("never proposes a factor above the ceiling", () => {
+    const p = planToReachGate({ a: 10, b: 10, c: 10 }, weights, keys, 95);
+    for (const m of p.moves) expect(m.to).toBeLessThanOrEqual(100);
+  });
+
+  it("reports unreachable when the target exceeds the ceiling", () => {
+    const p = planToReachGate({ a: 50, b: 50, c: 50 }, weights, keys, 105);
+    expect(p.reachable).toBe(false);
+  });
+
+  it("applying the moves reproduces the projected composite", () => {
+    const factors = { a: 52, b: 60, c: 45 };
+    const p = planToReachGate(factors, weights, keys, 75);
+    const applied: Record<"a" | "b" | "c", number> = { ...factors };
+    for (const m of p.moves) applied[m.key] = m.to;
+    expect(readinessComposite(applied, weights, keys)).toBe(p.projected);
   });
 });

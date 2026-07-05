@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { prob, riskAdj, recommend, greedyFund, STAGE_PROB, type Initiative } from "./portfolio";
+import { prob, riskAdj, recommend, greedyFund, reallocateKills, STAGE_PROB, type Initiative } from "./portfolio";
 
 const mk = (over: Partial<Initiative> = {}): Initiative => ({
   id: "x", name: "X", domain: "Finserv", stage: "scaling",
@@ -126,5 +126,66 @@ describe("greedyFund", () => {
     expect(r.funded).toEqual(["p1"]);
     expect(r.captured).toBeCloseTo(2.4, 6);
     expect(r.cut).toContain("p3");
+  });
+});
+
+describe("reallocateKills", () => {
+  type I = { id: string; spendM: number; v: number; scale: boolean };
+  const val = (i: I) => i.v;
+  const isScale = (i: I) => i.scale;
+  const items: I[] = [
+    { id: "loser1", spendM: 1, v: -0.5, scale: false },
+    { id: "loser2", spendM: 2, v: -1.0, scale: false },
+    { id: "star", spendM: 1, v: 3, scale: true },   // return-per-$ = 3
+    { id: "solid", spendM: 2, v: 2, scale: true },   // return-per-$ = 1
+    { id: "hold", spendM: 1, v: 0.4, scale: false },
+  ];
+
+  it("cuts the negative-value initiatives and frees their capital", () => {
+    const r = reallocateKills(items, val, isScale);
+    expect(r.killed.slice().sort()).toEqual(["loser1", "loser2"]);
+    expect(r.freedCapitalM).toBe(3);
+    expect(r.dragRemovedM).toBeCloseTo(1.5, 6);
+  });
+
+  it("cutting the kills raises portfolio risk-adjusted value by exactly the removed drag", () => {
+    const r = reallocateKills(items, val, isScale);
+    expect(r.afterCutRiskAdjM).toBeCloseTo(r.baseRiskAdjM + r.dragRemovedM, 6);
+  });
+
+  it("redeploys best return-per-$ first, capped at 1x spend", () => {
+    const r = reallocateKills(items, val, isScale); // freed 3
+    expect(r.targets.map((t) => t.id)).toEqual(["star", "solid"]);
+    expect(r.targets[0]).toMatchObject({ id: "star", allocatedM: 1 });
+    expect(r.redeployedM).toBe(3);
+    expect(r.redeployedValueM).toBeCloseTo(5, 6); // 1*3 + 2*1
+    expect(r.reserveM).toBe(0);
+  });
+
+  it("holds freed capital in reserve when caps are exhausted", () => {
+    const r = reallocateKills(
+      [{ id: "k", spendM: 10, v: -1, scale: false }, { id: "s", spendM: 1, v: 2, scale: true }],
+      val, isScale,
+    );
+    expect(r.redeployedM).toBe(1);
+    expect(r.reserveM).toBe(9);
+  });
+
+  it("respects the top-up multiple", () => {
+    const r = reallocateKills(items, val, isScale, 2);
+    expect(r.targets[0]).toMatchObject({ id: "star", allocatedM: 2 });
+    expect(r.redeployedValueM).toBeCloseTo(7, 6); // 2*3 + 1*1
+  });
+
+  it("afterRedeploy equals afterCut plus the redeployed value", () => {
+    const r = reallocateKills(items, val, isScale);
+    expect(r.afterRedeployRiskAdjM).toBeCloseTo(r.afterCutRiskAdjM + r.redeployedValueM, 6);
+  });
+
+  it("redeploys nothing when there are no scale targets", () => {
+    const r = reallocateKills(items.map((i) => ({ ...i, scale: false })), val, isScale);
+    expect(r.targets).toEqual([]);
+    expect(r.redeployedValueM).toBe(0);
+    expect(r.reserveM).toBe(r.freedCapitalM);
   });
 });
