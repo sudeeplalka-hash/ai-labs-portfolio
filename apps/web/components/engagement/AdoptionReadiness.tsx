@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
 import { EL01_USE_CASES, LABS } from "@labs/kit";
 import { weightSumOf, readinessComposite, readinessGate, planToReachGate, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
@@ -28,6 +28,9 @@ const FACTORS: { key: FactorKey; label: string; weight: number; hint: string }[]
   { key: "comms", label: "Comms quality", weight: 0.15, hint: "Two-way and fast, or broadcast-only?" },
   { key: "incentives", label: "Incentive alignment", weight: 0.10, hint: "Does the scorecard reward using it?" },
 ];
+
+// Illustrative reference — a "typical rollout at this stage" shape for the radar overlay.
+const BENCHMARK: Factors = { sponsorship: 70, trust: 55, workflow: 62, training: 58, comms: 60, incentives: 50 };
 
 const ACTION: Record<FactorKey, string> = {
   sponsorship: "Lock a visible executive sponsor and a leader-led kickoff; a 5-minute sponsor message every week.",
@@ -296,6 +299,35 @@ export function AdoptionReadiness() {
               </div>
               <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>Hold</span><span>{A.condCut}</span><span>{A.scaleCut}</span><span>Scale</span></div>
               <p className="mt-3 text-xs italic text-slatey-500">I gate below {A.condCut} because I&apos;ve watched pilots that scaled anyway die at week six — the trust wasn&apos;t there and the floor knew it.</p>
+            </Panel>
+
+            <Panel>
+              <p className="stat-label mb-2">Readiness shape <span className="font-normal text-slatey-500">· your factors vs a typical rollout</span></p>
+              {(() => {
+                const cx = 120, cy = 96, R = 64;
+                const you = radarVertices(FACTORS.map((f) => factors[f.key]), R, 100, cx, cy);
+                const ref = radarVertices(FACTORS.map((f) => BENCHMARK[f.key]), R, 100, cx, cy);
+                const axes = radarAxes(FACTORS.length, R, cx, cy);
+                const labels = radarAxes(FACTORS.length, R + 12, cx, cy);
+                return (
+                  <svg viewBox="0 0 240 200" className="w-full" role="img" aria-label="Radar of the six readiness factors versus a typical-rollout benchmark.">
+                    {[0.25, 0.5, 0.75, 1].map((f) => <circle key={f} cx={cx} cy={cy} r={R * f} fill="none" stroke="#eceff2" />)}
+                    {axes.map((pt, i) => <line key={i} x1={cx} y1={cy} x2={pt.x} y2={pt.y} stroke="#eceff2" />)}
+                    <polygon points={pointsToStr(ref)} fill="none" stroke="#94a3b8" strokeDasharray="3 3" strokeWidth="1.5" />
+                    <polygon points={pointsToStr(you)} fill="rgba(13,148,136,0.12)" stroke="#0d9488" strokeWidth="2" />
+                    {you.map((pt, i) => <circle key={i} cx={pt.x} cy={pt.y} r="2" fill="#0d9488" />)}
+                    {labels.map((pt, i) => (
+                      <text key={i} x={pt.x} y={pt.y} fontSize="7.5" fill="#64748b"
+                        textAnchor={pt.x < cx - 4 ? "end" : pt.x > cx + 4 ? "start" : "middle"}
+                        dominantBaseline={pt.y < cy ? "auto" : "hanging"}>{FACTORS[i].label.split(" ")[0]}</text>
+                    ))}
+                  </svg>
+                );
+              })()}
+              <div className="mt-1 flex items-center gap-4 text-[10px] text-slatey-500">
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-sm bg-teal-600/70" /> Your factors</span>
+                <span className="inline-flex items-center gap-1"><span className="inline-block h-0 w-3 border-t border-dashed border-slate-400" /> Typical rollout (illustrative)</span>
+              </div>
             </Panel>
 
             {c < A.scaleCut && (

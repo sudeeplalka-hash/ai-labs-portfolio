@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, svgElementToPng, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
+import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, svgElementToPng, sortBy, nextSort, type ExportAction, type Command, type SortState, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES, LABS } from "@labs/kit";
 import { greedyFund, reallocateKills } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
@@ -150,11 +150,34 @@ export function PortfolioDashboard() {
 
   // Budget-constrained funding — greedy by risk-adjusted return per $ (engine).
   const [budgetM, setBudgetM] = useState(5);
+  const [sort, setSort] = useState<SortState | null>(null);
+  const [domainFilter, setDomainFilter] = useState<string | null>(null);
+  const [recFilter, setRecFilter] = useState<Rec | null>(null);
   const fund = greedyFund(items, budgetM, riskAdj);
   const funded = new Set(fund.funded);
   const fundSpent = fund.spent;
   const fundCaptured = fund.captured;
   const realloc = reallocateKills(items, riskAdj, (i) => recommend(i) === "scale");
+  const sortAccessor: Record<string, (i: Initiative) => number | string> = {
+    name: (i) => i.name, stage: (i) => STAGES_LIST.indexOf(i.stage), value: (i) => i.expValueM,
+    spend: (i) => i.spendM, riskadj: (i) => riskAdj(i), planvar: (i) => i.planVar,
+  };
+  const domains = [...new Set(items.map((i) => i.domain))];
+  const financialRows = (() => {
+    if (editMode) return items;
+    let rows = items;
+    if (domainFilter) rows = rows.filter((i) => i.domain === domainFilter);
+    if (recFilter) rows = rows.filter((i) => recommend(i) === recFilter);
+    if (sort && sortAccessor[sort.key]) rows = sortBy(rows, sortAccessor[sort.key], sort.dir);
+    return rows;
+  })();
+  const sortTh = (label: string, k: string) => (
+    <th>
+      <button onClick={() => setSort((sc) => nextSort(sc, k))} className="inline-flex items-center gap-1 hover:text-ink">
+        {label}{sort?.key === k && <span className="text-[8px]">{sort.dir === "asc" ? "▲" : "▼"}</span>}
+      </button>
+    </th>
+  );
 
   const buildReviewPack = (): string => {
     const kills = items.filter((i) => recommend(i) === "kill");
@@ -394,15 +417,36 @@ export function PortfolioDashboard() {
                     <PencilLine className="h-3 w-3" /> {editMode ? "Done" : "Edit book"}
                   </button>
                 </div>
+                {!editMode && (
+                  <div className="mb-3 flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <span className="text-slatey-500">Filter</span>
+                    {domains.map((d) => (
+                      <button key={d} onClick={() => setDomainFilter((f) => (f === d ? null : d))}
+                        className={`rounded-full border px-2 py-0.5 font-medium transition ${domainFilter === d ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{d}</button>
+                    ))}
+                    <span className="mx-1 text-slate-300">|</span>
+                    {(["scale", "hold", "kill"] as Rec[]).map((r) => (
+                      <button key={r} onClick={() => setRecFilter((f) => (f === r ? null : r))}
+                        className={`rounded-full border px-2 py-0.5 font-medium capitalize transition ${recFilter === r ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{REC_LABEL[r]}</button>
+                    ))}
+                    {(domainFilter || recFilter) && (
+                      <button onClick={() => { setDomainFilter(null); setRecFilter(null); }} className="ml-1 text-slatey-500 underline hover:text-ink">clear</button>
+                    )}
+                    <span className="ml-auto text-slatey-500">{financialRows.length}/{items.length}</span>
+                  </div>
+                )}
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Initiative</th><th>Stage</th><th>Value</th><th>Spend</th>
-                      {editMode ? (<><th>Risk</th><th>Risk-adj</th><th aria-label="remove" /></>) : (<><th>Risk-adj</th><th>Plan var</th></>)}
+                      {editMode ? (
+                        <><th>Initiative</th><th>Stage</th><th>Value</th><th>Spend</th><th>Risk</th><th>Risk-adj</th><th aria-label="remove" /></>
+                      ) : (
+                        <>{sortTh("Initiative", "name")}{sortTh("Stage", "stage")}{sortTh("Value", "value")}{sortTh("Spend", "spend")}{sortTh("Risk-adj", "riskadj")}{sortTh("Plan var", "planvar")}</>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
-                    {items.map((i) => (
+                    {financialRows.map((i) => (
                       <tr key={i.id} className={editMode ? "" : "cursor-pointer"} onClick={editMode ? undefined : () => setSelId(i.id)}>
                         {editMode ? (
                           <>
@@ -430,6 +474,9 @@ export function PortfolioDashboard() {
                         )}
                       </tr>
                     ))}
+                    {!editMode && financialRows.length === 0 && (
+                      <tr><td colSpan={6} className="py-3 text-center text-xs text-slatey-500">No initiatives match the filter.</td></tr>
+                    )}
                   </tbody>
                 </table>
                 {editMode ? (
