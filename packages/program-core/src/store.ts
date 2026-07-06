@@ -85,7 +85,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
     },
     governance: { riskTier: "Medium", controls: 8, status: "ok" },
     outcomes: { roi: 180, adoption: 0.62, riskAdjustedValue: 2400000, paybackMonths: 8 },
-    progress: { frame: "done", data: "done", build: "done", deploy: "done", govern: "done", realize: "active", operate: "active" },
+    progress: { frame: "done", data: "done", build: "done", deploy: "done", govern: "done", realize: "done", operate: "done" },
   };
 
   switch (archetype) {
