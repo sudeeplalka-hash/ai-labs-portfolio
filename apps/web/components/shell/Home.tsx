@@ -3,11 +3,11 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import {
-  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, ArrowRight, Workflow, MousePointerClick, BookOpen, type LucideIcon,
+  Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, ArrowRight, Workflow, BookOpen, type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@labs/design-system";
 import { STAGES, useProgram, selectStageHeadlines, type StageKey, type StageHeadline } from "@labs/program-core";
-import { StartHereLoop, ReviewerModes, WhatThisDemonstrates, ContractLoop, ReviewerLinks } from "@/components/reviewer/Reviewer";
+import { ContractLoop, ReviewerLinks } from "@/components/reviewer/Reviewer";
 import { LoadSampleButton } from "@/components/reviewer/SampleProgram";
 import { Welcome } from "@/components/shell/Welcome";
 
@@ -63,37 +63,21 @@ export function Home() {
         </div>
       </div>
 
-      {/* Start here — the program loop */}
-      <StartHereLoop />
-
-      {/* Two ways to use it */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Link href="/frame" className="group rounded-xl border border-primary/30 bg-primary/[0.05] p-5 shadow-card transition-shadow hover:shadow-cardhover">
-          <div className="flex items-center gap-2 text-primary"><Workflow className="h-5 w-5" /><span className="text-[11px] font-semibold uppercase tracking-wider">Guided</span></div>
-          <h2 className="mt-2 text-lg font-semibold text-ink">Walk the program end-to-end</h2>
-          <p className="mt-1 text-sm leading-relaxed text-slatey-400">
-            Start at Framing, build one bet, and carry it through Data → Build → Deploy → Govern → Realize → Operate.
-            Every number in the final business case traces back to a decision you made.
-          </p>
-          <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">
-            {framed ? "Continue your initiative" : "Start with Framing"} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </span>
-        </Link>
-
-        <div className="rounded-xl border border-line bg-white p-5 shadow-card">
-          <div className="flex items-center gap-2 text-slatey-300"><MousePointerClick className="h-5 w-5" /><span className="text-[11px] font-semibold uppercase tracking-wider">Explore</span></div>
-          <h2 className="mt-2 text-lg font-semibold text-ink">Jump into any lab</h2>
-          <p className="mt-1 text-sm leading-relaxed text-slatey-400">
-            Each lab works on its own, just like a standalone tool — open any one below or from the sidebar. They
-            get richer if you&apos;ve run the upstream stages, but none of them require it.
-          </p>
+      {/* The seven stages — one pane: loop framing + lab cards + collapsible contract loop */}
+      <div className="rounded-2xl border border-line p-5 sm:p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-ink">The seven stages</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slatey-400">
+              One initiative, end to end — walk it as a guided loop, or open any lab standalone. Each lab works on its own; it gets richer if you&apos;ve run the upstream stages, but none of them require it.
+            </p>
+          </div>
+          <Link href="/frame" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-primary-dark">
+            <Workflow className="h-4 w-4" /> {framed ? "Continue your initiative" : "Start the guided loop"}
+          </Link>
         </div>
-      </div>
 
-      {/* Lab cards */}
-      <div>
-        <p className="stat-label mb-3">The seven stages</p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {STAGES.map((s) => {
             const Icon = ICONS[s.key];
             const status = state.progress[s.key];
@@ -121,16 +105,13 @@ export function Home() {
             );
           })}
         </div>
+
+        <details className="mt-5 border-t border-line pt-4">
+          <summary className="cursor-pointer text-sm font-semibold text-ink">How each stage hands off <span className="font-normal text-slatey-500">· the contract-driven loop</span></summary>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">Each stage emits a structured contract the next consumes through shared state.</p>
+          <div className="mt-3"><ContractLoop live={live} bare /></div>
+        </details>
       </div>
-
-      {/* Contract-driven loop — shows live values once a program is loaded */}
-      <ContractLoop live={live} />
-
-      {/* What this project demonstrates */}
-      <WhatThisDemonstrates />
-
-      {/* Reviewer paths */}
-      <ReviewerModes />
 
       {/* Quick links */}
       <ReviewerLinks />

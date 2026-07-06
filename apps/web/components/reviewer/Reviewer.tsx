@@ -109,22 +109,27 @@ const CONTRACTS: { key: string; stage: string; contract: string; fields: string[
   { key: "frame", stage: "Strategy", contract: "Strategy output", fields: ["initiative meta", "capability tags", "governance tier", "build path"], tone: "text-primary" },
   { key: "data", stage: "Data", contract: "Data Readiness Handoff", fields: ["approved sources", "blocked sources", "metadata / chunk reqs", "data risks"], tone: "text-emerald-700" },
   { key: "build", stage: "Build", contract: "Build Output Contract", fields: ["model", "retrieval mode", "eval run", "quality gates", "failure modes"], tone: "text-violet-700" },
-  { key: "deploy", stage: "Operate", contract: "Ops Evidence", fields: ["release readiness", "monitoring coverage", "regression", "incidents", "rollback"], tone: "text-amber-700" },
+  { key: "deploy", stage: "Deploy", contract: "Ops Evidence", fields: ["release readiness", "monitoring coverage", "regression", "incidents", "rollback"], tone: "text-amber-700" },
   { key: "govern", stage: "Govern", contract: "Governance Decision", fields: ["controls", "findings", "audit evidence", "approval status"], tone: "text-rose-700" },
   { key: "realize", stage: "Realize", contract: "Realization Dossier", fields: ["ROI", "risk-adjusted value", "payback", "leakage", "next action"], tone: "text-primary-dark" },
+  { key: "operate", stage: "Operate", contract: "Day-2 Operations", fields: ["drift + canary decay", "value at risk", "day-2 incidents", "refresh/retrain trigger"], tone: "text-primary" },
 ];
 
 /** Pure/presentational; `live` (optional) adds each contract's current headline
  * so the loop shows real values when a program is loaded. Server-safe. */
-export function ContractLoop({ live }: { live?: Partial<Record<string, string>> } = {}) {
+export function ContractLoop({ live, bare }: { live?: Partial<Record<string, string>>; bare?: boolean } = {}) {
   return (
     <div>
-      <p className="eyebrow">Contract-driven</p>
-      <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The program loop is contract-driven</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">
-        The stages aren&rsquo;t just visually connected — each one emits a structured contract the next consumes through shared state.
-      </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {!bare && (
+        <>
+          <p className="eyebrow">Contract-driven</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The program loop is contract-driven</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">
+            The stages aren&rsquo;t just visually connected — each one emits a structured contract the next consumes through shared state.
+          </p>
+        </>
+      )}
+      <div className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-3${bare ? "" : " mt-4"}`}>
         {CONTRACTS.map((c, i) => (
           <div key={c.stage} className="rounded-xl border border-line bg-white p-4 shadow-card">
             <div className="flex items-center gap-2">
