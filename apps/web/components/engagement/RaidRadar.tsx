@@ -8,16 +8,20 @@
 // and defensible; a live narrative variant can plug into LIVE_MODEL later.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { deliveryHealth, sinkingGreen } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, FreshnessStamp } from "@labs/design-system";
-import { EL04_USE_CASES } from "@labs/kit";
+import { Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, FreshnessStamp, CommandPalette, ExportMenu, ToastHost, toast, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { EL04_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadCsv, ArtifactButton } from "../artifact/artifact";
 import {
   SCENARIOS, HEALTH_LABEL, HEALTH_TONE, HEALTH_X, TREND_Y, SEV_TONE,
-  statusWord, trendWord, healthIndex, type RaidItem, type Scenario,
+  statusWord, trendWord, type RaidItem, type Scenario,
 } from "./portfolioData";
 
 export function RaidRadar() {
@@ -41,9 +45,11 @@ export function RaidRadar() {
     setSelectedId((s.workstreams.find((w) => w.reported !== w.actual) ?? s.workstreams[0]).id);
   };
 
-  const idx = healthIndex(scenario.workstreams);
-  const atRisk = scenario.workstreams.filter((w) => w.actual !== "green").length;
-  const gaps = scenario.workstreams.filter((w) => w.reported !== w.actual).length;
+  const dh = deliveryHealth(scenario.workstreams);
+  const idx = dh.index;
+  const atRisk = dh.atRisk;
+  const gaps = dh.gaps;
+  const sinking = sinkingGreen(scenario.workstreams);
   const idxTone = idx >= 80 ? "healthy" : idx >= 60 ? "watch" : idx >= 40 ? "risk" : "critical";
 
   const onGenerateCsv = () => {
@@ -57,6 +63,21 @@ export function RaidRadar() {
     downloadCsv(`raid-register-${scenario.key}`, rows);
   };
 
+  const router = useRouter();
+  const exportBoard = () => { downloadJson("delivery-health", { version: 1, scenario: scenario.key, health: dh, sinking }); toast("Board exported as JSON"); };
+  const exportActions: ExportAction[] = [
+    { id: "raid", label: "RAID register (CSV)", hint: "All workstreams + items", onSelect: onGenerateCsv },
+    { id: "json", label: "Export board (JSON)", hint: "Health + sinking flags", onSelect: exportBoard },
+  ];
+  const paletteCommands: Command[] = [
+    ...(sinking.length > 0 ? [{ id: "sink", label: `Jump to sinking workstream`, group: "action", keywords: "green trouble", run: () => setSelectedId(sinking[0].id) }] : []),
+    { id: "exp-csv", label: "Export RAID register (CSV)", group: "export", run: onGenerateCsv },
+    { id: "exp-json", label: "Export board (JSON)", group: "export", run: exportBoard },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -65,6 +86,7 @@ export function RaidRadar() {
             <ArrowLeft className="h-4 w-4" /> Portfolio
           </Link>
           <span className="ml-1 font-mono text-xs text-slatey-500">EL-04</span>
+          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
         </div>
       </header>
 
@@ -85,6 +107,7 @@ export function RaidRadar() {
 
         <UseCaseRail useCases={EL04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Which 'green' workstream is actually trending into trouble?" approach="Pair each workstream's reported RAG with its actual health and trend, and flag the ones that read green but are sinking." why="A steering board should report trajectory, not a milestone snapshot." metric="Portfolio health index; reported-vs-actual gaps; the sinking-green flags." tradeoff="A comfortable reported status versus the honest trajectory underneath it." outcome="The workstream that reads green but is sinking, surfaced before the next steering." />
 
         <div className="mb-4 flex justify-end">
           <ArtifactButton label="Export RAID register (CSV)" onClick={onGenerateCsv} title="Download the RAID register as CSV" />
@@ -109,6 +132,26 @@ export function RaidRadar() {
           <KpiCard label="Reported-vs-actual gaps" value={gaps} tone={gaps >= 1 ? "critical" : "healthy"} interpretation="Green on paper, worse in reality" />
           <KpiCard label="This period" value="Week 6" tone="neutral" interpretation="Trend window: last 3 weeks" />
         </div>
+
+        {sinking.length > 0 && (
+          <div className="mb-6 rounded-xl border border-rose-300/50 bg-rose-50/50 p-3.5">
+            <p className="stat-label mb-1.5 text-rose-700">Reads green, actually sinking <span className="font-normal text-slatey-500">· what the RAG snapshot hides</span></p>
+            <ul className="flex flex-wrap gap-2">
+              {sinking.map((flag) => {
+                const w = scenario.workstreams.find((x) => x.id === flag.id);
+                if (!w) return null;
+                return (
+                  <li key={flag.id}>
+                    <button onClick={() => setSelectedId(flag.id)} className="rounded-md border border-rose-300 bg-white px-2.5 py-1 text-xs hover:border-rose-400">
+                      <span className="font-semibold text-ink">{w.name}</span>
+                      <span className="ml-1.5 text-rose-700">{flag.reason === "reads-green-actually-worse" ? "reported green, actually worse" : "green but trending down"}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
@@ -210,6 +253,7 @@ export function RaidRadar() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Escalate the workstreams that read green but are sinking, before the next steering." lift="Catch the trajectory problem weeks earlier than a RAG snapshot would." measure="Lead time from actual-decline to escalation; reported-vs-actual gap trend; workstreams that recovered after an early flag." />
           <p className="text-sm leading-relaxed text-ink">
             <span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Green with a downward arrow is yellow. Report trajectory or get surprised."}
           </p>
@@ -230,6 +274,8 @@ export function RaidRadar() {
           </p>
         </div>
       </main>
+      <ToastHost />
+      <CommandPalette commands={paletteCommands} />
     </div>
   );
 }

@@ -7,11 +7,15 @@
 // altitude from GAP-06 (portfolio vs per-call). SIMULATED, stated formulas.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { forecastRunRate, cliffSensitivity } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
-import { C33_USE_CASES } from "@labs/kit";
+import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { C33_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const CLUSTER_CAP_TOKENS = 2.5e9; // tokens/month per cluster at 100% utilization
@@ -39,22 +43,16 @@ export function InferenceForecaster() {
     setStartVol(p.startVol); setGrowth(p.growth); setTokensPerCall(p.tokensPerCall); setFrontierShare(p.frontierShare); setUtil(p.util); setOpsFte(p.opsFte);
   };
 
-  const blendedPrice = CHEAP_PRICE + (frontierShare / 100) * (FRONTIER_PRICE - CHEAP_PRICE);
-  const apiCostPerCall = (tokensPerCall / 1e6) * blendedPrice;
-  const effCap = CLUSTER_CAP_TOKENS * (util / 100);
-
-  const api: number[] = [];
-  const self: number[] = [];
-  for (let m = 0; m < 24; m++) {
-    const vol = startVol * Math.pow(1 + growth / 100, m);
-    const tokens = vol * tokensPerCall;
-    api.push(vol * apiCostPerCall);
-    const clusters = Math.max(1, Math.ceil(tokens / effCap));
-    self.push(clusters * CLUSTER_COST + opsFte * OPS_COST_PER_FTE);
-  }
-  const cliff = api.findIndex((a, i) => a > self[i]); // first month self-host wins
-  const apiCum = api.reduce((a, b) => a + b, 0);
-  const selfCum = self.reduce((a, b) => a + b, 0);
+  const fp = { startVol, growthPct: growth, tokensPerCall, frontierShare, utilPct: util, opsFte, cheapPrice: CHEAP_PRICE, frontierPrice: FRONTIER_PRICE, clusterCapTokens: CLUSTER_CAP_TOKENS, clusterCost: CLUSTER_COST, opsCostPerFte: OPS_COST_PER_FTE, months: 24 };
+  const forecast = forecastRunRate(fp);
+  const { api, self, apiCum, selfCum } = forecast;
+  const cliff = forecast.cliffMonth ?? -1; // -1 = no crossover inside the horizon
+  const sensitivity = cliffSensitivity(fp, [
+    { key: "growthPct", label: `Growth \u2192 ${growth + 6}%/mo`, to: growth + 6 },
+    { key: "frontierShare", label: `Frontier share \u2192 ${Math.max(0, frontierShare - 20)}%`, to: Math.max(0, frontierShare - 20) },
+    { key: "tokensPerCall", label: `Tokens/call \u2192 ${Math.round(tokensPerCall * 1.5).toLocaleString()}`, to: Math.round(tokensPerCall * 1.5) },
+    { key: "utilPct", label: `Utilization \u2192 ${Math.min(100, util + 25)}%`, to: Math.min(100, util + 25) },
+  ]);
 
   const W = 720, H = 220, PAD = 40;
   const maxY = Math.max(...api, ...self);
@@ -62,12 +60,34 @@ export function InferenceForecaster() {
   const yf = (v: number) => H - PAD - (v / maxY) * (H - PAD * 2);
   const poly = (arr: number[]) => arr.map((v, i) => `${xf(i).toFixed(1)},${yf(v).toFixed(1)}`).join(" ");
 
+  const router = useRouter();
+  const exportForecast = () => {
+    downloadCsv("inference-forecast", ["Month", "API (USD)", "Self-host (USD)"], api.map((a, i) => [i + 1, Math.round(a), Math.round(self[i])]));
+    toast("24-month forecast exported as CSV");
+  };
+  const exportScenario = () => {
+    downloadJson("inference-forecast-scenario", { version: 1, startVol, growth, tokensPerCall, frontierShare, util, opsFte });
+    toast("Scenario exported as JSON");
+  };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "24-month forecast (CSV)", hint: "API vs self-host per month", onSelect: exportForecast },
+    { id: "scn", label: "Export scenario (JSON)", hint: "All assumptions", onSelect: exportScenario },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "exp-csv", label: "Export 24-month forecast (CSV)", group: "export", run: exportForecast },
+    { id: "exp-json", label: "Export scenario (JSON)", group: "export", run: exportScenario },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
           <span className="ml-1 font-mono text-xs text-slatey-500">C3-3</span>
+          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
         </div>
       </header>
 
@@ -88,6 +108,7 @@ export function InferenceForecaster() {
 
         <UseCaseRail useCases={C33_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="When does self-hosting actually undercut API spend?" approach="Project API versus self-host run-rate over 24 months, mark the crossover, and test which single assumption pulls it forward." why="Utilization decides the crossover, not the sticker price a vendor quotes." metric="The crossover month; 24-month cumulative cost each way." tradeoff="API is flexible pay-per-use; self-host is fixed capacity that only amortizes past the crossover." outcome="The crossover month with the assumption that moves it most made explicit." />
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Inputs */}
@@ -136,6 +157,23 @@ export function InferenceForecaster() {
               <KpiCard label="API · 24-mo total" value={fmt(apiCum)} tone="neutral" interpretation="Cumulative" />
               <KpiCard label="Self-host · 24-mo total" value={fmt(selfCum)} tone="neutral" interpretation="Cumulative" />
             </div>
+
+            <Panel>
+              <p className="stat-label mb-2">What pulls the break-even forward <span className="font-normal text-slatey-500">· crossover under each single move</span></p>
+              <ul className="space-y-1.5">
+                {sensitivity.map((lv) => (
+                  <li key={lv.key} className="flex items-center justify-between gap-2 rounded-md border border-line px-2.5 py-1.5 text-xs">
+                    <span className="text-slatey-300">{lv.label}</span>
+                    <span className="font-mono text-slatey-500">
+                      {lv.cliffMonth === null ? "no cliff" : `mo ${lv.cliffMonth + 1}`}
+                      {lv.delta !== null && lv.delta < 0 && <span className="ml-1 text-emerald-700">({lv.delta} mo)</span>}
+                      {lv.delta !== null && lv.delta > 0 && <span className="ml-1 text-rose-600">(+{lv.delta} mo)</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed &mdash; earlier (green) means self-host pays off sooner.</p>
+            </Panel>
           </div>
         </div>
 
@@ -148,6 +186,7 @@ export function InferenceForecaster() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Stay on API until the crossover, then revisit self-host — and track utilization, the lever that decides it." lift="Avoid premature capex; capture the self-host saving only after the crossover is real." measure="Actual $/mo vs the projection; utilization vs assumed; the crossover re-computed monthly." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The cliff is real but further out than vendors say — utilization assumptions decide it, not sticker price."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
@@ -160,6 +199,8 @@ export function InferenceForecaster() {
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> cluster capacity, amortization, and ops load are illustrative defaults; real forecasts need your hardware, contracts, and utilization telemetry. It finds the crossover&apos;s shape, not the exact date.</p>
         </div>
       </main>
+      <ToastHost />
+      <CommandPalette commands={paletteCommands} />
     </div>
   );
 }

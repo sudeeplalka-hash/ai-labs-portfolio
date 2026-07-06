@@ -14,6 +14,8 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, Toolb
 import { EL01_USE_CASES, LABS } from "@labs/kit";
 import { weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity, scheduleAdoptionPlan, compareReadiness, readinessTrajectory, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
 
@@ -252,6 +254,7 @@ export function AdoptionReadiness() {
 
         <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Enterprise AI rarely fails on the model; it fails on the people who have to trust and use it. Scaling an unready rollout is the expensive mistake." approach="Six weighted readiness factors roll up to a normalized composite that drives a Scale / conditions / Hold gate, with a two-week plan that rewrites as the weakest factors move." why="A single adoption number hides the levers. Weighting the factors and exposing the gate cutoffs turns readiness into a decision, not a vibe." metric="The composite against the Scale cutoff, and the fewest factor-point moves required to clear it, highest-leverage factors first." tradeoff="Broad slow change-management vs minimal targeted moves; the flip-the-gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold-or-scale decision with a dated, sequenced plan to reach the gate — and an honest read on whether the rollout is ready at all." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's weights and gate cutoffs">
@@ -503,6 +506,7 @@ export function AdoptionReadiness() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Hold or scale per the readiness gate, and spend the two weeks on the fewest, highest-leverage factor moves." lift="Clears the Scale cutoff via the minimal point moves instead of a broad slow push — and avoids the expensive failure of scaling an unready rollout." measure="Actual adoption percent vs target; re-survey the six factors at 2 and 6 weeks; time-to-Scale; support and override rates as trust proxies." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : `The model was never the risk. The ${people} people who have to trust it were.`}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — Gen AI rollouts at AMEX; the adoption half of the 4.5× scale story.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">

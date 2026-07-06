@@ -12,6 +12,8 @@ import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL09_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface Resource { key: string; role: string; loc: "Onshore" | "Offshore"; access: number }
@@ -88,6 +90,7 @@ export function OnboardingTracker() {
 
         <UseCaseRail useCases={EL09_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Why does it take forty days to make a new hire productive?" approach="Map the onboarding critical path and the knowledge-transfer that must be captured before a senior resource rolls off." why="Ramp time is a critical-path problem, and un-captured KT is a standing risk." metric="Time-to-productive; KT items captured before roll-off." tradeoff="Speed of ramp versus the depth of knowledge transfer captured." outcome="The onboarding critical path plus the KT captured before the senior leaves." />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {(["onboard", "kt"] as const).map((v) => (
@@ -166,6 +169,7 @@ export function OnboardingTracker() {
         )}
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Compress the onboarding critical path and capture the departing expert's KT before roll-off." lift="Cut time-to-productive and de-risk the senior handoff." measure="Days-to-productive vs baseline; KT items captured vs identified; gaps surfaced after roll-off." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "A resource is a cost from day one and an asset from day forty. Onboarding compression is the cheapest margin lever nobody manages."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — resource-lead reality of the 31-resource AMEX portfolio; onshore/offshore mobilization.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">

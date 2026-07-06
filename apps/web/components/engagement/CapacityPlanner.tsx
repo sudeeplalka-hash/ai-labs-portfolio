@@ -12,6 +12,8 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL03_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Res = "none" | "hire" | "contract" | "upskill";
@@ -90,6 +92,7 @@ export function CapacityPlanner() {
 
         <UseCaseRail useCases={EL03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Do thirty people actually cover this portfolio's skills?" approach="Map the portfolio's skill demand against the team's supply, flagging gaps and overallocation rather than raw headcount." why="Staffing is a skills-coverage problem, not a headcount problem." metric="Utilization versus target; skill-coverage gaps against demand." tradeoff="Hiring is slow and costly; contracting is fast but thin; upskilling is sticky but takes time." outcome="A hire/contract/upskill call per gap, with the date and cost impact." />
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Team" value={teamLabel} tone="neutral" interpretation={`${totalGap} FTE short in skills`} />
@@ -143,6 +146,7 @@ export function CapacityPlanner() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Close each skill gap with the cheapest adequate lever that still hits the need-by date." lift="Coverage on the critical skills without over-hiring, with the schedule impact explicit." measure="Skill-coverage % vs demand; utilization vs target; slippage traced to an unfilled gap." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Capacity plans fail on skills, not headcount. Thirty people ≠ thirty people."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — a direct mirror of the 31-resource AMEX intelligence mapping; the most personal instrument on the site.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">

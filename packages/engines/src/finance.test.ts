@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { avgAdoption, cashflows, npv, irr, payback, HORIZON_YEARS, type RoiInputs } from "./finance";
+import { avgAdoption, cashflows, npv, irr, payback, HORIZON_YEARS, type RoiInputs , roiTornado } from "./finance";
 
 const base: RoiInputs = { investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 };
 
@@ -77,5 +77,36 @@ describe("cashflows", () => {
   });
   it("respects a custom horizon", () => {
     expect(cashflows(base, 5)).toHaveLength(6);
+  });
+});
+
+describe("roiTornado", () => {
+  const base = { investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 };
+
+  it("returns one bar per driver, sorted widest-swing first", () => {
+    const t = roiTornado(base);
+    expect(t.length).toBe(5);
+    for (let i = 1; i < t.length; i++) expect(t[i].swing).toBeLessThanOrEqual(t[i - 1].swing);
+  });
+
+  it("swing equals |high - low| and brackets NPV both ways", () => {
+    const t = roiTornado(base);
+    for (const b of t) expect(b.swing).toBeCloseTo(Math.abs(b.high - b.low), 6);
+  });
+
+  it("annual value is the dominant driver for a value-heavy case", () => {
+    expect(roiTornado(base)[0].key).toBe("annualValue");
+  });
+
+  it("a bigger swing widens every bar", () => {
+    const narrow = roiTornado(base, 0.1);
+    const wide = roiTornado(base, 0.5);
+    const nAV = narrow.find((b) => b.key === "annualValue")!.swing;
+    const wAV = wide.find((b) => b.key === "annualValue")!.swing;
+    expect(wAV).toBeGreaterThan(nAV);
+  });
+
+  it("is deterministic", () => {
+    expect(roiTornado(base)).toEqual(roiTornado(base));
   });
 });

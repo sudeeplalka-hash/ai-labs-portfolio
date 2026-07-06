@@ -14,6 +14,8 @@ import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolb
 import { C31_USE_CASES, LABS } from "@labs/kit";
 import { greedyFund, reallocateKills, initiativesFromCsvRows, efficientFrontier } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
 
@@ -328,6 +330,7 @@ export function PortfolioDashboard() {
 
         <UseCaseRail useCases={C31_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Most AI portfolios are a list everyone is proud of and no one governs. Without a kill discipline, capital spreads thin across initiatives that will never pay." approach="Twelve initiatives governed like capital: each carries an expected value, a stage-based probability of success, and a run cost, yielding a risk-adjusted ROI and an explicit kill / hold / scale call across value×risk, financials, stage-gate, funding, and reallocation views." why="Treating initiatives as a capital book — not a wish list — forces the uncomfortable calls: fund the efficient core, kill the negatives, redeploy the freed capital." metric="Risk-adjusted ROI per initiative (expected value × stage probability − run cost) and the efficient frontier of cumulative value vs cumulative spend." tradeoff="Funding the single highest-value initiative can starve three efficient ones; the greedy funder and the frontier knee show where diminishing returns begin." outcome="A defensible funding decision within a budget — what to fund, what to kill, and where the freed capital goes — with the value captured quantified." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's assumptions">
@@ -687,6 +690,7 @@ export function PortfolioDashboard() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Fund the efficient core, kill the negative-ROI initiatives, and redeploy freed capital into scale targets." lift="Risk-adjusted value captured within budget, plus the value recovered by cutting losers and doubling down on winners at current efficiency." measure="Realized vs modeled risk-adjusted ROI per initiative; kill-decision cycle time; portfolio value-per-dollar trend quarter over quarter." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "A portfolio where nothing gets killed isn't governed — it's unattended. Two of these twelve should die this quarter."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>

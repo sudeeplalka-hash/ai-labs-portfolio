@@ -12,6 +12,8 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL07_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -148,6 +150,7 @@ export function RfpWarRoom() {
 
         <UseCaseRail useCases={EL07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Should we even bid this — and where is the response weak?" approach="Score the opportunity on fit, win-probability, capacity, and margin, and find the weakest sections of the draft response." why="Bid/no-bid is a portfolio decision, not an enthusiasm decision." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no-bid call plus where to strengthen the response if you bid." />
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -231,6 +234,7 @@ export function RfpWarRoom() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Bid only where fit times win-probability times margin clears the bar and capacity exists; else no-bid." lift="Win-rate and margin improve by not chasing low-probability, low-fit bids." measure="Win rate on bids above the bar; margin on won work; capacity freed by no-bidding." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The RFPs you decline fund the ones you win. Bid/no-bid is a portfolio decision, not a reflex."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — $9M pipeline — the instrument of how a pipeline gets built, one qualified pursuit at a time.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">

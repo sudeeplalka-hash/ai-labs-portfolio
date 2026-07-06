@@ -7,22 +7,18 @@
 // SIMULATED.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { DEFAULT_ITEMS, reviewed, reviewPolicy, recommendLevel } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
-import { GAP08_USE_CASES, type Gap08Tier } from "@labs/kit";
+import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { GAP08_USE_CASES, type Gap08Tier, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
-type Risk = "high" | "med" | "low";
-interface Item { risk: Risk; edge: boolean; sev: number }
-// 20 items; edges (would error if auto-approved) are at high 6/14 and med 7/15.
-const ITEMS: Item[] = Array.from({ length: 20 }, (_, i) => {
-  const high = [2, 6, 10, 14, 18], med = [1, 4, 7, 9, 12, 15, 17, 19];
-  const risk: Risk = high.includes(i) ? "high" : med.includes(i) ? "med" : "low";
-  const edge = [6, 14, 7, 15].includes(i);
-  return { risk, edge, sev: risk === "high" ? 50 : risk === "med" ? 20 : 5 };
-});
+const ITEMS = DEFAULT_ITEMS;
 
 const LEVELS = [
   { n: 1, label: "Review all" },
@@ -31,14 +27,6 @@ const LEVELS = [
   { n: 4, label: "Sample ~20%" },
   { n: 5, label: "Full autonomy" },
 ];
-const SAMPLE = new Set([3, 7, 11, 16]);
-function reviewed(level: number, item: Item, idx: number) {
-  if (level === 1) return true;
-  if (level === 2) return item.risk !== "low";
-  if (level === 3) return item.risk === "high";
-  if (level === 4) return SAMPLE.has(idx);
-  return false;
-}
 
 const TIER_GUIDE = [
   { tier: "High-risk (EU AI Act)", tone: "rose" as const, max: "L1–L2" },
@@ -63,11 +51,33 @@ export function HitlSimulator() {
     const slipped = it.edge && !rev;
     return { it, idx, rev, slipped, state: rev ? "reviewed" : slipped ? "slipped" : "auto" as const };
   });
-  const reviewedCount = cells.filter((c) => c.rev).length;
+  const policy = reviewPolicy(ITEMS, level);
+  const reviewedCount = policy.reviewedCount;
   const slips = cells.filter((c) => c.slipped);
-  const exposure = slips.reduce((a, c) => a + c.it.sev, 0);
-  const throughput = Math.round(100 * (1 + (level - 1) * 0.6));
-  const sweet = 2; // engineered: L2 clears all edges at good throughput
+  const exposure = policy.exposureK;
+  const throughput = policy.throughput;
+  const sweet = recommendLevel(ITEMS);
+
+  const router = useRouter();
+  const exportPolicy = () => {
+    downloadCsv("hitl-policy", ["Level", "Human review load", "Throughput/hr", "Edges slipped", "Exposure ($k)", "Edge coverage %"],
+      [1, 2, 3, 4, 5].map((l) => { const r = reviewPolicy(ITEMS, l); return [l, r.reviewedCount, r.throughput, r.slipped, r.exposureK, r.coveragePct]; }));
+    toast("Policy table exported as CSV");
+  };
+  const exportScenario = () => { downloadJson("hitl-scenario", { version: 1, level, recommended: sweet }); toast("Scenario exported as JSON"); };
+  const exportActions: ExportAction[] = [
+    { id: "csv", label: "Policy table (CSV)", hint: "All 5 levels compared", onSelect: exportPolicy },
+    { id: "json", label: "Export scenario (JSON)", hint: "Current + recommended level", onSelect: exportScenario },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-rec", label: `Set recommended level (L${sweet})`, group: "action", keywords: "sweet spot safe", run: () => setLevel(sweet) },
+    ...[1, 2, 3, 4, 5].map((l) => ({ id: `lvl-${l}`, label: `Autonomy L${l}`, group: "action", keywords: "level", run: () => setLevel(l) })),
+    { id: "exp-csv", label: "Export policy table (CSV)", group: "export", run: exportPolicy },
+    { id: "exp-json", label: "Export scenario (JSON)", group: "export", run: exportScenario },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -75,6 +85,7 @@ export function HitlSimulator() {
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
           <span className="ml-1 font-mono text-xs text-slatey-500">GAP-08</span>
+          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
         </div>
       </header>
 
@@ -93,10 +104,15 @@ export function HitlSimulator() {
 
         <UseCaseRail useCases={GAP08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="How much autonomy before an edge case slips through?" approach="Raise the autonomy level and watch throughput climb until a deliberately-engineered edge case slips through unreviewed; the engine recommends the safe level." why="Autonomy is set per risk tier, not per enthusiasm." metric="Edge-case coverage versus throughput; the recommended (highest zero-slip) level." tradeoff="More autonomy means more throughput and, eventually, an unreviewed high-severity error." outcome="The autonomy level to run per risk tier — the most speed that still catches every edge." />
 
         <Panel className="mb-4">
           <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Autonomy level</label><span className="font-mono text-xs font-semibold text-ink">L{level} · {LEVELS[level - 1].label}</span></div>
           <input type="range" min={1} max={5} step={1} value={level} onChange={(e) => setLevel(Number(e.target.value))} className="w-full accent-teal-600" />
+          <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
+            <span className="text-slatey-500">Recommended: <span className="font-semibold text-ink">L{sweet}</span> &mdash; the most autonomy that still catches every edge case.</span>
+            {level !== sweet && <button onClick={() => setLevel(sweet)} className="rounded border border-primary/40 bg-primary/5 px-1.5 py-0.5 font-semibold text-primary">Set L{sweet}</button>}
+          </div>
           <div className="mt-1 flex justify-between text-[10px] text-slatey-500">{LEVELS.map((l) => <span key={l.n}>L{l.n}</span>)}</div>
         </Panel>
 
@@ -151,6 +167,7 @@ export function HitlSimulator() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Set autonomy to the highest level that still catches every edge case for this risk tier." lift="Reclaim throughput on low-risk items while holding zero unreviewed high-severity errors." measure="Edge-case escape rate; human review load; throughput/hr; incidents from auto-approved items." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Autonomy is set per risk tier, not per enthusiasm."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
@@ -162,6 +179,8 @@ export function HitlSimulator() {
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the queue and severities are illustrative; real autonomy also weighs reversibility and detection latency. It shows the throughput-vs-risk trade and the per-tier rule, not a policy engine.</p>
         </div>
       </main>
+      <ToastHost />
+      <CommandPalette commands={paletteCommands} />
     </div>
   );
 }

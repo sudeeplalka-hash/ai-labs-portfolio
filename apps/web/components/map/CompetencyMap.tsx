@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import {
-  Workflow, Boxes, LineChart, Users, Sparkles,
+  Workflow, Boxes, LineChart, Users,
   CircleCheck, Hammer, Clock, ArrowRight, Mail,
   type LucideIcon,
 } from "lucide-react";
@@ -122,6 +122,49 @@ function Shelf({ title, tag, accent, icon: Icon, labs, href }: {
   );
 }
 
+const HERO_PROOF: Record<string, { proves: string; depth: string }> = {
+  "GAP-01": { proves: "Protocol & integration architecture", depth: "A working MCP client — browse a server's manifest, compose a call, read the JSON-RPC round-trip with honest typed errors, build a custom tool, watch the initialize handshake. The N\u00d7M\u2192N+M case made concrete." },
+  "GAP-03": { proves: "Multi-agent orchestration judgment", depth: "Supervisor \u2192 role agents over A2A messages you can inspect frame-by-frame, an agent timeline, and a tested single-vs-multi scorecard \u2014 quality bought with cost and latency." },
+  "GAP-07": { proves: "Architecture decision-making", depth: "Six questions \u2192 function-calling vs MCP vs A2A vs hybrid, with the runner-up, exactly what would flip the call, a four-protocol radar, and a shareable recommendation card." },
+  "C3-1": { proves: "Capital allocation under risk", depth: "Twelve initiatives governed like capital \u2014 risk-adjusted ROI, kill/hold/scale, budget-constrained greedy funding, the efficient frontier, and redeploy-the-kills." },
+  "EL-01": { proves: "Change-management rigor", depth: "Six weighted readiness factors \u2192 a scale/hold gate \u2192 the fewest moves to clear it, a sequenced two-week plan, and the projected path to the gate." },
+};
+
+function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
+  return (
+    <section className="mb-9 mt-8">
+      <div className="flex items-baseline justify-between gap-3">
+        <div>
+          <p className="eyebrow text-primary">Read these five first</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The deep case studies &mdash; each a tested decision tool</h2>
+        </div>
+        <span className="hidden shrink-0 text-xs text-slatey-500 sm:block">~10 minutes &middot; the other 18 show range</span>
+      </div>
+      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
+        If you have ten minutes, start here. Each of these five is a pure, unit-tested engine driving a real decision &mdash; the assumptions are labelled, and every one shows <span className="text-ink">what would change the call</span>. The shelves below show range across the same lifecycle.
+      </p>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        {labs.map((l) => {
+          const h = HERO_PROOF[l.id];
+          if (!h) return null;
+          return (
+            <Link key={l.id} href={l.href ?? "#"} className="group flex flex-col rounded-xl border border-line bg-white p-4 shadow-card transition hover:border-primary/40 hover:shadow-lg">
+              <div className="flex items-center gap-2">
+                <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-primary">{l.id}</span>
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{h.proves}</span>
+              </div>
+              <h3 className="mt-1.5 text-base font-semibold text-ink group-hover:text-primary">{l.title}</h3>
+              <p className="mt-0.5 text-xs font-medium text-slatey-300">{l.decision}</p>
+              <p className="mt-2 text-xs leading-relaxed text-slatey-400">{h.depth}</p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">Open the case study <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function CompetencyMap() {
   const featured = LABS.filter((l) => l.flagship);
   const c1labs = [labById("C1"), ...labsByCollection(1)].filter(Boolean) as LabEntry[];
@@ -165,13 +208,16 @@ export function CompetencyMap() {
             <Link href="/industries" className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
               Explore by industry <ArrowRight className="h-4 w-4" />
             </Link>
+            <Link href="/engagements" className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
+              See real engagements <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Shelves */}
       <main className="mx-auto max-w-6xl px-4 pb-6 md:px-5">
-        <Shelf title="Featured instruments" tag="start here" accent={ACCENT.blue} icon={Sparkles} labs={featured} />
+        <HeroCaseStudies labs={featured} />
         <Shelf title={COLLECTIONS[0].title} tag={COLLECTIONS[0].tag} accent={ACCENT.blue} icon={COLLECTIONS[0].icon} labs={c1labs} href="/lifecycle" />
         {COLLECTIONS.slice(1).map((col) => (
           <Shelf
@@ -199,6 +245,7 @@ export function CompetencyMap() {
               <Mail className="h-4 w-4" /> Discussing a role? <ArrowRight className="h-4 w-4" />
             </a>
             <Link href="/storylines" className="text-slatey-500 hover:text-ink hover:underline">Storylines</Link>
+            <Link href="/engagements" className="text-slatey-500 hover:text-ink hover:underline">Engagements</Link>
             <Link href="/industries" className="text-slatey-500 hover:text-ink hover:underline">Industry Atlas</Link>
             <Link href="/changelog" className="text-slatey-500 hover:text-ink hover:underline">Changelog</Link>
           </div>

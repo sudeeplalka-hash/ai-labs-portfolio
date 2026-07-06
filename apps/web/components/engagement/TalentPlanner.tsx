@@ -11,6 +11,8 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL06_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Path = "none" | "build" | "hire" | "partner";
@@ -80,6 +82,7 @@ export function TalentPlanner() {
 
         <UseCaseRail useCases={EL06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="How do we get the team to agentic-era skills in time?" approach="Assess the skill gap per role and lay out a build, hire, or partner pathway with a time-to-productive for each." why="Capability is a pathway with a timeline, not a one-off training event." metric="Skill gap per role; time-to-productive per pathway." tradeoff="Building is slow but sticky; hiring is fast but costly; partnering is quick but external." outcome="The build/hire/partner pathway per role, with time-to-productive." />
 
         <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Readiness now" value={`${readyNow}%`} tone={readyNow >= 70 ? "watch" : "risk"} interpretation="Avg coverage vs target" />
@@ -143,6 +146,7 @@ export function TalentPlanner() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="For each role, pick the build/hire/partner path that reaches productive capability by the need-by date." lift="The team reaches agentic-era capability on a defensible timeline, not on hope." measure="Skills assessed pre/post; time-to-productive vs plan; roles still gapped at the milestone." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The stack went agentic in 18 months. Teams take 24. Start the people plan before the platform plan."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — team capability building across delivery portfolios.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">

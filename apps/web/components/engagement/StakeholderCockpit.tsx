@@ -12,6 +12,8 @@ import { ArrowLeft, TrendingDown } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -117,6 +119,7 @@ export function StakeholderCockpit() {
 
         <UseCaseRail useCases={EL02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Which sponsor is quietly drifting before the next steering?" approach="Map stakeholders on influence and alignment, and flag the high-influence sponsor whose support is slipping before the meeting." why="Misalignment surfaces publicly at steering unless you catch it privately first." metric="Alignment gap per stakeholder; who is drifting and how much influence they hold." tradeoff="Time spent aligning ahead of the meeting versus a blindside inside it." outcome="Who needs to hear what, from whom, before the meeting." />
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Grid */}
@@ -184,6 +187,7 @@ export function StakeholderCockpit() {
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Brief the drifting high-influence sponsor one-on-one before the steering, not during it." lift="Turn a public misalignment into a private, pre-resolved one." measure="Sponsor alignment pre/post; decisions stalled at steering by misalignment; surprises raised in the room." />
           <InsightCard title={`${flags.length} stakeholders drifting`} tone="warn">
             Sentiment moves between meetings, not in them. The sponsor cooling from champion to neutral is invisible on a
             status report and obvious on a trajectory — and it&apos;s recoverable with one well-aimed 1:1 before the room.

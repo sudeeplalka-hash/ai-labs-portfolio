@@ -12,6 +12,8 @@ import { ArrowLeft, ArrowRight, ShieldCheck, XCircle, CheckCircle2, Database } f
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP04_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface Field { name: string; type: string; required: boolean }
@@ -112,6 +114,7 @@ export function StructuredOutput() {
 
         <UseCaseRail useCases={GAP04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="How do messy inputs become schema-valid outputs, reliably?" approach="Run messy inputs through a validation gate — schema check, repair/retry, honest typed errors — and watch what gets caught before it moves on." why="The gate belongs before outputs hit systems of record, not after." metric="Schema-valid rate at the gate; repair success rate; escapes downstream." tradeoff="A strict gate adds retries and latency; a loose one lets bad data write to systems of record." outcome="A clear answer on where to place the validation gate and how strict to make it." />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {!activeUc && SAMPLES.map((x) => (
@@ -177,6 +180,7 @@ export function StructuredOutput() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Put a schema-validation and repair gate before any output writes to a system of record." lift="Near-zero malformed writes downstream, at a bounded retry cost." measure="Schema-valid rate at the gate; repair success rate; malformed records reaching systems of record." />
           <InsightCard title="The retry is the reliability" tone="info">
             The first pass is often almost-right — a string where a number belongs, a missing key. A validation gate with a
             single corrective retry turns "usually valid" into "always valid or explicitly flagged." That&apos;s the

@@ -12,6 +12,8 @@ import { ArrowLeft, CheckCircle2, Circle } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -164,6 +166,7 @@ export function ComplianceNavigator() {
 
         <UseCaseRail useCases={EL05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="What tier is this AI, and what controls does it owe?" approach="Classify the system's risk tier under the EU AI Act plus finserv overlays, then map the required controls and the coverage gap." why="The controls owed follow the tier, not the team's enthusiasm." metric="Risk tier; control coverage versus what the tier requires." tradeoff="Control burden and time-to-market versus regulatory and reputational exposure." outcome="A risk-tier and required-controls map with the gap to close before go-live." />
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Inputs */}
@@ -233,6 +236,7 @@ export function ComplianceNavigator() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Classify the system's tier and close the required-control gaps before go-live." lift="Enter production with tier-appropriate controls in place, not a post-audit scramble." measure="Control coverage vs the tier's requirement; audit findings; time-to-close on gaps." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Compliance isn't a gate at the end; it's a design input at the start. Retrofit costs 10×."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — regulated-industry delivery across AMEX, Morgan Stanley, and S&P/CRISIL.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">

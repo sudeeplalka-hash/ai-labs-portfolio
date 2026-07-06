@@ -52,3 +52,27 @@ export function payback(cf: number[]): number | null {
   }
   return null;
 }
+
+// ROI tornado — the sensitivity view for a business case. Swing each driver ±`swing` and read
+// the NPV at each extreme; the bar with the widest low↔high spread is the assumption the case
+// most depends on. Sorted widest-first (tornado convention). Built on the same npv/cashflows
+// the KPIs show, so the chart and the headline can't disagree. Pure.
+export interface TornadoBar {
+  key: string;
+  label: string;
+  low: number;
+  high: number;
+  swing: number; // |high - low|
+}
+export function roiTornado(p: RoiInputs, swing = 0.3, horizon: number = HORIZON_YEARS): TornadoBar[] {
+  const r = p.rate / 100;
+  const at = (mods: Partial<RoiInputs>, rate = r) => npv(cashflows({ ...p, ...mods }, horizon), rate);
+  const raw: Omit<TornadoBar, "swing">[] = [
+    { key: "annualValue", label: "Annual value", low: at({ annualValue: p.annualValue * (1 - swing) }), high: at({ annualValue: p.annualValue * (1 + swing) }) },
+    { key: "rampMonths", label: "Adoption ramp", low: at({ rampMonths: p.rampMonths * (1 + swing) }), high: at({ rampMonths: p.rampMonths * (1 - swing) }) },
+    { key: "runCost", label: "Run cost", low: at({ runCost: p.runCost * (1 + swing) }), high: at({ runCost: p.runCost * (1 - swing) }) },
+    { key: "investment", label: "Upfront investment", low: at({ investment: p.investment * (1 + swing) }), high: at({ investment: p.investment * (1 - swing) }) },
+    { key: "rate", label: "Discount rate", low: at({}, r * (1 + swing)), high: at({}, r * (1 - swing)) },
+  ];
+  return raw.map((b) => ({ ...b, swing: Math.abs(b.high - b.low) })).sort((a, b) => b.swing - a.swing);
+}

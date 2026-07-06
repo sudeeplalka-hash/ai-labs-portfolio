@@ -14,6 +14,8 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, Toolb
 import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES, LABS } from "@labs/kit";
 import { sensitivity as protocolSensitivity, bespokeCost, protocolCost, crossoverConsumers, protocolAffinity, affinityRadar, whyNotOthers, recommendationCard, explainRecommendation, type ProtocolAxis } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type PKey = "fc" | "mcp" | "a2a" | "hybrid";
@@ -215,6 +217,7 @@ export function ProtocolSelection() {
 
         <UseCaseRail useCases={GAP07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Teams argue function-calling vs MCP vs A2A vs hybrid on taste, and either over-engineer a protocol layer they do not need or under-build one they will." approach="Six questions about the integration scenario feed a transparent weighted scorer; the lab returns a recommendation, the runner-up, and the single answer that would flip the call, plus a four-protocol radar and a producers×consumers crossover curve." why="The decision is a function of how many systems, how many consumers, and how much coordination — not religion. Making the scorer editable keeps it honest." metric="The fit scores and the flip conditions: which single input change would change the recommendation." tradeoff="Broadening scope raises value but lowers feasibility; the radar shows function-calling and MCP as mirror opposites on tool breadth — you choose where on that curve to sit." outcome="A protocol recommendation you can defend in a design review, with the runner-up and the exact condition that would flip it — exportable as a one-page card." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Tune how much each signal counts">
@@ -430,6 +433,7 @@ export function ProtocolSelection() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Standardize on the recommended protocol for this integration shape, with the runner-up noted." lift="Avoids the rework of an under- or over-engineered integration layer; the recommendation and the single input that would flip it are explicit." measure="Integration lead time; number of point-to-point connectors; rework and incident tickets 90 days after the decision; re-run the six answers if scope changes." />
           <InsightCard title="Why the runner-up matters" tone="info">
             A recommendation without a runner-up is a quiz answer. The flip condition tells leadership exactly what would
             change the architecture — so the decision survives the next scale-up instead of being re-litigated.

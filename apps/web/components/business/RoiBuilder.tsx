@@ -6,40 +6,25 @@
 // what gets funded. Adoption ramp links conceptually to EL-01. SIMULATED.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { cashflows, npv, irr, payback, roiTornado, HORIZON_YEARS, type RoiInputs } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
-import { C35_USE_CASES } from "@labs/kit";
+import { Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { C35_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
-const H = 3; // horizon years
+const H = HORIZON_YEARS;
 
-interface P { investment: number; annualValue: number; rampMonths: number; runCost: number; rate: number }
-
-function avgAdoption(t: number, rampMonths: number) {
-  let s = 0;
-  for (let m = 0; m < 12; m++) s += Math.min(1, ((t - 1) * 12 + m + 1) / rampMonths);
-  return s / 12;
-}
-function cashflows(p: P): number[] {
-  const cf = [-p.investment];
-  for (let t = 1; t <= H; t++) cf.push(p.annualValue * avgAdoption(t, p.rampMonths) - p.runCost);
-  return cf;
-}
-function npv(cf: number[], r: number) { return cf.reduce((a, c, t) => a + c / Math.pow(1 + r, t), 0); }
-function irr(cf: number[]) { let lo = -0.9, hi = 5; for (let i = 0; i < 90; i++) { const mid = (lo + hi) / 2; (npv(cf, mid) > 0 ? (lo = mid) : (hi = mid)); } return (lo + hi) / 2; }
-function payback(cf: number[]): number | null {
-  let cum = 0;
-  for (let t = 0; t < cf.length; t++) { const prev = cum; cum += cf[t]; if (cum >= 0 && cf[t] > 0) return t - 1 + (-prev) / cf[t]; }
-  return null;
-}
 const fmt = (v: number) => (v < 0 ? "-" : "") + (Math.abs(v) >= 1e6 ? `$${(Math.abs(v) / 1e6).toFixed(2)}M` : `$${Math.round(Math.abs(v) / 1000)}k`);
 
 export function RoiBuilder() {
-  const [p, setP] = useState<P>({ investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 });
-  const set = (k: keyof P, v: number) => setP((cur) => ({ ...cur, [k]: v }));
+  const [p, setP] = useState<RoiInputs>({ investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 });
+  const set = (k: keyof RoiInputs, v: number) => setP((cur) => ({ ...cur, [k]: v }));
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C35_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
   useUseCaseDeepLink(C35_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
@@ -55,12 +40,7 @@ export function RoiBuilder() {
   const baseIrr = irr(cf);
   const pb = payback(cf);
 
-  const drivers = [
-    { label: "Annual value", low: npv(cashflows({ ...p, annualValue: p.annualValue * 0.7 }), r), high: npv(cashflows({ ...p, annualValue: p.annualValue * 1.3 }), r) },
-    { label: "Adoption ramp", low: npv(cashflows({ ...p, rampMonths: p.rampMonths * 1.3 }), r), high: npv(cashflows({ ...p, rampMonths: p.rampMonths * 0.7 }), r) },
-    { label: "Run cost", low: npv(cashflows({ ...p, runCost: p.runCost * 1.3 }), r), high: npv(cashflows({ ...p, runCost: p.runCost * 0.7 }), r) },
-    { label: "Discount rate", low: npv(cf, r * 1.3), high: npv(cf, r * 0.7) },
-  ].map((d) => ({ ...d, swing: Math.abs(d.high - d.low) })).sort((a, b) => b.swing - a.swing);
+  const drivers = roiTornado(p);
 
   const lows = drivers.map((d) => Math.min(d.low, d.high));
   const highs = drivers.map((d) => Math.max(d.low, d.high));
@@ -116,12 +96,37 @@ export function RoiBuilder() {
       scenario: activeUc ? activeUc.title : "Custom inputs",
     });
 
+  const router = useRouter();
+  const exportCashflows = () => {
+    downloadCsv("roi-cashflows", ["Year", "Cash flow (USD)"], cf.map((c, i) => [i, Math.round(c)]));
+    toast("Cash flows exported as CSV");
+  };
+  const exportTornado = () => {
+    downloadCsv("roi-tornado", ["Driver", "NPV low (USD)", "NPV high (USD)", "Swing (USD)"], drivers.map((d) => [d.label, Math.round(d.low), Math.round(d.high), Math.round(d.swing)]));
+    toast("Tornado exported as CSV");
+  };
+  const exportScenario = () => { downloadJson("roi-scenario", { version: 1, ...p }); toast("Scenario exported as JSON"); };
+  const exportActions: ExportAction[] = [
+    { id: "cf", label: "Cash flows (CSV)", hint: "Year 0..3", onSelect: exportCashflows },
+    { id: "tor", label: "Tornado (CSV)", hint: "Driver swings on NPV", onSelect: exportTornado },
+    { id: "scn", label: "Export scenario (JSON)", hint: "All assumptions", onSelect: exportScenario },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "exp-cf", label: "Export cash flows (CSV)", group: "export", run: exportCashflows },
+    { id: "exp-tor", label: "Export tornado (CSV)", group: "export", run: exportTornado },
+    { id: "exp-scn", label: "Export scenario (JSON)", group: "export", run: exportScenario },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
           <span className="ml-1 font-mono text-xs text-slatey-500">C3-5</span>
+          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
         </div>
       </header>
 
@@ -142,6 +147,7 @@ export function RoiBuilder() {
 
         <UseCaseRail useCases={C35_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="What is the payback — and how fragile is it?" approach="Build the NPV, IRR, and payback, then swing each driver plus and minus to see which assumption the case most depends on." why="You fund on a range and its fragility, not a single confident point." metric="NPV and payback; the widest tornado bar (the driver the case hinges on)." tradeoff="Optimistic value versus conservative adoption and run-cost assumptions." outcome="A fund/defer decision with the fragility named, not hidden in a point estimate." />
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           {/* Inputs */}
@@ -205,6 +211,7 @@ export function RoiBuilder() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Fund if the pessimistic NPV clears zero; otherwise fund-with-conditions on the driver that swings it most." lift="The risk-adjusted NPV, with the one assumption the case most depends on made explicit." measure="Realized NPV/payback vs modeled; the driver's actual value vs assumed at 90 days." />
           <InsightCard title="Present the range, not the point" tone="info">
             A single NPV invites a fight about the assumption behind it. A tornado shows you already stress-tested it — and
             names the one driver leadership should actually govern. That&apos;s what moves a case from "interesting" to "funded."
@@ -220,6 +227,8 @@ export function RoiBuilder() {
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> a 3-year horizon and a linear adoption ramp are simplifications; real cases model per-year ramps, taxes, and terminal value. It frames the decision and its sensitivity, not an audited model.</p>
         </div>
       </main>
+      <ToastHost />
+      <CommandPalette commands={paletteCommands} />
     </div>
   );
 }

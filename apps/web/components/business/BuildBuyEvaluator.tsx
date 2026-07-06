@@ -12,6 +12,8 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C32_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type OKey = "api" | "ft" | "buy";
@@ -109,6 +111,7 @@ export function BuildBuyEvaluator() {
 
         <UseCaseRail useCases={C32_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Build it, buy it, or fine-tune it?" approach="Price the three-year total cost of ownership across build, buy, and fine-tune, and surface the volume or requirement that flips the answer." why="The decision is TCO plus strategic control over the horizon, not year-one price or preference." metric="Three-year TCO per path; the break-even volume or customization that flips it." tradeoff="Build and fine-tune buy control at the cost of speed; buy trades customization for time-to-value." outcome="A defensible build/buy/fine-tune call with the condition that would flip it." />
 
         {/* Inputs */}
         <Panel className="mb-6">
@@ -159,6 +162,7 @@ export function BuildBuyEvaluator() {
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Choose the lowest three-year TCO path that meets the control requirement; note the volume that flips it." lift="Avoid wrong-path rework by pricing all three over the horizon, not just the first year." measure="Actual TCO vs modeled per path; the flip variable (volume/customization) vs assumed." />
           <InsightCard title="Know the flip, not just the answer" tone="info">
             Cross the volume slider slowly and watch API and fine-tune trade places — the crossover is the whole decision.
             Buy wins on speed when differentiation is low; it loses the moment the capability becomes your edge.

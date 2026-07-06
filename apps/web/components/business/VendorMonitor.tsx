@@ -12,6 +12,8 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C34_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type CKey = "capability" | "security" | "roadmap" | "lockin" | "support" | "price";
@@ -80,6 +82,7 @@ export function VendorMonitor() {
 
         <UseCaseRail useCases={C34_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Which vendor — and what does concentration cost if we are wrong?" approach="Score vendors on a weighted rubric, then price the concentration and exit-cost exposure the pick creates." why="A vendor selection is also a concentration bet that has to be priced." metric="Weighted vendor score; switching/exit-cost exposure if the relationship sours." tradeoff="The best-fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit-cost exposure named up front." />
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Weights */}
@@ -150,6 +153,7 @@ export function VendorMonitor() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Select the highest weighted-fit vendor, but cap concentration and pre-price the exit." lift="A defensible pick that also bounds the downside if the vendor relationship fails." measure="Vendor score vs realized performance; switching cost if triggered; % of spend concentrated in one vendor." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The scorecard picks the vendor; the concentration view tells you what it costs to be wrong."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>

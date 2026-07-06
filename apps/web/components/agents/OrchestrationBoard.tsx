@@ -18,6 +18,8 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, Toolb
 import { LIVE_MODEL, GAP03_USE_CASES, LABS } from "@labs/kit";
 import { agentTimeline, messageFrames, baselineVsMulti } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Role = "Researcher" | "Analyst" | "Writer" | "Critic";
@@ -211,6 +213,7 @@ export function OrchestrationBoard() {
 
         <UseCaseRail useCases={GAP03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Multi-agent demos look impressive, but the question a sponsor asks is whether the extra agents are worth it — because they are not free." approach="A supervisor decomposes a goal and delegates to role-specialized agents that coordinate over inspectable A2A messages; an animated run assembles the result while a live meter compares it to a single-agent baseline." why="Multi-agent buys quality through decomposition and critique but pays for it in cost and latency from sequential handoffs. Showing both sides turns a party trick into an architecture decision." metric="The head-to-head scorecard: quality delta vs the single-agent baseline and the cost and latency multiples — the ratio, not the demo, is the decision." tradeoff="More agents raise quality and cost and latency together; the single-agent baseline finishes first at lower quality. The lab makes that tension literal." outcome="A per-task-class verdict on whether multi-agent is worth it, with the tradeoff quantified — the judgment a delivery leader is accountable for." />
 
         <LabToolbar>
           <ToolbarButton onClick={run} active title="Run / re-run the orchestration">
@@ -380,6 +383,7 @@ export function OrchestrationBoard() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Use the multi-agent pattern for this task class, and stay single-agent where it does not pay." lift="The scorecard quality gain over the single-agent baseline, bought for a known cost and latency multiple — a tradeoff you can defend, not a demo." measure="Answer-quality eval delta vs baseline; cost per run and p95 latency; human-escalation rate; share of tasks where multi-agent actually wins." />
           <InsightCard title="When multi-agent is worth it" tone="info">
             Decompose only when the subtasks genuinely differ (research vs critique) and quality matters more than the 2–3× cost. For high-volume, low-stakes calls, a single agent wins. Budget for the harness, not the party trick.
           </InsightCard>

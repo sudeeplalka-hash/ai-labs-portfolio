@@ -12,6 +12,8 @@ import { ArrowLeft, Brain, Wrench, Eye, XOctagon, Radar, LifeBuoy, CheckCircle2,
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Role = "thought" | "action" | "observation" | "failure" | "detect" | "recover" | "final";
@@ -141,6 +143,7 @@ export function LoopInspector() {
 
         <UseCaseRail useCases={GAP02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="How do agents fail, and what actually catches it?" approach="Step through an agent loop and surface the failure taxonomy — looping, wrong tool, hallucinated arguments, never-stopping — and where an observability harness catches each." why="You budget observability against how agents actually fail, not against a generic checklist." metric="Failure classes caught vs escaped; harness coverage of the taxonomy." tradeoff="A richer harness costs money and latency; an un-instrumented failure reaches a system of record." outcome="A defensible observability-harness budget tied to the failure modes that actually occur." />
 
         {!activeUc && (
         <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -204,6 +207,7 @@ export function LoopInspector() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Budget the observability harness to the failure classes this agent actually exhibits." lift="Catch the majority of agent failures before they reach a system of record." measure="Failure-class coverage; mean time to detect; incidents traced to an un-instrumented failure mode." />
           <InsightCard title="Failure injection is the whole point" tone="info">
             A happy-path demo tells you nothing about production. The four failures above are what actually happen — and
             each is cheap to catch with the right signal and expensive to miss. That gap is the observability budget.

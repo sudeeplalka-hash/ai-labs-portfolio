@@ -15,6 +15,8 @@ import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, Toolb
 import { GAP01_USE_CASES, LABS } from "@labs/kit";
 import { diffManifests, validateToolDef, manifestWithTool, lifecycleFrames, traceToJson } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type ArgType = "string" | "number" | "enum";
@@ -253,6 +255,7 @@ export function McpPlayground() {
 
         <UseCaseRail useCases={GAP01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Every new tool an AI agent needs has meant a new bespoke integration. With N tools and M agent-consumers that is N×M point-to-point connectors to build and maintain — the integration tax that stalls enterprise agent programs." approach="A working MCP client: pick a server, browse its manifest (tools, resources, prompts), compose a call, and read the full JSON-RPC round-trip — including honest typed errors when arguments are malformed. Define a custom tool and watch it appear in the manifest; see the initialize handshake that opens a session." why="MCP is the emerging standard — USB-C for AI — that turns N×M into N+M: expose a tool once against the contract and every compliant client uses it with no new integration code." metric="The crossover in the producers×consumers chart: the consumer count at which the shared protocol becomes cheaper than bespoke glue." tradeoff="A protocol layer is overhead for a tiny surface (a few tools, one consumer). The lab shows exactly where the surface is large enough that standardizing pays." outcome="A defensible recommendation to adopt (or not adopt) MCP for a given integration surface, with the crossover math and honest failure modes on the wire — not a slide asserting it." />
 
         <LabToolbar>
           <ToolbarButton onClick={shareScenario} title="Copy a link that reproduces this exact call">
@@ -473,6 +476,7 @@ export function McpPlayground() {
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Adopt MCP as the integration contract for tools and data, instead of bespoke point-to-point connectors." lift="Bespoke integration collapses from N×M to N+M as tools and agent-consumers grow — a new tool is exposed once and every client picks it up with no new integration code." measure="Bespoke connectors retired; new-tool onboarding time (days to hours); share of agents on the shared contract; integration change-failure rate." />
           <InsightCard title="What the wire teaches" tone="info">
             Every tool call is the same envelope: a named tool, typed arguments, structured content back, typed errors on failure. That uniformity is the whole value — one contract, many systems, many consumers.
           </InsightCard>

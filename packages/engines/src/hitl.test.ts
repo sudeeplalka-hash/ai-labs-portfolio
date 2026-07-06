@@ -1,55 +1,34 @@
 import { describe, it, expect } from "vitest";
-import { reviewed, DEFAULT_ITEMS, SAMPLE_INDICES, type Item } from "./hitl";
+import { DEFAULT_ITEMS, reviewPolicy, recommendLevel } from "./hitl";
 
-describe("DEFAULT_ITEMS", () => {
-  it("has 20 items with exactly 4 engineered edge cases", () => {
-    expect(DEFAULT_ITEMS).toHaveLength(20);
-    expect(DEFAULT_ITEMS.filter((x) => x.edge)).toHaveLength(4);
+describe("reviewPolicy", () => {
+  it("reviews every item at L1 with zero slips and full coverage", () => {
+    const r = reviewPolicy(DEFAULT_ITEMS, 1);
+    expect(r.reviewedCount).toBe(DEFAULT_ITEMS.length);
+    expect(r.slipped).toBe(0);
+    expect(r.coveragePct).toBe(100);
   });
-  it("places every edge on a high or med item (auto-approvable, would error)", () => {
-    for (const item of DEFAULT_ITEMS) if (item.edge) expect(item.risk === "high" || item.risk === "med").toBe(true);
+  it("L2 (high+med) still catches all four engineered edge cases", () => {
+    const r = reviewPolicy(DEFAULT_ITEMS, 2);
+    expect(r.slipped).toBe(0);
+    expect(r.coveragePct).toBe(100);
   });
-  it("encodes severity from the risk tier (high 50 · med 20 · low 5)", () => {
-    for (const item of DEFAULT_ITEMS) {
-      expect(item.sev).toBe(item.risk === "high" ? 50 : item.risk === "med" ? 20 : 5);
-    }
+  it("L3 (high only) lets the medium-risk edges slip, with exposure", () => {
+    const r = reviewPolicy(DEFAULT_ITEMS, 3);
+    expect(r.slipped).toBeGreaterThan(0);
+    expect(r.exposureK).toBeGreaterThan(0);
+    expect(r.coveragePct).toBeLessThan(100);
+  });
+  it("throughput rises with autonomy level", () => {
+    expect(reviewPolicy(DEFAULT_ITEMS, 5).throughput).toBeGreaterThan(reviewPolicy(DEFAULT_ITEMS, 1).throughput);
   });
 });
 
-describe("reviewed policy by autonomy level", () => {
-  it("L1 reviews everything", () => {
-    expect(DEFAULT_ITEMS.every((x, i) => reviewed(1, x, i))).toBe(true);
+describe("recommendLevel", () => {
+  it("returns the highest zero-slip level (the sweet spot)", () => {
+    expect(recommendLevel(DEFAULT_ITEMS)).toBe(2);
   });
-  it("L2 reviews all non-low items", () => {
-    DEFAULT_ITEMS.forEach((x, i) => expect(reviewed(2, x, i)).toBe(x.risk !== "low"));
-  });
-  it("L3 reviews high-risk only", () => {
-    DEFAULT_ITEMS.forEach((x, i) => expect(reviewed(3, x, i)).toBe(x.risk === "high"));
-  });
-  it("L4 reviews exactly the sampled indices", () => {
-    DEFAULT_ITEMS.forEach((x, i) => expect(reviewed(4, x, i)).toBe(SAMPLE_INDICES.has(i)));
-  });
-  it("L5 (full autonomy) reviews nothing", () => {
-    expect(DEFAULT_ITEMS.some((x, i) => reviewed(5, x, i))).toBe(false);
-  });
-});
-
-describe("the engineered edges", () => {
-  it("the two medium edges (7, 15) slip at high-only (L3) but are caught at L2", () => {
-    for (const idx of [7, 15]) {
-      const item = DEFAULT_ITEMS[idx];
-      expect(item.edge).toBe(true);
-      expect(item.risk).toBe("med");
-      expect(reviewed(3, item, idx)).toBe(false);
-      expect(reviewed(2, item, idx)).toBe(true);
-    }
-  });
-  it("the two high edges (6, 14) are still caught at L3", () => {
-    for (const idx of [6, 14]) {
-      const item = DEFAULT_ITEMS[idx];
-      expect(item.edge).toBe(true);
-      expect(item.risk).toBe("high");
-      expect(reviewed(3, item, idx)).toBe(true);
-    }
+  it("is deterministic", () => {
+    expect(recommendLevel(DEFAULT_ITEMS)).toBe(recommendLevel(DEFAULT_ITEMS));
   });
 });

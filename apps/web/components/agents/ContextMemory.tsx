@@ -12,6 +12,8 @@ import { ArrowLeft, Check, X } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { GAP05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const WINDOW = 24; // k tokens working budget (small on purpose, to make overflow visible)
@@ -91,6 +93,7 @@ export function ContextMemory() {
 
         <UseCaseRail useCases={GAP05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Dump, summarize, compress, or hand off — which context strategy?" approach="Compare context strategies on cost versus answer fidelity as the conversation grows, so the dial is set on evidence." why="The cost-fidelity dial is a per-use-case decision, not a per-platform default." metric="Tokens and cost per call versus answer fidelity, by strategy." tradeoff="Higher fidelity costs tokens; aggressive compression eventually hurts the answer." outcome="The context strategy to run per use case, with the point where compression starts to hurt." />
 
         <Panel className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -144,6 +147,7 @@ export function ContextMemory() {
         )}
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Set the context strategy per use case on its cost-fidelity needs, not the platform default." lift="Hold answer fidelity while cutting context token spend on high-volume paths." measure="Tokens and $/call by strategy; answer-fidelity eval; where compression began degrading quality." />
           <InsightCard title="It's a dial, not a default" tone="info">
             Full dump is right for a short, high-stakes exchange; summarize or compress for a long assistant thread; handoff
             when specialized sub-agents each need only their slice. The mistake is picking one and calling it the platform standard.

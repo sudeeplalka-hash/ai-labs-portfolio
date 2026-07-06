@@ -13,6 +13,8 @@ import { ArrowLeft } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp } from "@labs/design-system";
 import { EL10_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 import { SCENARIOS, healthIndex, type Scenario } from "./portfolioData";
@@ -208,6 +210,7 @@ export function ExecCommStudio() {
 
         <UseCaseRail useCases={EL10_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="Does this exec update force a decision, or just report status?" approach="Shape the update around the specific decision to force this week, framed for the audience in the room." why="An update that forces a decision beats one that reports status." metric="Whether a decision is actually asked; audience-fit of the framing." tradeoff="A comfortable status update versus forcing an uncomfortable but necessary decision." outcome="The decision to force this week, framed per audience." />
 
         {/* Controls */}
         <div className="mb-4 grid gap-3 md:grid-cols-3">
@@ -266,6 +269,7 @@ export function ExecCommStudio() {
 
         {/* Credibility block */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Lead the update with the specific decision you need this week, framed for the audience in the room." lift="Decisions get made in the meeting instead of deferred to the next one." measure="Decisions requested vs made per update; cycle time from raise to decision; status-only updates eliminated." />
           <p className="text-sm leading-relaxed text-ink">
             <span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "An exec update that contains no decision request is a diary entry. Every pre-read I send asks for something."}
           </p>

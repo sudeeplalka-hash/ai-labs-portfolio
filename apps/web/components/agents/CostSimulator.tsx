@@ -7,11 +7,15 @@
 // architecture does. SIMULATED (deterministic arithmetic; pricing in a dated file).
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { callCost, monthlyCost, compareModels, savingsLadder } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp } from "@labs/design-system";
-import { MODEL_PRICING, modelPrice, modelLabel, COST_LEVERS, PRICING_AS_OF, LIVE_MODEL_CHEAP, GAP06_USE_CASES } from "@labs/kit";
+import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { MODEL_PRICING, modelPrice, modelLabel, COST_LEVERS, PRICING_AS_OF, LIVE_MODEL_CHEAP, GAP06_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
+import { CaseStudy } from "../reviewer/CaseStudy";
+import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const SAMPLE_PROMPT =
@@ -49,23 +53,23 @@ export function CostSimulator() {
   const price = modelPrice(modelId) ?? MODEL_PRICING[0];
   const inTok = estTokens(prompt);
   const callsPerMonth = callsPerDay * 30;
+  const cacheable = price.cachedInputPerMTok !== undefined;
+  const spec = { inputTokens: inTok, outputTokens: outTok };
+  const levers = { cache: caching && cacheable, cacheShare, batch: batching, batchShare, batchDiscount: COST_LEVERS.batchDiscount };
 
   const inputPerCall = price.inputPerMTok * (inTok / 1e6);
   const outputPerCall = price.outputPerMTok * (outTok / 1e6);
-  const basePerCall = inputPerCall + outputPerCall;
-  const baseAnnual = basePerCall * callsPerMonth * 12;
-
-  const cacheRatio = price.cachedInputPerMTok !== undefined ? price.cachedInputPerMTok / price.inputPerMTok : 1;
-  const effInputPerCall = caching ? inputPerCall * (1 - cacheShare * (1 - cacheRatio)) : inputPerCall;
-  const postCachePerCall = effInputPerCall + outputPerCall;
-  const batchFactor = batching ? 1 - batchShare * COST_LEVERS.batchDiscount : 1;
-  const effPerCall = postCachePerCall * batchFactor;
-
-  const effMonthly = effPerCall * callsPerMonth;
+  const cacheRatio = cacheable ? price.cachedInputPerMTok! / price.inputPerMTok : 1;
+  const effInputPerCall = (caching && cacheable) ? inputPerCall * (1 - cacheShare * (1 - cacheRatio)) : inputPerCall;
+  const basePerCall = callCost(price, spec, { cache: false, cacheShare: 0, batch: false, batchShare: 0 });
+  const baseAnnual = monthlyCost(basePerCall, callsPerDay) * 12;
+  const effPerCall = callCost(price, spec, levers);
+  const effMonthly = monthlyCost(effPerCall, callsPerDay);
   const effAnnual = effMonthly * 12;
   const savings = baseAnnual - effAnnual;
   const savingsPct = baseAnnual > 0 ? Math.round((savings / baseAnnual) * 100) : 0;
-  const cacheable = price.cachedInputPerMTok !== undefined;
+  const comparison = compareModels(MODEL_PRICING, spec, levers, callsPerDay);
+  const ladder = savingsLadder(price, spec, levers, callsPerDay);
 
   const portfolioPreset = () => {
     setModelId(LIVE_MODEL_CHEAP);
@@ -75,6 +79,29 @@ export function CostSimulator() {
     setBatching(true); setBatchShare(0.5);
   };
 
+  const router = useRouter();
+  const exportComparison = () => {
+    downloadCsv("token-cost-by-model", ["Model", "Cost per call (USD)", "Monthly (USD)"], comparison.map((r) => [modelLabel(r.id), r.perCall.toFixed(6), Math.round(r.monthly)]));
+    toast("Model comparison exported as CSV");
+  };
+  const exportScenario = () => {
+    downloadJson("token-cost-scenario", { version: 1, modelId, prompt, outTok, callsPerDay, caching, cacheShare, batching, batchShare });
+    toast("Scenario exported as JSON");
+  };
+  const exportActions: ExportAction[] = [
+    { id: "cmp", label: "Model comparison (CSV)", hint: "This workload priced across models", onSelect: exportComparison },
+    { id: "scn", label: "Export scenario (JSON)", hint: "Model + prompt + levers", onSelect: exportScenario },
+  ];
+  const paletteCommands: Command[] = [
+    { id: "act-preset", label: "Load portfolio-scale preset", group: "action", keywords: "200k volume", run: portfolioPreset },
+    { id: "act-cheapest", label: `Switch to cheapest model (${modelLabel(comparison[0].id)})`, group: "action", keywords: "save cost swap", run: () => setModelId(comparison[0].id) },
+    { id: "exp-cmp", label: "Export model comparison (CSV)", group: "export", run: exportComparison },
+    { id: "exp-scn", label: "Export scenario (JSON)", group: "export", run: exportScenario },
+    ...LABS.filter((l) => l.href && l.status !== "planned").map((l) => ({
+      id: `nav-${l.id}`, label: `Go to ${l.title}`, group: l.id, keywords: l.id, run: () => router.push(l.href as string),
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
@@ -83,6 +110,7 @@ export function CostSimulator() {
             <ArrowLeft className="h-4 w-4" /> Portfolio
           </Link>
           <span className="ml-1 font-mono text-xs text-slatey-500">GAP-06</span>
+          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
         </div>
       </header>
 
@@ -102,6 +130,7 @@ export function CostSimulator() {
 
         <UseCaseRail useCases={GAP06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
+        <CaseStudy problem="What will this actually cost per month at volume?" approach="Size a single call, price the workload across every model, and stack the caching and batching leverage into a savings ladder." why="Unit economics settle architecture debates that taste cannot." metric="Cost per call and monthly run-rate; the monthly delta of switching models." tradeoff="The cheapest model is not always adequate; caching adds engineering for a real saving." outcome="A defensible build-vs-buy number before anyone draws an architecture box." />
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           {/* Inputs */}
@@ -155,6 +184,51 @@ export function CostSimulator() {
               {savings > 0 && <Bar label="Saved by caching + batching" value={savings} max={baseAnnual} fmt={usd0.format} tone="bg-emerald-500" />}
             </Panel>
 
+            <Panel>
+              <p className="stat-label mb-2">This workload priced across models <span className="font-normal text-slatey-500">· monthly, cheapest first</span></p>
+              {(() => {
+                const maxM = Math.max(...comparison.map((r) => r.monthly)) || 1;
+                const cheapest = comparison[0];
+                const curRow = comparison.find((r) => r.id === modelId);
+                return (
+                  <>
+                    <div className="space-y-1.5">
+                      {comparison.map((r) => {
+                        const isCur = r.id === modelId;
+                        return (
+                          <button key={r.id} onClick={() => setModelId(r.id)} className="block w-full text-left">
+                            <div className="mb-0.5 flex items-center justify-between text-[11px]">
+                              <span className={isCur ? "font-semibold text-ink" : "text-slatey-400"}>{modelLabel(r.id)}{r.id === cheapest.id && <span className="text-emerald-700"> · cheapest</span>}{isCur && <span className="text-primary"> · current</span>}</span>
+                              <span className="font-mono text-slatey-500">{usd0.format(r.monthly)}/mo</span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${isCur ? "bg-primary" : r.id === cheapest.id ? "bg-emerald-500" : "bg-slate-400"}`} style={{ width: `${(r.monthly / maxM) * 100}%` }} /></div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {modelId !== cheapest.id && curRow && (
+                      <p className="mt-2 text-[11px] text-slatey-500">Switching to <span className="font-semibold text-ink">{modelLabel(cheapest.id)}</span> saves <span className="font-semibold text-emerald-700">{usd0.format(curRow.monthly - cheapest.monthly)}/mo</span> on this workload — weigh against answer quality for your job.</p>
+                    )}
+                  </>
+                );
+              })()}
+            </Panel>
+
+            <Panel>
+              <p className="stat-label mb-2">Savings ladder <span className="font-normal text-slatey-500">· monthly, cumulative leverage</span></p>
+              <div className="space-y-1.5">
+                {ladder.map((st, i) => {
+                  const maxM = ladder[0].monthly || 1;
+                  return (
+                    <div key={st.label}>
+                      <div className="mb-0.5 flex items-center justify-between text-[11px]"><span className="text-slatey-400">{st.label}</span><span className="font-mono text-slatey-500">{usd0.format(st.monthly)}{st.savedPct > 0 && <span className="text-emerald-700"> · −{st.savedPct}%</span>}</span></div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${i === 0 ? "bg-slate-400" : "bg-emerald-500"}`} style={{ width: `${(st.monthly / maxM) * 100}%` }} /></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Panel>
+
             <InsightCard title={savings > 0 ? `Caching + batching cut ${savingsPct}% — ${usd0.format(savings)} / year` : "No leverage applied yet"} tone={savings > 0 ? "success" : "info"}>
               {savings > 0
                 ? <>Before leverage this workload runs <span className="font-semibold">{usd0.format(baseAnnual)}</span>/year; after, <span className="font-semibold">{usd0.format(effAnnual)}</span>. The static context you send on every call is the lever — cache it and the input line collapses.</>
@@ -165,6 +239,7 @@ export function CostSimulator() {
 
         {/* Credibility */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
+          <OutcomeFrame call="Standardize on the cheapest model that clears the quality bar, with caching on the static context." lift="Caching plus batching cut the run-rate materially; the model swap compounds it." measure="$/call and monthly run-rate vs budget; cache-hit rate; a quality eval on the cheaper model before the swap." />
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Unit economics decide build-vs-buy long before architecture does. Size the call, then argue the design."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
@@ -177,6 +252,8 @@ export function CostSimulator() {
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> token estimate is approximate (not a real tokenizer); pricing is published list price, not a negotiated rate; excludes retries, tool-call round-trips, and egress. It sizes the decision, not the invoice.</p>
         </div>
       </main>
+      <ToastHost />
+      <CommandPalette commands={paletteCommands} />
     </div>
   );
 }

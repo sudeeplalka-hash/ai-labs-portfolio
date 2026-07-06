@@ -25,3 +25,44 @@ export function reviewed(level: number, item: Item, idx: number): boolean {
   if (level === 4) return SAMPLE_INDICES.has(idx);
   return false;
 }
+
+// Policy outcome for a given autonomy level: human load, throughput proxy, edge cases slipped,
+// exposure (Σ severity of slips), and edge coverage. Plus the recommended level — the highest
+// autonomy that still catches every edge case (max throughput at zero slips). Pure; the same
+// policy the grid renders, so the recommendation can't disagree with what slips on screen.
+export interface PolicyResult {
+  reviewedCount: number;
+  autoCount: number;
+  throughput: number;   // items/hr proxy
+  slipped: number;      // edge cases that slipped through unreviewed
+  exposureK: number;    // Σ severity of slipped edges ($k)
+  coveragePct: number;  // % of edge cases caught
+}
+export function reviewPolicy(items: Item[], level: number, throughputBase = 100, throughputStep = 0.6): PolicyResult {
+  let reviewedCount = 0;
+  let slipped = 0;
+  let exposureK = 0;
+  let edges = 0;
+  items.forEach((it, idx) => {
+    const rev = reviewed(level, it, idx);
+    if (rev) reviewedCount++;
+    if (it.edge) {
+      edges++;
+      if (!rev) { slipped++; exposureK += it.sev; }
+    }
+  });
+  return {
+    reviewedCount,
+    autoCount: items.length - reviewedCount,
+    throughput: Math.round(throughputBase * (1 + (level - 1) * throughputStep)),
+    slipped,
+    exposureK,
+    coveragePct: edges > 0 ? Math.round(((edges - slipped) / edges) * 100) : 100,
+  };
+}
+/** The highest autonomy level that still catches every edge case — max throughput, zero slips. */
+export function recommendLevel(items: Item[], maxLevel = 5): number {
+  let best = 1;
+  for (let l = 1; l <= maxLevel; l++) if (reviewPolicy(items, l).slipped === 0) best = l;
+  return best;
+}
