@@ -8,7 +8,7 @@ import { demoState, blankState } from "./store";
 
 const state = () => demoState();
 
-describe("deriveOpsSeries — determinism & shape", () => {
+describe("deriveOpsSeries, determinism & shape", () => {
   it("is deterministic for the same initiative", () => {
     const a = deriveOpsSeries(state());
     const b = deriveOpsSeries(state());
@@ -26,7 +26,7 @@ describe("deriveOpsSeries — determinism & shape", () => {
     }
   });
 
-  it("SLOs stay green while canary decays — the silent-drift trap is engineered in", () => {
+  it("SLOs stay green while canary decays, the silent-drift trap is engineered in", () => {
     const s = deriveOpsSeries(state());
     const last = s.weeks[s.weeks.length - 1];
     expect(last.availabilityPct).toBeGreaterThanOrEqual(99.5); // infra: green
@@ -85,7 +85,7 @@ describe("incident & feedback routing", () => {
     expect(byKey).toEqual({ reindex: "build", retrain: "build", rollback: "deploy", rescope: "frame" });
   });
 
-  it("re-scope writes to Frame; re-index writes to Build; rollback to Deploy — never crossed", () => {
+  it("rescope writes to Frame; reindex writes to Build; rollback to Deploy, never crossed", () => {
     const st = state();
     const series = deriveOpsSeries(st);
     const inc = deriveDay2Incident(st);
@@ -126,7 +126,7 @@ describe("artifacts", () => {
     const inc = deriveDay2Incident(st);
     const fb = buildOperateFeedback(st, inc.options.find((o) => o.key === "reindex")!, series);
     const md = buildIncidentReport(st, inc, fb);
-    expect(md).toContain("Re-index ✅");
+    expect(md).toContain("Reindex ✅");
     expect(md).toContain("→ **Build:**");
     expect(md).toContain("→ **Realize:**");
     expect(md).toContain("SIMULATED");

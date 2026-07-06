@@ -2,7 +2,7 @@
   "name": "@labs/lab-governance",
   "version": "0.0.0",
   "private": true,
-  "description": "Governance & Realize lab — enterprise AI governance control plane (risk tiering, policy-as-code, runtime guardrails, red-team evals, audit evidence). Consumed by apps/web via the @gov alias; optional FastAPI service in services/governance-api.",
+  "description": "Governance & Realize lab, enterprise AI governance control plane (risk tiering, policy as code, runtime guardrails, red team evals, audit evidence). Consumed by apps/web via the @gov alias; optional FastAPI service in services/governance-api.",
   "peerDependencies": {
     "clsx": "*",
     "lucide-react": ">=0.446.0",

@@ -1,8 +1,8 @@
 "use client";
 
-// Phase A — one-click sample program. Loads the curated demo initiative into
+// Phase A, one-click sample program. Loads the curated demo initiative into
 // LIVE state so every stage, contract card, and downstream engine populates
-// immediately — the fastest way for a first-time visitor to see the loop work.
+// immediately, the fastest way for a first-time visitor to see the loop work.
 // A visible chip marks seeded state and offers a one-click reset.
 
 import { useState } from "react";

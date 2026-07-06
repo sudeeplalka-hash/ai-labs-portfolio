@@ -140,7 +140,7 @@ const SPARK_STROKE: Record<KpiTone, string> = {
   healthy: "#16a34a", watch: "#d97706", risk: "#ea580c", critical: "#e11d48", neutral: "#94a3b8",
 };
 
-// Tiny inline sparkline (no axes) — compresses a short series into the card so the
+// Tiny inline sparkline (no axes), compresses a short series into the card so the
 // KPI shows its direction of travel, not just today's number. Pure SVG, no hooks.
 function Sparkline({ data, tone = "neutral" }: { data: number[]; tone?: KpiTone }) {
   if (!data || data.length < 2) return null;

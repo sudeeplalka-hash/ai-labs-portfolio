@@ -1,6 +1,6 @@
 'use client';
 /**
- * Audience lens — one global switch that changes information density everywhere.
+ * Audience lens, one global switch that changes information density everywhere.
  * 'exec' shows plain-English outcomes; 'tech' reveals guardrail internals,
  * confidence, traces and hashes. Same data, two readings.
  */

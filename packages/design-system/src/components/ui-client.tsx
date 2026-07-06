@@ -59,7 +59,7 @@ export function Tabs({
 }
 
 /**
- * Controlled section navigation — a row of chip tabs that switch which section of
+ * Controlled section navigation, a row of chip tabs that switch which section of
  * a single-page lab is shown (so a long lab reads as a few clear areas instead of
  * one endless scroll). The caller owns the active state and renders the section,
  * which lets depth/mode decide what's available. Styling matches the lab subnavs.

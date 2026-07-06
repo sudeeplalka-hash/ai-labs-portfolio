@@ -1,6 +1,6 @@
 "use client";
 
-// Phase K — the six sample programs, surfaced as an invitation instead of a
+// Phase K, the six sample programs, surfaced as an invitation instead of a
 // header dropdown. Pick one and the whole storyline (and every lab) retells
 // itself for that archetype. Selecting switches to Demo mode so the choice
 // takes effect immediately; Live mode is one click away in the header.
@@ -23,7 +23,7 @@ export function ArchetypeExplorer() {
       <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-primary-dark">
         <Shuffle className="h-3.5 w-3.5" /> Six sample programs
       </p>
-      <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink">Shuffle the story — same loop, six very different programs</h2>
+      <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink">Shuffle the story, same loop, six very different programs</h2>
       <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slatey-400">
         Pick an archetype and every stage retells itself: the numbers, the risks, the governance decision, the business case.
         The <b className="text-slatey-300">at-risk</b> one shows what failure looks like.
@@ -56,7 +56,7 @@ export function ArchetypeExplorer() {
         })}
       </div>
       {mode !== "demo" && (
-        <p className="mt-3 text-[11px] text-slatey-500">Picking one switches you to Demo — your live initiative stays untouched, and the header toggle brings it back.</p>
+        <p className="mt-3 text-[11px] text-slatey-500">Picking one switches you to Demo, your live initiative stays untouched, and the header toggle brings it back.</p>
       )}
     </div>
   );

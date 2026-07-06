@@ -10,7 +10,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   },
   "/corpus": {
     title: "Corpus Builder",
-    subtitle: "Profile many files at once — surface duplicates, stale versions, and conflicts before ingestion.",
+    subtitle: "Profile many files at once, surface duplicates, stale versions, and conflicts before ingestion.",
   },
   "/overview": {
     title: "Executive Overview",
@@ -22,7 +22,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   },
   "/guide": {
     title: "Prep & Guidelines Guide",
-    subtitle: "What it takes to make data fit for ingestion — and why each step matters downstream.",
+    subtitle: "What it takes to make data fit for ingestion, and why each step matters downstream.",
   },
 };
 

@@ -84,7 +84,7 @@ export function ConsequenceSimulator({
           ) : cleared ? (
             <>This is what your prepared file produces. {c.fixedBy}</>
           ) : (
-            <>This is the goal — clear the ingestion gate above and this becomes your file&apos;s real outcome.</>
+            <>This is the goal, clear the ingestion gate above and this becomes your file&apos;s real outcome.</>
           )}
         </span>
       </div>

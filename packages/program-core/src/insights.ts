@@ -1,4 +1,4 @@
-// Phase C — insight engines. Read-only derivations that turn scores into
+// Phase C, insight engines. Read-only derivations that turn scores into
 // arguments: WHY the governance decision landed where it did, and WHAT would
 // make each failing gate pass. Both are pure functions over the same engines
 // the stages already use, so they can never disagree with the displayed state.
@@ -25,7 +25,7 @@ export interface DecisionFactor {
 export interface DecisionBreakdown {
   /** The all-clear score: every dimension passing. */
   baseline: number;
-  /** Final overall score — always equals baseline + Σ deltas, and matches
+  /** Final overall score, always equals baseline + Σ deltas, and matches
    * deriveGovernanceDecision().score (same scorecard, same mean). */
   score: number;
   factors: DecisionFactor[];
@@ -57,7 +57,7 @@ export function deriveDecisionBreakdown(s: ProgramState): DecisionBreakdown {
   const drivers: string[] = [];
   const tier = g.governanceTier;
   if (!tier) {
-    drivers.push("No framed initiative — assessment pending.");
+    drivers.push("No framed initiative, assessment pending.");
   } else {
     if ((g.hallucinationRisk ?? 0) >= 25 && g.operationalCriticality === "High")
       drivers.push(`Hallucination risk ${g.hallucinationRisk}% on a High-criticality workflow forces rejection.`);
@@ -70,7 +70,7 @@ export function deriveDecisionBreakdown(s: ProgramState): DecisionBreakdown {
       drivers.push(`Tier ${tier} requires human review while findings remain open.`);
     if (drivers.length === 0 && (rich.length > 0 || (g.conditionalSources?.length ?? 0) > 0 || g.humanReviewRequired))
       drivers.push("Open findings or conditional sources restrict the approval.");
-    if (drivers.length === 0) drivers.push("All dimensions pass — evidence supports a pilot.");
+    if (drivers.length === 0) drivers.push("All dimensions pass, evidence supports a pilot.");
   }
 
   return { baseline: BASE, score, factors, decisionDrivers: drivers.slice(0, 6) };
@@ -93,15 +93,15 @@ export interface GateFix {
 }
 
 const FIX_MAP: Record<string, { stage: StageKey; target: string; action: string }> = {
-  "Strategy initiative approved": { stage: "frame", target: "Initiative framed with a governance tier", action: "Frame the initiative in Strategy & Planning — the workshop derives the tier." },
+  "Strategy initiative approved": { stage: "frame", target: "Initiative framed with a governance tier", action: "Frame the initiative in Strategy & Planning, the workshop derives the tier." },
   "Data readiness handoff exists": { stage: "data", target: "Handoff produced", action: "Run the Data lab so it emits the readiness handoff to Build." },
   "Blocked data excluded": { stage: "data", target: "0 blocked sources pending", action: "Keep blocked sources excluded; complete redaction and access controls before re-inclusion." },
   "Build quality gates passed": { stage: "build", target: "All gates passing", action: "Open Quality Gates to see which gate fails, then improve retrieval or add an abstention path." },
   "Evaluation run available": { stage: "build", target: "Eval run recorded", action: "Run the Live Evaluator so an eval run id lands in the Build contract." },
-  "Citation accuracy": { stage: "build", target: "≥ 88%", action: "Switch to governed re-rank and require citation metadata on approved sources." },
+  "Citation accuracy": { stage: "build", target: "≥ 88%", action: "Switch to governed rerank and require citation metadata on approved sources." },
   "Faithfulness": { stage: "build", target: "≥ 85%", action: "Tighten retrieval scope and abstain when evidence is weak instead of answering." },
   "Hallucination risk": { stage: "build", target: "≤ 10%", action: "Constrain the prompt to retrieved evidence and penalize uncited claims." },
-  "Governance tier assigned": { stage: "frame", target: "Tier assigned", action: "Complete the Strategy workshop — tier derives from pattern, criticality, and data sensitivity." },
+  "Governance tier assigned": { stage: "frame", target: "Tier assigned", action: "Complete the Strategy workshop, tier derives from pattern, criticality, and data sensitivity." },
   "Human review decided": { stage: "frame", target: "Decision recorded", action: "Set the human-review requirement on the initiative in Strategy." },
   "Monitoring plan defined": { stage: "deploy", target: "≥ 80% coverage", action: "Add retrieval-miss and user-feedback instrumentation to close the monitoring gaps." },
   "Rollback path defined": { stage: "deploy", target: "Rollback validated", action: "Pick and validate a rollback option in Incident & Rollback." },
@@ -110,7 +110,7 @@ const FIX_MAP: Record<string, { stage: StageKey; target: string; action: string 
 
 // ---- Phase I · regulatory mapping ---------------------------------------------
 
-export type EuAiActClass = "High-risk" | "Limited risk" | "Minimal risk";
+export type EuAiActClass = "High risk" | "Limited risk" | "Minimal risk";
 export type NistFunction = "GOVERN" | "MAP" | "MEASURE" | "MANAGE";
 
 export interface RegulatoryMapping {
@@ -121,7 +121,7 @@ export interface RegulatoryMapping {
 
 /** Deterministic mapping of the initiative to the EU AI Act risk class and the
  * NIST AI RMF functions, derived from the same meta the governance tier uses.
- * Informational orientation — not legal advice (and it says so). */
+ * Informational orientation, not legal advice (and it says so). */
 export function deriveRegulatoryMapping(s: ProgramState): RegulatoryMapping {
   const g = selectGovernInputs(s);
   const meta = s.initiative?.meta;
@@ -133,18 +133,18 @@ export function deriveRegulatoryMapping(s: ProgramState): RegulatoryMapping {
   let riskClass: EuAiActClass;
   let rationale: string;
   if (highStakes && (highTier || highCrit)) {
-    riskClass = "High-risk";
-    rationale = `${pattern} outputs influence decisions about individuals (tier ${meta?.governanceTier ?? "—"}, criticality ${meta?.operationalCriticality ?? "—"}) — an Annex III-style high-risk profile.`;
+    riskClass = "High risk";
+    rationale = `${pattern} outputs influence decisions about individuals (tier ${meta?.governanceTier ?? "N/A"}, criticality ${meta?.operationalCriticality ?? "N/A"}), an Annex III-style high risk profile.`;
   } else if (meta?.operationalCriticality === "Low" && !highTier) {
     riskClass = "Minimal risk";
-    rationale = `Internal ${pattern.toLowerCase()} with low criticality and human authorship of final outputs — minimal-risk profile with voluntary best practice.`;
+    rationale = `Internal ${pattern.toLowerCase()} with low criticality and human authorship of final outputs, minimal-risk profile with voluntary best practice.`;
   } else {
     riskClass = "Limited risk";
-    rationale = `A user-facing ${pattern.toLowerCase()} that informs rather than decides — transparency obligations apply (users must know they are interacting with AI).`;
+    rationale = `A user-facing ${pattern.toLowerCase()} that informs rather than decides, transparency obligations apply (users must know they are interacting with AI).`;
   }
 
   const obligations =
-    riskClass === "High-risk"
+    riskClass === "High risk"
       ? [
           "Risk management system across the lifecycle",
           "Data governance incl. bias examination of training/eval data",
@@ -176,7 +176,7 @@ export function deriveRegulatoryMapping(s: ProgramState): RegulatoryMapping {
   return {
     euAiAct: { riskClass, rationale, obligations },
     nist,
-    disclaimer: "Informational orientation derived from the initiative's metadata — a starting map for counsel and compliance, not legal advice.",
+    disclaimer: "Informational orientation derived from the initiative's metadata, a starting map for counsel and compliance, not legal advice.",
   };
 }
 

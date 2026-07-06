@@ -122,7 +122,7 @@ export function BacklogScatter({
               onMouseLeave={() => setHovered((h) => (h === uc.id ? null : h))}
               style={{ cursor: "pointer" }}
             >
-              <title>{`${uc.title} — value ${uc.value} · effort ${uc.effort}`}</title>
+              <title>{`${uc.title}, value ${uc.value} · effort ${uc.effort}`}</title>
               {/* invisible larger hit area for easier hovering */}
               <circle cx={px(uc.effort)} cy={py(uc.value)} r={r + 8} fill="transparent" />
               <circle
@@ -142,7 +142,7 @@ export function BacklogScatter({
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/50" />
           <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
         </span>
-        The pulsing node is your recommended bet — click any node to switch, or hover for detail.
+        The pulsing node is your recommended bet, click any node to switch, or hover for detail.
       </p>
 
       {/* hover detail card */}

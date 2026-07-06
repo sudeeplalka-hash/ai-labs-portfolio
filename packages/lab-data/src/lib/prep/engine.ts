@@ -137,7 +137,7 @@ export function redactPii(text: string): string {
 }
 
 // ----------------------------------------------------------------------------
-// Chunking (readiness preview — NOT retrieval tuning)
+// Chunking (readiness preview, NOT retrieval tuning)
 // ----------------------------------------------------------------------------
 
 export function chunkText(serialized: string, targetTokens = 512, overlapPct = 0): ChunkPreview {
@@ -291,12 +291,12 @@ export function runChecks(
     "Encoding & decoding",
     parsed.hasReplacement ? "risk" : "healthy",
     parsed.hasReplacement
-      ? "Replacement characters found — file is not clean UTF-8."
+      ? "Replacement characters found, file is not clean UTF-8."
       : "Decoded cleanly as UTF-8.",
     parsed.hasReplacement ? { id: "encoding", label: "Re-encode as UTF-8", delta: 8 } : undefined,
   );
   if (parsed.kind === "text" && !parsed.jsonOk) {
-    add("jsonvalid", "format", "JSON validity", "critical", "Could not parse as JSON — treated as text.");
+    add("jsonvalid", "format", "JSON validity", "critical", "Could not parse as JSON, treated as text.");
   }
 
   if (profile.kind === "tabular") {
@@ -332,7 +332,7 @@ export function runChecks(
         "format",
         "Missing values",
         p.missingPct > config.maxMissingPct ? "risk" : "watch",
-        `${pct(p.missingPct)} of cells are empty — decide impute vs. drop.`,
+        `${pct(p.missingPct)} of cells are empty, decide impute vs. drop.`,
         { id: "missing", label: "Resolve missing values", delta: 6 },
       );
     const constCols = p.columns.filter((c) => c.distinct <= 1);
@@ -370,14 +370,14 @@ export function runChecks(
       );
   }
 
-  // Freshness — heuristic on filename/version markers
+  // Freshness, heuristic on filename/version markers
   if (/v\d|version|draft|old|legacy|archive|backup|\bcopy\b/i.test(fileName)) {
     add(
       "freshness",
       "freshness",
       "Freshness & versioning",
       "watch",
-      "Filename hints at a versioned or legacy copy — confirm this supersedes prior versions.",
+      "Filename hints at a versioned or legacy copy, confirm this supersedes prior versions.",
       { id: "freshness", label: "Confirm latest version", delta: 5 },
     );
   }
@@ -398,14 +398,14 @@ export function runChecks(
     );
   }
 
-  // Provenance — always needs a human owner
+  // Provenance, always needs a human owner
   add(
     "provenance",
     "provenance",
     "Provenance & licensing",
     "watch",
-    "Source and usage rights cannot be verified automatically — requires a named owner sign-off.",
-    { id: "provenance", label: "Attach owner sign-off", delta: 5 },
+    "Source and usage rights cannot be verified automatically, requires a named owner sign off.",
+    { id: "provenance", label: "Attach owner sign off", delta: 5 },
   );
 
   // Taxonomy / metadata (only enforced when the policy requires it)

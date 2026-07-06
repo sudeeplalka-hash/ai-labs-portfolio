@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 4 — Govern live-loop layer. Reads the live lifecycle state (Strategy,
+// Phase 4, Govern live-loop layer. Reads the live lifecycle state (Strategy,
 // Data, Build, Operate, Realize) when present, derives a governance decision,
 // scorecard, required controls, findings, and an audit evidence pack, and writes
 // governance.decision back to shared state for Realize. Falls back to a polished
@@ -39,7 +39,7 @@ export function GovernLoop() {
   const breakdown = useMemo(() => deriveDecisionBreakdown(src), [src]);
   const [copied, setCopied] = useState(false);
 
-  // Persist the governance decision for Realize — safe effect keyed on inputs.
+  // Persist the governance decision for Realize, safe effect keyed on inputs.
   const sig = JSON.stringify({
     tier: state.initiative?.meta?.governanceTier, name: state.initiative?.name,
     blocked: state.data?.handoff?.blockedSources?.length, gates: state.rag?.contract?.failedGates?.length,
@@ -60,7 +60,7 @@ export function GovernLoop() {
 
   return (
     <div className="space-y-6">
-      {/* 1 — Banner */}
+      {/* 1, Banner */}
       {live ? (
         <div className="rounded-xl border border-primary/25 bg-primary/[0.04] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -74,7 +74,7 @@ export function GovernLoop() {
           <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
             <div><p className="stat-label">Pattern</p><p className="font-medium text-ink">{g.primaryAiPattern}</p></div>
             <div><p className="stat-label">Governance tier</p><Badge tone={lvlTone(g.governanceTier === "Critical" || g.governanceTier === "High" ? "bad" : g.governanceTier === "Medium" ? "warn" : "good")}>{g.governanceTier}</Badge></div>
-            <div><p className="stat-label">Operational criticality</p><p className="font-medium text-ink">{g.operationalCriticality ?? "—"}</p></div>
+            <div><p className="stat-label">Operational criticality</p><p className="font-medium text-ink">{g.operationalCriticality ?? "N/A"}</p></div>
             <div><p className="stat-label">Release status</p><p className="font-medium text-ink">{g.releaseRecommendation ?? "pending Operate"}</p></div>
           </div>
           {(g.capabilityTags?.length ?? 0) > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{g.capabilityTags!.map((t) => <Badge key={t} tone="slate">{t}</Badge>)}</div>}
@@ -94,7 +94,7 @@ export function GovernLoop() {
         </div>
       )}
 
-      {/* 2 — Scorecard */}
+      {/* 2, Scorecard */}
       <Panel>
         <SectionHeader eyebrow="Live governance scorecard" title="Where this initiative stands, by evidence" icon={ShieldCheck} />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -112,9 +112,9 @@ export function GovernLoop() {
         </div>
       </Panel>
 
-      {/* 3 — Decision panel */}
+      {/* 3, Decision panel */}
       <Panel>
-        <SectionHeader eyebrow="Governance decision" title="Approve, restrict, or block — from the evidence" icon={Gavel}
+        <SectionHeader eyebrow="Governance decision" title="Approve, restrict, or block: from the evidence" icon={Gavel}
           action={<Badge tone={decTone(decision.decision)}>{decision.decision}</Badge>} />
         <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
           <div className="flex flex-col items-center justify-center rounded-xl border border-line bg-slate-50/60 p-4 text-center">
@@ -140,9 +140,9 @@ export function GovernLoop() {
           </div>
         </div>
 
-        {/* Phase D — why this score: baseline → per-dimension deltas → score */}
+        {/* Phase D, why this score: baseline → per-dimension deltas → score */}
         <div className="mt-5 border-t border-line pt-4">
-          <p className="stat-label mb-3">Why this score — each dimension&rsquo;s pull on the {breakdown.baseline}-point all-clear baseline</p>
+          <p className="stat-label mb-3">Why this score: each dimension&rsquo;s pull on the {breakdown.baseline} point all clear baseline</p>
           <DecisionWaterfall b={breakdown} />
           <div className="mt-3">
             <p className="stat-label mb-1">Decision drivers</p>
@@ -153,10 +153,10 @@ export function GovernLoop() {
         </div>
       </Panel>
 
-      {/* 3.5 — Regulatory orientation (EU AI Act + NIST AI RMF) */}
+      {/* 3.5, Regulatory orientation (EU AI Act + NIST AI RMF) */}
       <RegulatoryMap />
 
-      {/* 4 — Required controls */}
+      {/* 4, Required controls */}
       <Panel>
         <SectionHeader eyebrow="Required controls" title="Controls generated from live evidence" icon={ListChecks} />
         {controls.length === 0 ? <p className="text-sm text-slatey-400">No mandatory controls triggered by current evidence.</p> : (
@@ -179,10 +179,10 @@ export function GovernLoop() {
         )}
       </Panel>
 
-      {/* 5 — Open findings */}
+      {/* 5, Open findings */}
       <Panel>
         <SectionHeader eyebrow="Open governance findings" title="What must be resolved, and by whom" icon={AlertTriangle} />
-        {findings.length === 0 ? <p className="text-sm text-emerald-700">No open findings — evidence supports proceeding.</p> : (
+        {findings.length === 0 ? <p className="text-sm text-emerald-700">No open findings. Evidence supports proceeding.</p> : (
           <div className="grid gap-3 lg:grid-cols-3">{findings.map((f, i) => (
             <div key={i} className="flex flex-col rounded-xl border border-line bg-white p-4">
               <div className="flex items-center justify-between"><Badge tone={sevTone(f.severity)}>{f.severity}</Badge><span className="text-[11px] text-slatey-400">{f.status}</span></div>
@@ -198,7 +198,7 @@ export function GovernLoop() {
         )}
       </Panel>
 
-      {/* 6 — Audit evidence pack */}
+      {/* 6, Audit evidence pack */}
       <Panel>
         <SectionHeader eyebrow="Audit evidence pack" title="A defensible, traceable record" icon={FileText}
           action={
@@ -231,7 +231,7 @@ export function GovernLoop() {
 // floating drop, and the final governance score on the right. Hand-rolled so it
 // stays deterministic, dependency-free, and print-safe.
 const SHORT_DIM: Record<string, string> = {
-  usecase: "Use-case", data: "Data", build: "Build", ops: "Ops", audit: "Audit",
+  usecase: "Use case", data: "Data", build: "Build", ops: "Ops", audit: "Audit",
 };
 
 function DecisionWaterfall({ b }: { b: DecisionBreakdown }) {
@@ -256,8 +256,8 @@ function DecisionWaterfall({ b }: { b: DecisionBreakdown }) {
         const dropPx = f.delta < 0 ? px(-f.delta) : 3;
         const spacerPx = Math.round(((b.baseline - top) / b.baseline) * H);
         return (
-          <div key={f.key} className="flex w-16 shrink-0 flex-col items-center gap-1" title={`${f.dimension}: ${f.status}${f.findings.length ? ` — ${f.findings.join("; ")}` : ""}`}>
-            <span className={cnDelta(f.delta)}>{f.delta === 0 ? "—" : f.delta}</span>
+          <div key={f.key} className="flex w-16 shrink-0 flex-col items-center gap-1" title={`${f.dimension}: ${f.status}${f.findings.length ? `. ${f.findings.join("; ")}` : ""}`}>
+            <span className={cnDelta(f.delta)}>{f.delta === 0 ? "0" : f.delta}</span>
             <div className="flex w-full flex-col" style={{ height: px(b.baseline) }}>
               <div style={{ height: spacerPx }} />
               <div className={f.delta === 0 ? "w-full rounded bg-emerald-400/70" : f.delta <= -8 ? "w-full rounded bg-rose-400/80" : "w-full rounded bg-amber-400/80"} style={{ height: dropPx }} />

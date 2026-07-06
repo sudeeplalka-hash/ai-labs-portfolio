@@ -8,7 +8,7 @@ const ZONE_EDGE: Record<string, string> = { green: "#86efac", amber: "#fcd34d", 
 const fmtVol = (v: number) => (v >= 1000 ? `${Math.round(v / 1000)}k` : `${v}`);
 
 /**
- * The Operating Envelope — the Deploy lab's signature visual. A load × cache
+ * The Operating Envelope, the Deploy lab's signature visual. A load × cache
  * heat-map of SLO/cost zones with a live operating point. Turn the scale dial or
  * change caching and watch the point drift from the green "safe zone" toward red.
  */
@@ -64,7 +64,7 @@ export function OperatingEnvelope({
         <circle cx={px} cy={py} r={3.5} fill="#152433" />
       </svg>
       <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-slatey-400">
-        <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-[-1px]" style={{ background: ZONE_FILL.green, outline: `1px solid ${ZONE_EDGE.green}` }} />safe — within SLO, latency &amp; budget</span>
+        <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-[-1px]" style={{ background: ZONE_FILL.green, outline: `1px solid ${ZONE_EDGE.green}` }} />safe, within SLO, latency &amp; budget</span>
         <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-[-1px]" style={{ background: ZONE_FILL.amber, outline: `1px solid ${ZONE_EDGE.amber}` }} />margin</span>
         <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-[-1px]" style={{ background: ZONE_FILL.red, outline: `1px solid ${ZONE_EDGE.red}` }} />breaks here</span>
         <span className="text-slatey-500">● = your current operating point</span>

@@ -45,7 +45,7 @@ export function EffortDonut() {
         </div>
       </div>
 
-      {/* Breakdown — fills the space and shows the actual split, not just colors */}
+      {/* Breakdown, fills the space and shows the actual split, not just colors */}
       <ul className="mt-5 flex-1 space-y-2.5">
         {EFFORT.map((e) => {
           const pct = Math.round((e.hrs / total) * 100);

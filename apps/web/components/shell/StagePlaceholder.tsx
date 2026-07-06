@@ -31,7 +31,7 @@ export function StagePlaceholder({ stageKey }: { stageKey: StageKey }) {
 
       <Panel>
         <h3 className="text-base font-semibold text-ink">
-          {locked ? "Locked — earlier stages aren't complete" : done ? "Complete" : "Ready when you are"}
+          {locked ? "Locked: earlier stages aren't complete" : done ? "Complete" : "Ready when you are"}
         </h3>
         <p className="mt-1 text-sm leading-relaxed text-slatey-300">{locked ? def.reason : def.will}</p>
         <p className="mt-3 text-xs text-slatey-500">Then it raises: <span className="italic">“{def.raises}”</span></p>

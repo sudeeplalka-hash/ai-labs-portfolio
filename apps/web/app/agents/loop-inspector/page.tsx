@@ -4,7 +4,7 @@ import { LoopInspector } from "@/components/agents/LoopInspector";
 export const metadata: Metadata = {
   title: "GAP-02 · Agent Loop & Failure Inspector",
   description:
-    "Step through an agent's Thought→Action→Observation loop, restructure it by architecture, then inject the four failures that break agents in production — and watch detection and recovery fire.",
+    "Step through an agent's Thought→Action→Observation loop, restructure it by architecture, then inject the four failures that break agents in production, and watch detection and recovery fire.",
 };
 
 export default function Page() {

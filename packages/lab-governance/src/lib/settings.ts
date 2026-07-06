@@ -1,8 +1,8 @@
 'use client';
 /**
- * Bring-your-own-key model settings (client-side, demo only).
+ * Bring-your-own-key model settings (client side, demo only).
  * The key is stored in this browser's localStorage and sent ONLY to the model
- * endpoint you configure — never to this app's host. Default is deterministic
+ * endpoint you configure, never to this app's host. Default is deterministic
  * mock mode, so the lab works with no key.
  */
 import { useSyncExternalStore } from 'react';

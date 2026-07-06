@@ -1,4 +1,4 @@
-// EL-07 · RFP/RFI Response War Room — use-cases.
+// EL-07 · RFP/RFI Response War Room, use cases.
 // Payload = a complete RFP (same shape EL-07 decomposes): excerpt, compliance
 // matrix, evaluation criteria, win themes, and the bid/no-bid inputs (fit,
 // win-prob, capacity, margin vs floor). One is engineered as a disciplined no-bid.
@@ -22,15 +22,15 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     industry: "public-sector",
     provenance: studied,
     title: "Benefits-eligibility AI platform bid",
-    oneLiner: "A biddable win — but only if you close the ATO and past-performance gates first.",
+    oneLiner: "A biddable win, but only if you close the ATO and past-performance gates first.",
     context:
-      "A government RFP for an AI-assisted benefits-eligibility triage platform. Strong fit, but two public-sector gates — a security authorization (ATO) pathway and direct government past-performance — sit as partials that must be closed before the bid is credible.",
+      "A government RFP for an AI-assisted benefits-eligibility triage platform. Strong fit, but two public-sector gates, a security authorization (ATO) pathway and direct government past-performance, sit as partials that must be closed before the bid is credible.",
     theDecision:
-      "Bid, but gate-first: the pursuit clears the threshold, so the real work is converting the ATO and past-performance partials to met before submission — in gov, an unclosed mandatory gate is a disqualification, not a deduction.",
+      "Bid, but gate-first: the pursuit clears the threshold, so the real work is converting the ATO and past-performance partials to met before submission, in gov, an unclosed mandatory gate is a disqualification, not a deduction.",
     whatMostMiss:
-      "Bidders treat gov mandatory requirements (ATO, 508, past performance) as scored line items. They're pass/fail gates — a single unmet mandatory zeroes the whole bid regardless of technical score.",
+      "Bidders treat gov mandatory requirements (ATO, 508, past performance) as scored line items. They're pass/fail gates, a single unmet mandatory zeroes the whole bid regardless of technical score.",
     stakes: "Leave the ATO partial unclosed and a technically winning bid is thrown out on a compliance gate.",
-    takeaway: "In public-sector bids, mandatory gates are pass/fail — close the ATO and past-performance partials or don't bid.",
+    takeaway: "In public-sector bids, mandatory gates are pass/fail, close the ATO and past-performance partials or don't bid.",
     sources: [
       "Public-sector proposal / capture practice (studied)",
       "Government mandatory-requirement (ATO, Section 508, past-performance) gating",
@@ -65,16 +65,16 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     labId: "EL-07",
     industry: "cybersecurity",
     provenance: studied,
-    title: "Autonomous SOC triage — the disciplined no-bid",
-    oneLiner: "Attractive scope, un-survivable terms — the senior move is to decline and say why.",
+    title: "Autonomous SOC triage, the disciplined no-bid",
+    oneLiner: "Attractive scope, un-survivable terms, the senior move is to decline and say why.",
     context:
       "An MSSP RFP for an autonomous SOC triage agent. The scope is appealing, but the commercial terms are the story: a guarantee of zero missed critical alerts and uncapped breach liability are red lines no responsible bidder accepts.",
     theDecision:
-      "No-bid — on terms, not capability: a 'zero missed criticals' guarantee is technically impossible and uncapped indemnity is a bet-the-firm liability, so decline regardless of how good the fit looks.",
+      "No-bid, on terms, not capability: a 'zero missed criticals' guarantee is technically impossible and uncapped indemnity is a bet-the-firm liability, so decline regardless of how good the fit looks.",
     whatMostMiss:
-      "Teams engage on the exciting technical scope and only hit the commercial red lines after burning capture time. Read the terms first — some RFPs are un-winnable by construction, not by competition.",
+      "Teams engage on the exciting technical scope and only hit the commercial red lines after burning capture time. Read the terms first, some RFPs are un-winnable by construction, not by competition.",
     stakes: "Accept 'zero missed criticals' and uncapped liability and one inevitable miss is an existential claim.",
-    takeaway: "Some RFPs are no-bids on terms alone — an impossible guarantee and uncapped liability end it before fit matters.",
+    takeaway: "Some RFPs are no-bids on terms alone, an impossible guarantee and uncapped liability end it before fit matters.",
     sources: [
       "Cybersecurity services capture / risk review (studied)",
       "Commercial red-line discipline (guarantees, liability caps, indemnity)",
@@ -86,9 +86,9 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
         label: "Autonomous SOC triage (cybersecurity)",
         excerpt: "MSSP seeks a partner to deliver an autonomous SOC triage agent. Must guarantee zero missed critical alerts and accept uncapped liability for any breach. 10-week fixed price with penalties; client threat data withheld until week 3; incumbent SIEM integration favored; lowest price wins.",
         requirements: [
-          { text: "Guarantee zero missed critical alerts", owner: "Delivery", evidence: "— undeliverable guarantee", status: "gap" },
-          { text: "Accept uncapped breach liability", owner: "Commercial", evidence: "— commercial red line", status: "gap" },
-          { text: "10-week fixed price with penalties", owner: "Commercial", evidence: "—", status: "gap" },
+          { text: "Guarantee zero missed critical alerts", owner: "Delivery", evidence: ", undeliverable guarantee", status: "gap" },
+          { text: "Accept uncapped breach liability", owner: "Commercial", evidence: ", commercial red line", status: "gap" },
+          { text: "10-week fixed price with penalties", owner: "Commercial", evidence: "N/A", status: "gap" },
           { text: "Deliver with threat data withheld to week 3", owner: "Data", evidence: "critical-path risk", status: "gap" },
           { text: "Displace incumbent SIEM integration", owner: "Sales", evidence: "adjacent only", status: "partial" },
         ],
@@ -99,7 +99,7 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
           { name: "Price", weight: 0.15, score: 40 },
           { name: "Assurance & terms", weight: 0.10, score: 55 },
         ],
-        winThemes: ["Thin — commercial terms are the blocker"],
+        winThemes: ["Thin, commercial terms are the blocker"],
         fit: 0.45, winProb: 0.20, capacity: 0.50, marginPct: 12, marginFloor: 25,
       },
     },
@@ -110,15 +110,15 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     industry: "retail",
     provenance: studied,
     title: "Peak-season personalization bid",
-    oneLiner: "Strong fit and a hard date — win on measurable lift, not lowest price.",
+    oneLiner: "Strong fit and a hard date, win on measurable lift, not lowest price.",
     context:
       "A national retailer's RFP for AI personalization and search relevance ahead of peak season. Value and speed are weighted over lowest price, which plays to a differentiated, measurement-led response with a hard Black-Friday deadline.",
     theDecision:
-      "Bid to win on lift, not price: fit and win themes are strong and the buyer weights value over cost, so lead with measurable lift and peak-load resilience — and be honest that the 16-week date is the real risk.",
+      "Bid to win on lift, not price: fit and win themes are strong and the buyer weights value over cost, so lead with measurable lift and peak-load resilience, and be honest that the 16-week date is the real risk.",
     whatMostMiss:
-      "Teams race to the lowest price on retail bids the buyer explicitly scores on value. When speed and lift are weighted, discounting signals weakness — differentiate on measurable outcome instead.",
-    stakes: "The 16-week hard date before peak is the binding constraint — miss it and the whole engagement misses its window.",
-    takeaway: "In retail peak bids weighted on value, win on measurable lift and the hard date — not on price.",
+      "Teams race to the lowest price on retail bids the buyer explicitly scores on value. When speed and lift are weighted, discounting signals weakness, differentiate on measurable outcome instead.",
+    stakes: "The 16-week hard date before peak is the binding constraint, miss it and the whole engagement misses its window.",
+    takeaway: "In retail peak bids weighted on value, win on measurable lift and the hard date, not on price.",
     sources: [
       "Retail / e-commerce proposal practice (studied)",
       "Value-weighted evaluation and peak-season delivery constraints",

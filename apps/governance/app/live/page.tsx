@@ -20,10 +20,10 @@ const UC = { id: 'live-demo', business_function: 'Finance', use_case_type: 'assi
 const PLAIN: Record<string, string> = {
   BLOCK: 'Blocked before it could cause harm.',
   REDACT: 'Sensitive data was masked before the model ever saw it.',
-  ESCALATE: 'Routed to a human reviewer — the AI cannot make this call.',
+  ESCALATE: 'Routed to a human reviewer, the AI cannot make this call.',
   REQUIRE_CONFIRMATION: 'Held for explicit confirmation before any action runs.',
   ALLOW_WITH_DISCLAIMER: 'Allowed, with an advisory caveat attached.',
-  ALLOW: 'No policy risk detected — allowed and logged for audit.',
+  ALLOW: 'No policy risk detected, allowed and logged for audit.',
 };
 
 export default function LiveDemo() {

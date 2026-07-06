@@ -1,4 +1,4 @@
-// Radar / spider chart geometry — pure math so a lab can draw a factor radar without
+// Radar / spider chart geometry, pure math so a lab can draw a factor radar without
 // re-deriving trig. Values are placed evenly around a circle starting at 12 o'clock
 // (top) and going clockwise; each vertex sits at (value / max) × radius from center.
 

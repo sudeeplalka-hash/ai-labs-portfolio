@@ -1,14 +1,14 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Lab Suite — the one Tailwind preset for the whole platform.
+ * Lab Suite, the one Tailwind preset for the whole platform.
  * Every app does `presets: [labPreset]`. Light, editorial, JIRA-adjacent:
  * navy ink + one brand blue, calm multicolor for data only.
  *
  * Two naming systems coexist on purpose, both mapping to the same palette:
  *  - Lab Suite tokens:  ink / canvas / card / line / primary / slatey / navy / accent / status
  *  - shadcn HSL tokens: background / foreground / muted / border / destructive / brand
- *    (so apps authored in either convention — e.g. governance — stay consistent)
+ *    (so apps authored in either convention, e.g. governance, stay consistent)
  */
 const labPreset: Partial<Config> = {
   theme: {

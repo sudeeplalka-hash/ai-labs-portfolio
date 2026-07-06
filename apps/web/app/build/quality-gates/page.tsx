@@ -45,8 +45,8 @@ function QualityGatesDemo() {
 
         <InsightCard title="Why Hold?" icon={ShieldAlert} tone="warn" className="lg:col-span-2">
           <p>
-            Citation accuracy (82%) sits below the 85% production threshold — a High-severity gate failure — so the documented decision
-            logic returns <span className="font-semibold text-ink">Hold</span> rather than promotion. High-risk query pass rate (87%)
+            Citation accuracy (82%) sits below the 85% production threshold, a High severity gate failure, so the documented decision
+            logic returns <span className="font-semibold text-ink">Hold</span> rather than promotion. High risk query pass rate (87%)
             and P95 latency (4.25s) are on warning, and one critical compliance query remains in human review.
           </p>
           <p className="mt-2">
@@ -114,7 +114,7 @@ export default function QualityGatesPage() {
     <div className="space-y-6">
       <PageIntro eyebrow="Quality Gates" title="Should this release be promoted?">
         Quality gates turn evaluation from passive reporting into release control. A version is only promoted when it clears the
-        quality, risk, latency, cost, and governance thresholds — not because a demo looked good.
+        quality, risk, latency, cost, and governance thresholds, not because a demo looked good.
       </PageIntro>
       <DataSourceToggle demo={<QualityGatesDemo />} live={<LiveQualityGates />} />
     </div>

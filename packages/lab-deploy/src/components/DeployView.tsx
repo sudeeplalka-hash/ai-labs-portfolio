@@ -22,7 +22,7 @@ const VMIN = 100, VMAX = 200000, RATIO = VMAX / VMIN;
 const posToVol = (p: number) => Math.round(VMIN * Math.pow(RATIO, p / 100));
 const volToPos = (v: number) => (100 * Math.log(v / VMIN)) / Math.log(RATIO);
 
-// Curated mixes for the comparison matrix — not every combination, just the ones
+// Curated mixes for the comparison matrix, not every combination, just the ones
 // that tell a story about the cost/quality/latency tradeoff.
 const COMPARE_CONFIGS: { key: string; label: string; tier: ModelTier; cachePct: number; reranker: boolean; blurb: string }[] = [
   { key: "lean", label: "Lean", tier: "small", cachePct: 0, reranker: false, blurb: "Cheapest compute, no extras" },
@@ -73,7 +73,7 @@ export function DeployView() {
         errorBudgetPct: prod.errorBudgetPct,
         driftRisk: drift.driftRisk,
         status: prod.zone === "green" ? "healthy" : prod.zone === "amber" ? "watch" : "at-risk",
-        // Phase 1 — Ops Evidence for Govern / Realize.
+        // Phase 1, Ops Evidence for Govern / Realize.
         evidence: {
           sloStatus,
           latencyP95: prod.p95,
@@ -84,7 +84,7 @@ export function DeployView() {
           monitoringCoverage: reranker ? 88 : 80,
           rollbackReadiness: "Prompt + index rollback available",
           versionLineage: lineage,
-          operationalDecision: prod.zone === "green" ? "Ready for pilot" : prod.zone === "amber" ? "Ready with restrictions" : "Hold — not production ready",
+          operationalDecision: prod.zone === "green" ? "Ready for pilot" : prod.zone === "amber" ? "Ready with restrictions" : "Hold, not production ready",
           createdAt: new Date().toISOString(),
         },
       };
@@ -127,7 +127,7 @@ export function DeployView() {
     setTier(c.tier); setCachePct(c.cachePct); setReranker(c.reranker);
   };
 
-  // Section tabs replace the endless scroll — every section available to everyone.
+  // Section tabs replace the endless scroll, every section available to everyone.
   const tabs = [
     { key: "envelope", label: "Operating envelope" },
     { key: "compare", label: "Compare configs" },
@@ -150,11 +150,11 @@ export function DeployView() {
             {typeof engine.modelCostFactor === "number" ? ` · cost ×${engine.modelCostFactor}` : ""}
             {typeof engine.modelLatencyFactor === "number" ? `, latency ×${engine.modelLatencyFactor}` : ""}
           </span>
-          <span className="text-slatey-500">— set in Build · Model Fit</span>
+          <span className="text-slatey-500">set in Build · Model Fit</span>
         </div>
       )}
 
-      {/* Exec KPI strip — live, moves with the dial */}
+      {/* Exec KPI strip, live, moves with the dial */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <KpiCard label="Monthly cost" value={fmtUsd(ops.monthlyCost)} tone={meetsCost ? "healthy" : "watch"}
           target={`at ${fmtVol(vol)}/day`} tooltip="The total monthly cost to run the system at the current load. It is the per-query cost (compute plus human-escalation cost) times daily volume across the month. Escalation is the dominant driver and rises with the engine's hallucination rate from Build, so better answers lower this number." interpretation={`$${ops.costPerQuery}/query`} />
@@ -172,7 +172,7 @@ export function DeployView() {
 
       {active === "envelope" && (
       <div className="space-y-6">
-      {/* Hero — Operating Envelope + Scale Dial */}
+      {/* Hero, Operating Envelope + Scale Dial */}
       <Panel>
         <SectionHeader eyebrow="Signature · where it breaks" title="Operating envelope"
           description="Load × caching → SLO & cost zones. Drag the scale dial and watch your operating point drift toward the edge."
@@ -219,7 +219,7 @@ export function DeployView() {
                   <button onClick={() => applyConfig(recommended.levers)} className="rounded-md bg-teal-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-teal-700">Apply</button>
                 </div>
                 <p className="mt-0.5 leading-relaxed text-slatey-300">
-                  {recommended.found ? "Meets both SLOs" : "Closest to SLO"} at {recommended.levers.tier} tier &middot; {recommended.levers.cachePct}% cache &middot; reranker {recommended.levers.reranker ? "on" : "off"} — saves <span className="font-semibold text-teal-700">${recommended.monthlySavings.toLocaleString()}/mo</span> vs your current mix.
+                  {recommended.found ? "Meets both SLOs" : "Closest to SLO"} at {recommended.levers.tier} tier &middot; {recommended.levers.cachePct}% cache &middot; reranker {recommended.levers.reranker ? "on" : "off"}, saves <span className="font-semibold text-teal-700">${recommended.monthlySavings.toLocaleString()}/mo</span> vs your current mix.
                 </p>
               </div>
             )}
@@ -230,10 +230,10 @@ export function DeployView() {
       {/* cost + reliability read alongside the envelope */}
       <div className="grid gap-3 md:grid-cols-2">
         <InsightCard tone={meetsCost ? "success" : "warn"} title={`Run cost ${meetsCost ? "within budget" : "over budget"}`}>
-          {meetsCost ? `At ${fmtVol(vol)}/day you're at $${ops.costPerQuery}/query, under the $${baseline.targetCostPerQuery.toFixed(3)} target.` : `$${ops.costPerQuery}/query vs $${baseline.targetCostPerQuery.toFixed(3)} target — escalation is ${ops.escalationRate}% of cost; better answers (Build) or caching closes it.`}
+          {meetsCost ? `At ${fmtVol(vol)}/day you're at $${ops.costPerQuery}/query, under the $${baseline.targetCostPerQuery.toFixed(3)} target.` : `$${ops.costPerQuery}/query vs $${baseline.targetCostPerQuery.toFixed(3)} target, escalation is ${ops.escalationRate}% of cost; better answers (Build) or caching closes it.`}
         </InsightCard>
         <InsightCard tone={meetsRel ? "success" : "danger"} title={`Reliability ${meetsRel ? "meets SLO" : "below SLO"}`}>
-          {meetsRel ? `${(ops.reliability * 100).toFixed(2)}% ≥ ${(baseline.sloReliability * 100).toFixed(1)}% SLO at this load.` : `${(ops.reliability * 100).toFixed(2)}% vs ${(baseline.sloReliability * 100).toFixed(1)}% — add capacity or shed load before scaling further.`}
+          {meetsRel ? `${(ops.reliability * 100).toFixed(2)}% ≥ ${(baseline.sloReliability * 100).toFixed(1)}% SLO at this load.` : `${(ops.reliability * 100).toFixed(2)}% vs ${(baseline.sloReliability * 100).toFixed(1)}%, add capacity or shed load before scaling further.`}
         </InsightCard>
       </div>
       </div>
@@ -258,7 +258,7 @@ export function DeployView() {
             </p>
           </Panel>
           <Panel>
-            <SectionHeader title="Production drift" description="Answer quality decays over time until a refresh fires — distinct from Build's version regression." icon={Activity} />
+            <SectionHeader title="Production drift" description="Answer quality decays over time until a refresh fires, distinct from Build's version regression." icon={Activity} />
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={drift.points} margin={{ top: 6, right: 8, bottom: 4, left: 0 }}>
                 <XAxis dataKey="week" tick={{ fontSize: 10, fill: "#5f6f81" }} label={{ value: "weeks in production", position: "insideBottom", offset: -2, fontSize: 10, fill: "#5f6f81" }} />
@@ -341,7 +341,7 @@ export function DeployView() {
 
       {active === "incident" && (
       <div className="space-y-6">
-      {/* Incident set-piece — the wow */}
+      {/* Incident set-piece, the wow */}
       <Panel>
         <SectionHeader eyebrow="Set-piece" title="Incident response" description="Fire an incident and watch alerts trip, the error budget burn, and the system recover (MTTR)." icon={AlertTriangle} />
         <IncidentPanel baseline={baseline} levers={levers} />
@@ -349,7 +349,7 @@ export function DeployView() {
 
       {/* handoff to Govern → Realize */}
       <InsightCard tone="info" title="Next: Govern, then Realize">
-        These reliability and cost numbers flow into governance&apos;s risk tier, and from there into the risk adjusted ROI in Realize — run cost is a direct input to the business case.
+        These reliability and cost numbers flow into governance&apos;s risk tier, and from there into the risk adjusted ROI in Realize, run cost is a direct input to the business case.
       </InsightCard>
       </div>
       )}

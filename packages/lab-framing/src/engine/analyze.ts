@@ -1,5 +1,5 @@
 // ============================================================================
-// Ambition analysis. Pulls the OBJECT (what the AI acts on — tickets, invoices,
+// Ambition analysis. Pulls the OBJECT (what the AI acts on, tickets, invoices,
 // claims…) and the INTENT (answer, summarize, detect, route…) out of the typed
 // question, so the backlog generates ideas that are actually about what the user
 // asked, not generic templates. Deterministic and offline.
@@ -20,7 +20,7 @@ const DOMAIN_NOUNS = [
   "proposals", "tenders", "spreadsheets", "datasets", "manuals", "guidelines",
 ];
 
-// The Job dropdown IS the intent — it's the explicit control, so it drives the
+// The Job dropdown IS the intent, it's the explicit control, so it drives the
 // verb/noun woven through every idea. (The free-text question supplies the object.)
 const INTENT_INFO: Record<string, { verb: string; noun: string }> = {
   answer: { verb: "answer", noun: "answers" },
@@ -55,7 +55,7 @@ const COMMON_VERBS = new Set(
 );
 
 export interface AmbitionSignal {
-  object: string;       // the thing acted on — from the question, else the job
+  object: string;       // the thing acted on, from the question, else the job
   flavor: string;       // a distinctive qualifier from the ask (fraud, onboarding…) or ""
   verb: string;         // intent verb, driven by the Job dropdown
   noun: string;         // intent noun

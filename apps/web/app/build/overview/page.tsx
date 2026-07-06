@@ -63,7 +63,7 @@ export default function ExecutiveOverviewPage() {
     <div className="space-y-6">
       <PageIntro eyebrow="Executive Overview" title="Is this RAG system ready for production?">
         A control tower for an enterprise RAG system currently in controlled pilot. Quality is improving, but citation accuracy,
-        high-risk reliability, and latency still hold the release.
+        high risk reliability, and latency still hold the release.
       </PageIntro>
       <DataSourceToggle demo={<ExecutiveOverviewDemo />} live={<LiveExecutiveOverview />} />
     </div>

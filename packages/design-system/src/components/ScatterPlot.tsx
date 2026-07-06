@@ -5,7 +5,7 @@ import { scatterLayout, type ScatterLayout } from "../lib/scatter";
 
 // Reusable scatter chart built on the tested `scatterLayout` geometry. Handles the chart
 // chrome (axes, gridlines, ticks, optional quadrant split) and the points (per-point size /
-// color / selection). Bespoke overlays — quadrant labels, hover cards — are supplied via the
+// color / selection). Bespoke overlays, quadrant labels, hover cards, are supplied via the
 // `overlay` render-prop, which receives the layout so a caller can position in the same space.
 export interface ScatterPoint {
   x: number;

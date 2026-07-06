@@ -1,8 +1,7 @@
 "use client";
 
-// Phase H — first-visit welcome. The Command Center is comprehensive by design,
-// which can overwhelm on arrival. This full-screen gate offers three doors —
-// watch it working, read the story, or explore alone — then never appears again
+// Phase H, first-visit welcome. The Command Center is comprehensive by design,
+// which can overwhelm on arrival. This full-screen gate offers three doors, // watch it working, read the story, or explore alone, then never appears again
 // (localStorage). Deep links to labs skip it entirely; it only guards "/".
 
 import { useEffect, useState } from "react";
@@ -16,7 +15,7 @@ const STAGES_LINE = ["Strategy", "Data", "Build", "Operate", "Govern", "Realize"
 export function Welcome() {
   const router = useRouter();
   const { hydrated, load } = useSampleProgram();
-  // Assume welcomed until we can read storage — avoids flashing the gate for
+  // Assume welcomed until we can read storage, avoids flashing the gate for
   // returning visitors during hydration.
   const [welcomed, setWelcomed] = useState(true);
   useEffect(() => {
@@ -36,11 +35,11 @@ export function Welcome() {
         <div className="w-full max-w-2xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300/80">AI Program Command Center</p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-            Everyone has an AI idea.<br className="hidden sm:block" /> This is how one becomes <span className="text-sky-300">real</span>.
+            Every enterprise has an AI idea.<br className="hidden sm:block" /> This is how one becomes <span className="text-sky-300">real</span>.
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-            Six labs walk one initiative from a rough ambition to a governed, measurable business case —
-            every stage handing a real contract to the next.
+            Six labs walk one initiative from a rough ambition to a governed, measurable business case,
+            with every stage handing a real contract to the next.
           </p>
 
           {/* The loop, in one line */}
@@ -63,7 +62,7 @@ export function Welcome() {
               <PlayCircle className="h-5 w-5 text-sky-300" />
               <span className="mt-2 text-sm font-semibold text-white">See it working</span>
               <span className="mt-1 flex-1 text-xs leading-relaxed text-slate-300">
-                Load a complete sample program — every stage populated, every number traceable.
+                Load a complete sample program: every stage populated, every number traceable.
               </span>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-300">
                 Recommended <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
@@ -77,10 +76,10 @@ export function Welcome() {
               <BookOpen className="h-5 w-5 text-slate-300" />
               <span className="mt-2 text-sm font-semibold text-white">Read the story</span>
               <span className="mt-1 flex-1 text-xs leading-relaxed text-slate-300">
-                The whole program in six beats — two minutes, no clicking around.
+                The whole program in six beats: two minutes, no clicking around.
               </span>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-300">
-                2-minute read <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                Two minute read <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
               </span>
             </button>
 
@@ -91,7 +90,7 @@ export function Welcome() {
               <MousePointerClick className="h-5 w-5 text-slate-300" />
               <span className="mt-2 text-sm font-semibold text-white">Explore on my own</span>
               <span className="mt-1 flex-1 text-xs leading-relaxed text-slate-300">
-                Straight to the Command Center — every lab works standalone.
+                Straight to the Command Center. Every lab works standalone.
               </span>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-300">
                 Enter <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />

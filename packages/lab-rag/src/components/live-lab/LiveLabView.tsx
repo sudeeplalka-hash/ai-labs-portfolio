@@ -136,7 +136,7 @@ export function LiveLabView() {
     updateStep(4, { status: "Complete", durationMs: 1, explanation: "Ready for questions." });
     setReady(true);
     setIsProcessing(false);
-    flash(`Ready — ${created.length} chunks. Ask a question on the right.`);
+    flash(`Ready, ${created.length} chunks. Ask a question on the right.`);
   }
 
   function makeDocument(name: string, text: string, sourceType: LiveLabDocument["sourceType"], fileType: string): LiveLabDocument {
@@ -283,7 +283,7 @@ export function LiveLabView() {
         </div>
       )}
 
-      {/* Answer engine selector — Simulated / Bring your own API key inline */}
+      {/* Answer engine selector, Simulated / Bring your own API key inline */}
       <AnswerEnginePanel engine={engine} config={llmConfig} onSave={onSaveEngine} onClear={onClearEngine} />
 
       {/* PRIMARY: document + chat side by side */}

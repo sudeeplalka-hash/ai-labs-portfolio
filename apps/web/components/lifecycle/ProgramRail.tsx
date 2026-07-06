@@ -1,6 +1,6 @@
 "use client";
 
-// Phase B — the persistent program rail. One slim strip under the header with a
+// Phase B, the persistent program rail. One slim strip under the header with a
 // chip per stage: status dot, label, and the stage's live headline number, all
 // derived on the fly by program-core selectors (never dependent on which pages
 // have been visited). Ends with a release-blocker pill when evidence is failing.
@@ -29,7 +29,7 @@ export function ProgramRail() {
   const headlines = useMemo(() => selectStageHeadlines(src), [src]);
   const blockers = useMemo(() => selectReleaseBlockers(src), [src]);
 
-  // The homepage tells the loop its own way — the rail starts once you're inside.
+  // The homepage tells the loop its own way, the rail starts once you're inside.
   if (!hydrated || pathname === "/") return null;
 
   const byKey = Object.fromEntries(headlines.map((h) => [h.key, h]));
@@ -55,7 +55,7 @@ export function ProgramRail() {
                 <span className={cn("h-1.5 w-1.5 rounded-full", dotCls(src.progress[s.key]))} />
                 {SHORT_LABEL[s.key]}
                 <span className={cn("font-mono font-semibold", h?.value ? "text-ink" : "text-slate-300")}>
-                  {h?.value ?? "—"}
+                  {h?.value ?? "N/A"}
                 </span>
               </Link>
             </span>

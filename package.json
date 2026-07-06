@@ -2,7 +2,7 @@
   "name": "ai-labs-portfolio",
   "version": "1.0.0",
   "private": true,
-  "description": "AI Labs Portfolio — one operator at four altitudes: the agent-protocol wire, the enterprise AI program lifecycle, the P&L, and the people. 23 interactive, client-side deterministic labs across four collections under a Competency Map. Next.js static export, no backend. Live at portfolio.sudeeplalka.com.",
+  "description": "AI Labs Portfolio, one operator at four altitudes: the agent protocol wire, the enterprise AI program lifecycle, the P&L, and the people. 23 interactive, client side deterministic labs across four collections under a Competency Map. Next.js static export, no backend. Live at portfolio.sudeeplalka.com.",
   "packageManager": "pnpm@9.7.0",
   "scripts": {
     "dev": "turbo run dev",

@@ -48,7 +48,7 @@ export function ModelScoreVisuals({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {/* Capability profiles — the shape of each top candidate */}
+      {/* Capability profiles, the shape of each top candidate */}
       <div>
         <h3 className="text-sm font-semibold text-ink">Capability profiles</h3>
         <p className="mt-0.5 text-xs text-slatey-400">
@@ -81,14 +81,14 @@ export function ModelScoreVisuals({
         </div>
       </div>
 
-      {/* What drives the fit — live weighted contribution */}
+      {/* What drives the fit, live weighted contribution */}
       <div>
         <h3 className="text-sm font-semibold text-ink">
           What drives <span className="text-accent-cyan">{focus.model.name}</span>&rsquo;s fit
         </h3>
         <p className="mt-0.5 text-xs text-slatey-400">
           Each bar is how much a criterion contributes to the {focus.fit}-point fit right now (weight × score). Change a
-          weight or profile and the bars re-proportion live — that&rsquo;s the lever turning priorities into a pick.
+          weight or profile and the bars re-proportion live, that&rsquo;s the lever turning priorities into a pick.
         </p>
         <div className="mt-3 space-y-2">
           {contrib.map((c) => {

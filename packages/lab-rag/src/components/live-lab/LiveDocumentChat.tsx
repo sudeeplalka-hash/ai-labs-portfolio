@@ -48,7 +48,7 @@ export function LiveDocumentChat({ ready, isAnswering, queryStage, sampleQuestio
           </div>
         ) : !latestQuestion ? (
           <div className="space-y-3">
-            <p className="text-sm text-slatey-400">Ready. Ask anything about the document — or try one of these:</p>
+            <p className="text-sm text-slatey-400">Ready. Ask anything about the document, or try one of these:</p>
             <div className="flex flex-wrap gap-1.5">
               {sampleQuestions.map((q) => (
                 <button

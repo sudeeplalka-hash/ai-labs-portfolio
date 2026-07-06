@@ -18,14 +18,14 @@ export function blankState(): ProgramState {
       valueHypothesis: null,
       createdAt: null,
     },
-    // All stages browsable by default — visitors can explore any lab without
+    // All stages browsable by default, visitors can explore any lab without
     // completing Framing first. (Framing still threads the initiative through.)
     progress: { frame: "active", data: "active", build: "active", deploy: "active", govern: "active", realize: "active", operate: "active" },
   };
 }
 
 // ---- Demo archetypes ----------------------------------------------------------
-// Six curated, self-contained initiatives for Demo mode — one per use-case
+// Six curated, self-contained initiatives for Demo mode, one per use case
 // archetype, so a visitor can shuffle through the product's range. Each variant
 // carries its own initiative.meta, which the deterministic engines turn into a
 // genuinely different program: the agentic archetype enables the agent layer,
@@ -40,11 +40,11 @@ export type DemoArchetype =
 export const DEMO_ARCHETYPE_KEY = "apcc_demo_archetype";
 
 export const DEMO_ARCHETYPES: { id: DemoArchetype; label: string; blurb: string }[] = [
-  { id: "knowledge-assistant", label: "Knowledge assistant", blurb: "Customer answers from your own knowledge base — the clean, fundable RAG story." },
-  { id: "summarization", label: "Summarization", blurb: "Meeting & case summarization — prompting-first, with a citation gate failing." },
-  { id: "classification", label: "Classification", blurb: "Claims intake routing — labeled data, training readiness, and generalization risk." },
-  { id: "decision-support", label: "Decision support", blurb: "High-stakes recommendations — human review, audit evidence, blocked sources." },
-  { id: "agentic-workflow", label: "Agentic workflow", blurb: "Tool-calling support agent — approvals, permission boundaries, blocked actions." },
+  { id: "knowledge-assistant", label: "Knowledge assistant", blurb: "Customer answers from your own knowledge base, the clean, fundable RAG story." },
+  { id: "summarization", label: "Summarization", blurb: "Meeting & case summarization, prompting-first, with a citation gate failing." },
+  { id: "classification", label: "Classification", blurb: "Claims intake routing, labeled data, training readiness, and generalization risk." },
+  { id: "decision-support", label: "Decision support", blurb: "High-stakes recommendations, human review, audit evidence, blocked sources." },
+  { id: "agentic-workflow", label: "Agentic workflow", blurb: "Tool-calling support agent, approvals, permission boundaries, blocked actions." },
   { id: "at-risk", label: "At-risk initiative", blurb: "What bad looks like: weak data, failing gates, and a business case that doesn't clear." },
 ];
 
@@ -75,8 +75,8 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
     data: { readinessScore: 74, gaps: 2, status: "ready" },
     rag: {
       faithfulness: 88, citationAccuracy: 90, hallucination: 5, costPerAnswer: 0.02, status: "good",
-      model: "Frontier hosted — fast / mini", modelDeployment: "Hosted API",
-      modelCostNote: "Low–moderate $/query", modelLatencyNote: "Fast",
+      model: "Frontier hosted, fast / mini", modelDeployment: "Hosted API",
+      modelCostNote: "Low to moderate $/query", modelLatencyNote: "Fast",
       modelCostFactor: 0.7, modelLatencyFactor: 0.7, modelCapability: 80,
     },
     deploy: {
@@ -162,7 +162,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
             primaryAiPattern: "Decision support",
             capabilityTags: ["Retrieval", "Decision support"],
             governanceTier: "High",
-            governanceTierRationale: "Recommendations influence care decisions — human review and audit evidence are mandatory.",
+            governanceTierRationale: "Recommendations influence care decisions, human review and audit evidence are mandatory.",
             operationalCriticality: "High",
             humanReviewRequired: true,
             auditEvidenceRequired: true,
@@ -181,7 +181,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
         initiative: {
           ...base.initiative,
           name: "Support operations agent",
-          rawAmbition: "Let an agent handle the routine support workflow end to end — safely.",
+          rawAmbition: "Let an agent handle the routine support workflow end to end, safely.",
           sharpenedProblem: "Run the eligibility-check-and-draft workflow with tools, where every risky action needs approval and nothing external executes unreviewed. Prove it with one number: minutes of handling time per resolved case.",
           params: { user: "Employees", job: "Orchestrate", pain: "Hard to scale", posture: "Rich & ready", risk: "Balanced" },
           selectedUseCase: { id: 4, title: "Governed support workflow agent", bucket: "Differentiators", value: 80, effort: 65 },
@@ -192,7 +192,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
             primaryAiPattern: "Agentic workflow",
             capabilityTags: ["Agentic workflow", "Tool calling", "Retrieval"],
             governanceTier: "High",
-            governanceTierRationale: "The agent proposes real actions — permission boundaries and approval gates are load-bearing.",
+            governanceTierRationale: "The agent proposes real actions, permission boundaries and approval gates are load-bearing.",
             operationalCriticality: "High",
             humanReviewRequired: true,
             auditEvidenceRequired: true,
@@ -212,17 +212,17 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
           ...base.initiative,
           name: "Legacy policy migration assistant",
           rawAmbition: "Answer questions from two decades of unversioned policy documents.",
-          sharpenedProblem: "Answer policy questions from the legacy archive — but the archive is stale, unowned, and unlabeled. Prove it with one number: percent of answers a reviewer signs off.",
+          sharpenedProblem: "Answer policy questions from the legacy archive, but the archive is stale, unowned, and unlabeled. Prove it with one number: percent of answers a reviewer signs off.",
           params: { user: "Employees", job: "Answer", pain: "Knowledge trapped", posture: "Unstructured", risk: "Aggressive" },
           selectedUseCase: { id: 5, title: "Legacy archive Q&A", bucket: "Foundations", value: 55, effort: 70 },
           successMetric: { shape: "Reduce time", baseline: "3 days", target: "under 1 day", coverage: "40% of policy queries" },
           scores: { value: 58, feasibility: 48, dataReadiness: 42 },
-          valueHypothesis: "If the archive can be trusted, research time collapses — a big if.",
+          valueHypothesis: "If the archive can be trusted, research time collapses, a big if.",
           meta: {
             primaryAiPattern: "Search / knowledge assistant",
             capabilityTags: ["Retrieval"],
             governanceTier: "High",
-            governanceTierRationale: "Unowned, stale sources with unknown sensitivity — high provenance risk.",
+            governanceTierRationale: "Unowned, stale sources with unknown sensitivity, high provenance risk.",
             operationalCriticality: "Medium",
             humanReviewRequired: true,
             auditEvidenceRequired: true,

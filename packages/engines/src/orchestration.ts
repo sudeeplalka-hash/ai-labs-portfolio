@@ -1,5 +1,5 @@
 // Orchestration timeline (GAP-03). The A2A messages define a sequential handoff
-// chain (supervisor → agents in order → supervisor), which is *why* multi-agent
+// chain (supervisor → agents in order → supervisor), which is *why* multiagent
 // latency exceeds a single agent. This lays that chain out on a time axis: a
 // Decompose span, the agents in series, then an Assemble span, summing to the
 // authored total latency. The ordering and the sum-to-total are the real teaching
@@ -32,10 +32,10 @@ export function agentTimeline(steps: string[], totalLatencyS: number, opts: Time
   return spans;
 }
 
-// A2A message inspector — expands each coordination hop into the structured envelope an
+// A2A message inspector, expands each coordination hop into the structured envelope an
 // agent-to-agent protocol would actually carry: a JSON-RPC-ish method, the request/response
 // direction, and the payload (the recipient's assignment on a request, the sender's output
-// on a response). Derived deterministically from the authored run — the point is to make the
+// on a response). Derived deterministically from the authored run, the point is to make the
 // "· label" on each arrow legible as a real contract, not to fake wire bytes. Pure.
 export type A2AKind = "request" | "response";
 export interface A2AFrame {
@@ -75,8 +75,8 @@ export function messageFrames(messages: FrameMsg[], agents: FrameAgent[], goal: 
   });
 }
 
-// Single-agent baseline vs multi-agent — the head-to-head that makes the thesis honest:
-// multi-agent buys quality by spending cost and latency. Computes the per-metric deltas
+// Single-agent baseline vs multiagent, the head-to-head that makes the thesis honest:
+// multiagent buys quality by spending cost and latency. Computes the per-metric deltas
 // (percent change and who wins, given each metric's direction) plus the cost/latency
 // multiples and a one-line tradeoff verdict. Pure; operates on the same authored figures
 // the meter shows.
@@ -88,7 +88,7 @@ export interface MetricDelta {
   multi: number;
   deltaPct: number;    // (multi - single) / single × 100
   betterIsUp: boolean; // quality: higher is better; cost/latency: lower is better
-  multiWins: boolean;  // did multi-agent improve this metric?
+  multiWins: boolean;  // did multiagent improve this metric?
 }
 export interface HeadToHead {
   metrics: MetricDelta[];

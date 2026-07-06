@@ -1,4 +1,4 @@
-// Scatter layout — pure geometry for a scatter chart: map each datum to a pixel position
+// Scatter layout, pure geometry for a scatter chart: map each datum to a pixel position
 // and produce the axis ticks, on linear or log scales. Built on the tested scale primitives
 // so a chart component never re-derives the arithmetic. Returns the scale functions too, so
 // a caller can position its own overlays (quadrant labels, hover cards) in the same space.

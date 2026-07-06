@@ -26,7 +26,7 @@ export default function RetrievalPage() {
         plus reranking lifted retrieval above target, at the cost of added latency.
       </PageIntro>
 
-      {/* Phase 3 — retrieval substrate: modes, comparison, re-rank, vector readiness */}
+      {/* Phase 3, retrieval substrate: modes, comparison, rerank, vector readiness */}
       <RetrievalModes />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

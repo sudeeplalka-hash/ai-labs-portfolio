@@ -77,7 +77,7 @@ export default function AuditLogs() {
                     </div>
                   </div>
                   <p className="text-sm text-slate-700 truncate">{ev.prompt}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">{ev.created_at ? formatDateTime(ev.created_at) : '—'} · Risk: {ev.risk_score.toFixed(2)}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{ev.created_at ? formatDateTime(ev.created_at) : 'N/A'} · Risk: {ev.risk_score.toFixed(2)}</p>
                 </button>
               ))}
               {events.length === 0 && <p className="text-center text-slate-400 py-10 text-sm">No events found.</p>}
@@ -99,7 +99,7 @@ export default function AuditLogs() {
                     ['Latency', `${selected.latency_ms.toFixed(0)}ms`],
                     ['Audit Status', selected.audit_status],
                     ['Review Status', selected.review_status],
-                    ['Timestamp', selected.created_at ? formatDateTime(selected.created_at) : '—'],
+                    ['Timestamp', selected.created_at ? formatDateTime(selected.created_at) : 'N/A'],
                   ].map(([k, v]) => (
                     <div key={k} className="flex justify-between border-b border-slate-50 pb-1">
                       <span className="text-slate-500">{k}</span>

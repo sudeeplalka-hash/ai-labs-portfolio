@@ -1,7 +1,7 @@
 'use client';
 /**
- * Lightweight RBAC for the demo — separation of duties without real auth.
- * A client-side role store (persisted to localStorage) gates what each persona
+ * Lightweight RBAC for the demo, separation of duties without real auth.
+ * A client side role store (persisted to localStorage) gates what each persona
  * can do, mirroring how an enterprise deployment would scope the control plane.
  */
 import { useSyncExternalStore } from 'react';

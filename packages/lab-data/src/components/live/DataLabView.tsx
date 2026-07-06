@@ -197,11 +197,11 @@ export function DataLabView() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
-      {/* LEFT: intake + timeline — sticky so the controls travel with the long
+      {/* LEFT: intake + timeline, sticky so the controls travel with the long
           report instead of leaving a tall empty gutter on scroll. */}
       <div className="space-y-6 lg:sticky lg:top-24 lg:col-span-1 lg:self-start">
         <Panel>
-          <SectionHeader title="Upload a file" description="CSV · JSON · TXT · MD · PDF · DOCX — runs in your browser" icon={UploadCloud} />
+          <SectionHeader title="Upload a file" description="CSV · JSON · TXT · MD · PDF · DOCX, runs in your browser" icon={UploadCloud} />
           <label
             htmlFor="fileInput"
             onDragOver={(e) => {
@@ -224,7 +224,7 @@ export function DataLabView() {
             <div className="mt-2 text-sm font-medium text-ink">
               Drop a file or <span className="text-primary">browse</span>
             </div>
-            <div className="mt-0.5 text-xs text-slatey-400">CSV · JSON · TXT · MD · PDF · DOCX — nothing leaves this tab</div>
+            <div className="mt-0.5 text-xs text-slatey-400">CSV · JSON · TXT · MD · PDF · DOCX, nothing leaves this tab</div>
             <input
               ref={inputRef}
               id="fileInput"
@@ -244,7 +244,7 @@ export function DataLabView() {
             </div>
           )}
 
-          {/* Sample switcher — only after a report exists. In the empty state the
+          {/* Sample switcher, only after a report exists. In the empty state the
               richer sample grid in EmptyHero is the single source, so samples
               don't appear in two places at once. */}
           {(report || running) && (
@@ -305,7 +305,7 @@ export function DataLabView() {
               <div className={cn("h-1.5 w-full", GATE_BG[gate.color])} />
               {approved && (
                 <div className="flex items-center gap-2 border-b border-emerald-200 bg-emerald-50/70 px-5 py-2 text-sm font-medium text-emerald-700">
-                  <CircleCheck className="h-4 w-4" /> Cleared the ingestion gate — ready to hand off to the RAG Evaluator.
+                  <CircleCheck className="h-4 w-4" /> Cleared the ingestion gate, ready to hand off to the RAG Evaluator.
                 </div>
               )}
               <div className="grid gap-5 p-5 md:grid-cols-2">
@@ -330,7 +330,7 @@ export function DataLabView() {
 
             {/* Compliance profile */}
             <Panel>
-              <SectionHeader title="Compliance profile" description="Judge this file against an industry's bar — escalates the rules that matter" icon={SlidersHorizontal} />
+              <SectionHeader title="Compliance profile" description="Judge this file against an industry's bar, escalates the rules that matter" icon={SlidersHorizontal} />
               <RuleProfileSelector value={profileId} onChange={changeProfile} />
             </Panel>
 
@@ -342,7 +342,7 @@ export function DataLabView() {
 
             {/* Consequence simulator */}
             <Panel>
-              <SectionHeader title="What would the AI answer?" description="The same file ingested as-is vs prepared — the failure prep prevents" icon={MessageSquareText} />
+              <SectionHeader title="What would the AI answer?" description="The same file ingested as-is vs prepared, the failure prep prevents" icon={MessageSquareText} />
               <ConsequenceSimulator report={report} sampleId={sampleId} cleared={cleared} />
             </Panel>
 
@@ -380,7 +380,7 @@ export function DataLabView() {
               <Panel>
                 <SectionHeader
                   title="Sensitive data clearance"
-                  description="Anything embedded becomes retrievable by the AI — clear it first"
+                  description="Anything embedded becomes retrievable by the AI, clear it first"
                   icon={ShieldAlert}
                   action={
                     <button
@@ -406,7 +406,7 @@ export function DataLabView() {
                         "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset",
                         p.severe ? "bg-rose-50 text-rose-700 ring-rose-600/20" : "bg-amber-50 text-amber-700 ring-amber-600/20",
                       )}
-                      title={p.severe ? "Hard blocker until cleared" : "Sensitive — review before ingestion"}
+                      title={p.severe ? "Hard blocker until cleared" : "Sensitive, review before ingestion"}
                     >
                       {p.label} <span className="font-mono">×{p.count}</span>
                     </span>
@@ -428,7 +428,7 @@ export function DataLabView() {
             <Panel>
               <SectionHeader
                 title="Chunk-readiness preview"
-                description="Can this be cleanly segmented for embedding? (Drag to explore — not retrieval tuning)"
+                description="Can this be cleanly segmented for embedding? (Drag to explore, not retrieval tuning)"
                 icon={Scissors}
               />
               <ChunkReadiness serialized={report.serialized} />
@@ -574,7 +574,7 @@ function FixItList({
   const fixable = report.checks.filter((c) => c.fix);
   const clean = report.checks.filter((c) => !c.fix);
   if (fixable.length === 0) {
-    return <p className="text-sm text-slatey-300">No remediations needed — every guideline passed.</p>;
+    return <p className="text-sm text-slatey-300">No remediations needed, every guideline passed.</p>;
   }
   return (
     <div className="space-y-2.5">
@@ -649,7 +649,7 @@ function Rulebook({ checks, applied }: { checks: CheckResult[]; applied: Set<str
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-sm font-semibold text-ink">
                 {g.name}
-                <MetricTooltip text={`${g.rule} — ${g.downstream}`} />
+                <MetricTooltip text={`${g.rule}, ${g.downstream}`} />
               </span>
               <Badge color={b.color}>{b.word}</Badge>
             </div>
@@ -768,12 +768,12 @@ function Handoff({
           {handed ? <ArrowRightCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           {handed ? "Handed off to RAG Evaluator" : "Send to RAG Evaluator"}
         </button>
-        {!canSend && <span className="text-xs text-slatey-400">Clear the gate first — resolve blockers and at-risk items.</span>}
+        {!canSend && <span className="text-xs text-slatey-400">Clear the gate first, resolve blockers and at-risk items.</span>}
       </div>
       {handed && (
         <div className="mt-3">
           <InsightCard title="Handed off" tone="success" icon={ArrowRightCircle}>
-            Opening the RAG Evaluator in a new tab — this prepared file is now its input. In the suite, the Data Lab
+            Opening the RAG Evaluator in a new tab, this prepared file is now its input. In the suite, the Data Lab
             prevents the very failures the RAG Evaluator detects: stale duplicates, PII leaks, and conflicting sources
             never reach the index.
           </InsightCard>

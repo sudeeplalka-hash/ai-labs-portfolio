@@ -10,7 +10,7 @@ import { StageDemonstrates } from "@/components/reviewer/Reviewer";
 import { NextStageCTA } from "@/components/lifecycle/NextStageCTA";
 
 // Stage 03. Locked until Framing completes, then the live RAG evaluator renders
-// in the shared shell. (Operations/cost-latency now live in Deploy; maturity in Govern.)
+// in the shared shell. (Operations/cost and latency now live in Deploy; maturity in Govern.)
 export function BuildStage() {
   const { state, hydrated } = useProgram();
   if (!hydrated) return null;
@@ -19,7 +19,7 @@ export function BuildStage() {
   return (
     <div className="space-y-6">
       <PageIntro eyebrow="Stage 03 · Build" title="Does the engine actually work?">
-        Pick a sample or drop in your own file — the evaluator scores every answer in real time: retrieval,
+        Pick a sample or drop in your own file. The evaluator scores every answer in real time: retrieval,
         faithfulness, citation accuracy, and an honest quality verdict. This is where the bet&apos;s feasibility
         guess from Framing meets the truth.
       </PageIntro>
@@ -27,7 +27,7 @@ export function BuildStage() {
       <HandoffBanner stage="build" />
       {state.operate?.buildTask && (
         <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50/60 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">Looped back from Operate · day-2</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">Looped back from Operate · day two</p>
           <p className="mt-0.5 text-sm text-ink">{state.operate.buildTask}</p>
           {state.operate.evidenceNote && <p className="mt-1 text-xs leading-relaxed text-slatey-500">{state.operate.evidenceNote}</p>}
         </div>

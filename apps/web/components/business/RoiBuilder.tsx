@@ -58,10 +58,10 @@ export function RoiBuilder() {
     const narrative = rangeLow > 0
       ? "stays NPV-positive across the full ±30% sensitivity band"
       : baseNpv > 0
-      ? "is positive at plan but turns negative under adverse assumptions — condition funding on the adoption ramp"
+      ? "is positive at plan but turns negative under adverse assumptions, condition funding on the adoption ramp"
       : "does not clear the hurdle rate at these assumptions";
     return [
-      `# AI initiative — ${H}-year business case`,
+      `# AI initiative, ${H}-year business case`,
       "",
       `**Recommendation: ${fundable}.**`,
       "",
@@ -70,7 +70,7 @@ export function RoiBuilder() {
       "| Metric | Value |",
       "| --- | --- |",
       `| NPV (base) | ${fmt(baseNpv)} @ ${p.rate}% discount |`,
-      `| NPV (±30% range) | ${fmt(rangeLow)} – ${fmt(rangeHigh)} |`,
+      `| NPV (±30% range) | ${fmt(rangeLow)} to ${fmt(rangeHigh)} |`,
       `| IRR | ${Math.round(baseIrr * 100)}% |`,
       `| Payback | ${pb ? `${pb.toFixed(1)} yr` : ">3 yr"} |`,
       "",
@@ -84,7 +84,7 @@ export function RoiBuilder() {
       "",
       "## Sensitivity (tornado, ±30%)",
       "",
-      ...drivers.map((d) => `- **${d.label}** — ${fmt(Math.min(d.low, d.high))} … ${fmt(Math.max(d.low, d.high))} (swing ${fmt(d.swing)})`),
+      ...drivers.map((d) => `- **${d.label}**, ${fmt(Math.min(d.low, d.high))} … ${fmt(Math.max(d.low, d.high))} (swing ${fmt(d.swing)})`),
       "",
       "## Recommendation",
       "",
@@ -139,7 +139,7 @@ export function RoiBuilder() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Payback, NPV, and IRR are table stakes. The tornado is the difference — single-point ROI gets challenged in
+            Payback, NPV, and IRR are table stakes. The tornado is the difference, single-point ROI gets challenged in
             the room; a range that stays positive gets funded. Adoption ramp ties to{" "}
             <Link href="/engagement/adoption" className="font-medium text-primary hover:underline">EL-01</Link>.
           </p>
@@ -147,7 +147,7 @@ export function RoiBuilder() {
 
         <UseCaseRail useCases={C35_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="What is the payback — and how fragile is it?" approach="Build the NPV, IRR, and payback, then swing each driver plus and minus to see which assumption the case most depends on." why="You fund on a range and its fragility, not a single confident point." metric="NPV and payback; the widest tornado bar (the driver the case hinges on)." tradeoff="Optimistic value versus conservative adoption and run-cost assumptions." outcome="A fund/defer decision with the fragility named, not hidden in a point estimate." />
+        <CaseStudy problem="What is the payback, and how fragile is it?" approach="Build the NPV, IRR, and payback, then swing each driver plus and minus to see which assumption the case most depends on." why="You fund on a range and its fragility, not a single confident point." metric="NPV and payback; the widest tornado bar (the driver the case hinges on)." tradeoff="Optimistic value versus conservative adoption and run-cost assumptions." outcome="A fund/defer decision with the fragility named, not hidden in a point estimate." />
 
         <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           {/* Inputs */}
@@ -194,14 +194,14 @@ export function RoiBuilder() {
                 <p className="font-mono text-[11px] uppercase tracking-widest text-slatey-500">Steering pre-read · business case</p>
                 <Badge tone={fundTone}>{fundable}</Badge>
               </div>
-              <h2 className="text-lg font-semibold text-ink">AI initiative — {H}-year business case</h2>
+              <h2 className="text-lg font-semibold text-ink">AI initiative, {H}-year business case</h2>
               <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-                <div><p className="text-[11px] text-slatey-500">NPV (range)</p><p className="font-mono text-sm font-semibold text-ink">{fmt(rangeLow)} – {fmt(rangeHigh)}</p></div>
+                <div><p className="text-[11px] text-slatey-500">NPV (range)</p><p className="font-mono text-sm font-semibold text-ink">{fmt(rangeLow)} to {fmt(rangeHigh)}</p></div>
                 <div><p className="text-[11px] text-slatey-500">IRR</p><p className="font-mono text-sm font-semibold text-ink">{Math.round(baseIrr * 100)}%</p></div>
                 <div><p className="text-[11px] text-slatey-500">Payback</p><p className="font-mono text-sm font-semibold text-ink">{pb ? `${pb.toFixed(1)} yr` : ">3 yr"}</p></div>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-slatey-300">
-                Recommendation: <span className="font-semibold text-ink">{fundable}</span>. The case {rangeLow > 0 ? "stays NPV-positive across the full ±30% sensitivity band" : baseNpv > 0 ? "is positive at plan but turns negative under adverse assumptions — condition funding on the adoption ramp" : "does not clear the hurdle rate at these assumptions"}. Largest lever: <span className="font-semibold text-ink">{drivers[0].label.toLowerCase()}</span>.
+                Recommendation: <span className="font-semibold text-ink">{fundable}</span>. The case {rangeLow > 0 ? "stays NPV-positive across the full ±30% sensitivity band" : baseNpv > 0 ? "is positive at plan but turns negative under adverse assumptions, condition funding on the adoption ramp" : "does not clear the hurdle rate at these assumptions"}. Largest lever: <span className="font-semibold text-ink">{drivers[0].label.toLowerCase()}</span>.
               </p>
               <div className="mt-3">
                 <ArtifactButton label="Download the one-pager" onClick={onGenerate} title="Download this business case as Markdown" />
@@ -211,17 +211,17 @@ export function RoiBuilder() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Fund if the pessimistic NPV clears zero; otherwise fund-with-conditions on the driver that swings it most." lift="The risk-adjusted NPV, with the one assumption the case most depends on made explicit." measure="Realized NPV/payback vs modeled; the driver's actual value vs assumed at 90 days." />
+          <OutcomeFrame call="Fund if the pessimistic NPV clears zero; otherwise fund-with-conditions on the driver that swings it most." lift="The risk adjusted NPV, with the one assumption the case most depends on made explicit." measure="Realized NPV/payback vs modeled; the driver's actual value vs assumed at 90 days." />
           <InsightCard title="Present the range, not the point" tone="info">
-            A single NPV invites a fight about the assumption behind it. A tornado shows you already stress-tested it — and
+            A single NPV invites a fight about the assumption behind it. A tornado shows you already stress-tested it, and
             names the one driver leadership should actually govern. That&apos;s what moves a case from "interesting" to "funded."
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "I present the range, not the point. Points get challenged; ranges get funded."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "I present the range, not the point. Points get challenged; ranges get funded."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Cash flows: year 0 = −investment; year t = annual value × average adoption (linear ramp) − run cost, over {H} years. NPV discounts at the chosen rate; IRR solved by bisection; payback interpolated on undiscounted cumulative flow.</p>
-              <p>Tornado varies each driver ±30% and re-computes NPV; bars are sorted by swing and centered on the base NPV. Stack: Next.js (static) + shared design system; client-side.</p>
+              <p>Tornado varies each driver ±30% and re-computes NPV; bars are sorted by swing and centered on the base NPV. Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> a 3-year horizon and a linear adoption ramp are simplifications; real cases model per-year ramps, taxes, and terminal value. It frames the decision and its sensitivity, not an audited model.</p>

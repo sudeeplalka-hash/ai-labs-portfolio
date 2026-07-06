@@ -1,4 +1,4 @@
-// @labs/kit · labs.ts — the lab route registry (single source of truth).
+// @labs/kit · labs.ts, the lab route registry (single source of truth).
 // labId → display name + route + collection. Both the Industry Atlas and the
 // Storylines resolve labs through this, so a renamed route can't drift between them.
 
@@ -10,19 +10,19 @@ export interface LabRoute {
 
 export const LAB_ROUTES: Record<string, LabRoute> = {
   // Collection 1 · Enterprise AI Lifecycle (stages that storylines/atlas may reference)
-  "C1-operate": { name: "Operate — Day-2 Observability", href: "/operate", collection: "Enterprise AI Lifecycle" },
+  "C1-operate": { name: "Operate, Day Two Observability", href: "/operate", collection: "Enterprise AI Lifecycle" },
   // Collection 2 · Agent & Protocol Engineering
   "GAP-01": { name: "MCP Server Playground", href: "/agents/mcp-playground", collection: "Agent & Protocol" },
   "GAP-02": { name: "Agent Loop & Failure Inspector", href: "/agents/loop-inspector", collection: "Agent & Protocol" },
-  "GAP-03": { name: "Multi-Agent Orchestration Board", href: "/agents/orchestration", collection: "Agent & Protocol" },
-  "GAP-04": { name: "Tool-Use & Structured Output", href: "/agents/structured-output", collection: "Agent & Protocol" },
+  "GAP-03": { name: "Multiagent Orchestration Board", href: "/agents/orchestration", collection: "Agent & Protocol" },
+  "GAP-04": { name: "Tool use & Structured Output", href: "/agents/structured-output", collection: "Agent & Protocol" },
   "GAP-05": { name: "Context & Memory Engineering", href: "/agents/context-memory", collection: "Agent & Protocol" },
   "GAP-06": { name: "Prompt Cost & Token Simulator", href: "/agents/cost-simulator", collection: "Agent & Protocol" },
   "GAP-07": { name: "Protocol Selection Lab", href: "/agents/protocol-selection", collection: "Agent & Protocol" },
-  "GAP-08": { name: "Human-in-the-Loop Approval", href: "/agents/hitl", collection: "Agent & Protocol" },
+  "GAP-08": { name: "Human in the loop Approval", href: "/agents/hitl", collection: "Agent & Protocol" },
   // Collection 3 · The Business of AI
   "C3-1": { name: "AI Initiative Portfolio Dashboard", href: "/business/portfolio", collection: "Business of AI" },
-  "C3-2": { name: "Build vs Buy vs Fine-Tune", href: "/business/build-buy", collection: "Business of AI" },
+  "C3-2": { name: "Build vs Buy vs Fine tune", href: "/business/build-buy", collection: "Business of AI" },
   "C3-3": { name: "Inference Cost Forecaster", href: "/business/cost-forecaster", collection: "Business of AI" },
   "C3-4": { name: "Vendor Evaluation & Risk Monitor", href: "/business/vendor-monitor", collection: "Business of AI" },
   "C3-5": { name: "Business Case / ROI Builder", href: "/business/roi-builder", collection: "Business of AI" },
@@ -39,7 +39,7 @@ export const LAB_ROUTES: Record<string, LabRoute> = {
   "EL-10": { name: "Executive Communication Studio", href: "/engagement/exec-comms", collection: "Engagement Leadership" },
 };
 
-// Build a deep-link into a lab, optionally pre-selecting a use-case (?uc=).
+// Build a deep-link into a lab, optionally pre-selecting a use case (?uc=).
 export function labHref(labId: string, ucId?: string): string {
   const route = LAB_ROUTES[labId];
   if (!route) return "/";

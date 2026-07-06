@@ -1,4 +1,4 @@
-// MCP manifest diff — what changed between two servers' capability surfaces. Pure:
+// MCP manifest diff, what changed between two servers' capability surfaces. Pure:
 // compares tool / resource / prompt names and reports added / removed / kept per
 // category, plus a `changed` flag. Drives the Playground's "on system switch" diff.
 
@@ -43,10 +43,10 @@ export function diffManifests(from: ManifestShape, to: ManifestShape): ManifestD
   return { tools, resources, prompts, changed };
 }
 
-// Custom tool builder — validate a user-authored tool definition against the MCP shape
+// Custom tool builder, validate a user-authored tool definition against the MCP shape
 // (lower_snake_case unique name, at least one argument, each argument named/typed, enums
 // carry values) and normalize it. Returns typed errors the UI surfaces the same way the
-// server rejects a bad tools/call. Pure — the component wraps the returned def with a
+// server rejects a bad tools/call. Pure, the component wraps the returned def with a
 // deterministic result closure.
 export type ToolArgType = "string" | "number" | "enum";
 export interface ToolArgDef {
@@ -111,11 +111,11 @@ export function manifestWithTool<T extends { name: string }>(tools: T[], tool: T
   return tools.some((t) => t.name === tool.name) ? tools : [...tools, tool];
 }
 
-// Session lifecycle — the ordered frames an MCP session opens with, before any tool runs:
+// Session lifecycle, the ordered frames an MCP session opens with, before any tool runs:
 // the client's `initialize` (declaring protocol version + capabilities), the server's reply
 // (version negotiated, capabilities + identity returned), the client's `initialized`
 // notification, then a single `tools/list` discovery round-trip. Built from the live server
-// so a custom tool added in the builder shows up in tools/list with no client change — the
+// so a custom tool added in the builder shows up in tools/list with no client change, the
 // whole point of coding to the contract. Pure; frames are the real JSON-RPC shapes.
 export interface LifecycleServer {
   name: string;
@@ -138,7 +138,7 @@ export function lifecycleFrames(server: LifecycleServer): LifecycleFrame[] {
     {
       seq: 1, dir: "client→server", kind: "request", method: "initialize",
       body: { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: v, capabilities: { tools: {}, resources: {}, prompts: {} }, clientInfo: { name: "ai-labs-playground", version: "1.0.0" } } },
-      note: "The client opens the session by declaring the protocol version and the capabilities it supports — nothing tool-specific yet.",
+      note: "The client opens the session by declaring the protocol version and the capabilities it supports, nothing tool-specific yet.",
     },
     {
       seq: 2, dir: "server→client", kind: "response",
@@ -163,7 +163,7 @@ export function lifecycleFrames(server: LifecycleServer): LifecycleFrame[] {
   ];
 }
 
-// Trace export — normalize a completed call (its request/response frames plus the real
+// Trace export, normalize a completed call (its request/response frames plus the real
 // byte + latency figures) into a clean, self-describing object for copy/download. Pure:
 // strips UI-only fields and keeps the wire frames, so a shared trace is exactly what the
 // client and server exchanged.

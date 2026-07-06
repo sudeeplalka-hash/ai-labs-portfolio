@@ -2,7 +2,7 @@
   "name": "@labs/lab-framing",
   "version": "0.0.0",
   "private": true,
-  "description": "Strategy & Framing lab — forge a fuzzy ambition into a scoped, scored, falsifiable bet. Built on the shared foundation.",
+  "description": "Strategy & Framing lab, forge a fuzzy ambition into a scoped, scored, falsifiable bet. Built on the shared foundation.",
   "exports": {
     ".": "./src/index.ts"
   },

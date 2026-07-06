@@ -3,7 +3,7 @@
 // EL-02 · Stakeholder & Sponsor Alignment Cockpit (Collection 4 · control room).
 // Power/interest grid + sentiment trajectories over program weeks. The sponsor
 // drifting from champion to neutral gets flagged; selecting a stakeholder drafts
-// the pre-steering briefing — who needs to hear what, from whom, before the meeting.
+// the pre-steering briefing, who needs to hear what, from whom, before the meeting.
 // Programs lose sponsors in the silence between meetings, not in them. SIMULATED.
 
 import { useState } from "react";
@@ -28,7 +28,7 @@ const SENT_HEX = ["#e24b4a", "#ea580c", "#d97706", "#1f6fc4", "#16a34a"];
 
 const STAKEHOLDERS: SH[] = [
   { key: "cio", name: "Exec sponsor (CIO)", role: "Manage closely", power: 0.9, interest: 0.85, traj: [4, 4, 3, 3, 2, 2],
-    brief: { why: "Two quiet weeks — no win shared since the pilot demo, and a peer flagged cost. Champion energy is cooling to neutral.", who: "You, in a 1:1 before the steering — not during it.", message: "Bring one concrete win (containment +5 pts) and the single decision you need; re-anchor the why.", before: "48 hours before the pre-read goes out." } },
+    brief: { why: "Two quiet weeks, no win shared since the pilot demo, and a peer flagged cost. Champion energy is cooling to neutral.", who: "You, in a 1:1 before the steering, not during it.", message: "Bring one concrete win (containment +5 pts) and the single decision you need; re-anchor the why.", before: "48 hours before the pre-read goes out." } },
   { key: "vp", name: "Business owner (VP Servicing)", role: "Manage closely", power: 0.8, interest: 0.9, traj: [3, 3, 3, 3, 3, 3],
     brief: { why: "Steady supporter; owns the outcome and the floor.", who: "Delivery lead, weekly.", message: "Keep sharing adoption numbers; ask them to co-present the win at steering.", before: "In the normal weekly." } },
   { key: "risk", name: "Head of Risk", role: "Keep satisfied", power: 0.85, interest: 0.5, traj: [2, 1, 1, 1, 1, 1],
@@ -73,7 +73,7 @@ export function StakeholderCockpit() {
     const targets: SH[] = flags.length ? flags : [s];
     const block = (x: SH): string =>
       [
-        `### ${x.name} — ${SENT[last(x.traj)]}${drifting(x.traj) ? " (drifting)" : ""}`,
+        `### ${x.name}, ${SENT[last(x.traj)]}${drifting(x.traj) ? " (drifting)" : ""}`,
         `- **Why now:** ${x.brief.why}`,
         `- **Who talks to them:** ${x.brief.who}`,
         `- **The message:** ${x.brief.message}`,
@@ -88,7 +88,7 @@ export function StakeholderCockpit() {
       ...targets.map(block),
       "## The move",
       "",
-      "Sentiment moves between meetings, not in them. Each 1:1 above is aimed to re-anchor a specific stakeholder before the room — who, what, from whom, by when.",
+      "Sentiment moves between meetings, not in them. Each 1:1 above is aimed to re-anchor a specific stakeholder before the room, who, what, from whom, by when.",
     ].join("\n");
   };
   const onGenerate = () =>
@@ -113,7 +113,7 @@ export function StakeholderCockpit() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             A snapshot lies; a trajectory tells the truth. The grid places each stakeholder by power and interest, the
-            sparklines show where sentiment is heading — {activeUc ? activeUc.payload.drivingLine : `and ${flags.length} are drifting, including the sponsor.`}
+            sparklines show where sentiment is heading, {activeUc ? activeUc.payload.drivingLine : `and ${flags.length} are drifting, including the sponsor.`}
           </p>
         </div>
 
@@ -190,15 +190,15 @@ export function StakeholderCockpit() {
           <OutcomeFrame call="Brief the drifting high-influence sponsor one-on-one before the steering, not during it." lift="Turn a public misalignment into a private, pre-resolved one." measure="Sponsor alignment pre/post; decisions stalled at steering by misalignment; surprises raised in the room." />
           <InsightCard title={`${flags.length} stakeholders drifting`} tone="warn">
             Sentiment moves between meetings, not in them. The sponsor cooling from champion to neutral is invisible on a
-            status report and obvious on a trajectory — and it&apos;s recoverable with one well-aimed 1:1 before the room.
+            status report and obvious on a trajectory, and it&apos;s recoverable with one well-aimed 1:1 before the room.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Programs don't lose sponsors in meetings; they lose them in the silence between meetings."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — multi-stakeholder consulting delivery (Deloitte/Verizon, Genpact/Morgan Stanley).</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Programs don't lose sponsors in meetings; they lose them in the silence between meetings."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, multi-stakeholder consulting delivery (Deloitte/Verizon, Genpact/Morgan Stanley).</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Each stakeholder carries a power/interest coordinate (grid placement) and a six-week sentiment trajectory (Blocker→Champion). Drift = latest sentiment below the starting point; the briefing is authored per stakeholder around who, what, from whom, and by when.</p>
-              <p>Stack: Next.js (static) + shared design system; client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> sentiment is a judgment read, not instrumented; archetypes are illustrative. It structures the alignment work between meetings, not a CRM.</p>

@@ -1,4 +1,4 @@
-// EL-06 · Talent & Upskilling Pathway Planner — use-cases.
+// EL-06 · Talent & Upskilling Pathway Planner, use cases.
 // Payload = a different org's capability map (current vs agentic-era target per
 // capability) plus how fast that org's stack moved and a label for it. The gap
 // heatmap, the build/hire/partner pathways, and the stack-vs-team timeline all
@@ -20,17 +20,17 @@ export const EL06_USE_CASES: UseCase<El06Payload>[] = assertUseCases<El06Payload
     industry: "financial-services",
     provenance: firstHand,
     title: "Bank AI Center of Excellence upskilling",
-    oneLiner: "Governance and model-risk carry the highest targets — and can't be partnered out.",
+    oneLiner: "Governance and model-risk carry the highest targets, and can't be partnered out.",
     context:
-      "A bank's AI CoE re-skilling for the agentic era. The capability targets skew to governance and model-risk validation — the highest bars in a regulated shop — where the fast lever (partner) doesn't work because the accountability can't be rented.",
+      "A bank's AI CoE re-skilling for the agentic era. The capability targets skew to governance and model-risk validation, the highest bars in a regulated shop, where the fast lever (partner) doesn't work because the accountability can't be rented.",
     theDecision:
       "Build where it's regulated, partner where it's not: model-risk and AI governance must be built or hired because the bank owns the accountability, so reserve partnering for orchestration and eval where speed is safe.",
     whatMostMiss:
-      "Teams pick the pathway by cost and speed and forget that in a bank some capabilities legally can't be outsourced — governance has to be in-house, which changes the whole build/hire/partner mix.",
+      "Teams pick the pathway by cost and speed and forget that in a bank some capabilities legally can't be outsourced, governance has to be in-house, which changes the whole build/hire/partner mix.",
     stakes: "Partner your governance capability and you've rented the one thing examiners hold you personally accountable for.",
-    takeaway: "In a bank CoE, governance and model-risk must be built or hired — you can't partner accountability.",
+    takeaway: "In a bank CoE, governance and model-risk must be built or hired, you can't partner accountability.",
     sources: [
-      "Bank AI CoE capability building (first-hand, financial services)",
+      "Bank AI CoE capability building (firsthand, financial services)",
       "Regulated-org build/hire/partner constraints",
     ],
     lastVerified: "2026-07-03",
@@ -53,15 +53,15 @@ export const EL06_USE_CASES: UseCase<El06Payload>[] = assertUseCases<El06Payload
     industry: "manufacturing",
     provenance: studied,
     title: "Plant-floor AI capability build",
-    oneLiner: "The gap isn't ML — it's the OT/IT and edge skills that make ML run on the floor.",
+    oneLiner: "The gap isn't ML, it's the OT/IT and edge skills that make ML run on the floor.",
     context:
-      "A manufacturer building AI capability for the plant floor. The visible gap is ML, but the binding gaps are industrial data engineering (OT/IT convergence), edge MLOps, and OT security — the skills that get a model off the laptop and onto the line safely.",
+      "A manufacturer building AI capability for the plant floor. The visible gap is ML, but the binding gaps are industrial data engineering (OT/IT convergence), edge MLOps, and OT security, the skills that get a model off the laptop and onto the line safely.",
     theDecision:
       "Staff the deployment skills, not the modeling skills: OT/IT data engineering, edge MLOps, and OT security are the plant-floor bottleneck, and floor knowledge must be built because it can't be hired off the shelf.",
     whatMostMiss:
       "Teams over-index on data science and under-index on the OT/edge/security skills that decide whether AI survives contact with the plant. On the floor, deployment capability is the scarce one.",
     stakes: "Skip the OT and edge skills and every model works in the lab and dies on the line.",
-    takeaway: "In manufacturing, the scarce AI skill is OT/edge deployment — not modeling. Build the floor skills.",
+    takeaway: "In manufacturing, the scarce AI skill is OT/edge deployment, not modeling. Build the floor skills.",
     sources: [
       "Manufacturing / plant-floor AI capability (studied)",
       "OT/IT convergence and edge-MLOps skill gaps",
@@ -88,13 +88,13 @@ export const EL06_USE_CASES: UseCase<El06Payload>[] = assertUseCases<El06Payload
     title: "Creative agency genAI upskilling",
     oneLiner: "Tooling moves in a year; the sleeper gap is rights, IP, and disclosure.",
     context:
-      "A creative and marketing agency re-skilling for generative AI. The tooling shifts fastest of any industry here, but the widest and most dangerous gap isn't craft — it's rights/IP hygiene and AI-disclosure, the capability that keeps client work defensible.",
+      "A creative and marketing agency re-skilling for generative AI. The tooling shifts fastest of any industry here, but the widest and most dangerous gap isn't craft, it's rights/IP hygiene and AI-disclosure, the capability that keeps client work defensible.",
     theDecision:
       "Hire for taste, partner for pipeline, but build the rights/IP capability: the IP-and-disclosure gap is the one that turns a delivered campaign into a legal liability, so it can't be rented.",
     whatMostMiss:
-      "Agencies chase the newest tool and treat rights/IP as legal's problem. In genAI creative, provenance and disclosure are a delivery capability — the sleeper risk that scales with output.",
+      "Agencies chase the newest tool and treat rights/IP as legal's problem. In genAI creative, provenance and disclosure are a delivery capability, the sleeper risk that scales with output.",
     stakes: "Ignore the rights/IP gap and the faster you produce, the faster you ship indefensible work.",
-    takeaway: "In creative agencies, rights/IP and disclosure is the sleeper capability gap — build it or ship liability.",
+    takeaway: "In creative agencies, rights/IP and disclosure is the sleeper capability gap, build it or ship liability.",
     sources: [
       "Creative / marketing agency genAI adoption (studied)",
       "AI content provenance, rights, and disclosure practice",

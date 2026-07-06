@@ -3,7 +3,7 @@
 // GAP-02 · Agent Loop & Failure Inspector (Collection 2 · toolkit).
 // Step a Thought→Action→Observation trace; restructure it by architecture; inject
 // one of the four failures that break agents in production and watch the detection
-// signal and recovery policy fire. You don't budget for agents — you budget for
+// signal and recovery policy fire. You don't budget for agents, you budget for
 // agents plus the harness that catches these four. SIMULATED (trace constructed).
 
 import { useEffect, useRef, useState } from "react";
@@ -48,7 +48,7 @@ const BASE: Record<string, Step[]> = {
     { role: "thought", label: "Supervisor: aggregate results and file." },
     { role: "action", label: "open_dispute(...)" },
     { role: "observation", label: "filed ✓" },
-    { role: "final", label: "Filed via orchestrator + workers — faster, more moving parts to monitor." },
+    { role: "final", label: "Filed via orchestrator + workers, faster, more moving parts to monitor." },
   ],
   eval: [
     { role: "thought", label: "Generator: draft the member response." },
@@ -57,7 +57,7 @@ const BASE: Record<string, Step[]> = {
     { role: "thought", label: "Evaluator: check tone + policy citation." },
     { role: "observation", label: "v1 missing policy citation; tone too curt." },
     { role: "action", label: "refine → draft_response(v2)" },
-    { role: "observation", label: "v2 cites policy, warmer tone — passes." },
+    { role: "observation", label: "v2 cites policy, warmer tone, passes." },
     { role: "final", label: "Approved after one evaluate→refine cycle." },
   ],
 };
@@ -137,13 +137,13 @@ export function LoopInspector() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? `${activeUc.payload.taskLine} Step the loop and watch the characteristic failure, its detection signal, and the recovery policy fire.` : "Task: resolve a card dispute end-to-end. Step the loop, restructure it by architecture, then inject a failure — the failure, its detection signal, and the recovery policy are the part you actually budget for."}
+            {activeUc ? `${activeUc.payload.taskLine} Step the loop and watch the characteristic failure, its detection signal, and the recovery policy fire.` : "Task: resolve a card dispute end-to-end. Step the loop, restructure it by architecture, then inject a failure, the failure, its detection signal, and the recovery policy are the part you actually budget for."}
           </p>
         </div>
 
         <UseCaseRail useCases={GAP02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="How do agents fail, and what actually catches it?" approach="Step through an agent loop and surface the failure taxonomy — looping, wrong tool, hallucinated arguments, never-stopping — and where an observability harness catches each." why="You budget observability against how agents actually fail, not against a generic checklist." metric="Failure classes caught vs escaped; harness coverage of the taxonomy." tradeoff="A richer harness costs money and latency; an un-instrumented failure reaches a system of record." outcome="A defensible observability-harness budget tied to the failure modes that actually occur." />
+        <CaseStudy problem="How do agents fail, and what actually catches it?" approach="Step through an agent loop and surface the failure taxonomy, looping, wrong tool, hallucinated arguments, never-stopping, and where an observability harness catches each." why="You budget observability against how agents actually fail, not against a generic checklist." metric="Failure classes caught vs escaped; harness coverage of the taxonomy." tradeoff="A richer harness costs money and latency; an un-instrumented failure reaches a system of record." outcome="A defensible observability-harness budget tied to the failure modes that actually occur." />
 
         {!activeUc && (
         <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -209,15 +209,15 @@ export function LoopInspector() {
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Budget the observability harness to the failure classes this agent actually exhibits." lift="Catch the majority of agent failures before they reach a system of record." measure="Failure-class coverage; mean time to detect; incidents traced to an un-instrumented failure mode." />
           <InsightCard title="Failure injection is the whole point" tone="info">
-            A happy-path demo tells you nothing about production. The four failures above are what actually happen — and
+            A happy-path demo tells you nothing about production. The four failures above are what actually happen, and
             each is cheap to catch with the right signal and expensive to miss. That gap is the observability budget.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "You don't budget for agents; you budget for agents plus the harness that catches these four failures."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "You don't budget for agents; you budget for agents plus the harness that catches these four failures."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Each architecture defines a base Thought→Action→Observation trace; a selected failure splices a failure→detection→recovery triad into the loop. The stepper reveals steps in order.</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> traces are illustrative constructions, not captured from a live agent; real detection needs instrumentation (traces, token meters, action fingerprints). It shows the failure taxonomy and response pattern, not a monitoring stack.</p>

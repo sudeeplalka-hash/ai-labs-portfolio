@@ -2,7 +2,7 @@
   "name": "@labs/engines",
   "version": "0.0.0",
   "private": true,
-  "description": "Pure, framework-agnostic decision engines behind the labs — risk-adjusted portfolio ROI, NPV/IRR/payback, protocol scoring, human-in-the-loop review policy, and artifact formatting. No React, no DOM. Extracted so the exact formulas the UI shows are unit-tested in isolation.",
+  "description": "Pure, framework-agnostic decision engines behind the labs, risk adjusted portfolio ROI, NPV/IRR/payback, protocol scoring, human in the loop review policy, and artifact formatting. No React, no DOM. Extracted so the exact formulas the UI shows are unit-tested in isolation.",
   "exports": {
     ".": "./src/index.ts"
   },

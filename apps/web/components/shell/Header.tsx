@@ -24,9 +24,9 @@ export function Header({ onMenu }: { onMenu?: () => void }) {
   const showMode = onAny(pathname, MODE_ROUTES);
   const title = isHome ? "Command Center" : isStory ? "Storyline" : stage.label;
   const subtitle = isHome
-    ? "Your AI program at a glance — walk it end-to-end, or open any lab."
+    ? "Your AI program at a glance, walk it end-to-end, or open any lab."
     : isStory
-      ? "The whole program in six beats — one idea, idea to business case."
+      ? "The whole program in six beats, one idea, idea to business case."
       : stage.will;
   // A quiet entry point to the lab's guide, caught at the moment of arrival.
   const showGuideLink = !isHome && !isStory && !pathname.includes("/guide");
@@ -84,7 +84,7 @@ export function Header({ onMenu }: { onMenu?: () => void }) {
                 </button>
               ))}
             </div>
-            {/* Demo archetype switcher — shuffle through the six curated samples. */}
+            {/* Demo archetype switcher, shuffle through the six curated samples. */}
             {mode === "demo" && (
               <select
                 value={demoArchetype}

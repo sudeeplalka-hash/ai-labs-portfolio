@@ -1,6 +1,6 @@
 // ============================================================================
-// Phase 6 — Training / fine-tuning / generalization readiness. Deterministic,
-// client-side decision + readiness engine. NO real training or fine-tuning is
+// Phase 6, Training / fine tuning / generalization readiness. Deterministic,
+// client side decision + readiness engine. NO real training or fine tuning is
 // performed; this is readiness, decisioning, and risk only.
 // ============================================================================
 import type {
@@ -8,11 +8,11 @@ import type {
   GeneralizationAssessment, TrainingReadinessStatus, GeneralizationRiskLevel,
 } from "./types";
 
-// ---- Is a trained / fine-tuned model relevant to this initiative? -----------
+// ---- Is a trained / fine tuned model relevant to this initiative? -----------
 export function trainingRelevant(s: ProgramState): boolean {
   const meta = s.initiative?.meta;
   const tags = meta?.capabilityTags ?? [];
-  return tags.includes("Fine-tuning") || tags.includes("Training data") || tags.includes("Classification")
+  return tags.includes("Fine tuning") || tags.includes("Training data") || tags.includes("Classification")
     || meta?.primaryAiPattern === "Classification" || meta?.primaryAiPattern === "Recommendation";
 }
 
@@ -20,29 +20,29 @@ function approachFor(s: ProgramState): FineTuneDecisionMemo["recommendedApproach
   const meta = s.initiative?.meta;
   const tags = meta?.capabilityTags ?? [];
   const p = meta?.primaryAiPattern;
-  if (tags.includes("Fine-tuning")) return "fine-tuning";
+  if (tags.includes("Fine tuning")) return "fine tuning";
   if (p === "Classification") return "traditional-ml";
   if (p === "Agentic workflow" || p === "Workflow automation") return "hybrid";
   if (p === "Summarization") return "prompting";
   return "rag";
 }
 
-// ---- Fine-tune vs RAG vs prompt decision memo -------------------------------
+// ---- Fine tune vs RAG vs prompt decision memo -------------------------------
 export function deriveFineTuneMemo(s: ProgramState): FineTuneDecisionMemo {
   const approach = approachFor(s);
   const base = {
     dataRequired: ["Evaluation cases", "Golden test set"],
     evaluationRequired: ["Quality gates", "Regression checks"],
-    governanceRequired: ["Human review for high-risk outputs", "Audit evidence"],
+    governanceRequired: ["Human review for high risk outputs", "Audit evidence"],
     operationalMonitoringRequired: ["Quality drift", "Cost / latency"],
   };
   const MEMO: Record<FineTuneDecisionMemo["recommendedApproach"], Partial<FineTuneDecisionMemo> & { headline: string }> = {
     "rag": {
-      headline: "RAG first — fine-tuning later only if needed",
+      headline: "RAG first, fine tuning later only if needed",
       rationale: ["Answers require current source evidence and citations", "Knowledge changes often; retrieval keeps it fresh", "Governance requires traceable evidence"],
       whyNotPromptOnly: ["Prompt-only answers lack grounding and citations"],
       whyNotRagOnly: [],
-      whyNotFineTune: ["Fine-tuning can memorize outdated guidance; source freshness matters more", "Higher governance burden and harder rollback"],
+      whyNotFineTune: ["Fine tuning can memorize outdated guidance; source freshness matters more", "Higher governance burden and harder rollback"],
       dataRequired: ["Approved corpus + metadata", "Chunking", "Retrieval evals", "Golden dataset"],
       costRisk: "low" as const, deliveryComplexity: "medium" as const,
     },
@@ -53,8 +53,8 @@ export function deriveFineTuneMemo(s: ProgramState): FineTuneDecisionMemo {
       dataRequired: ["Prompt templates", "Evaluation cases"],
       costRisk: "low" as const, deliveryComplexity: "low" as const,
     },
-    "fine-tuning": {
-      headline: "Fine-tuning is warranted — with strict data controls",
+    "fine tuning": {
+      headline: "Fine tuning is warranted, with strict data controls",
       rationale: ["Consistent tone/style/format is required", "Task is stable and repeated", "Labeled examples exist"],
       whyNotPromptOnly: ["Prompting is too brittle for the required consistency"],
       whyNotRagOnly: ["Behavior/format cannot be fixed by retrieval alone"],
@@ -67,16 +67,16 @@ export function deriveFineTuneMemo(s: ProgramState): FineTuneDecisionMemo {
       rationale: ["Task is prediction/classification", "Structured data with labels", "Thresholds and explainability matter"],
       whyNotPromptOnly: ["Classification needs measured accuracy, not free text"],
       whyNotRagOnly: ["Retrieval doesn't produce calibrated class scores"],
-      whyNotFineTune: ["An LLM fine-tune is heavier than needed for structured classification"],
+      whyNotFineTune: ["An LLM fine tune is heavier than needed for structured classification"],
       dataRequired: ["Structured dataset", "Labels", "Feature definitions", "Validation/test sets", "Drift monitoring"],
       costRisk: "medium" as const, deliveryComplexity: "medium" as const,
     },
     "hybrid": {
-      headline: "Hybrid — RAG for evidence, prompts for responses, tools for actions",
+      headline: "Hybrid, RAG for evidence, prompts for responses, tools for actions",
       rationale: ["Workflow needs multiple techniques", "RAG provides evidence, an agent executes actions"],
       whyNotPromptOnly: ["Actions and evidence need more than a prompt"],
       whyNotRagOnly: ["Retrieval alone can't execute governed actions"],
-      whyNotFineTune: ["Fine-tuning adds cost without solving orchestration"],
+      whyNotFineTune: ["Fine tuning adds cost without solving orchestration"],
       dataRequired: ["Mixed data assets", "Eval datasets", "Monitoring signals", "Governance controls"],
       costRisk: "high" as const, deliveryComplexity: "high" as const,
     },
@@ -101,7 +101,7 @@ export function deriveFineTuneMemo(s: ProgramState): FineTuneDecisionMemo {
 // ---- Dataset readiness ------------------------------------------------------
 export function deriveDatasetReadiness(s: ProgramState): TrainingDatasetReadiness {
   const approach = approachFor(s);
-  const required = approach === "fine-tuning" || approach === "traditional-ml";
+  const required = approach === "fine tuning" || approach === "traditional-ml";
   if (!required) {
     return {
       required: false, status: "not-required", labeledExamplesAvailable: false, labeledExampleCount: 0,
@@ -109,7 +109,7 @@ export function deriveDatasetReadiness(s: ProgramState): TrainingDatasetReadines
       trainPercent: 0, validationPercent: 0, testPercent: 0, holdoutSetAvailable: false,
       classBalanceScore: 0, edgeCaseCoverageScore: 0, leakageRisk: "low", overfittingRisk: "low",
       generalizationReadiness: 0, representativeCoverage: 0, driftMonitoringRequired: false,
-      recommendedAction: "Training dataset not required — this initiative is better served by RAG, evaluation datasets, and monitoring, because answers must stay grounded in current source documents.",
+      recommendedAction: "Training dataset not required, this initiative is better served by RAG, evaluation datasets, and monitoring, because answers must stay grounded in current source documents.",
       blockers: [], cautions: [],
     };
   }
@@ -134,7 +134,7 @@ export const GENERALIZATION_SCENARIOS = [
 export function deriveGeneralizationAssessment(s: ProgramState): GeneralizationAssessment {
   const required = deriveDatasetReadiness(s).required;
   if (!required) {
-    return { overfittingRisk: "low", generalizationScore: 0, trainPerformance: 0, validationPerformance: 0, testPerformance: 0, performanceGap: 0, riskTriggers: [], recommendedControls: ["Prefer RAG with strong retrieval and citation evaluation over fine-tuning."] };
+    return { overfittingRisk: "low", generalizationScore: 0, trainPerformance: 0, validationPerformance: 0, testPerformance: 0, performanceGap: 0, riskTriggers: [], recommendedControls: ["Prefer RAG with strong retrieval and citation evaluation over fine tuning."] };
   }
   const train = 92, validation = 78, test = 75;
   return {
@@ -151,14 +151,14 @@ export function deriveDataPurposes(s: ProgramState): DataPurposeRow[] {
   const approach = approachFor(s);
   const dr = s.data?.handoff?.dataReadinessScore ?? s.data?.readinessScore ?? 65;
   const corpusStatus: TrainingReadinessStatus = dr >= 75 ? "ready" : dr >= 55 ? "ready-with-cautions" : "not-ready";
-  const ftReq = approach === "fine-tuning";
+  const ftReq = approach === "fine tuning";
   const mlReq = approach === "traditional-ml";
   const agentic = (s.initiative?.meta?.capabilityTags ?? []).includes("Agentic workflow");
   return [
     { purpose: "RAG corpus", required: approach === "rag" || approach === "hybrid", status: corpusStatus, why: "Used for retrieval and citations" },
     { purpose: "Evaluation dataset", required: true, status: "ready-with-cautions", why: "Needed for quality gates" },
     { purpose: "Golden test set", required: true, status: "ready-with-cautions", why: "Needed for regression comparison" },
-    { purpose: "Fine-tuning dataset", required: ftReq, status: ftReq ? "ready-with-cautions" : "not-required", why: ftReq ? "Behavior/format consistency" : "RAG currently preferred" },
+    { purpose: "Fine tuning dataset", required: ftReq, status: ftReq ? "ready-with-cautions" : "not-required", why: ftReq ? "Behavior/format consistency" : "RAG currently preferred" },
     { purpose: "Supervised training dataset", required: mlReq, status: mlReq ? "ready-with-cautions" : "not-required", why: mlReq ? "Prediction/classification task" : "Use case is not a classifier" },
     { purpose: "Telemetry logs", required: true, status: "ready-with-cautions", why: "Needed for AI Ops and drift" },
     { purpose: "Business outcome data", required: true, status: "ready-with-cautions", why: "Needed for Realize ROI" },
@@ -180,15 +180,15 @@ export function buildTrainingReadinessContract(s: ProgramState): TrainingReadine
     ? ["Model drift monitoring", "Class-level performance monitoring", "Holdout performance tracking", "Retraining trigger on drift"]
     : ["Answer-quality drift monitoring"];
   const governanceControls = enabled
-    ? ["Clean train/validation/test split", "Holdout evaluation before release", "Leakage check", "Class-level performance reporting", "Rollback plan for the trained model", "Human review for high-risk cases"]
-    : ["Prefer RAG with citation evidence; no fine-tune governance burden required yet"];
+    ? ["Clean train/validation/test split", "Holdout evaluation before release", "Leakage check", "Class-level performance reporting", "Rollback plan for the trained model", "Human review for high risk cases"]
+    : ["Prefer RAG with citation evidence; no fine tune governance burden required yet"];
 
   return { enabled, datasetReadiness, decisionMemo, generalizationAssessment, evaluationRequirements, opsMonitoringRequirements, governanceControls };
 }
 
 // ---- Phase C · Learning curve (train vs validation) --------------------------
 // Deterministic model of the single most-recognized ML visual: training accuracy
-// keeps climbing while validation accuracy plateaus — and, with too little data,
+// keeps climbing while validation accuracy plateaus, and, with too little data,
 // starts falling. No model is trained; the curve makes overfitting *visible* and
 // reacts to dataset size so a slider can tell the story interactively.
 
@@ -236,10 +236,10 @@ export function deriveLearningCurve(s: ProgramState, datasetSize?: number): Lear
   const overfittingRisk: LearningCurve["overfittingRisk"] = finalGap >= 18 ? "high" : finalGap >= 9 ? "medium" : "low";
   const note =
     overfittingRisk === "high"
-      ? `With ~${n.toLocaleString()} labeled examples, validation accuracy turns down around epoch ${divergence} — the model is memorizing, not learning. Stop early, add data, or regularize.`
+      ? `With ~${n.toLocaleString()} labeled examples, validation accuracy turns down around epoch ${divergence}, the model is memorizing, not learning. Stop early, add data, or regularize.`
       : overfittingRisk === "medium"
-        ? `Validation plateaus near epoch ${divergence} while training keeps climbing — a ${finalGap}pt gap. Usable with early stopping and a clean holdout.`
-        : `Training and validation stay close (${finalGap}pt gap) — the dataset supports what the model is being asked to learn.`;
+        ? `Validation plateaus near epoch ${divergence} while training keeps climbing, a ${finalGap}pt gap. Usable with early stopping and a clean holdout.`
+        : `Training and validation stay close (${finalGap}pt gap), the dataset supports what the model is being asked to learn.`;
 
   return { points, divergenceEpoch: divergence, finalGap, overfittingRisk, note };
 }

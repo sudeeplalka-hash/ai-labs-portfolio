@@ -1,6 +1,6 @@
 import type { KpiMetric } from "@rag/types";
 
-// Headline metrics for the Executive Overview. Story: improving but not production-ready.
+// Headline metrics for the Executive Overview. Story: improving but not production ready.
 export const kpis: KpiMetric[] = [
   {
     id: "overall",
@@ -12,7 +12,7 @@ export const kpis: KpiMetric[] = [
     trendDirection: "up",
     status: "Watch",
     interpretation:
-      "Up from 76% last run, but still 2 points below the 80% production baseline. Held back by citation accuracy and high-risk failures.",
+      "Up from 76% last run, but still 2 points below the 80% production baseline. Held back by citation accuracy and high risk failures.",
     description: "Weighted composite of retrieval, faithfulness, citation accuracy, hallucination risk, reliability, and governance.",
   },
   {
@@ -81,8 +81,8 @@ export const kpis: KpiMetric[] = [
     description: "Share of critical-risk queries that failed evaluation or required escalation.",
   },
   {
-    id: "high-risk-pass",
-    label: "High-Risk Pass Rate",
+    id: "high risk-pass",
+    label: "High risk Pass Rate",
     value: 87,
     unit: "%",
     target: 90,

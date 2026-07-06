@@ -53,9 +53,9 @@ describe("deriveGateFixes", () => {
 });
 
 describe("deriveRegulatoryMapping", () => {
-  it("classifies high-stakes archetypes as High-risk and low-stakes as lighter", () => {
-    expect(deriveRegulatoryMapping(demoState("decision-support")).euAiAct.riskClass).toBe("High-risk");
-    expect(deriveRegulatoryMapping(demoState("classification")).euAiAct.riskClass).not.toBe("High-risk");
+  it("classifies high-stakes archetypes as High risk and low stakes as lighter", () => {
+    expect(deriveRegulatoryMapping(demoState("decision-support")).euAiAct.riskClass).toBe("High risk");
+    expect(deriveRegulatoryMapping(demoState("classification")).euAiAct.riskClass).not.toBe("High risk");
     expect(deriveRegulatoryMapping(demoState("summarization")).euAiAct.riskClass).toBe("Minimal risk");
     expect(deriveRegulatoryMapping(demoState("knowledge-assistant")).euAiAct.riskClass).toBe("Limited risk");
   });

@@ -1,7 +1,7 @@
 "use client";
 
 // EL-09 · Resource Onboarding & KT Tracker (Collection 4 · commercial wing).
-// Onboarding as a critical-path problem — access requests are the longest pole.
+// Onboarding as a critical-path problem, access requests are the longest pole.
 // 30/60/90 ramps, time-to-productive, blocked-on-access flags, and a pre-provision
 // compression lever. Flip to KT: a departing senior's knowledge mapped to bus-factor
 // with sessions to close single points of failure. SIMULATED.
@@ -83,7 +83,7 @@ export function OnboardingTracker() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A resource is a cost from day one and an asset from day forty. Access requests — not training — are the longest
+            A resource is a cost from day one and an asset from day forty. Access requests, not training, are the longest
             pole; compress them and the carrying cost falls. Then guard the other end: a departing senior&apos;s knowledge.
           </p>
         </div>
@@ -136,8 +136,8 @@ export function OnboardingTracker() {
 
             <InsightCard title="Access is the pole nobody manages" tone={blocked > 0 ? "warn" : "success"}>
               {blocked > 0
-                ? <>Two offshore hires can&apos;t touch the work for three weeks — not because of training, but because credentials aren&apos;t provisioned. Pre-provisioning access before day one saves <span className="font-semibold">{fmt(savings)}</span> in ramp carrying cost and pulls productivity forward two weeks.</>
-                : <>With access pre-provisioned, ramps start on day one — carrying cost drops to {fmt(current)}. That&apos;s the cheapest margin lever in mobilization.</>}
+                ? <>Two offshore hires can&apos;t touch the work for three weeks, not because of training, but because credentials aren&apos;t provisioned. Pre-provisioning access before day one saves <span className="font-semibold">{fmt(savings)}</span> in ramp carrying cost and pulls productivity forward two weeks.</>
+                : <>With access pre-provisioned, ramps start on day one, carrying cost drops to {fmt(current)}. That&apos;s the cheapest margin lever in mobilization.</>}
             </InsightCard>
           </>
         ) : (
@@ -162,7 +162,7 @@ export function OnboardingTracker() {
             </Panel>
             <InsightCard title={spofs > 0 ? `${spofs} single points of failure remain` : "No single points of failure"} tone={spofs > 0 ? "danger" : "success"}>
               {spofs > 0
-                ? <>{spofs} area{spofs > 1 ? "s" : ""} still live only in one person&apos;s head. Schedule KT with a named backup for each before the last day — knowledge capture is risk mitigation, not a nice-to-have.</>
+                ? <>{spofs} area{spofs > 1 ? "s" : ""} still live only in one person&apos;s head. Schedule KT with a named backup for each before the last day, knowledge capture is risk mitigation, not a nice-to-have.</>
                 : <>Every area now has a backup. The departure is a transition, not a rupture.</>}
             </InsightCard>
           </>
@@ -170,13 +170,13 @@ export function OnboardingTracker() {
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Compress the onboarding critical path and capture the departing expert's KT before roll-off." lift="Cut time-to-productive and de-risk the senior handoff." measure="Days-to-productive vs baseline; KT items captured vs identified; gaps surfaced after roll-off." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "A resource is a cost from day one and an asset from day forty. Onboarding compression is the cheapest margin lever nobody manages."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — resource-lead reality of the 31-resource AMEX portfolio; onshore/offshore mobilization.</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "A resource is a cost from day one and an asset from day forty. Onboarding compression is the cheapest margin lever nobody manages."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, resource-lead reality of the 31-resource AMEX portfolio; onshore/offshore mobilization.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Time-to-productive = ramp ({RAMP}d) + access beyond a 7-day norm; blocked if access &gt; 14 days. Carrying cost = time-to-productive × loaded day rate (onshore $1,100 · offshore $700). Pre-provisioning caps access at 5 days.</p>
-              <p>KT view scores each knowledge area by bus-factor; scheduling KT adds a backup (+1). Single point of failure = bus-factor &lt; 2. Stack: Next.js (static) + shared design system; client-side.</p>
+              <p>KT view scores each knowledge area by bus-factor; scheduling KT adds a backup (+1). Single point of failure = bus-factor &lt; 2. Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> ramp and rates are illustrative; real onboarding varies by role and client security posture. It exposes the access bottleneck and the KT risk, not a full mobilization plan.</p>

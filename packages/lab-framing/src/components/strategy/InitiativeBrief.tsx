@@ -8,7 +8,7 @@ import type { Brief, Scored } from "../../strategy/model";
 
 function briefToText(b: Brief): string {
   return [
-    `AI INITIATIVE BRIEF — ${b.name}`,
+    `AI INITIATIVE BRIEF, ${b.name}`,
     ``,
     `Business problem: ${b.problem}`,
     `Target users: ${b.users}`,

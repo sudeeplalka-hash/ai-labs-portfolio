@@ -142,7 +142,7 @@ export function GoldenDatasetView() {
                     <td><RiskBadge level={d.riskLevel} /></td>
                     <td><EvalStatusBadge status={d.testStatus} /></td>
                     <td className={cn("text-center", d.humanReviewRequired ? "text-amber-700" : "text-slatey-600")}>
-                      {d.humanReviewRequired ? "Yes" : "—"}
+                      {d.humanReviewRequired ? "Yes" : "N/A"}
                     </td>
                   </tr>
                 ))}

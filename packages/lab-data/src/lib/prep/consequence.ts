@@ -2,7 +2,7 @@ import type { PrepReport } from "./types";
 
 // The consequence simulator: what would the RAG system answer if this file were
 // ingested AS-IS versus PREPARED? This is the connective tissue to the RAG
-// Evaluator — it shows the bad answer that preparation prevents.
+// Evaluator, it shows the bad answer that preparation prevents.
 export type AnswerVerdict = "wrong" | "risky" | "ok";
 
 export interface SimAnswer {
@@ -32,7 +32,7 @@ const CANNED: Record<string, Consequence> = {
       verdict: "ok",
       note: "The stale v2.7 copy was quarantined, leaving one authoritative source.",
     },
-    fixedBy: "Freshness & versioning — the superseded copy was removed before ingestion.",
+    fixedBy: "Freshness & versioning, the superseded copy was removed before ingestion.",
   },
   crm: {
     question: "What is Katherine Johnson's payment information?",
@@ -46,21 +46,21 @@ const CANNED: Record<string, Consequence> = {
       verdict: "ok",
       note: "PII was redacted before embedding, so it is no longer retrievable.",
     },
-    fixedBy: "Privacy & PII — card and SSN values were redacted before ingestion.",
+    fixedBy: "Privacy & PII, card and SSN values were redacted before ingestion.",
   },
   kb: {
     question: "What are the standard payment terms for new vendors?",
     asIs: {
       answer: "Standard terms are Net 30.",
       verdict: "risky",
-      note: "The answer is correct but uncitable — no owner, source, or effective date was attached, so it can't be trusted or access-controlled.",
+      note: "The answer is correct but uncitable, no owner, source, or effective date was attached, so it can't be trusted or access-controlled.",
     },
     prepared: {
       answer: "Standard terms are Net 30 [Vendor Onboarding KB · owner: Procurement · effective 2024-04].",
       verdict: "ok",
       note: "Metadata was attached, so the answer is citable and governable.",
     },
-    fixedBy: "Taxonomy & metadata — domain, owner, and effective date were tagged.",
+    fixedBy: "Taxonomy & metadata, domain, owner, and effective date were tagged.",
   },
   clean: {
     question: "What is the main remaining risk this quarter?",
@@ -72,9 +72,9 @@ const CANNED: Record<string, Consequence> = {
     prepared: {
       answer: "The main remaining risk is latency under peak load [Eng Update Q2].",
       verdict: "ok",
-      note: "Little to fix — preparation mainly added a clean citation.",
+      note: "Little to fix, preparation mainly added a clean citation.",
     },
-    fixedBy: "Already clean — only light formatting and a citation were added.",
+    fixedBy: "Already clean, only light formatting and a citation were added.",
   },
 };
 
@@ -95,14 +95,14 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
       asIs: {
         answer: `It could retrieve and reveal ${kind} embedded from this file.`,
         verdict: "risky",
-        note: "Anything embedded becomes retrievable — un-redacted PII leaks straight into answers.",
+        note: "Anything embedded becomes retrievable, un-redacted PII leaks straight into answers.",
       },
       prepared: {
         answer: "It declines, because the sensitive values were redacted before embedding.",
         verdict: "ok",
         note: "PII was cleared at the privacy gate.",
       },
-      fixedBy: "Privacy & PII — sensitive values were redacted before ingestion.",
+      fixedBy: "Privacy & PII, sensitive values were redacted before ingestion.",
     };
   }
   if (dups > 0) {
@@ -118,7 +118,7 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
         verdict: "ok",
         note: "Duplicates were removed before ingestion.",
       },
-      fixedBy: "De-duplication — repeated rows were collapsed to one authoritative copy.",
+      fixedBy: "De-duplication, repeated rows were collapsed to one authoritative copy.",
     };
   }
   if (stale) {
@@ -134,7 +134,7 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
         verdict: "ok",
         note: "Stale versions were quarantined.",
       },
-      fixedBy: "Freshness & versioning — older copies were quarantined.",
+      fixedBy: "Freshness & versioning, older copies were quarantined.",
     };
   }
   if (boilerplate) {
@@ -150,7 +150,7 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
         verdict: "ok",
         note: "Boilerplate was stripped.",
       },
-      fixedBy: "Format — repeated boilerplate lines were removed.",
+      fixedBy: "Format, repeated boilerplate lines were removed.",
     };
   }
   return {
@@ -158,13 +158,13 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
     asIs: {
       answer: "It would answer about as well as the prepared version.",
       verdict: "ok",
-      note: "This file is already in good shape — little preparation was needed.",
+      note: "This file is already in good shape, little preparation was needed.",
     },
     prepared: {
       answer: "It answers cleanly, with a citation.",
       verdict: "ok",
       note: "Only light cleanup and a citation were added.",
     },
-    fixedBy: "Already clean — minimal preparation required.",
+    fixedBy: "Already clean, minimal preparation required.",
   };
 }

@@ -58,7 +58,7 @@ export const EFFORT = [
   { name: "Profiling", hrs: 0.3, color: "#1f6fc4" },
   { name: "Cleaning", hrs: 0.8, color: "#0891b2" },
   { name: "PII review", hrs: 0.6, color: "#0d9488" },
-  { name: "Guideline sign-off", hrs: 0.4, color: "#16a34a" },
+  { name: "Guideline sign off", hrs: 0.4, color: "#16a34a" },
   { name: "Chunk tuning", hrs: 0.3, color: "#d97706" },
 ];
 
@@ -80,12 +80,12 @@ export const EXEC_NARRATIVE = [
   {
     tone: "warn" as const,
     title: "One gap remains",
-    body: "Readiness sits at 71% against an 80% target. The bottleneck is PII redaction and licensing sign-off, not data quality.",
+    body: "Readiness sits at 71% against an 80% target. The bottleneck is PII redaction and licensing sign off, not data quality.",
   },
   {
     tone: "info" as const,
     title: "Recommended focus",
-    body: "Standardize redaction and pre-clear common source licenses to lift first-pass approval above target — which means fewer conflicting answers downstream in the RAG Evaluator.",
+    body: "Standardize redaction and pre-clear common source licenses to lift first-pass approval above target, which means fewer conflicting answers downstream in the RAG Evaluator.",
   },
 ];
 
@@ -102,7 +102,7 @@ export const STAGES: Stage[] = [
   { name: "Profile structure", inn: 2086, out: 2086, yield: 100, desc: "Schema, types & cardinality inferred for every file" },
   { name: "Clean & normalize", inn: 2086, out: 1842, yield: 88.3, desc: "Dedup, trim, missing-value & date-format passes" },
   { name: "Apply org guidelines", inn: 1842, out: 1680, yield: 91.2, desc: "Freshness, provenance & metadata rules enforced" },
-  { name: "PII scan & redact", inn: 1680, out: 1597, yield: 95.1, desc: "83 files needed redaction or manual sign-off" },
+  { name: "PII scan & redact", inn: 1680, out: 1597, yield: 95.1, desc: "83 files needed redaction or manual sign off" },
   { name: "Chunk & embed-prep", inn: 1597, out: 1521, yield: 95.2, desc: "Semantic split at ~512 tokens; 76 over-length re-split" },
 ];
 

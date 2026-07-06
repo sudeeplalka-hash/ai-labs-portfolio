@@ -1,8 +1,7 @@
-// Phase I — the adoption & change plan. Realize names adoption as the biggest
+// Phase I, the adoption & change plan. Realize names adoption as the biggest
 // value leak; this engine derives the treatment: a set of change-management
 // interventions tailored to the audience and the program's current evidence,
-// each with a modeled adoption uplift. Deterministic, offline, and honest —
-// uplifts are directional planning numbers, not measurements.
+// each with a modeled adoption uplift. Deterministic, offline, and honest, // uplifts are directional planning numbers, not measurements.
 
 export interface AdoptionIntervention {
   id: string;
@@ -36,7 +35,7 @@ export function deriveAdoptionPlan(inp: AdoptionPlanInputs): AdoptionInterventio
       id: "workflow",
       label: internal ? "Embed in the existing workflow" : "Meet users where they already are",
       detail: internal
-        ? "Surface answers inside the tool people already work in — no new tab, no separate login. Adoption follows the path of least resistance."
+        ? "Surface answers inside the tool people already work in, no new tab, no separate login. Adoption follows the path of least resistance."
         : "Put the assistant on the pages and channels customers already use for help, not behind a new destination.",
       upliftPts: 8, owner: internal ? "Product + IT" : "Digital channel owner", horizon: "pre-launch",
       recommended: true,
@@ -44,14 +43,14 @@ export function deriveAdoptionPlan(inp: AdoptionPlanInputs): AdoptionInterventio
     {
       id: "champions",
       label: "Executive sponsor + champions network",
-      detail: "A named sponsor sets the expectation; 1–2 champions per team translate it into daily habit and surface friction early.",
+      detail: "A named sponsor sets the expectation; 1 to 2 champions per team translate it into daily habit and surface friction early.",
       upliftPts: 6, owner: "Business sponsor", horizon: "launch",
       recommended: low || internal,
     },
     {
       id: "trust",
       label: "Trust by default: citations visible",
-      detail: "Show the evidence behind every answer. Users adopt what they can verify — especially in the first weeks when trust is being formed.",
+      detail: "Show the evidence behind every answer. Users adopt what they can verify, especially in the first weeks when trust is being formed.",
       upliftPts: (inp.citationAccuracy ?? 90) < 90 ? 5 : 3, owner: "Build / RAG owner", horizon: "pre-launch",
       recommended: (inp.citationAccuracy ?? 90) < 90,
     },
@@ -65,7 +64,7 @@ export function deriveAdoptionPlan(inp: AdoptionPlanInputs): AdoptionInterventio
     {
       id: "feedback",
       label: "Feedback button with a visible fix loop",
-      detail: "One-tap feedback, and — critically — visible fixes (\"you flagged it, we fixed it\"). Nothing builds usage like being heard.",
+      detail: "One-tap feedback, and, critically, visible fixes (\"you flagged it, we fixed it\"). Nothing builds usage like being heard.",
       upliftPts: 4, owner: "AI Ops", horizon: "first 90 days",
       recommended: true,
     },
@@ -87,7 +86,7 @@ export function projectAdoption(currentPct: number, selected: AdoptionInterventi
   return Math.min(ADOPTION_CEILING, Math.round(currentPct + uplift));
 }
 
-// EL-01 · Adoption & change readiness — the weighted composite the gate reads.
+// EL-01 · Adoption & change readiness, the weighted composite the gate reads.
 // Readiness factors (0..100) combined with visible, editable weights, then
 // normalized by the weight sum so the score stays on a 0..100 scale for ANY weights
 // (that's what keeps a user-edited "your model" honest). Pure and framework-agnostic;
@@ -110,7 +109,7 @@ export const readinessComposite = <K extends string>(
 export const readinessGate = (composite: number, scaleCut: number, condCut: number): ReadinessVerdict =>
   composite >= scaleCut ? "Scale" : composite >= condCut ? "Scale with conditions" : "Hold";
 
-// Flip-the-gate — the minimal factor increases that lift the composite to a target
+// Flip-the-gate, the minimal factor increases that lift the composite to a target
 // (e.g. the Scale cutoff). The composite is a weight-normalized average, so each
 // point added to a factor moves it by weight / Σweights; the cheapest way to close
 // the gap is to spend points on the highest-weight factors that still have headroom.
@@ -165,11 +164,11 @@ export function planToReachGate<K extends string>(
   return { reachable: projected >= target, moves, totalAdded, projected };
 }
 
-// Sensitivity tornado — which factor has the most leverage on the composite right now.
+// Sensitivity tornado, which factor has the most leverage on the composite right now.
 // Raising factor k by Δ moves the (weight-normalized) composite by (weight_k/Σw)·Δ, so
 // the most a single factor can add is its weight-share × its headroom to the ceiling.
 // Ranked, that's where to spend the effort. Neat identity: the impacts sum to
-// (ceiling − composite) — maxing everything lands exactly at the ceiling. Pure.
+// (ceiling − composite), maxing everything lands exactly at the ceiling. Pure.
 export interface FactorLever<K extends string = string> {
   key: K;
   /** composite points gained if this factor is raised to the ceiling. */
@@ -193,11 +192,11 @@ export function factorSensitivity<K extends string>(
     .sort((a, b) => b.impact - a.impact);
 }
 
-// Two-week sequencing — turns the flat "fix these weak factors" list into an illustrative
+// Two-week sequencing, turns the flat "fix these weak factors" list into an illustrative
 // 14-day plan a steering committee can read as a schedule. The weakest factors start first
 // and run longest (duration scales with how far below "healthy" each sits); later factors
 // stagger in behind them. Deterministic and clamped to the horizon. This is a *sequencing
-// aid*, not a project plan — the ordering and the "weakest gets the most days" rule are the
+// aid*, not a project plan, the ordering and the "weakest gets the most days" rule are the
 // honest point; the exact day counts are illustrative.
 export interface PlanItem {
   key: string;
@@ -233,7 +232,7 @@ export function scheduleAdoptionPlan(items: PlanItem[], opts: ScheduleOpts = {})
   });
 }
 
-// Compare two populations — put two readiness vectors side by side under the same weights
+// Compare two populations, put two readiness vectors side by side under the same weights
 // and gate, and attribute the composite gap to the factors that drive it. Each factor's
 // contribution to (composite B − composite A) is its weight-share × the factor delta; the
 // biggest-magnitude contribution is the "driver" of the difference. That turns "our rollout
@@ -284,10 +283,10 @@ export function compareReadiness<K extends string>(
   };
 }
 
-// Readiness trajectory — ties the flip-the-gate moves and the two-week schedule together
+// Readiness trajectory, ties the flip-the-gate moves and the two-week schedule together
 // into one projection: as each factor's fix runs over its scheduled span, its score ramps
 // from current to target, and the weighted composite is recomputed day by day. The result
-// is the curve to the Scale cutoff — and the day it (illustratively) crosses. Reuses the
+// is the curve to the Scale cutoff, and the day it (illustratively) crosses. Reuses the
 // tested scheduler and composite, so the curve and the plan can't drift. Pure.
 export interface TrajectoryPoint { day: number; composite: number; }
 export interface Trajectory {

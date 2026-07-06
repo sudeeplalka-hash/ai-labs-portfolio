@@ -1,6 +1,6 @@
-// Measured-outcome framing — the market wants "one improvement with measured lift", not just
+// Measured-outcome framing, the market wants "one improvement with measured lift", not just
 // the decision. Each flagship renders this after its recommendation: the call, the expected
-// lift (labelled illustrative — SIMULATED, no live telemetry), and how you'd actually measure
+// lift (labelled illustrative, SIMULATED, no live telemetry), and how you'd actually measure
 // it in production. Presentational + server-safe.
 export function OutcomeFrame({ call, lift, measure }: { call: string; lift: string; measure: string }) {
   return (

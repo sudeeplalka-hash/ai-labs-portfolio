@@ -36,7 +36,7 @@ export function buildLiveTrace(input: BuildTraceInput): LiveRagLabTrace {
       durationMs: stepDurations.retrieve,
       explanation: strongRetrieval
         ? `Retrieved ${input.retrievedChunks.length} candidate chunks ranked by relevance.`
-        : `Retrieved ${input.retrievedChunks.length} chunks, but none scored highly — evidence may be weak.`,
+        : `Retrieved ${input.retrievedChunks.length} chunks, but none scored highly, evidence may be weak.`,
       technicalDetail: "Lexical retriever: keyword overlap + term frequency + phrase/heading/policy bonuses.",
     },
     {

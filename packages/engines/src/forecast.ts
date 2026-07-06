@@ -1,7 +1,7 @@
 // Inference run-rate forecast (C3-3). The API bill scales linearly with compounding volume;
 // self-host is fixed capacity that steps up in cluster-sized jumps. Projecting both over a
-// horizon exposes the crossover — the month self-host starts winning — which is the whole
-// build-vs-buy-at-scale argument. Pure; the same series the chart plots, so they can't drift.
+// horizon exposes the crossover, the month self-host starts winning, which is the whole
+// build versus buy-at-scale argument. Pure; the same series the chart plots, so they can't drift.
 export interface ForecastParams {
   startVol: number;        // calls/month at month 0
   growthPct: number;       // monthly growth %
@@ -42,7 +42,7 @@ export function forecastRunRate(p: ForecastParams): Forecast {
 }
 
 // Which single assumption change brings the crossover forward (or into view)? Recompute the
-// crossover under each proposed lever move — the biggest earlier shift is the lever that most
+// crossover under each proposed lever move, the biggest earlier shift is the lever that most
 // favors self-host. Deterministic; delta is months earlier (negative) vs the base crossover.
 export interface CliffLever {
   key: string;

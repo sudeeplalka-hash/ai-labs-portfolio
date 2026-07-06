@@ -51,7 +51,7 @@ export default function ExecutiveCockpit() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-900">New here? See governance actually work.</p>
-            <p className="text-xs text-slate-500 mt-0.5">Watch an unguarded AI cause harm — then watch the control plane catch it.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Watch an unguarded AI cause harm, then watch the control plane catch it.</p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -89,14 +89,14 @@ export default function ExecutiveCockpit() {
         <MetricCard label="Pending Reviews" value={metrics.pending_reviews} sub={`${metrics.overdue_reviews} overdue`} icon={Clock} color={metrics.overdue_reviews > 0 ? 'amber' : 'default'}
           tooltip="Human review items waiting in the queue, with the count overdue past their SLA shown beneath. Items land here when a guardrail escalates a request or a scheduled review comes due. A growing or overdue queue signals that review capacity is not keeping up with activity." />
         <MetricCard label="Guardrail Trigger Rate" value={`${metrics.guardrail_trigger_rate}%`} sub={`${metrics.total_prompt_events} total requests`} icon={Shield}
-          tooltip="The share of prompt events where a runtime guardrail fired — block, redact, rewrite, or confirm — out of all requests. It is triggered events divided by total prompt events over the period. A higher rate means more risky traffic is being caught and contained automatically." />
+          tooltip="The share of prompt events where a runtime guardrail fired, block, redact, rewrite, or confirm, out of all requests. It is triggered events divided by total prompt events over the period. A higher rate means more risky traffic is being caught and contained automatically." />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard label="Active Policies" value={metrics.active_policies} icon={CheckCircle} color="green"
-          tooltip="The number of governance policies currently enabled and enforced at runtime. Each policy is a rule — for example PII redaction or protected-class checks — that the guardrail engine applies to every request. More active policies means broader coverage, though they should be tuned to limit false positives." />
+          tooltip="The number of governance policies currently enabled and enforced at runtime. Each policy is a rule, for example PII redaction or protected-class checks, that the guardrail engine applies to every request. More active policies means broader coverage, though they should be tuned to limit false positives." />
         <MetricCard label="Blocked Requests" value={metrics.blocked_events} icon={XCircle} color="red"
-          tooltip="How many requests were fully blocked by a guardrail in this period. A block happens when a policy judges the request too risky to answer at all. It captures the hard stops — the clearest evidence the control plane is preventing harm." />
+          tooltip="How many requests were fully blocked by a guardrail in this period. A block happens when a policy judges the request too risky to answer at all. It captures the hard stops, the clearest evidence the control plane is preventing harm." />
         <MetricCard label="Escalated for Review" value={metrics.escalated_events} icon={Users} color="amber"
           tooltip="Requests routed to a human reviewer rather than answered or blocked automatically. Escalation fires when a policy is uncertain or the stakes are high enough to need judgment. It captures where automation hands off to people." />
         <MetricCard label="Avg Risk Score" value={metrics.avg_risk_score.toFixed(2)} sub="across all use cases" icon={TrendingUp} color={metrics.avg_risk_score >= 0.5 ? 'amber' : 'green'}
@@ -183,18 +183,18 @@ export default function ExecutiveCockpit() {
           </div>
         </div>
 
-        {/* Recent High-Risk Events */}
+        {/* Recent High risk Events */}
         <div className="bg-white rounded-lg border border-slate-200 p-5">
-          <h3 className="text-sm font-semibold text-slate-700 mb-4">Recent High-Risk Events</h3>
+          <h3 className="text-sm font-semibold text-slate-700 mb-4">Recent High risk Events</h3>
           {metrics.recent_high_risk_events.length === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center">No high-risk events in this period</p>
+            <p className="text-sm text-slate-400 py-8 text-center">No high risk events in this period</p>
           ) : (
             <div className="space-y-3">
               {metrics.recent_high_risk_events.map((ev) => (
                 <div key={ev.id} className="flex gap-3 items-start py-2 border-b border-slate-100 last:border-0">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-slate-700 truncate font-medium">{ev.prompt_excerpt}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{ev.created_at ? formatDateTime(ev.created_at) : '—'}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{ev.created_at ? formatDateTime(ev.created_at) : 'N/A'}</p>
                   </div>
                   <DecisionBadge decision={ev.decision} />
                 </div>

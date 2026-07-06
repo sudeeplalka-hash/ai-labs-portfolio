@@ -2,7 +2,7 @@
 
 // C3-4 · Vendor Evaluation & Risk Monitor (Collection 3 · gallery).
 // Score three archetype vendors on a weighted matrix; move the weights and the
-// ranking flips — that fragility is the point. Then flip to the risk view:
+// ranking flips, that fragility is the point. Then flip to the risk view:
 // concentration, renewal timeline, exit cost. The scorecard picks the vendor; the
 // concentration view tells you what it costs to be wrong. SIMULATED.
 
@@ -75,14 +75,14 @@ export function VendorMonitor() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The scorecard picks a winner — but move the weights and watch it change. That fragility is why the risk view
+            The scorecard picks a winner, but move the weights and watch it change. That fragility is why the risk view
             matters: concentration and exit cost tell you what it costs to be wrong.
           </p>
         </div>
 
         <UseCaseRail useCases={C34_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Which vendor — and what does concentration cost if we are wrong?" approach="Score vendors on a weighted rubric, then price the concentration and exit-cost exposure the pick creates." why="A vendor selection is also a concentration bet that has to be priced." metric="Weighted vendor score; switching/exit-cost exposure if the relationship sours." tradeoff="The best-fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit-cost exposure named up front." />
+        <CaseStudy problem="Which vendor, and what does concentration cost if we are wrong?" approach="Score vendors on a weighted rubric, then price the concentration and exit-cost exposure the pick creates." why="A vendor selection is also a concentration bet that has to be priced." metric="Weighted vendor score; switching/exit-cost exposure if the relationship sours." tradeoff="The best-fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit-cost exposure named up front." />
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Weights */}
@@ -146,20 +146,20 @@ export function VendorMonitor() {
         </div>
 
         <div className="mt-6">
-          <InsightCard title={`Top pick: ${top.v.label} — exit cost ${fmt(top.v.exitCost)}`} tone={top.v.exitCost > 300000 ? "warn" : "info"}>
-            Nudge two or three weights and the ranking can flip — a "winner" that survives only one weighting isn&apos;t a
+          <InsightCard title={`Top pick: ${top.v.label}, exit cost ${fmt(top.v.exitCost)}`} tone={top.v.exitCost > 300000 ? "warn" : "info"}>
+            Nudge two or three weights and the ranking can flip, a "winner" that survives only one weighting isn&apos;t a
             decision, it&apos;s a preference. Pair the pick with its concentration and exit cost before you sign.
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Select the highest weighted-fit vendor, but cap concentration and pre-price the exit." lift="A defensible pick that also bounds the downside if the vendor relationship fails." measure="Vendor score vs realized performance; switching cost if triggered; % of spend concentrated in one vendor." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The scorecard picks the vendor; the concentration view tells you what it costs to be wrong."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The scorecard picks the vendor; the concentration view tells you what it costs to be wrong."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Weighted score = Σ(weight × criterion score) ÷ Σ(weights), so weights are relative and always normalize to 100%. Lock-in and price are scored so higher = better (less lock-in, better value).</p>
-              <p>Risk view pairs each vendor with concentration (spend share if primary), renewal window, and exit cost (tracks lock-in). Stack: Next.js (static) + shared design system; client-side.</p>
+              <p>Risk view pairs each vendor with concentration (spend share if primary), renewal window, and exit cost (tracks lock-in). Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> vendor scores are archetype illustrations, not a live evaluation; real scoring needs POCs and reference checks. It exposes ranking fragility and exit exposure, not a procurement verdict.</p>

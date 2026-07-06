@@ -2,7 +2,7 @@
   "name": "@labs/lab-rag",
   "version": "0.0.0",
   "private": true,
-  "description": "RAG Quality Evaluator — prove the engine: retrieval + generation on a real document, scored for faithfulness, citations, and hallucination. Consumed by apps/web via the @rag alias. (Operations metrics live in the Deploy lab; maturity/readiness in Governance.)",
+  "description": "RAG Quality Evaluator, prove the engine: retrieval + generation on a real document, scored for faithfulness, citations, and hallucination. Consumed by apps/web via the @rag alias. (Operations metrics live in the Deploy lab; maturity/readiness in Governance.)",
   "dependencies": {
     "@labs/design-system": "workspace:*",
     "@labs/kit": "workspace:*",

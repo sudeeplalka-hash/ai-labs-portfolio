@@ -5,7 +5,7 @@ import { useProgram } from "@labs/program-core";
 import { scoreUseCase } from "@gov/lib/api";
 
 // Scores the *framed initiative* with governance's own risk engine and writes the
-// real risk tier into ProgramState.governance — so Realize's risk discount traces
+// real risk tier into ProgramState.governance, so Realize's risk discount traces
 // to a governance decision about this exact bet (not a guess).
 const TIER_CASE: Record<string, string> = { CRITICAL: "Critical", HIGH: "High", MEDIUM: "Medium", LOW: "Low" };
 

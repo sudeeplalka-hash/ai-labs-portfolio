@@ -14,7 +14,7 @@ export function ExecutiveSummary() {
         85% threshold, and <span className="font-semibold text-ink">P95 latency (4.25s)</span> exceeds the 4-second SLA after reranking.
         One critical compliance query still fails and is held in human review. Current readiness is{" "}
         <span className="font-semibold text-ink">Level 3: Controlled Pilot</span>, with a release recommendation of{" "}
-        <span className="font-semibold text-orange-700">Hold</span> until citation and high-risk gaps close.
+        <span className="font-semibold text-orange-700">Hold</span> until citation and high risk gaps close.
       </p>
     </InsightCard>
   );

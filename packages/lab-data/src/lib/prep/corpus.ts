@@ -4,7 +4,7 @@ import type { ProfileId } from "./profiles";
 
 // Corpus-level analysis: profile many files at once, find near-duplicates and
 // stale-version pairs, and project documents into 2D for the star-map. This is
-// the dedup / conflict / coverage lens — a different question than the RAG lab's
+// the dedup / conflict / coverage lens, a different question than the RAG lab's
 // query-relative embedding view.
 
 export interface CorpusFile {
@@ -146,7 +146,7 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
         note = `Near-identical (${pctTxt}). Keep one authoritative copy; embedding both biases retrieval.`;
       } else if (versioned && sim >= 0.5) {
         kind = "stale-version";
-        note = `Looks like a version pair (${pctTxt}) that differs. Quarantine the older copy — this is the conflicting-answer risk the RAG Evaluator would otherwise surface.`;
+        note = `Looks like a version pair (${pctTxt}) that differs. Quarantine the older copy, this is the conflicting-answer risk the RAG Evaluator would otherwise surface.`;
       } else {
         kind = "near-duplicate";
         note = `Overlaps by ${pctTxt}. Review for redundancy before ingestion.`;

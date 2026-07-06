@@ -8,7 +8,7 @@ import { filterCommands, type Command } from "../lib/command";
 /**
  * ⌘K / Ctrl-K command palette. Fuzzy-filtered (see filterCommands), fully keyboard
  * driven (↑/↓ to move, Enter to run, Esc to close) and screen-reader labelled. The
- * lab supplies the command list — navigate to a lab, run/reset, copy link, export,
+ * lab supplies the command list, navigate to a lab, run/reset, copy link, export,
  * toggle assumptions. Self-contained: mount one per lab.
  */
 export function CommandPalette({ commands, hotkey = true }: { commands: Command[]; hotkey?: boolean }) {

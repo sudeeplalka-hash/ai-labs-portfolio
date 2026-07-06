@@ -32,7 +32,7 @@ export function LiveTraceSummary({ trace }: { trace: LiveRagLabTrace | null }) {
     <Panel>
       <SectionHeader
         title="Trace Summary"
-        description="A trace records the question, evidence, answer, citations, scores, and quality decision — the proof of why an answer was or was not trustworthy."
+        description="A trace records the question, evidence, answer, citations, scores, and quality decision, the proof of why an answer was or was not trustworthy."
         icon={ScrollText}
       />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-100 bg-navy-850/40 p-3">
@@ -55,7 +55,7 @@ export function LiveTraceSummary({ trace }: { trace: LiveRagLabTrace | null }) {
           </div>
         ))}
       </dl>
-      {/* TODO: future integration — write this trace into the global Query Trace
+      {/* TODO: future integration, write this trace into the global Query Trace
           Explorer store so live + mock traces share one inspection surface. */}
     </Panel>
   );

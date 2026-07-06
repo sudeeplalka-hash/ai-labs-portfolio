@@ -10,7 +10,7 @@ const FIELD_OPTIONS = {
   data_sensitivity: ['public', 'internal', 'confidential', 'regulated'],
   human_oversight: ['always', 'required', 'optional', 'none'],
   use_case_type: ['assistant', 'rag', 'agentic', 'classifier'],
-  // Model names are dated config (§B5.6), not copy — sourced from @labs/kit.
+  // Model names are dated config (§B5.6), not copy, sourced from @labs/kit.
   ai_model: USE_CASE_MODEL_OPTIONS,
 };
 
@@ -31,7 +31,7 @@ export default function NewUseCase() {
     setLoading(true); setError('');
     try {
       const uc = await api.useCases.create(form);
-      router.push(`/use-cases/${uc.id}`);
+      router.push(`/use cases/${uc.id}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to register use case');
     } finally { setLoading(false); }

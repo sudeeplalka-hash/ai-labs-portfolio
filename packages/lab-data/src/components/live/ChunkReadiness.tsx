@@ -7,7 +7,7 @@ import { cn } from "@data/lib/cn";
 const STRIPE = ["bg-primary/5", "bg-cyan-500/5", "bg-teal-500/5", "bg-violet-500/5"];
 
 // Interactive chunk-readiness preview. Framed as "can this be cleanly segmented
-// for embedding?" — NOT retrieval tuning (that lives in the RAG Evaluator).
+// for embedding?", NOT retrieval tuning (that lives in the RAG Evaluator).
 export function ChunkReadiness({ serialized }: { serialized: string }) {
   const [tokens, setTokens] = useState(512);
   const [overlap, setOverlap] = useState(0);
@@ -59,7 +59,7 @@ export function ChunkReadiness({ serialized }: { serialized: string }) {
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {[
           ["Chunks", preview.count.toLocaleString(), "at this setting"],
-          ["Avg tokens/chunk", preview.avgTokens.toLocaleString(), "target 350–512"],
+          ["Avg tokens/chunk", preview.avgTokens.toLocaleString(), "target 350 to 512"],
           ["Oversized blocks", String(preview.oversized), preview.oversized ? "would split mid-thought" : "none"],
         ].map(([l, v, s]) => (
           <div key={l} className="rounded-lg border border-line bg-slate-50 p-3">

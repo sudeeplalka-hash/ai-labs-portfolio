@@ -38,7 +38,7 @@ export function TokenExplorer({ analysis }: { analysis: TokenAnalysis }) {
       </div>
       {analysis.missCount > 0 && (
         <p className="mt-2 text-xs leading-relaxed text-amber-700">
-          {analysis.missCount} content {analysis.missCount === 1 ? "word was" : "words were"} not found in the retrieved context — those
+          {analysis.missCount} content {analysis.missCount === 1 ? "word was" : "words were"} not found in the retrieved context, those
           are where answers tend to go wrong. The evaluator weighs this as retrieval coverage.
         </p>
       )}
@@ -65,7 +65,7 @@ export function TokenExplorer({ analysis }: { analysis: TokenAnalysis }) {
       </div>
       <p className="mt-3 text-xs leading-relaxed text-slatey-400">
         The retriever compressed a {analysis.documentTokens.toLocaleString()}-token document down to {analysis.contextTokens.toLocaleString()} tokens
-        ({analysis.compression}% of the document) — only the passages most likely to answer your question reach the model.
+        ({analysis.compression}% of the document), only the passages most likely to answer your question reach the model.
       </p>
     </Panel>
   );

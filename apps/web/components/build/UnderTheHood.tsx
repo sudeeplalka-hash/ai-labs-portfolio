@@ -1,4 +1,4 @@
-// Phase 7 — optional "Under the Hood" model-internals explainer. Static,
+// Phase 7, optional "Under the Hood" model internals explainer. Static,
 // presentational, no hooks/state/deps. Explanation, not implementation: this
 // product does not train transformers or run PyTorch/TensorFlow.
 
@@ -36,7 +36,7 @@ export function UnderTheHood() {
       <div className="rounded-xl border border-line bg-slate-50/60 p-4">
         <p className="text-sm leading-relaxed text-slatey-300">
           This Command Center focuses on enterprise AI delivery decisions, not low-level model training. This optional layer explains the
-          model concepts underneath the lifecycle: how transformers use attention, how embeddings support retrieval, how fine-tuning changes
+          model concepts underneath the lifecycle: how transformers use attention, how embeddings support retrieval, how fine tuning changes
           behavior, and where frameworks like PyTorch or TensorFlow fit in real AI engineering.
         </p>
       </div>
@@ -59,7 +59,7 @@ export function UnderTheHood() {
       {/* Attention */}
       <Panel>
         <SectionHeader eyebrow="Inside the context window" title="What does attention do?" icon={Focus}
-          description="Attention helps a model decide which parts of the input are most relevant to the current generation step — assigning different weights to different tokens based on context." />
+          description="Attention helps a model decide which parts of the input are most relevant to the current generation step, assigning different weights to different tokens based on context." />
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-lg border border-line bg-white p-3">
             <p className="stat-label mb-1">Example question</p>
@@ -80,7 +80,7 @@ export function UnderTheHood() {
           <T head={["Concept", "What it does", "Where this product shows it"]} rows={[
             ["Attention", "Weighs relationships inside the model context", "Under the Hood"],
             ["Retrieval", "Selects external evidence before generation", <Link key="r" href="/build/retrieval" className="text-primary hover:underline">Build/RAG</Link>],
-            ["Re-ranking", "Improves which retrieved evidence is sent forward", <Link key="rr" href="/build/retrieval" className="text-primary hover:underline">Retrieval modes</Link>],
+            ["Reranking", "Improves which retrieved evidence is sent forward", <Link key="rr" href="/build/retrieval" className="text-primary hover:underline">Retrieval modes</Link>],
             ["Evaluation", "Tests whether the final answer is grounded and correct", <Link key="e" href="/build/evaluations" className="text-primary hover:underline">Evaluations</Link>],
           ]} />
         </div>
@@ -89,7 +89,7 @@ export function UnderTheHood() {
       {/* Embeddings */}
       <Panel>
         <SectionHeader eyebrow="Semantic space" title="What are embeddings?" icon={Sparkles}
-          description="Numeric representations of text or documents. Similar meanings sit closer together in embedding space — which is why embeddings power semantic search and RAG." />
+          description="Numeric representations of text or documents. Similar meanings sit closer together in embedding space, which is why embeddings power semantic search and RAG." />
         <p className="max-w-3xl text-sm leading-relaxed text-slatey-400">
           In this portfolio demo, vector retrieval uses deterministic local representations to demonstrate retrieval behavior without an
           external embedding API or vector database. In production, embeddings might come from OpenAI, MiniLM, Voyage, or Cohere models and
@@ -100,37 +100,37 @@ export function UnderTheHood() {
             ["BM25", "Exact keyword and term matching", "Misses semantic matches"],
             ["Embeddings", "Semantic similarity", "Can retrieve vague/broad neighbors"],
             ["Hybrid", "Lexical + semantic balance", "Needs tuning"],
-            ["Re-ranking", "Final, governance-aware ordering", "Adds latency and complexity"],
+            ["Reranking", "Final, governance-aware ordering", "Adds latency and complexity"],
           ]} />
         </div>
       </Panel>
 
-      {/* RAG vs fine-tuning */}
+      {/* RAG vs fine tuning */}
       <Panel>
-        <SectionHeader eyebrow="Decisioning" title="Why RAG often comes before fine-tuning" icon={GitCompare}
-          description="For enterprise knowledge workflows, answers must be grounded in current, approved sources. Fine-tuning changes behavior/tone/task performance — but doesn't solve source freshness, citations, or policy version control." />
+        <SectionHeader eyebrow="Decisioning" title="Why RAG often comes before fine tuning" icon={GitCompare}
+          description="For enterprise knowledge workflows, answers must be grounded in current, approved sources. Fine tuning changes behavior/tone/task performance, but doesn't solve source freshness, citations, or policy version control." />
         <T head={["Need", "Better first choice", "Why"]} rows={[
           ["Current policy answers", "RAG", "Sources change and citations matter"],
-          ["Consistent tone/format", "Prompting or fine-tuning", "Behavior pattern is stable"],
-          ["Domain classification", "Fine-tuning or traditional ML", "Labeled examples can teach the task"],
+          ["Consistent tone/format", "Prompting or fine tuning", "Behavior pattern is stable"],
+          ["Domain classification", "Fine tuning or traditional ML", "Labeled examples can teach the task"],
           ["Evidence-backed answers", "RAG", "Retrieval provides source grounding"],
-          ["Multi-step action workflow", "Agent/tools + governance", "Needs permissions, logs, approval"],
+          ["Multistep action workflow", "Agent/tools + governance", "Needs permissions, logs, approval"],
         ]} />
-        <p className="mt-3 text-[12px] text-slatey-500">Fine-tuning can be valuable, but it raises requirements around labeled data, splits, overfitting, regression, monitoring, and governance — which is why <Link href="/build/training" className="text-primary hover:underline">Training Readiness</Link> evaluates it before recommending it.</p>
+        <p className="mt-3 text-[12px] text-slatey-500">Fine tuning can be valuable, but it raises requirements around labeled data, splits, overfitting, regression, monitoring, and governance, which is why <Link href="/build/training" className="text-primary hover:underline">Training Readiness</Link> evaluates it before recommending it.</p>
       </Panel>
 
       {/* Framework placement */}
       <Panel>
         <SectionHeader eyebrow="Framework placement" title="Where PyTorch and TensorFlow fit" icon={Layers}
-          description="ML frameworks used to build, train, fine-tune, and experiment with models. They sit below this Command Center's operating layer." />
+          description="ML frameworks used to build, train, fine tune, and experiment with models. They sit below this Command Center's operating layer." />
         <p className="max-w-3xl text-sm leading-relaxed text-slatey-400">
-          This product does not use PyTorch or TensorFlow directly — it is a static portfolio demo focused on lifecycle decisions, not
+          This product does not use PyTorch or TensorFlow directly, it is a static portfolio demo focused on lifecycle decisions, not
           GPU-backed training. In production, outputs here could connect to ML workflows using PyTorch, TensorFlow, Hugging Face, MLflow,
           W&amp;B, SageMaker, Vertex AI, or Azure ML.
         </p>
         <div className="mt-3">
           <T highlight={5} head={["Layer", "Examples", "Role"]} rows={[
-            ["Model development", "PyTorch, TensorFlow, JAX", "Build / train / fine-tune models"],
+            ["Model development", "PyTorch, TensorFlow, JAX", "Build / train / fine tune models"],
             ["Experiment tracking", "MLflow, W&B", "Track runs, metrics, artifacts"],
             ["Model registry", "MLflow, SageMaker, Vertex AI", "Version and promote models"],
             ["Retrieval infrastructure", "Pinecone, Weaviate, pgvector, Milvus", "Store / search embeddings"],
@@ -138,14 +138,14 @@ export function UnderTheHood() {
             ["AI Command Center", "This product", "Coordinate decisions, readiness, governance, value"],
           ]} />
         </div>
-        <p className="mt-2 text-[11px] italic text-slatey-500">Explanatory content only — none of these tools are dependencies of this product.</p>
+        <p className="mt-2 text-[11px] italic text-slatey-500">Explanatory content only, none of these tools are dependencies of this product.</p>
       </Panel>
 
       {/* Lifecycle integration */}
       <Panel>
         <SectionHeader eyebrow="Tie-back" title="How model internals connect to the lifecycle" icon={Workflow} />
         <T head={["Stage", "Model-internals relevance"]} rows={[
-          ["Strategy", "Choose prompting, RAG, tools, fine-tuning, traditional ML, or hybrid"],
+          ["Strategy", "Choose prompting, RAG, tools, fine tuning, traditional ML, or hybrid"],
           ["Data", "Prepare RAG corpus, eval datasets, training data, labels, metadata, telemetry"],
           ["Build/RAG", "Configure retrieval, embeddings, prompts, evals, and model behavior"],
           ["Operate", "Monitor latency, cost, drift, regression, incidents, rollback"],
@@ -161,7 +161,7 @@ export function UnderTheHood() {
           <InsightCard tone="info" title="Transformer awareness">Understands the architecture behind modern LLMs without pretending to rebuild one.</InsightCard>
           <InsightCard tone="info" title="Attention vs retrieval">Separates what happens inside the context window from how external evidence is selected.</InsightCard>
           <InsightCard tone="success" title="Embedding literacy">Connects embeddings to semantic search, vector/hybrid retrieval, and RAG quality.</InsightCard>
-          <InsightCard tone="success" title="Fine-tuning judgment">Picks RAG, prompting, fine-tuning, ML, or hybrid by use case — not by default.</InsightCard>
+          <InsightCard tone="success" title="Fine tuning judgment">Picks RAG, prompting, fine tuning, ML, or hybrid by use case, not by default.</InsightCard>
           <InsightCard tone="warn" title="Framework placement">Shows where PyTorch/TensorFlow belong without becoming a training platform.</InsightCard>
           <InsightCard tone="warn" title="Lifecycle integration">Ties model concepts to evaluation, operations, governance, and value.</InsightCard>
         </div>

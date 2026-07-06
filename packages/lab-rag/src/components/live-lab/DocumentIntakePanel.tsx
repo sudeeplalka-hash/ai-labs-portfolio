@@ -65,7 +65,7 @@ export function DocumentIntakePanel({
       <div className="mb-2 flex items-center gap-2">
         <Sparkles className="h-4 w-4 text-accent-cyan" />
         <h2 className="text-base font-semibold text-ink">Start with a sample policy</h2>
-        <span className="text-sm text-slatey-500">— one click to begin</span>
+        <span className="text-sm text-slatey-500">one click to begin</span>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         {sampleDocuments.map((doc) => (

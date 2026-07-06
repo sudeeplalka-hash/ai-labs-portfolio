@@ -2,7 +2,7 @@
 // prompt workload: per-call cost with prompt-caching applied to the cacheable input share and
 // an optional async batch discount, projected to monthly; the same workload priced across
 // models (the model-swap decision); and the savings ladder (list → +cache → +batch). The
-// point is the SHAPE of the economics, not the third decimal — so prices are inputs, tested.
+// point is the SHAPE of the economics, not the third decimal, so prices are inputs, tested.
 export interface ModelRate {
   id: string;
   inputPerMTok: number;

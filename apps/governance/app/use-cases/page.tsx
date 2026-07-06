@@ -63,7 +63,7 @@ export default function UseCaseRegistry() {
               {filtered.map(uc => (
                 <tr key={uc.id} className="hover:bg-slate-50 cursor-pointer">
                   <td className="px-4 py-3">
-                    <Link href={`/use-cases/${uc.id}`} className="font-medium text-blue-600 hover:underline">{uc.name}</Link>
+                    <Link href={`/use cases/${uc.id}`} className="font-medium text-blue-600 hover:underline">{uc.name}</Link>
                     <p className="text-xs text-slate-400 mt-0.5">{uc.owner}</p>
                   </td>
                   <td className="px-4 py-3 text-slate-600">{uc.business_function}</td>

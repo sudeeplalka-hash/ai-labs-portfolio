@@ -2,7 +2,7 @@
   "name": "@labs/governance",
   "version": "0.0.0",
   "private": true,
-  "description": "Governance & Realize lab — enterprise AI governance control plane (risk tiering, policy-as-code, runtime guardrails, red-team evals, audit evidence). Frontend on the shared foundation; backed by services/governance-api.",
+  "description": "Governance & Realize lab, enterprise AI governance control plane (risk tiering, policy as code, runtime guardrails, red team evals, audit evidence). Frontend on the shared foundation; backed by services/governance-api.",
   "scripts": {
     "dev": "next dev -p 3004",
     "build": "next build",

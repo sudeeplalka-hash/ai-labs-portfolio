@@ -125,7 +125,7 @@ export const sourceDocuments: SourceDocument[] = [
     lastUpdated: "2026-02-27",
     freshnessStatus: "Current",
     riskLevel: "High",
-    description: "Required review steps, clause checks, and sign-off authority before contract execution.",
+    description: "Required review steps, clause checks, and sign off authority before contract execution.",
   },
   {
     id: "doc-access",

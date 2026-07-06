@@ -1,4 +1,4 @@
-// Axis scale + tick helpers — pure math so any chart can map a data value to a pixel
+// Axis scale + tick helpers, pure math so any chart can map a data value to a pixel
 // position and render "nice" ticks, on a linear or log axis. Framework-agnostic and tested;
 // a chart imports these instead of re-deriving the arithmetic inline.
 

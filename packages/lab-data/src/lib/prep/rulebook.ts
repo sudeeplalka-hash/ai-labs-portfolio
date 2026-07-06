@@ -39,7 +39,7 @@ export const RULEBOOK: Record<GuidelineId, Guideline> = {
     id: "privacy",
     name: "Privacy & PII",
     rule: "PII must be redacted or explicitly approved before embedding.",
-    downstream: "Anything embedded becomes retrievable — a privacy-gate failure in governance.",
+    downstream: "Anything embedded becomes retrievable, a privacy-gate failure in governance.",
   },
   provenance: {
     id: "provenance",

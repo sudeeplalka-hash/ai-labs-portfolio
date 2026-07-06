@@ -19,13 +19,13 @@ describe("riskAdj", () => {
   it("equals expected value × P(stage) − spend", () => {
     expect(riskAdj(mk({ expValueM: 4, spendM: 1.2, stage: "production" }))).toBeCloseTo(2.2, 6); // 4·0.85 − 1.2
   });
-  it("goes negative when spend exceeds risk-adjusted value", () => {
+  it("goes negative when spend exceeds risk adjusted value", () => {
     expect(riskAdj(mk({ expValueM: 1, spendM: 1, stage: "pilot" }))).toBeLessThan(0); // 0.3 − 1
   });
 });
 
 describe("recommend", () => {
-  it("kills any initiative with negative risk-adjusted value", () => {
+  it("kills any initiative with negative risk adjusted value", () => {
     expect(recommend(mk({ expValueM: 1, spendM: 1.1, stage: "pilot" }))).toBe("kill");
   });
   it("scales a mature, low-risk, high-return initiative", () => {
@@ -38,7 +38,7 @@ describe("recommend", () => {
     expect(recommend(mk({ stage: "production", expValueM: 4, spendM: 0.5, risk: 0.6 }))).toBe("hold");
   });
   it("treats the 1.5× spend threshold as inclusive (>=)", () => {
-    // choose expValue so risk-adjusted value is exactly 1.5 at spend 1
+    // choose expValue so risk adjusted value is exactly 1.5 at spend 1
     const i = mk({ stage: "production", spendM: 1, risk: 0.3, expValueM: 2.5 / 0.85 });
     expect(riskAdj(i)).toBeCloseTo(1.5, 6);
     expect(recommend(i)).toBe("scale");
@@ -98,7 +98,7 @@ describe("greedyFund", () => {
     expect(r.cut).toHaveLength(items.length);
   });
 
-  it("is greedy, not a solved optimum — ratio-first can leave value on the table", () => {
+  it("is greedy, not a solved optimum, ratio-first can leave value on the table", () => {
     // At budget 4, greedy takes s1(ratio1.8)+s2, capturing 6.4; the optimal single
     // pick `big` would capture 7. The engine is honest about being a first cut.
     const knap = [
@@ -148,7 +148,7 @@ describe("reallocateKills", () => {
     expect(r.dragRemovedM).toBeCloseTo(1.5, 6);
   });
 
-  it("cutting the kills raises portfolio risk-adjusted value by exactly the removed drag", () => {
+  it("cutting the kills raises portfolio risk adjusted value by exactly the removed drag", () => {
     const r = reallocateKills(items, val, isScale);
     expect(r.afterCutRiskAdjM).toBeCloseTo(r.baseRiskAdjM + r.dragRemovedM, 6);
   });

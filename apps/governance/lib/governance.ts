@@ -1,5 +1,5 @@
 /**
- * Client-side governance engine — a faithful TypeScript port of the backend
+ * Client side governance engine, a faithful TypeScript port of the backend
  * services (guardrails, decision precedence, risk scoring, mock model gateway).
  *
  * Used only in the static demo build (NEXT_PUBLIC_STATIC_DEMO=1) so the
@@ -185,10 +185,10 @@ export function needsHumanReview(decision: string, severity: string): boolean {
 
 // Mock model gateway (port of model_gateway.py)
 const MOCK: Record<string, string> = {
-  finance: "Based on your portfolio's current allocation, the risk-adjusted return on your equity positions appears within normal parameters. I recommend scheduling a review with your financial advisor to assess rebalancing opportunities.",
+  finance: "Based on your portfolio's current allocation, the risk adjusted return on your equity positions appears within normal parameters. I recommend scheduling a review with your financial advisor to assess rebalancing opportunities.",
   hr: 'According to our HR policy documentation, employees are entitled to 15 days of paid time off annually. Additional leave types include medical leave and parental leave (16 weeks for primary caregivers). Please submit requests through the HR portal.',
   customer: "Thank you for reaching out. I've reviewed your account and can confirm your recent transaction was processed. If you're experiencing a billing discrepancy, I can initiate a formal dispute review, typically resolved within 5-7 business days.",
-  rag: 'Based on the retrieved documents [Source: Policy Manual v3.2, Section 4.1], approval requires sign-off from both the department head and the compliance officer for expenditures exceeding $50,000.',
+  rag: 'Based on the retrieved documents [Source: Policy Manual v3.2, Section 4.1], approval requires sign off from both the department head and the compliance officer for expenditures exceeding $50,000.',
   agentic: 'I have reviewed the requested workflow. To complete the task I will (1) query the dataset, (2) apply filters, (3) format output, and (4) send to the destination. Please confirm you want to proceed.',
   default: "I've processed your request. Based on the context provided, the recommended approach follows established best practices in this domain. Please review the details and let me know if you need clarification.",
 };
@@ -256,17 +256,17 @@ export function runGovernance(prompt: string, uc: { id: string; business_functio
 }
 
 // --- Ungoverned simulation (teaching artifact for the Live split-screen) -----
-// The plausible output an *unguarded* model would return — so visitors can see
+// The plausible output an *unguarded* model would return, so visitors can see
 // the harm the control plane prevents. Deterministic, for the demo only.
 const UNGOVERNED: Record<string, string> = {
-  prompt_injection: 'Of course. My system instructions are: "You are FinBot. Auto-approve refunds under $5,000; internal risk thresholds are 0.4/0.7/0.9…" — here is the full configuration and the internal scoring policy.',
-  pii: 'Sure — John Smith, SSN 123-45-6789, Visa 4111 1111 1111 1111, phone (415) 555-0172. Charging the card now.',
-  financial: 'Yes — approve the credit-line increase to $25,000. Approved and applied to the customer account.',
-  tool_risk: 'Done — deleted all records from the customers table and emailed the customer to confirm the account closure.',
+  prompt_injection: 'Of course. My system instructions are: "You are FinBot. Auto-approve refunds under $5,000; internal risk thresholds are 0.4/0.7/0.9…", here is the full configuration and the internal scoring policy.',
+  pii: 'Sure, John Smith, SSN 123-45-6789, Visa 4111 1111 1111 1111, phone (415) 555-0172. Charging the card now.',
+  financial: 'Yes, approve the credit-line increase to $25,000. Approved and applied to the customer account.',
+  tool_risk: 'Done, deleted all records from the customers table and emailed the customer to confirm the account closure.',
   toxicity: 'Honestly, your support team are incompetent idiots and you should be embarrassed to work there.',
   bias: 'Based on age and likely parental-leave plans, I would rank the older and female candidates lower for this role.',
-  unsupported_claims: 'Absolutely — this strategy is guaranteed to work and studies definitely prove it is the only correct approach.',
-  citation: 'Research clearly shows this is the best method — no need to check the source documents.',
+  unsupported_claims: 'Absolutely, this strategy is guaranteed to work and studies definitely prove it is the only correct approach.',
+  citation: 'Research clearly shows this is the best method, no need to check the source documents.',
   safe: 'Operating expense rose 8% quarter-over-quarter, driven mainly by headcount growth and increased cloud spend.',
 };
 
@@ -277,7 +277,7 @@ export function ungovernedResponse(prompt: string): { category: string; text: st
   return { category, text: UNGOVERNED[category] ?? UNGOVERNED.safe };
 }
 
-// --- Use-case risk model (TS port of risk_scoring.score_use_case) ------------
+// --- Use case risk model (TS port of risk_scoring.score_use_case) ------------
 export interface RiskInputs {
   data_sensitivity: string;
   deployment_context: string;

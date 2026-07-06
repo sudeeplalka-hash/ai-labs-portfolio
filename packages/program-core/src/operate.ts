@@ -1,6 +1,6 @@
 // ============================================================================
-// Operate / AI Ops / MLOps / RAGOps — deterministic production-readiness engine
-// (Phase 2). Pure, client-side derivations over the Phase 1 lifecycle contracts
+// Operate / AI Ops / MLOps / RAGOps, deterministic production readiness engine
+// (Phase 2). Pure, client side derivations over the Phase 1 lifecycle contracts
 // (initiative.meta, data.handoff, rag.contract, deploy slice/evidence,
 // governance.decision). No telemetry, no backend.
 // ============================================================================
@@ -76,7 +76,7 @@ export function deriveVersionLineage(s: ProgramState): LineageRow[] {
   const lin = s.deploy?.evidence?.versionLineage ?? {};
   const base = slug(meta?.primaryAiPattern || "assistant") || "assistant";
   return [
-    { asset: "Model", version: lin.model ?? c?.selectedModel ?? s.rag?.model ?? "Frontier hosted — fast / mini", source: "Build contract", why: "Determines cost, latency, and capability." },
+    { asset: "Model", version: lin.model ?? c?.selectedModel ?? s.rag?.model ?? "Frontier hosted, fast / mini", source: "Build contract", why: "Determines cost, latency, and capability." },
     { asset: "Model archetype", version: c?.selectedPattern ?? meta?.primaryAiPattern ?? "Knowledge assistant", source: "Build contract", why: "The system shape being operated." },
     { asset: "Prompt", version: lin.prompt ?? c?.promptVersion ?? `${base}-v0.3`, source: "Build contract", why: "Prompt changes can alter answer behavior." },
     { asset: "Retrieval mode", version: c?.retrievalModeLabel ?? c?.retrievalMode ?? "Lexical BM25", source: "Build", why: "Affects which evidence reaches the answer." },
@@ -84,7 +84,7 @@ export function deriveVersionLineage(s: ProgramState): LineageRow[] {
     { asset: "Corpus", version: `${base}-corpus-v1.2`, source: "Data handoff", why: "Data changes affect quality and risk." },
     { asset: "Eval set", version: lin.dataset ?? c?.datasetVersion ?? "golden-v1", source: "Build contract", why: "Needed for regression comparison." },
     { asset: "Policy pack", version: meta?.governanceTier ? `policy-controls-${slug(meta.governanceTier)}-v1` : "policy-controls-v1", source: "Govern", why: "Determines release guardrails." },
-    { asset: "Deployment config", version: "balanced-cost-latency-v2", source: "Operate", why: "Determines the runtime cost/latency tradeoff." },
+    { asset: "Deployment config", version: "balanced-cost and latency-v2", source: "Operate", why: "Determines the runtime cost/latency tradeoff." },
   ];
 }
 
@@ -103,18 +103,18 @@ export function deriveMonitoringCoverage(s: ProgramState): MonitoringCoverage {
   const drift = ev?.driftRisk ?? dep?.driftRisk;
 
   const signals: MonitorSignal[] = [
-    { signal: "p95 latency", status: "monitored", current: p95 !== undefined ? `${p95} ms` : "—", threshold: "1000 ms", owner: "AI Ops", action: "Scale or switch config" },
-    { signal: "Cost / query", status: "monitored", current: cpq !== undefined ? `$${cpq.toFixed(3)}` : "—", threshold: "$0.020", owner: "Product Ops", action: "Optimize retrieval / model tier" },
+    { signal: "p95 latency", status: "monitored", current: p95 !== undefined ? `${p95} ms` : "N/A", threshold: "1000 ms", owner: "AI Ops", action: "Scale or switch config" },
+    { signal: "Cost / query", status: "monitored", current: cpq !== undefined ? `$${cpq.toFixed(3)}` : "N/A", threshold: "$0.020", owner: "Product Ops", action: "Optimize retrieval / model tier" },
     { signal: "Token usage", status: "monitored", current: "~1.2k / query", threshold: "2k / query", owner: "AI Ops", action: "Trim context / chunk size" },
-    { signal: "Error rate", status: "monitored", current: dep?.errorBudgetPct !== undefined ? `budget ${dep.errorBudgetPct}%` : "—", threshold: "1%", owner: "AI Ops", action: "Investigate + roll back" },
-    { signal: "Citation failure rate", status: "monitored", current: cite !== undefined ? `${100 - cite}%` : "—", threshold: "5%", owner: "RAG Owner", action: "Block release if rising" },
-    { signal: "Faithfulness drop", status: "monitored", current: c?.faithfulness !== undefined ? `${c.faithfulness}%` : "—", threshold: "≥ 85%", owner: "RAG Owner", action: "Regression review" },
-    { signal: "Hallucination risk", status: "monitored", current: c?.hallucinationRisk !== undefined ? `${c.hallucinationRisk}%` : "—", threshold: "≤ 10%", owner: "RAG Owner", action: "Constrain prompt / retrieval" },
-    { signal: "Drift signal", status: "monitored", current: drift !== undefined ? `${drift}/100` : "—", threshold: "60/100", owner: "AI Ops", action: "Re-index / refresh sources" },
+    { signal: "Error rate", status: "monitored", current: dep?.errorBudgetPct !== undefined ? `budget ${dep.errorBudgetPct}%` : "N/A", threshold: "1%", owner: "AI Ops", action: "Investigate + roll back" },
+    { signal: "Citation failure rate", status: "monitored", current: cite !== undefined ? `${100 - cite}%` : "N/A", threshold: "5%", owner: "RAG Owner", action: "Block release if rising" },
+    { signal: "Faithfulness drop", status: "monitored", current: c?.faithfulness !== undefined ? `${c.faithfulness}%` : "N/A", threshold: "≥ 85%", owner: "RAG Owner", action: "Regression review" },
+    { signal: "Hallucination risk", status: "monitored", current: c?.hallucinationRisk !== undefined ? `${c.hallucinationRisk}%` : "N/A", threshold: "≤ 10%", owner: "RAG Owner", action: "Constrain prompt / retrieval" },
+    { signal: "Drift signal", status: "monitored", current: drift !== undefined ? `${drift}/100` : "N/A", threshold: "60/100", owner: "AI Ops", action: "Reindex / refresh sources" },
     { signal: "Incident triggers", status: "monitored", current: ev?.incidentStatus ?? "none", threshold: "0 active", owner: "AI Ops", action: "Run incident playbook" },
-    { signal: "Retrieval miss rate", status: "gap", current: "—", threshold: "8%", owner: "RAG Owner", action: "Add trace instrumentation" },
-    { signal: "Escalation rate", status: "gap", current: "—", threshold: "12%", owner: "Product", action: "Instrument handoff-to-human" },
-    { signal: "User feedback rate", status: "gap", current: "—", threshold: "—", owner: "Product", action: "Add feedback capture" },
+    { signal: "Retrieval miss rate", status: "gap", current: "N/A", threshold: "8%", owner: "RAG Owner", action: "Add trace instrumentation" },
+    { signal: "Escalation rate", status: "gap", current: "N/A", threshold: "12%", owner: "Product", action: "Instrument handoff-to-human" },
+    { signal: "User feedback rate", status: "gap", current: "N/A", threshold: "N/A", owner: "Product", action: "Add feedback capture" },
   ];
   const monitoredCount = signals.filter((x) => x.status === "monitored").length;
   const total = signals.length;
@@ -184,15 +184,15 @@ export function deriveIncidents(s: ProgramState): { incidents: OpsIncident[]; ro
   if (drift >= 50) {
     incidents.push({
       id: "INC-DRIFT-02", severity: drift >= 70 ? "High" : "Medium", trigger: `Drift signal at ${drift}/100`,
-      affectedUsers: "All queries", rootCause: "Source freshness decay since last re-index",
-      linkedVersion: indexVer, mitigation: "Re-index changed sources; refresh embeddings",
+      affectedUsers: "All queries", rootCause: "Source freshness decay since last reindex",
+      linkedVersion: indexVer, mitigation: "Reindex changed sources; refresh embeddings",
       rollback: "Roll back model / config to last stable", owner: "AI Ops", postmortem: "Optional",
     });
   }
   incidents.push({
     id: "INC-LAT-03", severity: "Medium", trigger: "p95 latency breaches SLO under peak load",
     affectedUsers: "Peak-hour users", rootCause: "Queueing as traffic approaches capacity",
-    linkedVersion: "balanced-cost-latency-v2", mitigation: "Raise cache %, scale tier, or add reranker budget",
+    linkedVersion: "balanced-cost and latency-v2", mitigation: "Raise cache %, scale tier, or add reranker budget",
     rollback: "Switch retrieval mode / pause deployment", owner: "AI Ops", postmortem: "Optional",
   });
   return { incidents, rollbackOptions: ROLLBACK_OPTIONS };

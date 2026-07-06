@@ -1,6 +1,6 @@
 "use client";
 
-// Phase I — regulatory orientation. Maps the live initiative to an EU AI Act
+// Phase I, regulatory orientation. Maps the live initiative to an EU AI Act
 // risk class and the four NIST AI RMF functions, derived deterministically from
 // the same metadata the governance tier uses. Explicitly not legal advice.
 
@@ -10,7 +10,7 @@ import { Panel, SectionHeader, Badge, cn } from "@labs/design-system";
 import { Scale, CheckCircle2, CircleDashed } from "lucide-react";
 
 const classTone: Record<EuAiActClass, "rose" | "amber" | "emerald"> = {
-  "High-risk": "rose", "Limited risk": "amber", "Minimal risk": "emerald",
+  "High risk": "rose", "Limited risk": "amber", "Minimal risk": "emerald",
 };
 
 export function RegulatoryMap() {
@@ -21,7 +21,7 @@ export function RegulatoryMap() {
   return (
     <Panel>
       <SectionHeader eyebrow="Regulatory orientation" title="Where this initiative sits under EU AI Act & NIST AI RMF" icon={Scale}
-        description="Derived from the initiative's pattern, criticality, and tier — the starting map you'd hand counsel and compliance."
+        description="Derived from the initiative's pattern, criticality, and tier: the starting map you'd hand counsel and compliance."
         action={<Badge tone={classTone[map.euAiAct.riskClass]}>EU AI Act · {map.euAiAct.riskClass}</Badge>} />
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -34,7 +34,7 @@ export function RegulatoryMap() {
             {map.euAiAct.obligations.map((o) => (
               <li key={o} className="flex items-start gap-1.5 text-[12px] leading-relaxed text-slatey-400">
                 <span className={cn("mt-1 h-1.5 w-1.5 shrink-0 rounded-full",
-                  map.euAiAct.riskClass === "High-risk" ? "bg-rose-400" : map.euAiAct.riskClass === "Limited risk" ? "bg-amber-400" : "bg-emerald-400")} />
+                  map.euAiAct.riskClass === "High risk" ? "bg-rose-400" : map.euAiAct.riskClass === "Limited risk" ? "bg-amber-400" : "bg-emerald-400")} />
                 {o}
               </li>
             ))}
@@ -43,7 +43,7 @@ export function RegulatoryMap() {
 
         {/* NIST AI RMF */}
         <div className="rounded-xl border border-line bg-white p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">NIST AI RMF — function coverage</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">NIST AI RMF: function coverage</p>
           <div className="mt-2 space-y-2.5">
             {map.nist.map((n) => (
               <div key={n.fn}>

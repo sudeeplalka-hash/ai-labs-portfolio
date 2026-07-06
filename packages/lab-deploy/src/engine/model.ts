@@ -1,5 +1,5 @@
 // ============================================================================
-// Deploy / Operations — pure deterministic model. Same inputs → same outputs.
+// Deploy / Operations, pure deterministic model. Same inputs → same outputs.
 // Reads the threaded ProgramState (Frame + Build/Data/Govern slices if present),
 // degrades gracefully to Frame + sensible defaults when a slice is missing.
 // ============================================================================
@@ -13,7 +13,7 @@ export const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b
 
 // --- per-job operational character ---
 // capacity = sustainable queries/sec for the *as-deployed* footprint (a fixed pilot
-// replica, no autoscaling) — small on purpose so scaling into production stresses it.
+// replica, no autoscaling), small on purpose so scaling into production stresses it.
 const JOB_PROFILE: Record<string, { cost: number; latency: number; capacity: number }> = {
   Answer: { cost: 0.012, latency: 650, capacity: 6 },
   Summarize: { cost: 0.018, latency: 900, capacity: 4 },
@@ -48,7 +48,7 @@ export function deriveBaseline(state: ProgramState): Baseline {
       ? clamp(state.rag.hallucination / 100, 0.02, 0.4)
       : clamp(0.32 - (dataReadiness / 100) * 0.28, 0.04, 0.32);
   // A stronger engine (Build · Model Fit) hallucinates less, cutting the dominant
-  // escalation cost — so a pricier-but-smarter model can be cheaper overall.
+  // escalation cost, so a pricier-but-smarter model can be cheaper overall.
   const capMult = typeof state.rag?.modelCapability === "number"
     ? clamp(1.3 - (state.rag.modelCapability / 100) * 0.6, 0.7, 1.3)
     : 1;
@@ -114,7 +114,7 @@ export function computeOps(b: Baseline, levers: DeployLevers): OpsResult {
   const errorBudgetPct = clamp((1 - (1 - reliability) / Math.max(1e-6, 1 - b.sloReliability)) * 100, -200, 100);
 
   // Envelope zone is about LOAD (reliability + latency). Cost is a separate lever,
-  // surfaced in the KPIs and verdict — not folded into the load envelope.
+  // surfaced in the KPIs and verdict, not folded into the load envelope.
   let zone: Zone = "amber";
   const meetsRel = reliability >= b.sloReliability;
   const meetsLat = p95 <= b.sloLatencyMs;
@@ -193,15 +193,15 @@ export function runIncident(b: Baseline, levers: DeployLevers, type: IncidentTyp
 
 export function deployVerdict(b: Baseline, ops: OpsResult): DeployVerdict {
   if (ops.zone === "red" && ops.utilization > 1)
-    return { tone: "risk", headline: "Won't hold at this scale", detail: `Peak load exceeds capacity (${ops.utilization}× ) — p99 ${ops.p99}ms, errors ${ops.errorRatePct}%. Add capacity, cache, or shed load.` };
+    return { tone: "risk", headline: "Won't hold at this scale", detail: `Peak load exceeds capacity (${ops.utilization}× ), p99 ${ops.p99}ms, errors ${ops.errorRatePct}%. Add capacity, cache, or shed load.` };
   if (ops.costPerQuery > b.targetCostPerQuery)
-    return { tone: "watch", headline: "Over budget at scale", detail: `$${ops.costPerQuery}/query vs target $${b.targetCostPerQuery.toFixed(3)} — escalation from quality is ${ops.escalationRate}% of cost. Improve the engine or raise caching.` };
+    return { tone: "watch", headline: "Over budget at scale", detail: `$${ops.costPerQuery}/query vs target $${b.targetCostPerQuery.toFixed(3)}, escalation from quality is ${ops.escalationRate}% of cost. Improve the engine or raise caching.` };
   if (ops.reliability < b.sloReliability)
-    return { tone: "watch", headline: "Below the reliability SLO", detail: `${(ops.reliability * 100).toFixed(2)}% vs ${(b.sloReliability * 100).toFixed(1)}% target — error budget ${ops.errorBudgetPct}%.` };
+    return { tone: "watch", headline: "Below the reliability SLO", detail: `${(ops.reliability * 100).toFixed(2)}% vs ${(b.sloReliability * 100).toFixed(1)}% target, error budget ${ops.errorBudgetPct}%.` };
   return { tone: "healthy", headline: "Production-ready at this load", detail: `Within SLO, latency, and budget. Error budget ${ops.errorBudgetPct}% intact.` };
 }
 
-// Cheapest-safe operating point — search the controllable levers (tier × cache × reranker)
+// Cheapest-safe operating point, search the controllable levers (tier × cache × reranker)
 // at the current volume and return the lowest-monthly-cost configuration that still lands in
 // the green zone (meets the reliability + latency SLOs). If nothing is green at this load,
 // fall back to the cheapest non-red config and flag found=false. Uses the same computeOps

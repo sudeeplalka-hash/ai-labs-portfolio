@@ -19,7 +19,7 @@ export const sampleDocuments: SampleDocument[] = [
 This policy governs business travel booking, approvals, and expense reimbursement for all employees. It applies to domestic and international travel undertaken for company business.
 
 ## 2. Pre-Trip Approval
-Manager approval is required before booking any trip with an expected total cost above $2,500. Any single expense exceeding $500 also requires manager sign-off regardless of the trip total. International travel always requires manager approval prior to booking, plus director approval when the destination is on the restricted-travel list.
+Manager approval is required before booking any trip with an expected total cost above $2,500. Any single expense exceeding $500 also requires manager sign off regardless of the trip total. International travel always requires manager approval prior to booking, plus director approval when the destination is on the restricted-travel list.
 
 ## 3. Booking and Travel Class
 Employees must book through the approved corporate travel tool. Economy class is the default for all flights. Premium economy is permitted for flights longer than 6 hours, and business class requires VP approval and is only allowed for flights longer than 10 hours.
@@ -50,7 +50,7 @@ Exceptions to this policy require written approval from the employee's manager a
     sampleQuestions: [
       "What documents are required before onboarding a vendor?",
       "When is a security review required?",
-      "Who approves high-risk vendors?",
+      "Who approves high risk vendors?",
       "How long does vendor due diligence take?",
     ],
     rawText: `# Vendor Onboarding Policy v4.1
@@ -62,16 +62,16 @@ This policy defines the steps required to evaluate, approve, and activate a new 
 Before a vendor can be activated, Procurement must collect: a signed Master Services Agreement (MSA), a completed security and privacy questionnaire, proof of insurance, and tax documentation (W-9 or local equivalent). Vendors handling personal data must also sign a Data Processing Agreement (DPA).
 
 ## 3. Risk Tiering
-Each vendor is assigned a risk tier. Low-risk vendors provide non-sensitive goods or services with no system access. Medium-risk vendors have limited system access. High-risk vendors process personal data, access production systems, or support regulated business functions.
+Each vendor is assigned a risk tier. Low-risk vendors provide non-sensitive goods or services with no system access. Medium-risk vendors have limited system access. High risk vendors process personal data, access production systems, or support regulated business functions.
 
 ## 4. Security Review
-A security review is required for all medium- and high-risk vendors. The review covers data handling, access controls, incident history, and subprocessor disclosure. High-risk vendors additionally require a SOC 2 Type II report or equivalent independent assessment.
+A security review is required for all medium- and high risk vendors. The review covers data handling, access controls, incident history, and subprocessor disclosure. High risk vendors additionally require a SOC 2 Type II report or equivalent independent assessment.
 
 ## 5. Approvals
-Low-risk vendors are approved by the Procurement lead. Medium-risk vendors require Procurement and Information Security approval. High-risk vendors require Procurement, Information Security, and Legal approval, and any high-risk vendor with annual spend above $250,000 also requires CFO sign-off.
+Low-risk vendors are approved by the Procurement lead. Medium-risk vendors require Procurement and Information Security approval. High risk vendors require Procurement, Information Security, and Legal approval, and any high risk vendor with annual spend above $250,000 also requires CFO sign off.
 
 ## 6. Due Diligence Timeline
-Standard due diligence takes 5 to 10 business days for low- and medium-risk vendors. High-risk vendor due diligence may take 3 to 6 weeks depending on the depth of the security assessment and contract negotiation.
+Standard due diligence takes 5 to 10 business days for low- and medium-risk vendors. High risk vendor due diligence may take 3 to 6 weeks depending on the depth of the security assessment and contract negotiation.
 
 ## 7. Activation
 A vendor may only be activated after all required documents are collected, the risk tier is assigned, the security review is complete where required, and all approvals are recorded. Activation grants the minimum access necessary for the engagement.
@@ -105,13 +105,13 @@ Customer or personal data may only be processed by external AI tools that appear
 The AI Governance Office maintains the approved tools list. A data processing agreement alone is not sufficient to approve data use; the tool must also be on the approved list and tied to a reviewed use case.
 
 ## 5. Human Oversight
-AI outputs used in decisions that affect individuals, finances, legal matters, or safety must have human oversight. The system must escalate to human review when confidence is low, evidence is missing, or the topic is high-risk.
+AI outputs used in decisions that affect individuals, finances, legal matters, or safety must have human oversight. The system must escalate to human review when confidence is low, evidence is missing, or the topic is high risk.
 
 ## 6. Conflicting Sources
-When retrieved sources conflict, the system should defer to the current effective version, disclose the conflict to the user, cite the authoritative source, and route high-risk topics to human review.
+When retrieved sources conflict, the system should defer to the current effective version, disclose the conflict to the user, cite the authoritative source, and route high risk topics to human review.
 
 ## 7. Approval Authority
-New AI use cases are approved by the AI Governance Office. High-risk use cases involving regulated data additionally require Legal and the relevant data owner. Approvals are time-bound and re-reviewed at least annually.
+New AI use cases are approved by the AI Governance Office. High risk use cases involving regulated data additionally require Legal and the relevant data owner. Approvals are time-bound and re-reviewed at least annually.
 
 ## 8. Monitoring and Audit
 Approved AI use cases are monitored for drift, accuracy, and policy compliance. The AI Governance Office may suspend a use case that no longer meets the standard.`,

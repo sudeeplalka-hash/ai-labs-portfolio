@@ -1,5 +1,5 @@
 // ============================================================================
-// Cross-stage selectors (Phase 1 — lifecycle coherence).
+// Cross-stage selectors (Phase 1, lifecycle coherence).
 // Pure, read-only helpers that let a downstream stage consume upstream contracts
 // from the shared ProgramState, with a `hasLive` flag so a stage can fall back to
 // its own demo data when the loop hasn't been run.
@@ -37,7 +37,7 @@ export function buildDataReadinessHandoff(s: ProgramState): DataReadinessHandoff
   const rejected = readiness < 55 ? ["Unversioned scraped web content"] : [];
 
   const risks: string[] = [];
-  if (sensitive) risks.push("Sensitive data present — redaction & access control required before indexing");
+  if (sensitive) risks.push("Sensitive data present, redaction & access control required before indexing");
   if (readiness < 70) risks.push("Coverage gaps in the corpus could cap answer completeness");
   if (pattern.includes("Classification") || pattern.includes("Agentic")) risks.push("Label/schema quality drives downstream accuracy");
 
@@ -96,15 +96,15 @@ export function buildBuildOutputContract(s: ProgramState): BuildOutputContract {
 
   const release = failedGates.length === 0 && quality >= 85 ? "Ready for pilot"
     : failedGates.length <= 1 && quality >= 75 ? "Ready with restrictions"
-    : "Hold — strengthen quality before release";
+    : "Hold, strengthen quality before release";
 
-  // Phase 3 — retrieval substrate lineage from the chosen mode + data handoff.
+  // Phase 3, retrieval substrate lineage from the chosen mode + data handoff.
   const mode = rag.retrievalMode ?? "lexical";
   const MODE: Record<string, { label: string; hybrid: boolean; rerank: boolean; qDelta: number; latMult: number; costMult: number; fail: string[] }> = {
     "lexical": { label: "Lexical BM25", hybrid: false, rerank: false, qDelta: -6, latMult: 0.8, costMult: 0.9, fail: ["Semantic miss when wording differs from source"] },
     "simulated-vector": { label: "Simulated vector retrieval", hybrid: false, rerank: false, qDelta: 2, latMult: 1.0, costMult: 1.0, fail: ["May retrieve vague semantic neighbors"] },
     "hybrid": { label: "Hybrid lexical + vector", hybrid: true, rerank: false, qDelta: 6, latMult: 1.15, costMult: 1.1, fail: ["Weight tuning required"] },
-    "hybrid-rerank": { label: "Hybrid + re-rank", hybrid: true, rerank: true, qDelta: 10, latMult: 1.35, costMult: 1.2, fail: ["Higher latency from re-rank pass"] },
+    "hybrid rerank": { label: "Hybrid + rerank", hybrid: true, rerank: true, qDelta: 10, latMult: 1.35, costMult: 1.2, fail: ["Higher latency from rerank pass"] },
   };
   const m = MODE[mode] ?? MODE["lexical"];
   const handoff = s.data?.handoff;
@@ -113,12 +113,12 @@ export function buildBuildOutputContract(s: ProgramState): BuildOutputContract {
     : (handoff && (handoff.dataReadinessScore ?? 0) >= 75 && blocked.length <= 1) ? "Partial" : "Missing";
   const retrievalRisks = [
     ...(blocked.length ? [`${blocked.length} blocked source(s) excluded from evidence`] : []),
-    ...(m.hybrid ? ["Local deterministic embeddings — not a production vector store"] : []),
+    ...(m.hybrid ? ["Local deterministic embeddings, not a production vector store"] : []),
     ...((handoff?.knownDataRisks ?? []).slice(0, 1)),
   ].slice(0, 4);
   const baseLatency = Math.round(1400 * (rag.modelLatencyFactor ?? 1));
 
-  // Phase 5 — agent / tool-calling fields (only when the initiative is agentic).
+  // Phase 5, agent / tool calling fields (only when the initiative is agentic).
   const agentic = isAgenticInitiative(s);
   const agentEvalStatus = MISUSE_EVALS.some((e) => e.result === "fail") ? "fail" : MISUSE_EVALS.some((e) => e.result === "warning") ? "warning" : "pass";
   const agentFields = agentic ? {
@@ -129,17 +129,17 @@ export function buildBuildOutputContract(s: ProgramState): BuildOutputContract {
     approvalRequiredCount: TOOL_REGISTRY.filter((t) => t.approvalMode !== "none" && t.approvalMode !== "blocked").length,
     toolMisuseEvalStatus: agentEvalStatus,
     agenticRiskLevel: "high",
-    agentReleaseRecommendation: "Approved with human-in-the-loop; financial actions blocked",
+    agentReleaseRecommendation: "Approved with human in the loop; financial actions blocked",
   } : {};
 
-  // Phase 6 — training / fine-tuning fields.
+  // Phase 6, training / fine tuning fields.
   const tMemo = deriveFineTuneMemo(s);
   const tDs = deriveDatasetReadiness(s);
   const tGen = deriveGeneralizationAssessment(s);
   const highOverfit = tGen.overfittingRisk === "high" || tGen.overfittingRisk === "critical";
   const trainingFields = {
     trainingRequired: tDs.required,
-    fineTuningRecommended: tMemo.recommendedApproach === "fine-tuning",
+    fineTuningRecommended: tMemo.recommendedApproach === "fine tuning",
     recommendedApproach: tMemo.recommendedApproach,
     ...(tDs.required ? {
       trainingReadinessStatus: tDs.status,
@@ -148,12 +148,12 @@ export function buildBuildOutputContract(s: ProgramState): BuildOutputContract {
       datasetSplitStatus: tDs.trainValidationTestSplit,
       trainingEvalRequired: ["Holdout evaluation", "Class-level performance", "Eval regression"],
       trainingGovernanceControls: ["Clean train/validation/test split", "Holdout evaluation", "Leakage check", "Rollback plan"],
-      trainingReleaseRecommendation: highOverfit ? "Hold — reduce overfitting risk before release" : "Approved with holdout evaluation",
+      trainingReleaseRecommendation: highOverfit ? "Hold, reduce overfitting risk before release" : "Approved with holdout evaluation",
     } : {}),
   };
 
   return {
-    selectedModel: rag.model ?? "Frontier hosted — fast / mini",
+    selectedModel: rag.model ?? "Frontier hosted, fast / mini",
     selectedPattern: pattern,
     retrievalMode: mode,
     retrievalModeLabel: m.label,
@@ -315,7 +315,7 @@ const worst = (a: GovLevel, b: GovLevel): GovLevel => (a === "bad" || b === "bad
 
 export function deriveGovernanceScorecard(s: ProgramState): ScorecardDim[] {
   const g = selectGovernInputs(s);
-  // Use-case risk (Strategy)
+  // Use case risk (Strategy)
   const tier = g.governanceTier ?? "Medium";
   const ucLevel: GovLevel = tier === "Critical" ? "bad" : tier === "High" ? "warn" : "good";
   // Data risk
@@ -348,7 +348,7 @@ export function deriveGovernanceScorecard(s: ProgramState): ScorecardDim[] {
   const lvlScore = (l: GovLevel) => (l === "good" ? 90 : l === "warn" ? 65 : 35);
   const label = (l: GovLevel, riskWord = false) => riskWord ? (l === "good" ? "Low" : l === "warn" ? "Medium" : "High") : (l === "good" ? "Pass" : l === "warn" ? "Warning" : "Blocker");
   return [
-    { key: "usecase", dimension: "Use-case risk", status: tier, level: ucLevel, score: lvlScore(ucLevel), why: "Higher tiers demand stronger controls and human oversight.", source: "Strategy metadata", findings: [g.governanceTierRationale ?? `Tier ${tier}`] },
+    { key: "usecase", dimension: "Use case risk", status: tier, level: ucLevel, score: lvlScore(ucLevel), why: "Higher tiers demand stronger controls and human oversight.", source: "Strategy metadata", findings: [g.governanceTierRationale ?? `Tier ${tier}`] },
     { key: "data", dimension: "Data risk", status: label(dataLevel), level: dataLevel, score: lvlScore(dataLevel), why: "Blocked or sensitive data must be excluded or controlled before use.", source: "Data handoff", findings: dataFindings },
     { key: "build", dimension: "Build quality", status: label(buildLevel), level: buildLevel, score: lvlScore(buildLevel), why: "Weak faithfulness or citations let unsupported answers reach users.", source: "Build contract", findings: buildFindings },
     { key: "ops", dimension: "Operational risk", status: label(opsLevel), level: opsLevel, score: lvlScore(opsLevel), why: "Drift, regressions, and SLO breaches erode trust in production.", source: "Ops evidence", findings: opsFindings },
@@ -364,15 +364,15 @@ export function deriveOpenFindings(s: ProgramState): GovFinding[] {
   (g.blockedSources ?? []).forEach((src) => out.push({ severity: "High", finding: `Blocked source: ${src}`, evidenceSource: "Data handoff", impact: "Source cannot be indexed or retrieved", requiredAction: "Keep excluded until redaction and access controls complete", owner: "Data Owner", dueStage: "Data", status: "Open" }));
   if ((g.monitoringCoverageScore ?? 100) < 80) out.push({ severity: "Medium", finding: "Monitoring coverage gap", evidenceSource: "Operate", impact: "Retrieval misses and user feedback not fully monitored", requiredAction: "Add instrumentation before production", owner: "AI Ops", dueStage: "Operate", status: "In review" });
   if (g.regressionStatus === "Block release") out.push({ severity: "High", finding: "Evaluation regression blocker", evidenceSource: "Operate", impact: "Quality worsened vs prior run", requiredAction: "Investigate and fix before release", owner: "RAG Owner", dueStage: "Build", status: "Open" });
-  if ((g.driftRisk ?? 0) >= 60) out.push({ severity: "Medium", finding: "High operational drift risk", evidenceSource: "Operate", impact: "Answers may go stale as sources change", requiredAction: "Re-index and add drift monitoring", owner: "AI Ops", dueStage: "Operate", status: "In review" });
-  if (g.auditEvidenceRequired && (g.qualityScore ?? 0) < 80) out.push({ severity: "Medium", finding: "Audit evidence incomplete for tier", evidenceSource: "Governance", impact: "Decision harder to defend in review", requiredAction: "Raise quality and complete lineage before sign-off", owner: "Governance", dueStage: "Govern", status: "Open" });
-  // Phase 5 — agent / tool-calling findings.
+  if ((g.driftRisk ?? 0) >= 60) out.push({ severity: "Medium", finding: "High operational drift risk", evidenceSource: "Operate", impact: "Answers may go stale as sources change", requiredAction: "Reindex and add drift monitoring", owner: "AI Ops", dueStage: "Operate", status: "In review" });
+  if (g.auditEvidenceRequired && (g.qualityScore ?? 0) < 80) out.push({ severity: "Medium", finding: "Audit evidence incomplete for tier", evidenceSource: "Governance", impact: "Decision harder to defend in review", requiredAction: "Raise quality and complete lineage before sign off", owner: "Governance", dueStage: "Govern", status: "Open" });
+  // Phase 5, agent / tool calling findings.
   const at = s.rag?.agentTooling;
   if (at?.enabled) {
     if (at.misuseEvals.some((e) => e.result === "fail")) out.push({ severity: "High", finding: "Agent tool-misuse evaluation failing", evidenceSource: "Build/Agents", impact: "Unsafe or unapproved tool use could reach production", requiredAction: "Resolve failing misuse evals before enabling the agent", owner: "RAG Owner", dueStage: "Build", status: "Open" });
-    if (at.toolSchemas.some((t) => t.riskLevel === "high" && t.approvalMode === "none")) out.push({ severity: "High", finding: "High-risk tool missing an approval path", evidenceSource: "Build/Agents", impact: "Risky action could execute without human oversight", requiredAction: "Add an approval gate to all high-risk tools", owner: "Governance", dueStage: "Govern", status: "Open" });
+    if (at.toolSchemas.some((t) => t.riskLevel === "high" && t.approvalMode === "none")) out.push({ severity: "High", finding: "High risk tool missing an approval path", evidenceSource: "Build/Agents", impact: "Risky action could execute without human oversight", requiredAction: "Add an approval gate to all high risk tools", owner: "Governance", dueStage: "Govern", status: "Open" });
   }
-  // Phase 6 — training / generalization findings.
+  // Phase 6, training / generalization findings.
   const tc = s.rag?.trainingContract;
   if (tc?.enabled) {
     const gen = tc.generalizationAssessment;
@@ -395,18 +395,18 @@ export function deriveRequiredControls(s: ProgramState): GovControl[] {
   if ((g.monitoringCoverageScore ?? 100) < 80) { add("Retrieval-miss + citation-failure + feedback monitoring", "Monitoring coverage gap", "AI Ops", "Operate", false); }
   if (!g.rollbackReadiness || /weak|not/i.test(g.rollbackReadiness)) { add("Prompt / index / source / model rollback plan", "Rollback readiness", "AI Ops", "Operate", false); }
   if (g.auditEvidenceRequired) { add("Audit logging + evidence pack retention", "Audit evidence required", "Governance", "Govern", true); }
-  // Phase 5 — agent / tool-calling controls.
+  // Phase 5, agent / tool calling controls.
   if (s.rag?.agentTooling?.enabled) {
     add("Human approval for customer-facing drafts", "Agentic workflow", "Support Lead", "Build/Agents", true);
     add("Financial actions blocked (no AI refund approval)", "Critical tool risk", "Finance", "Build/Agents", true);
     add("Tool-call audit logging on every call", "Agentic workflow", "AI Ops", "Build/Agents", true);
   }
-  // Phase 6 — training / generalization controls.
+  // Phase 6, training / generalization controls.
   if (s.rag?.trainingContract?.enabled) {
-    add("Clean train/validation/test split + leakage check", "Trained/fine-tuned model", "Data Owner", "Build/Training", true);
+    add("Clean train/validation/test split + leakage check", "Trained/fine tuned model", "Data Owner", "Build/Training", true);
     add("Holdout evaluation before release", "Generalization risk", "RAG Owner", "Build/Training", true);
     add("Class-level performance reporting + drift monitoring", "Trained model", "AI Ops", "Operate", true);
-    add("Rollback plan for the trained model", "Fine-tune rollback burden", "AI Ops", "Operate", false);
+    add("Rollback plan for the trained model", "Fine tune rollback burden", "AI Ops", "Operate", false);
   }
   return out;
 }
@@ -443,7 +443,7 @@ export function deriveGovernanceDecision(s: ProgramState): GovernanceDecision {
   const score = Math.round(card.reduce((a, d) => a + d.score, 0) / card.length);
   const rationale = has(tier)
     ? `Tier ${tier} with ${blockers.length} blocker(s) and ${findings.length} open finding(s). ${g.governanceTierRationale ?? ""}`.trim()
-    : "No framed initiative — assessment pending.";
+    : "No framed initiative, assessment pending.";
   const conditions = [
     ...controls.filter((c) => c.requiredBeforePilot).map((c) => c.name),
     ...(g.conditionalSources?.length ? ["Flag conditional data sources in retrieval"] : []),
@@ -451,9 +451,9 @@ export function deriveGovernanceDecision(s: ProgramState): GovernanceDecision {
   const evidenceUsed = [
     g.initiativeName ? `Strategy: ${g.primaryAiPattern} · tier ${tier}` : "",
     g.dataReadinessScore !== undefined ? `Data: readiness ${g.dataReadinessScore}/100` : "",
-    g.qualityScore !== undefined ? `Build: quality ${g.qualityScore}/100 · eval ${g.evalRunId ?? "—"}` : "",
+    g.qualityScore !== undefined ? `Build: quality ${g.qualityScore}/100 · eval ${g.evalRunId ?? "N/A"}` : "",
     g.releaseReadinessScore !== undefined ? `Operate: readiness ${g.releaseReadinessScore}/100 · ${g.releaseRecommendation ?? ""}` : "",
-    g.roi !== undefined ? `Realize: ${Math.round(g.roi)}% risk-adjusted ROI` : "",
+    g.roi !== undefined ? `Realize: ${Math.round(g.roi)}% risk adjusted ROI` : "",
   ].filter(Boolean);
 
   const auditReadiness = card.find((d) => d.key === "audit")?.level === "good" ? "Ready" : card.find((d) => d.key === "audit")?.level === "warn" ? "Partial" : "Incomplete";

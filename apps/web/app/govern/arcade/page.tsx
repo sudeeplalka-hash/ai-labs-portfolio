@@ -91,7 +91,7 @@ export default function Arcade() {
       </div>
 
       <div>
-        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Threat types defended — {caught.size} of {THREATS.length}</p>
+        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Threat types defended, {caught.size} of {THREATS.length}</p>
         <div className="flex flex-wrap gap-1.5">
           {THREATS.map((t) => (
             <span key={t} className={`text-xs rounded-md px-2 py-0.5 ring-1 ring-inset ${caught.has(t) ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-50 text-slate-400 ring-slate-500/15'}`}>

@@ -32,7 +32,7 @@ export function evaluateLiveAnswer(
   const retrievalRelevance = retrievedChunks.length
     ? clamp((retrievedChunks.reduce((s, c) => s + c.relevanceScore, 0) / retrievedChunks.length) * 100)
     : 0;
-  if (retrievalRelevance < 50) failureReasons.push("Retrieval relevance is low — the evidence may not match the question.");
+  if (retrievalRelevance < 50) failureReasons.push("Retrieval relevance is low, the evidence may not match the question.");
 
   // --- Citation coverage: cited / used ---
   const citationCoverage = usedChunks.length
@@ -128,7 +128,7 @@ export function evaluateLiveAnswer(
     citationAccuracy < 70 ||
     faithfulness < 70 ||
     Boolean(highRiskHit);
-  if (highRiskHit) failureReasons.push(`High-risk topic detected ("${highRiskHit}") — human review recommended.`);
+  if (highRiskHit) failureReasons.push(`High risk topic detected ("${highRiskHit}"), human review recommended.`);
 
   // --- Quality gate ---
   let qualityGateStatus: QualityGateStatus;
@@ -223,7 +223,7 @@ function buildExplanation(i: ExplainInput): string[] {
   }
   if (i.highRiskHit) {
     out.push(
-      `Because this is a high-risk topic ("${i.highRiskHit}"), the evaluator recommends human review before relying on the answer.`,
+      `Because this is a high risk topic ("${i.highRiskHit}"), the evaluator recommends human review before relying on the answer.`,
     );
   }
 

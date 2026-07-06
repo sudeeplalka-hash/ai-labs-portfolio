@@ -59,7 +59,7 @@ export default function UseCaseDetail({ id }: { id: string }) {
               ['Owner', uc.owner],
               ['Owner Email', uc.owner_email],
               ['Registered', formatDate(uc.created_at)],
-              ['Approved By', uc.approved_by ?? '—'],
+              ['Approved By', uc.approved_by ?? 'N/A'],
             ].map(([k, v]) => (
               <div key={k} className="flex justify-between text-sm">
                 <dt className="text-slate-500">{k}</dt>

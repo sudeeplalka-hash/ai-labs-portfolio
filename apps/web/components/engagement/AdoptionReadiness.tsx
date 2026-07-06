@@ -1,7 +1,7 @@
 "use client";
 
 // EL-01 · Adoption & Change Readiness Instrument (Collection 4 · control room · flagship).
-// The model was never the risk — the people who have to trust it were. Six weighted
+// The model was never the risk, the people who have to trust it were. Six weighted
 // readiness factors → composite → gate verdict (SCALE / SCALE WITH CONDITIONS / HOLD)
 // → a two-week adoption plan that rewrites as the weakest factors move. SIMULATED;
 // weighted composite with visible weights and a defended threshold.
@@ -31,7 +31,7 @@ const FACTORS: { key: FactorKey; label: string; weight: number; hint: string }[]
   { key: "incentives", label: "Incentive alignment", weight: 0.10, hint: "Does the scorecard reward using it?" },
 ];
 
-// Illustrative reference — a "typical rollout at this stage" shape for the radar overlay.
+// Illustrative reference, a "typical rollout at this stage" shape for the radar overlay.
 const BENCHMARK: Factors = { sponsorship: 70, trust: 55, workflow: 62, training: 58, comms: 60, incentives: 50 };
 // Illustrative reference populations to compare a rollout against.
 const POPULATIONS: { key: string; label: string; factors: Factors }[] = [
@@ -43,10 +43,10 @@ const POPULATIONS: { key: string; label: string; factors: Factors }[] = [
 const ACTION: Record<FactorKey, string> = {
   sponsorship: "Lock a visible executive sponsor and a leader-led kickoff; a 5-minute sponsor message every week.",
   trust: "Publish an accuracy scorecard and a one-click override; run a 'show your work' session with the loudest skeptics.",
-  workflow: "Redesign the two highest-friction steps and embed the assist in the existing tool — no new tab.",
+  workflow: "Redesign the two highest-friction steps and embed the assist in the existing tool, no new tab.",
   training: "Role-based training waves, not an all-hands; certify floor champions first.",
   comms: "Switch from broadcast to two-way: weekly office hours, a visible changelog, fixes shipped within days.",
-  incentives: "Fix the scorecard — reward assisted-handle quality, not raw handle time; drop the metric that punishes usage.",
+  incentives: "Fix the scorecard, reward assisted-handle quality, not raw handle time; drop the metric that punishes usage.",
 };
 
 const SCENARIOS: { key: string; label: string; people: number; defaults: Factors }[] = [
@@ -56,9 +56,9 @@ const SCENARIOS: { key: string; label: string; people: number; defaults: Factors
 
 const FACTOR_KEYS = FACTORS.map((x) => x.key);
 
-// Editable model assumptions — the six factor weights + the two gate cutoffs.
+// Editable model assumptions, the six factor weights + the two gate cutoffs.
 // Defaults are the original values; editing makes it "your model" (still SIMULATED).
-// Composite is normalized by the weight sum so it stays 0–100 for any weights.
+// Composite is normalized by the weight sum so it stays 0 to 100 for any weights.
 interface Assumptions { weights: Record<FactorKey, number>; scaleCut: number; condCut: number }
 const DEFAULT_ASSUMPTIONS: Assumptions = {
   weights: { sponsorship: 0.25, trust: 0.20, workflow: 0.15, training: 0.15, comms: 0.15, incentives: 0.10 },
@@ -100,7 +100,7 @@ export function AdoptionReadiness() {
   const edited = JSON.stringify(A) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
   const router = useRouter();
 
-  // Restore a shared scenario (?cfg=) once on mount — scenario, factors, assumptions.
+  // Restore a shared scenario (?cfg=) once on mount, scenario, factors, assumptions.
   useEffect(() => {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
@@ -127,7 +127,7 @@ export function AdoptionReadiness() {
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact scenario"), () => toast("Link is in the address bar"));
+      navigator.clipboard.writeText(url).then(() => toast("Link copied, this exact scenario"), () => toast("Link is in the address bar"));
     } else {
       toast("Link is in the address bar");
     }
@@ -148,15 +148,15 @@ export function AdoptionReadiness() {
 
   const buildAdoptionMemo = (): string => {
     const gnarr = c >= A.scaleCut
-      ? "Readiness clears the bar — scale."
+      ? "Readiness clears the bar, scale."
       : c >= A.condCut
       ? "Scale only with the fixes below committed and owned."
-      : "Hold — the people aren't ready. Fix the weakest factors before scaling; a technically-working pilot still fails without them.";
+      : "Hold, the people aren't ready. Fix the weakest factors before scaling; a technically-working pilot still fails without them.";
     return [
       "# Adoption readiness memo",
       "",
       `**Program:** ${activeUc ? activeUc.title : nativeScenario.label} (~${people} users)`,
-      `**Composite readiness:** ${c}/100 — ${gate.verdict}`,
+      `**Composite readiness:** ${c}/100, ${gate.verdict}`,
       "",
       "## Factor scores",
       "",
@@ -171,8 +171,8 @@ export function AdoptionReadiness() {
       "## Fix first (2-week plan)",
       "",
       priorities.length
-        ? priorities.map((x, i) => `${i + 1}. **${x.label}** (${factors[x.key]}/100) — ${ACTION[x.key]}`).join("\n")
-        : "_All factors above threshold — proceed to scale._",
+        ? priorities.map((x, i) => `${i + 1}. **${x.label}** (${factors[x.key]}/100), ${ACTION[x.key]}`).join("\n")
+        : "_All factors above threshold, proceed to scale._",
     ].join("\n");
   };
   const onGenerate = () =>
@@ -248,13 +248,13 @@ export function AdoptionReadiness() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             A pilot that works technically still dies if the people don&apos;t adopt it. Score the six factors that
-            decide adoption and the gate tells you whether to scale — and the plan tells you what to fix first.
+            decide adoption and the gate tells you whether to scale, and the plan tells you what to fix first.
           </p>
         </div>
 
         <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Enterprise AI rarely fails on the model; it fails on the people who have to trust and use it. Scaling an unready rollout is the expensive mistake." approach="Six weighted readiness factors roll up to a normalized composite that drives a Scale / conditions / Hold gate, with a two-week plan that rewrites as the weakest factors move." why="A single adoption number hides the levers. Weighting the factors and exposing the gate cutoffs turns readiness into a decision, not a vibe." metric="The composite against the Scale cutoff, and the fewest factor-point moves required to clear it, highest-leverage factors first." tradeoff="Broad slow change-management vs minimal targeted moves; the flip-the-gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold-or-scale decision with a dated, sequenced plan to reach the gate — and an honest read on whether the rollout is ready at all." />
+        <CaseStudy problem="Enterprise AI rarely fails on the model; it fails on the people who have to trust and use it. Scaling an unready rollout is the expensive mistake." approach="Six weighted readiness factors roll up to a normalized composite that drives a Scale / conditions / Hold gate, with a two-week plan that rewrites as the weakest factors move." why="A single adoption number hides the levers. Weighting the factors and exposing the gate cutoffs turns readiness into a decision, not a vibe." metric="The composite against the Scale cutoff, and the fewest factor-point moves required to clear it, highest-leverage factors first." tradeoff="Broad slow change-management vs minimal targeted moves; the flip-the-gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold-or-scale decision with a dated, sequenced plan to reach the gate, and an honest read on whether the rollout is ready at all." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's weights and gate cutoffs">
@@ -336,7 +336,7 @@ export function AdoptionReadiness() {
                 <div className="absolute -top-0.5 h-4 w-[3px] rounded bg-ink" style={{ left: `calc(${c}% - 1px)` }} />
               </div>
               <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>Hold</span><span>{A.condCut}</span><span>{A.scaleCut}</span><span>Scale</span></div>
-              <p className="mt-3 text-xs italic text-slatey-500">I gate below {A.condCut} because I&apos;ve watched pilots that scaled anyway die at week six — the trust wasn&apos;t there and the floor knew it.</p>
+              <p className="mt-3 text-xs italic text-slatey-500">I gate below {A.condCut} because I&apos;ve watched pilots that scaled anyway die at week six, the trust wasn&apos;t there and the floor knew it.</p>
             </Panel>
 
             <Panel>
@@ -447,7 +447,7 @@ export function AdoptionReadiness() {
                           </svg>
                         );
                       })()}
-                      <p className="mt-1 text-[10px] text-slatey-500">{trajectory.gateDay !== null ? `Clears Scale around day ${trajectory.gateDay} if the moves land on schedule.` : "Even fully applied these moves fall short — revisit the model."} Illustrative linear ramp.</p>
+                      <p className="mt-1 text-[10px] text-slatey-500">{trajectory.gateDay !== null ? `Clears Scale around day ${trajectory.gateDay} if the moves land on schedule.` : "Even fully applied these moves fall short, revisit the model."} Illustrative linear ramp.</p>
                     </div>
                   </>
                 ) : (
@@ -483,7 +483,7 @@ export function AdoptionReadiness() {
                 </div>
               )}
               {priorities.length === 0 ? (
-                <p className="text-sm text-slatey-400">All factors are healthy — proceed to scale with the standard champion model and a weekly pulse.</p>
+                <p className="text-sm text-slatey-400">All factors are healthy, proceed to scale with the standard champion model and a weekly pulse.</p>
               ) : (
                 <ol className="space-y-2 text-sm">
                   {priorities.map((x) => (
@@ -500,31 +500,31 @@ export function AdoptionReadiness() {
         </div>
 
         <div className="mt-6">
-          <InsightCard title={gate.verdict === "Hold" ? "Not ready — and scaling anyway is the expensive mistake" : gate.verdict === "Scale with conditions" ? "Conditional go — fix the flagged factors in parallel with the ramp" : "Ready to scale"} tone={gate.tone === "rose" ? "danger" : gate.tone === "amber" ? "warn" : "success"}>
-            The composite is dragged most by <span className="font-semibold">{(weak[0]?.label ?? "nothing").toLowerCase()}</span>. Adoption is a trust problem wearing a training problem&apos;s clothes — spend the two weeks there, not on another demo.
+          <InsightCard title={gate.verdict === "Hold" ? "Not ready, and scaling anyway is the expensive mistake" : gate.verdict === "Scale with conditions" ? "Conditional go, fix the flagged factors in parallel with the ramp" : "Ready to scale"} tone={gate.tone === "rose" ? "danger" : gate.tone === "amber" ? "warn" : "success"}>
+            The composite is dragged most by <span className="font-semibold">{(weak[0]?.label ?? "nothing").toLowerCase()}</span>. Adoption is a trust problem wearing a training problem&apos;s clothes, spend the two weeks there, not on another demo.
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Hold or scale per the readiness gate, and spend the two weeks on the fewest, highest-leverage factor moves." lift="Clears the Scale cutoff via the minimal point moves instead of a broad slow push — and avoids the expensive failure of scaling an unready rollout." measure="Actual adoption percent vs target; re-survey the six factors at 2 and 6 weeks; time-to-Scale; support and override rates as trust proxies." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : `The model was never the risk. The ${people} people who have to trust it were.`}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — Gen AI rollouts at AMEX; the adoption half of the 4.5× scale story.</p>}
+          <OutcomeFrame call="Hold or scale per the readiness gate, and spend the two weeks on the fewest, highest-leverage factor moves." lift="Clears the Scale cutoff via the minimal point moves instead of a broad slow push, and avoids the expensive failure of scaling an unready rollout." measure="Actual adoption percent vs target; re-survey the six factors at 2 and 6 weeks; time-to-Scale; support and override rates as trust proxies." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : `The model was never the risk. The ${people} people who have to trust it were.`}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, Gen AI rollouts at AMEX; the adoption half of the 4.5× scale story.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Composite = weighted sum of six factors (sponsorship 25% · trust 20% · workflow 15% · training 15% · comms 15% · incentives 10%). Gate: ≥75 scale · 60–74 conditions · &lt;60 hold.</p>
+              <p>Composite = weighted sum of six factors (sponsorship 25% · trust 20% · workflow 15% · training 15% · comms 15% · incentives 10%). Gate: ≥75 scale · 60 to 74 conditions · &lt;60 hold.</p>
               <p>The plan is generated from the weakest factors (below 70), each mapped to a concrete first move; the champion ratio scales with the population.</p>
-              <p>Stack: Next.js (static) + shared design system; client-side only.</p>
+              <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> weights are defensible defaults, not calibrated against outcome data; scoring is judgment-based. The instrument structures the readiness conversation — it doesn&apos;t replace it.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> weights are defensible defaults, not calibrated against outcome data; scoring is judgment-based. The instrument structures the readiness conversation, it doesn&apos;t replace it.</p>
         </div>
 
         <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Model assumptions">
           <div className="space-y-5">
             <p className="text-xs leading-relaxed text-slatey-400">
               These set how much each factor counts and where the gate draws its lines. Editing makes this{" "}
-              <span className="font-semibold text-ink">your model</span> — still SIMULATED, now on your weights.
+              <span className="font-semibold text-ink">your model</span>, still SIMULATED, now on your weights.
             </p>
 
             <div>

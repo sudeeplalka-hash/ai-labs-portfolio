@@ -3,7 +3,7 @@
 // EL-07 · RFP/RFI Response War Room (Collection 4 · control room · commercial wing).
 // Decompose an RFP into a compliance matrix, set win themes, red-team the draft
 // against the RFP's own criteria, and land a bid / no-bid call from fit × win-prob
-// × capacity × margin floor. One sample is a deliberate no-bid — declining bad work
+// × capacity × margin floor. One sample is a deliberate no-bid, declining bad work
 // is senior judgment. SIMULATED.
 
 import { useState } from "react";
@@ -52,12 +52,12 @@ const RFPS: Rfp[] = [
   },
   {
     key: "greenfield", label: "Greenfield agentic platform (new domain)",
-    excerpt: "Fixed-price build of a production multi-agent platform in a domain new to the bidder, delivered in 12 weeks with slip penalties. Client data available from week 4. Strong incumbent relationship in place. Lowest price weighted heavily.",
+    excerpt: "Fixed-price build of a production multiagent platform in a domain new to the bidder, delivered in 12 weeks with slip penalties. Client data available from week 4. Strong incumbent relationship in place. Lowest price weighted heavily.",
     requirements: [
-      { text: "Production multi-agent platform in 12 weeks", owner: "Delivery", evidence: "—", status: "gap" },
-      { text: "Fixed price with slip penalties", owner: "Commercial", evidence: "—", status: "gap" },
+      { text: "Production multiagent platform in 12 weeks", owner: "Delivery", evidence: "N/A", status: "gap" },
+      { text: "Fixed price with slip penalties", owner: "Commercial", evidence: "N/A", status: "gap" },
       { text: "Deliver with data withheld until week 4", owner: "Data", evidence: "critical-path risk", status: "gap" },
-      { text: "Displace a strong incumbent", owner: "Sales", evidence: "—", status: "gap" },
+      { text: "Displace a strong incumbent", owner: "Sales", evidence: "N/A", status: "gap" },
       { text: "Domain expertise (net-new to us)", owner: "Delivery", evidence: "adjacent only", status: "partial" },
     ],
     criteria: [
@@ -67,7 +67,7 @@ const RFPS: Rfp[] = [
       { name: "Price", weight: 0.15, score: 40 },
       { name: "Governance", weight: 0.10, score: 65 },
     ],
-    winThemes: ["Thin — no clear differentiator"],
+    winThemes: ["Thin, no clear differentiator"],
     fit: 0.40, winProb: 0.20, capacity: 0.5, marginPct: 14, marginFloor: 25,
   },
 ];
@@ -88,10 +88,10 @@ export function RfpWarRoom() {
 
   const buildBidMemo = (): string => {
     const rec = bid
-      ? `Bid. Coverage ${coverage}%, red-team ${redTeam}/100, margin above floor — pursue it and thread the win themes through every scored section.`
-      : `No-bid. Margin ${rfp.marginPct}% vs a ${rfp.marginFloor}% floor and a pursuit score of ${portfolio} — chasing it burns senior time owed to winnable bids. Decline, and say why in one paragraph.`;
+      ? `Bid. Coverage ${coverage}%, red-team ${redTeam}/100, margin above floor, pursue it and thread the win themes through every scored section.`
+      : `No-bid. Margin ${rfp.marginPct}% vs a ${rfp.marginFloor}% floor and a pursuit score of ${portfolio}, chasing it burns senior time owed to winnable bids. Decline, and say why in one paragraph.`;
     return [
-      `# Bid / No-bid memo — ${rfp.label}`,
+      `# Bid / No-bid memo, ${rfp.label}`,
       "",
       `**Decision: ${bid ? "BID" : "NO-BID"}**`,
       "",
@@ -144,13 +144,13 @@ export function RfpWarRoom() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             Decompose the ask, red-team the response against the RFP&apos;s own scoring, and make the call. The RFPs you
-            decline fund the ones you win — bid/no-bid is a portfolio decision, not a reflex.
+            decline fund the ones you win, bid/no-bid is a portfolio decision, not a reflex.
           </p>
         </div>
 
         <UseCaseRail useCases={EL07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Should we even bid this — and where is the response weak?" approach="Score the opportunity on fit, win-probability, capacity, and margin, and find the weakest sections of the draft response." why="Bid/no-bid is a portfolio decision, not an enthusiasm decision." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no-bid call plus where to strengthen the response if you bid." />
+        <CaseStudy problem="Should we even bid this, and where is the response weak?" approach="Score the opportunity on fit, win-probability, capacity, and margin, and find the weakest sections of the draft response." why="Bid/no-bid is a portfolio decision, not an enthusiasm decision." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no-bid call plus where to strengthen the response if you bid." />
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -225,7 +225,7 @@ export function RfpWarRoom() {
         </div>
 
         <div className="mt-6">
-          <InsightCard title={bid ? "Bid — and lead with the win themes" : "No-bid — and that's the senior call"} tone={bid ? "success" : "danger"}>
+          <InsightCard title={bid ? "Bid, and lead with the win themes" : "No-bid, and that's the senior call"} tone={bid ? "success" : "danger"}>
             {bid
               ? <>Coverage {coverage}%, red-team {redTeam}/100, margin above floor. Pursue it and thread the win themes through every section the RFP scores.</>
               : <>Margin {rfp.marginPct}% sits below the {rfp.marginFloor}% floor and the pursuit score is {portfolio}. Chasing it burns senior time you owe the bids you can win. Decline, and say why in one paragraph.</>}
@@ -235,14 +235,14 @@ export function RfpWarRoom() {
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Bid only where fit times win-probability times margin clears the bar and capacity exists; else no-bid." lift="Win-rate and margin improve by not chasing low-probability, low-fit bids." measure="Win rate on bids above the bar; margin on won work; capacity freed by no-bidding." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The RFPs you decline fund the ones you win. Bid/no-bid is a portfolio decision, not a reflex."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — $9M pipeline — the instrument of how a pipeline gets built, one qualified pursuit at a time.</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The RFPs you decline fund the ones you win. Bid/no-bid is a portfolio decision, not a reflex."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, $9M pipeline, the instrument of how a pipeline gets built, one qualified pursuit at a time.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Coverage = mean of requirement status (met 1 · partial 0.5 · gap 0). Red-team = Σ(criterion weight × score) against the RFP&apos;s own evaluation scheme.</p>
-              <p>Bid rule: margin ≥ floor AND pursuit score (fit × win-prob × capacity) ≥ 35. The second sample is engineered to fail both — the honest answer is no-bid.</p>
-              <p>Stack: Next.js (static) + shared design system; client-side only.</p>
+              <p>Bid rule: margin ≥ floor AND pursuit score (fit × win-prob × capacity) ≥ 35. The second sample is engineered to fail both, the honest answer is no-bid.</p>
+              <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> fit/win-prob/capacity are judgment inputs, not a CRM model; scoring is illustrative. It disciplines the qualify-and-decline decision, not the full proposal build.</p>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useProgram } from "@labs/program-core";
 import { loadStoredTraces, aggregateLiveMetrics } from "@rag/lib/live-lab/liveMetrics";
 
-// Writes the real RAG evaluator metrics into ProgramState.rag — this is what makes
+// Writes the real RAG evaluator metrics into ProgramState.rag, this is what makes
 // Deploy's escalation cost and Realize's quality factor *live*. Reuses the RAG
 // lab's own aggregation over its persisted traces.
 export function BuildSliceWriter() {

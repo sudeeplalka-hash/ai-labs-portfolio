@@ -1,6 +1,6 @@
 // ============================================================================
 // Verdict + insights. The judgment is the hero: a short, honest read of the bet,
-// plus three cards — what is strong, what to watch, and what comes next.
+// plus three cards, what is strong, what to watch, and what comes next.
 // ============================================================================
 import type { FramingParams, TriangleScores, Verdict, VerdictTone } from "./types";
 import { SCORE_TARGETS } from "./scoring";

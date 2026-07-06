@@ -1,14 +1,14 @@
 "use client";
 
-// Phase 5 — Agent & tool-calling mechanics UI. Enterprise-safe: scoped tools,
+// Phase 5, Agent & tool calling mechanics UI. Enterprise-safe: scoped tools,
 // governed workflow trace, permission boundaries, approvals, blocked actions, and
 // misuse evals. No real external actions. Persists the agent tooling contract in
 // live mode so Operate + Govern can consume it.
 //
-// Phase E — the safety story made touchable: the trace replays step by step with
+// Phase E, the safety story made touchable: the trace replays step by step with
 // the blocked branch as a visible fork, and the approval flow takes real
-// decisions that append audit lines and update the pending-approvals count.
-// All interaction state is session-local (never written to program state), so
+// decisions that append audit lines and update the pending approvals count.
+// All interaction state is session local (never written to program state), so
 // there is zero update-loop risk and demo mode stays read-only.
 
 import { useEffect, useMemo, useState } from "react";
@@ -50,7 +50,7 @@ export function AgentTooling() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, hydrated, isDemo]);
 
-  // --- Phase E · trace playback (session-local UI state) ---------------------
+  // --- Phase E · trace playback (session local UI state) ---------------------
   const total = WORKFLOW_TRACE.steps.length;
   const [revealed, setRevealed] = useState(total); // fully visible on arrival
   const [playing, setPlaying] = useState(false);
@@ -75,7 +75,7 @@ export function AgentTooling() {
   };
   const tryBlocked = () => {
     setBlockedTried(true);
-    log(`${WORKFLOW_TRACE.auditLogId} · approve-refund attempt BLOCKED by policy boundary · routed to human`, "rose");
+    log(`${WORKFLOW_TRACE.auditLogId} · approve refund attempt BLOCKED by policy boundary · routed to human`, "rose");
   };
   const resetSession = () => { setDecision(null); setBlockedTried(false); setAudit([]); };
 
@@ -92,10 +92,10 @@ export function AgentTooling() {
         </div>
         <p className="mt-1 text-sm text-slatey-400">{agentic
           ? "Strategy tagged this initiative as agentic / tool-using, so these tool schemas, approvals, and audit traces apply to its Build Output Contract."
-          : "This initiative isn't tagged agentic, but the mechanics below show how tool-calling would be scoped and governed if it were."}</p>
+          : "This initiative isn't tagged agentic, but the mechanics below show how tool calling would be scoped and governed if it were."}</p>
       </div>
 
-      {/* 3 — Tool schema registry */}
+      {/* 3, Tool schema registry */}
       <Panel>
         <SectionHeader eyebrow="Tool schema registry" title="What the agent may (and may not) call" icon={Wrench}
           description="Each tool is scoped with a schema, allowed roles, risk level, approval mode, and rollback path. Some are intentionally blocked." />
@@ -123,7 +123,7 @@ export function AgentTooling() {
         </div>
       </Panel>
 
-      {/* 4 — Workflow trace with playback + blocked fork */}
+      {/* 4, Workflow trace with playback + blocked fork */}
       <Panel>
         <SectionHeader eyebrow="Agentic workflow trace" title={WORKFLOW_TRACE.name} icon={Workflow}
           description={`Request: "${WORKFLOW_TRACE.userRequest}"`}
@@ -160,7 +160,7 @@ export function AgentTooling() {
                   </div>
                 </div>
 
-                {/* The fork: the branch the agent tried to take — and couldn't. */}
+                {/* The fork: the branch the agent tried to take, and couldn't. */}
                 {s.stepNumber === FORK_AFTER_STEP && (
                   <div className={cn(
                     "ml-9 mt-2 flex items-start gap-2 rounded-lg border border-rose-300 bg-rose-50/50 p-3 transition-all duration-300",
@@ -169,7 +169,7 @@ export function AgentTooling() {
                   )}>
                     <Ban className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
                     <div className="text-[12px] leading-relaxed">
-                      <p className="font-semibold text-rose-700">Blocked branch — attempted: approve-refund</p>
+                      <p className="font-semibold text-rose-700">Blocked branch, attempted: approve refund</p>
                       <p className="text-slatey-400">{WORKFLOW_TRACE.risks[0]}</p>
                     </div>
                   </div>
@@ -186,9 +186,9 @@ export function AgentTooling() {
         <p className="mt-2 flex items-center gap-1.5 text-[11px] text-slatey-500"><RotateCcw className="h-3.5 w-3.5" /> Rollback: {WORKFLOW_TRACE.rollbackPlan} · Audit: {WORKFLOW_TRACE.auditLogId}</p>
       </Panel>
 
-      {/* 5 — Permission boundaries */}
+      {/* 5, Permission boundaries */}
       <Panel>
-        <SectionHeader eyebrow="Permission boundaries" title="Assist and recommend — don't act unsupervised" icon={ShieldCheck}
+        <SectionHeader eyebrow="Permission boundaries" title="Assist and recommend, don't act unsupervised" icon={ShieldCheck}
           description="Permission boundaries convert agentic AI from autonomous action into controlled workflow execution." />
         <div className="grid gap-3 md:grid-cols-3">
           <Boundary title="Allowed" tone="emerald" icon={<CheckCircle2 className="h-4 w-4" />} items={PERMISSION_BOUNDARIES.allowedActions} />
@@ -197,10 +197,10 @@ export function AgentTooling() {
         </div>
       </Panel>
 
-      {/* 6 — Action approval flow (real decisions, session-local) */}
+      {/* 6, Action approval flow (real decisions, session local) */}
       <Panel>
         <SectionHeader eyebrow="Action approval flow" title="Approvals gate risky actions" icon={Gavel}
-          description="Take the Support Lead's decision yourself — every choice lands in the audit feed below and updates the pending-approvals count."
+          description="Take the Support Lead's decision yourself, every choice lands in the audit feed below and updates the pending approvals count."
           action={audit.length > 0 ? <button onClick={resetSession} className="inline-flex items-center gap-1 text-xs font-semibold text-primary"><RotateCcw className="h-3 w-3" /> reset session</button> : null} />
         <div className="grid gap-3 md:grid-cols-2">
           <div className={cn("rounded-xl border p-4", decision ? "border-line bg-white" : "border-amber-300 bg-amber-50/40")}>
@@ -228,22 +228,22 @@ export function AgentTooling() {
           </div>
           <div className="rounded-xl border border-rose-300 bg-rose-50/40 p-4">
             <div className="flex items-center justify-between"><span className="text-sm font-semibold text-ink">Approve refund</span><Badge tone="rose">Critical · Blocked</Badge></div>
-            <p className="mt-2 text-[12px] leading-relaxed text-slatey-400">The AI is not permitted to approve financial transactions — try it and watch the boundary hold.</p>
+            <p className="mt-2 text-[12px] leading-relaxed text-slatey-400">The AI is not permitted to approve financial transactions, try it and watch the boundary hold.</p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <button onClick={tryBlocked}
                 className="rounded-md border border-rose-300 bg-white px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-50">
                 Attempt refund approval as AI
               </button>
-              {blockedTried && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600"><Ban className="h-3.5 w-3.5" /> Blocked by policy boundary — routed to a human</span>}
+              {blockedTried && <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600"><Ban className="h-3.5 w-3.5" /> Blocked by policy boundary, routed to a human</span>}
             </div>
           </div>
         </div>
 
         {/* Session audit feed */}
         <div className="mt-4 rounded-lg border border-line bg-slate-50/60 p-3">
-          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slatey-500"><ScrollText className="h-3.5 w-3.5" /> Audit feed (session-local — resets on reload)</p>
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slatey-500"><ScrollText className="h-3.5 w-3.5" /> Audit feed (session local, resets on reload)</p>
           {audit.length === 0 ? (
-            <p className="mt-1 text-[12px] text-slatey-400">No entries yet — take a decision above, or attempt the blocked action.</p>
+            <p className="mt-1 text-[12px] text-slatey-400">No entries yet, take a decision above, or attempt the blocked action.</p>
           ) : (
             <ul className="mt-1.5 space-y-1">
               {audit.map((a, i) => (
@@ -257,7 +257,7 @@ export function AgentTooling() {
         </div>
       </Panel>
 
-      {/* 7 — Misuse evals */}
+      {/* 7, Misuse evals */}
       <Panel className="overflow-x-auto">
         <SectionHeader eyebrow="Tool misuse evaluations" title="Agent behavior needs evaluation too" icon={FlaskConical} />
         <table className="w-full min-w-[860px] text-left text-sm">
@@ -276,7 +276,7 @@ export function AgentTooling() {
         </table>
       </Panel>
 
-      {/* 8 — Contract summary + 9 handoff */}
+      {/* 8, Contract summary + 9 handoff */}
       <Panel>
         <SectionHeader eyebrow="Agent tooling contract" title="What flows to Operate & Govern" icon={ClipboardCheck} />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -306,16 +306,16 @@ export function AgentTooling() {
           <div className="flex flex-wrap gap-1.5">{AGENT_ROLLBACK_OPTIONS.map((o) => <Badge key={o} tone="slate">{o}</Badge>)}</div></div>
       </Panel>
 
-      {/* 10 + 11 — demonstrates + simulation boundary */}
+      {/* 10 + 11, demonstrates + simulation boundary */}
       <Panel>
         <SectionHeader eyebrow="For reviewers" title="What this agent layer demonstrates" icon={Info} />
         <p className="max-w-3xl text-sm leading-relaxed text-slatey-300">
           This layer shows how agentic AI should be operationalized in the enterprise. The system can retrieve, draft, summarize, and
-          recommend, but high-risk actions are approved, restricted, or blocked. Every tool call becomes evidence for Operate and Govern.
+          recommend, but high risk actions are approved, restricted, or blocked. Every tool call becomes evidence for Operate and Govern.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <InsightCard tone="info" title="Scoped tool access">Every tool has a schema, allowed roles, and a risk level.</InsightCard>
-          <InsightCard tone="info" title="Permission boundaries">Assist, draft, and recommend — high-risk actions need approval or are blocked.</InsightCard>
+          <InsightCard tone="info" title="Permission boundaries">Assist, draft, and recommend, high risk actions need approval or are blocked.</InsightCard>
           <InsightCard tone="success" title="Human approval gates">Risky actions route to a human before any effect.</InsightCard>
           <InsightCard tone="success" title="Tool misuse evaluation">Agent behavior is evaluated like RAG answers.</InsightCard>
           <InsightCard tone="warn" title="Auditability & rollback">Every call is logged; every action has a rollback path.</InsightCard>

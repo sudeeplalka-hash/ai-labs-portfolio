@@ -1,8 +1,8 @@
-// Shareable per-use-case pages — a canonical, SEO'd URL for every worked scenario
+// Shareable per-use case pages, a canonical, SEO'd URL for every worked scenario
 // (/industries/uc/<id>). Statically generated from the registry (generateStaticParams),
-// with per-use-case metadata (title/description/OpenGraph) computed from the same data
-// the labs read — so a shared link renders a real analyst card and opens the live lab
-// pre-loaded to that exact industry scenario. Fully static (output: export compatible).
+// with per-use case metadata (title/description/OpenGraph) computed from the same data
+// the labs read, so a shared link renders a real analyst card and opens the live lab
+// preloaded to that exact industry scenario. Fully static (output: export compatible).
 
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -18,16 +18,16 @@ export function generateStaticParams() {
 
 export function generateMetadata({ params }: { params: { id: string } }): Metadata {
   const uc = ALL_USE_CASES.find((u) => u.id === params.id);
-  if (!uc) return { title: "Use-case not found" };
+  if (!uc) return { title: "Use case not found" };
   const ind = INDUSTRIES[uc.industry];
-  const prov = uc.provenance.kind === "first-hand" ? "First-hand" : "Studied";
+  const prov = uc.provenance.kind === "firsthand" ? "Firsthand" : "Studied";
   const title = `${uc.title} · ${ind.label}`;
-  const description = `${uc.oneLiner} — ${uc.takeaway}`;
+  const description = `${uc.oneLiner}, ${uc.takeaway}`;
   return {
     title,
     description,
     keywords: [ind.label, uc.labId, prov, "AI delivery", "engagement leadership", "use case"],
-    openGraph: { title: `${title} — AI Labs Portfolio`, description, type: "article" },
+    openGraph: { title: `${title}, AI Labs Portfolio`, description, type: "article" },
     twitter: { card: "summary", title, description },
   };
 }
@@ -47,7 +47,7 @@ export default function UseCasePage({ params }: { params: { id: string } }) {
 
   const ind = INDUSTRIES[uc.industry];
   const route = LAB_ROUTES[uc.labId];
-  const fh = uc.provenance.kind === "first-hand";
+  const fh = uc.provenance.kind === "firsthand";
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
@@ -70,23 +70,23 @@ export default function UseCasePage({ params }: { params: { id: string } }) {
             <span
               className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${fh ? "text-white" : "border border-line bg-slate-50 text-slatey-400"}`}
               style={fh ? { background: ind.accent } : undefined}
-              title={fh ? "Grounded in first-hand delivery" : "Informed by public industry patterns"}
+              title={fh ? "Grounded in firsthand delivery" : "Informed by public industry patterns"}
             >
-              {fh ? "First-hand" : "Studied"}
+              {fh ? "Firsthand" : "Studied"}
             </span>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">{uc.title}</h1>
           <p className="mt-2 text-base italic text-slatey-400">{uc.oneLiner}</p>
         </div>
 
-        {/* Primary CTA — open the live lab pre-loaded */}
+        {/* Primary CTA, open the live lab preloaded */}
         <Link
           href={labHref(uc.labId, uc.id)}
           className="group mb-6 flex items-center gap-3 rounded-xl border px-4 py-3 transition hover:bg-slate-50"
           style={{ borderColor: `${ind.accent}55`, borderLeftWidth: 4, borderLeftColor: ind.accent }}
         >
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">Open the live lab · pre-loaded to this scenario</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">Open the live lab · preloaded to this scenario</p>
             <p className="text-sm font-semibold text-ink">{route?.name ?? uc.labId}</p>
           </div>
           <ArrowRight className="ml-auto h-5 w-5 shrink-0 text-slatey-400 transition group-hover:translate-x-0.5 group-hover:text-ink" />
@@ -108,7 +108,7 @@ export default function UseCasePage({ params }: { params: { id: string } }) {
         {/* Provenance / sources */}
         <div className="mt-6 border-t border-line pt-4 text-xs text-slatey-500">
           <p>
-            <span className="font-semibold text-slatey-400">{fh ? "First-hand" : "Studied"}</span> · {route?.collection ?? "Lab"} ·{" "}
+            <span className="font-semibold text-slatey-400">{fh ? "Firsthand" : "Studied"}</span> · {route?.collection ?? "Lab"} ·{" "}
             verified {uc.lastVerified}
           </p>
           <p className="mt-1">Sources: {uc.sources.join("; ")}</p>

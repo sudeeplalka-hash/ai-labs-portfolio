@@ -1,6 +1,6 @@
 "use client";
 
-// Phase A — live/demo clarity. The Govern landing page runs the live evidence
+// Phase A, live/demo clarity. The Govern landing page runs the live evidence
 // loop; the older control-plane subroutes render a curated demo dataset. This
 // banner makes that boundary explicit on every legacy subroute.
 

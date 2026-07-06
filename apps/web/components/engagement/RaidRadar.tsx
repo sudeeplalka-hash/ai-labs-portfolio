@@ -4,7 +4,7 @@
 // The lesson: reported status hides trajectory. The board pairs each workstream's
 // reported RAG with its ACTUAL health and TREND, the mini-plot exposes the one that
 // "reads green but is sinking," and selecting a workstream drafts the leadership
-// status narrative that ends in a decision ask. SIMULATED — logic is deterministic
+// status narrative that ends in a decision ask. SIMULATED, logic is deterministic
 // and defensible; a live narrative variant can plug into LIVE_MODEL later.
 
 import { useState } from "react";
@@ -100,7 +100,7 @@ export function RaidRadar() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             A steering board should report <span className="font-semibold text-ink">trajectory, not snapshots</span>.
-            Each workstream pairs its reported RAG with the health it actually has once the trend is priced in — so the
+            Each workstream pairs its reported RAG with the health it actually has once the trend is priced in, so the
             one that <span className="font-semibold text-ink">reads green but is sinking</span> can&apos;t hide.
           </p>
         </div>
@@ -178,7 +178,7 @@ export function RaidRadar() {
                     </div>
                     {gap && (
                       <p className="mt-2 rounded-md bg-rose-50 px-2 py-1 text-[11px] font-medium text-rose-700">
-                        Reads {HEALTH_LABEL[w.reported].toLowerCase()}, trending {HEALTH_LABEL[w.actual].toLowerCase()} — trajectory hidden by the milestone view.
+                        Reads {HEALTH_LABEL[w.reported].toLowerCase()}, trending {HEALTH_LABEL[w.actual].toLowerCase()}, trajectory hidden by the milestone view.
                       </p>
                     )}
                   </button>
@@ -247,23 +247,23 @@ export function RaidRadar() {
         <div className="mt-6">
           <InsightCard title="The reported-vs-actual gap" tone={gaps >= 1 ? "danger" : "success"}>
             {gaps >= 1
-              ? `${gaps} workstream${gaps > 1 ? "s report" : " reports"} healthier than reality. A green status with a downward arrow is a yellow that hasn't surfaced yet — the milestone view rewards "on schedule" and stays silent on quality and adoption.`
-              : "No reported-vs-actual gaps this period — reported status matches trajectory."}
+              ? `${gaps} workstream${gaps > 1 ? "s report" : " reports"} healthier than reality. A green status with a downward arrow is a yellow that hasn't surfaced yet, the milestone view rewards "on schedule" and stays silent on quality and adoption.`
+              : "No reported-vs-actual gaps this period, reported status matches trajectory."}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Escalate the workstreams that read green but are sinking, before the next steering." lift="Catch the trajectory problem weeks earlier than a RAG snapshot would." measure="Lead time from actual-decline to escalation; reported-vs-actual gap trend; workstreams that recovered after an early flag." />
           <p className="text-sm leading-relaxed text-ink">
-            <span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Green with a downward arrow is yellow. Report trajectory or get surprised."}
+            <span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Green with a downward arrow is yellow. Report trajectory or get surprised."}
           </p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — the weekly reality of multi-portfolio EM work at AMEX.</p>}
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, the weekly reality of multi-portfolio EM work at AMEX.</p>}
 
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Stack: Next.js (static) + the shared design system; client-side state only.</p>
-              <p>Data: authored sample portfolios (finserv + telecom), each workstream carrying reported vs actual RAG, a 3-week trend, and RAID items — shared with EL-10.</p>
+              <p>Stack: Next.js (static) + the shared design system; client side state only.</p>
+              <p>Data: authored sample portfolios (finserv + telecom), each workstream carrying reported vs actual RAG, a 3-week trend, and RAID items, shared with EL-10.</p>
               <p>Health index = mean of actual-health scores (green 100 / amber 60 / red 25); the radar plots actual-health × trend with reported status as dot color, so a green dot in the deteriorating-but-looks-better corner is the trap.</p>
               <p>Narrative: deterministic template over the workstream&apos;s authored brief, disciplined into Status → What changed → Watch → Ask. A LIVE variant can generate the prose via LIVE_MODEL without changing the structure.</p>
             </div>
@@ -285,7 +285,7 @@ function RaidBlock({ title, items }: { title: string; items: RaidItem[] }) {
     <div>
       <p className="mb-1 font-semibold text-slatey-400">{title} <span className="font-normal text-slatey-500">· {items.length}</span></p>
       {items.length === 0 ? (
-        <p className="text-slatey-500">—</p>
+        <p className="text-slatey-500">N/A</p>
       ) : (
         <ul className="space-y-1">
           {items.map((it, i) => (

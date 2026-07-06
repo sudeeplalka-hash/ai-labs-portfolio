@@ -54,7 +54,7 @@ export function EvaluationsView() {
     { label: "Faithfulness", key: "faithfulness", value: run.metrics.faithfulness, target: THRESHOLDS.faithfulness },
     { label: "Citation Accuracy", key: "citationAccuracy", value: run.metrics.citationAccuracy, target: THRESHOLDS.citationAccuracy },
     { label: "Pass Rate", key: "passRate", value: run.metrics.passRate, target: 85 },
-    { label: "High-Risk Pass Rate", key: "highRiskPassRate", value: run.metrics.highRiskPassRate, target: THRESHOLDS.highRiskPassRate },
+    { label: "High risk Pass Rate", key: "highRiskPassRate", value: run.metrics.highRiskPassRate, target: THRESHOLDS.highRiskPassRate },
   ];
 
   const compareData = evaluationRuns.map((r) => ({

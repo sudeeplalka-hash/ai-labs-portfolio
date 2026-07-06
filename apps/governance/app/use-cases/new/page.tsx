@@ -29,7 +29,7 @@ export default function NewUseCase() {
     setLoading(true); setError('');
     try {
       const uc = await api.useCases.create(form);
-      router.push(`/use-cases/${uc.id}`);
+      router.push(`/use cases/${uc.id}`);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to register use case');
     } finally { setLoading(false); }

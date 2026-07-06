@@ -1,6 +1,6 @@
-// C3-1 · AI Initiative Portfolio Dashboard — use-cases.
+// C3-1 · AI Initiative Portfolio Dashboard, use cases.
 // Payload = an industry-specific book of ~12 initiatives the dashboard scores with
-// the SAME risk-adjusted-ROI engine. Numbers are tuned so each book yields a
+// the SAME risk adjusted-ROI engine. Numbers are tuned so each book yields a
 // believable kill/scale/hold spread (2 kills, ~3 scale, rest hold).
 
 import { type UseCase, assertUseCases, firstHand, studied } from "../industries";
@@ -21,17 +21,17 @@ export const C31_USE_CASES: UseCase<C31Payload>[] = assertUseCases<C31Payload>([
     industry: "financial-services",
     provenance: firstHand,
     title: "A retail bank's AI book",
-    oneLiner: "Cards, fraud, KYC, wealth — governed like capital; two get cut.",
+    oneLiner: "Cards, fraud, KYC, wealth, governed like capital; two get cut.",
     context:
       "A retail bank runs twelve AI initiatives across cards, fraud, lending, and wealth. Each competes for the same delivery capacity and cloud budget; leadership wants a defensible kill/scale/hold call, not a champion's wish-list.",
     theDecision:
-      "Fund on risk-adjusted ROI, not enthusiasm — the KYC pilot and the collections assist both destroy value at their current stage and should be cut to feed the two that are ready to scale.",
+      "Fund on risk adjusted ROI, not enthusiasm, the KYC pilot and the collections assist both destroy value at their current stage and should be cut to feed the two that are ready to scale.",
     whatMostMiss:
-      "The hard call isn't what to scale — it's killing a well-liked pilot. A portfolio where nothing is ever killed isn't governed; it's unattended.",
-    stakes: "Two negative-ROI initiatives hold the delivery capacity the scale-ready ones need — the cost of not deciding is the opportunity cost.",
+      "The hard call isn't what to scale, it's killing a well-liked pilot. A portfolio where nothing is ever killed isn't governed; it's unattended.",
+    stakes: "Two negative-ROI initiatives hold the delivery capacity the scale-ready ones need, the cost of not deciding is the opportunity cost.",
     takeaway: "I govern the AI book like capital: fund the ROI, kill the theatre, and make the call visible.",
     sources: [
-      "Financial-services AI portfolio governance — first-hand (cards & payments, American Express)",
+      "Financial-services AI portfolio governance, firsthand (cards & payments, American Express)",
       "Stage-gated capital-allocation practice",
     ],
     lastVerified: "2026-07-03",
@@ -47,7 +47,7 @@ export const C31_USE_CASES: UseCase<C31Payload>[] = assertUseCases<C31Payload>([
         { id: "aml", name: "AML transaction monitoring", domain: "Risk", stage: "production", expValueM: 3.0, spendM: 1.0, risk: 0.40, planVar: -2 },
         { id: "wealth", name: "Wealth ops copilot", domain: "Wealth", stage: "scaling", expValueM: 1.8, spendM: 0.8, risk: 0.50, planVar: 6 },
         { id: "nba", name: "Marketing next-best-action", domain: "Growth", stage: "scaling", expValueM: 2.2, spendM: 0.9, risk: 0.55, planVar: 8 },
-        { id: "agentassist", name: "Contact-center agent assist", domain: "Servicing", stage: "production", expValueM: 2.6, spendM: 0.75, risk: 0.35, planVar: 3 },
+        { id: "agentassist", name: "Contact center agent assist", domain: "Servicing", stage: "production", expValueM: 2.6, spendM: 0.75, risk: 0.35, planVar: 3 },
         { id: "complaints", name: "Complaint analytics", domain: "Risk", stage: "scaling", expValueM: 1.6, spendM: 0.7, risk: 0.50, planVar: 11 },
       ],
     },
@@ -62,9 +62,9 @@ export const C31_USE_CASES: UseCase<C31Payload>[] = assertUseCases<C31Payload>([
     context:
       "A health system weighs twelve initiatives spanning clinical (scribe, sepsis warning, imaging) and administrative (prior-auth, revenue-cycle coding, denials). Clinical value is real but slower to prove; admin value is faster and fundable now.",
     theDecision:
-      "Revenue-cycle coding and denials management scale now — proven and high risk-adjusted ROI; the imaging-triage and bed-management pilots are cut — high spend, unproven, and the clinical-safety bar makes the ramp long.",
+      "Revenue-cycle coding and denials management scale now, proven and high risk adjusted ROI; the imaging-triage and bed-management pilots are cut, high spend, unproven, and the clinical-safety bar makes the ramp long.",
     whatMostMiss:
-      "Clinical prestige biases the book toward glamorous pilots. The risk-adjusted math usually says the unglamorous admin automation funds the clinical ambition.",
+      "Clinical prestige biases the book toward glamorous pilots. The risk adjusted math usually says the unglamorous admin automation funds the clinical ambition.",
     stakes: "Mis-allocating toward slow clinical pilots starves the admin automations that actually pay for the program.",
     takeaway: "Same instrument, clinical book: the admin ROI often funds the clinical ambition.",
     sources: [
@@ -95,13 +95,13 @@ export const C31_USE_CASES: UseCase<C31Payload>[] = assertUseCases<C31Payload>([
     industry: "manufacturing",
     provenance: studied,
     title: "A manufacturer's AI book",
-    oneLiner: "Predictive maintenance to procurement — where the money actually is.",
+    oneLiner: "Predictive maintenance to procurement, where the money actually is.",
     context:
       "An industrial manufacturer runs twelve AI initiatives across plant (predictive maintenance, energy), quality (defect vision), and supply (demand, supply-risk). The plant-floor bets compound with uptime; the discovery-stage ideas burn budget with no line of sight.",
     theDecision:
-      "Predictive maintenance, supply-risk monitoring, and spare-parts optimization scale; the procurement copilot and the quality-doc assistant are cut — early-stage, thin ROI, and no near-term path.",
+      "Predictive maintenance, supply-risk monitoring, and spare-parts optimization scale; the procurement copilot and the quality-doc assistant are cut, early-stage, thin ROI, and no near-term path.",
     whatMostMiss:
-      "The flashy generative pilots (doc assistants, digital twins) rarely top the risk-adjusted list; boring predictive maintenance usually does. Fund the boring compounder.",
+      "The flashy generative pilots (doc assistants, digital twins) rarely top the risk adjusted list; boring predictive maintenance usually does. Fund the boring compounder.",
     stakes: "Uptime is the P&L lever; funding discovery toys over predictive maintenance leaves real margin on the floor.",
     takeaway: "Same instrument, industrial book: the boring uptime bet usually beats the shiny pilot.",
     sources: [

@@ -2,7 +2,7 @@
   "name": "@labs/lab-data",
   "version": "0.0.0",
   "private": true,
-  "description": "Data lab — assess the fuel: profile sources, clear sensitive data, preview chunking, and score readiness. Consumed by apps/web via the @data alias.",
+  "description": "Data lab, assess the fuel: profile sources, clear sensitive data, preview chunking, and score readiness. Consumed by apps/web via the @data alias.",
   "dependencies": {
     "@labs/program-core": "workspace:*"
   },

@@ -12,7 +12,7 @@ export function LiveEmptyState({ what }: { what: string }) {
         <p className="text-base font-semibold text-ink">No live sessions yet</p>
         <p className="mt-1 max-w-md text-sm text-slatey-400">
           {what} will appear here once you ask questions in the Live RAG Evaluator Lab. Everything is computed from your own
-          documents and questions — right in your browser.
+          documents and questions, right in your browser.
         </p>
       </div>
       <Link

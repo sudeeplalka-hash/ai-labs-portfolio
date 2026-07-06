@@ -1,7 +1,7 @@
 "use client";
 
-// Shared use-case layer UI — one rail + one brief, imported by every lab that has
-// use-cases. Lives in apps/web (not the design system) so it can read the industry
+// Shared use case layer UI, one rail + one brief, imported by every lab that has
+// use cases. Lives in apps/web (not the design system) so it can read the industry
 // registry and UseCase type from @labs/kit without coupling the two packages.
 // The rail is the selector; the brief is the analyst one-pager. Selecting a chip
 // tells the lab to applyUseCase(payload) and slides the brief in over the engine.
@@ -21,7 +21,7 @@ export function UseCaseRail({
     <div className="mb-4">
       <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slatey-500">
         Same instrument · three industries{" "}
-        <span className="font-normal normal-case text-slatey-400">— pick a use-case to reconfigure the run</span>
+        <span className="font-normal normal-case text-slatey-400">pick a use case to reconfigure the run</span>
       </p>
       <div className="flex flex-wrap gap-1.5">
         <button
@@ -38,7 +38,7 @@ export function UseCaseRail({
         {useCases.map((uc) => {
           const ind = INDUSTRIES[uc.industry];
           const on = uc.id === activeId;
-          const fh = uc.provenance.kind === "first-hand";
+          const fh = uc.provenance.kind === "firsthand";
           return (
             <button
               key={uc.id}
@@ -56,8 +56,8 @@ export function UseCaseRail({
                 <span
                   className="ml-0.5 inline-block h-1.5 w-1.5 rounded-full"
                   style={{ background: on ? "#ffffff" : ind.accent }}
-                  title="first-hand"
-                  aria-label="first-hand"
+                  title="firsthand"
+                  aria-label="firsthand"
                 />
               )}
             </button>
@@ -70,7 +70,7 @@ export function UseCaseRail({
 
 export function UseCaseBrief({ useCase }: { useCase: UseCase }) {
   const ind = INDUSTRIES[useCase.industry];
-  const fh = useCase.provenance.kind === "first-hand";
+  const fh = useCase.provenance.kind === "firsthand";
   return (
     <div
       className="mb-4 rounded-xl border bg-white p-4"
@@ -85,9 +85,9 @@ export function UseCaseBrief({ useCase }: { useCase: UseCase }) {
             fh ? "text-white" : "border border-line bg-slate-50 text-slatey-400"
           }`}
           style={fh ? { background: ind.accent } : undefined}
-          title={fh ? "You ran this pattern first-hand" : "Informed by public industry patterns"}
+          title={fh ? "You ran this pattern firsthand" : "Informed by public industry patterns"}
         >
-          {fh ? "First-hand" : "Studied"}
+          {fh ? "Firsthand" : "Studied"}
         </span>
       </div>
 
@@ -106,7 +106,7 @@ export function UseCaseBrief({ useCase }: { useCase: UseCase }) {
       </div>
 
       <p className="mt-2 text-[10px] text-slatey-500">
-        {fh ? "First-hand" : "Studied"} · sources: {useCase.sources.join("; ")} · verified {useCase.lastVerified}
+        {fh ? "Firsthand" : "Studied"} · sources: {useCase.sources.join("; ")} · verified {useCase.lastVerified}
       </p>
     </div>
   );

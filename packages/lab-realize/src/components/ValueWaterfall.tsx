@@ -14,7 +14,7 @@ const usd = (n: number) => {
 
 // A proper waterfall / bridge chart: start at the addressable value, step DOWN
 // for every leak (adoption, quality, run cost, risk), and land on the
-// risk-adjusted value. Each drop is labelled and links to the stage that caused
+// risk adjusted value. Each drop is labelled and links to the stage that caused
 // it. This replaces the old "river of bars", which was hard to read.
 export function ValueWaterfall({ flows }: { flows: RiverFlow[] }) {
   const inFlow = flows.find((f) => f.kind === "in")!;
@@ -48,7 +48,7 @@ export function ValueWaterfall({ flows }: { flows: RiverFlow[] }) {
   const y0 = yOf(0);
 
   return (
-    <div role="img" aria-label={`Value bridge: ${usd(inFlow.amount)} addressable down to ${usd(out.amount)} risk-adjusted.`}>
+    <div role="img" aria-label={`Value bridge: ${usd(inFlow.amount)} addressable down to ${usd(out.amount)} risk adjusted.`}>
       <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto" }}>
         {/* zero baseline */}
         <line x1={padL} y1={y0} x2={W - padR} y2={y0} stroke="#152433" strokeOpacity={0.15} strokeWidth={1} />
@@ -95,11 +95,11 @@ export function ValueWaterfall({ flows }: { flows: RiverFlow[] }) {
             </>
           );
           return c.kind === "leak"
-            ? <a key={c.key} href={STAGE_HREF[c.source]} aria-label={`${c.label} ${usd(c.delta)} — from ${c.source}`}>{label}</a>
+            ? <a key={c.key} href={STAGE_HREF[c.source]} aria-label={`${c.label} ${usd(c.delta)}, from ${c.source}`}>{label}</a>
             : <g key={c.key}>{label}</g>;
         })}
       </svg>
-      <p className="mt-1 text-[11px] text-slatey-500">Read left to right: the tall blue bar is everything on the table; each red step is value lost, traced to the stage that caused it; the green bar is what's left — defensible.</p>
+      <p className="mt-1 text-[11px] text-slatey-500">Read left to right: the tall blue bar is everything on the table; each red step is value lost, traced to the stage that caused it; the green bar is what's left, defensible.</p>
     </div>
   );
 }
@@ -108,6 +108,6 @@ export function ValueWaterfall({ flows }: { flows: RiverFlow[] }) {
 function shortLabel(l: string): string {
   return l
     .replace("Addressable value", "Addressable")
-    .replace("Risk-adjusted value", "Risk-adjusted")
+    .replace("Risk adjusted value", "Risk adjusted")
     .replace(" gap", "");
 }

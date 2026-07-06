@@ -7,20 +7,20 @@ export const metadata: Metadata = { title: "Architecture & Implementation Notes"
 
 const ARCH = [
   "Next.js 14 App Router, static export (no server runtime)",
-  "pnpm + Turborepo monorepo — one app composing domain lab packages",
+  "pnpm + Turborepo monorepo: one app composing domain lab packages",
   "ProgramProvider shared state (apcc_state) persisted in localStorage",
-  "Client-side deterministic engines per stage — no backend, no API key required",
-  "Static / demo-data fallback so every lab works standalone",
+  "Client side deterministic engines per stage: no backend, no API key required",
+  "Static / demo data fallback so every lab works standalone",
 ];
 const REAL = [
-  "Strategy scoring, capability tags, and build-path recommendation",
+  "Strategy scoring, capability tags, and recommended build path",
   "Data readiness handoff derivation",
-  "RAG lab logic — chunking, retrieval, evidence, evaluations, quality gates",
-  "Operate evidence engine — release readiness, lineage, monitoring, regression, incidents",
-  "Governance decision engine — scorecard, controls, findings, audit pack",
-  "Agent / tool-calling mechanics — schemas, permission boundaries, approvals, misuse evals",
-  "Training / fine-tuning readiness — decision memo, dataset readiness, overfitting & generalization",
-  "Realize ROI engine — leakage, risk discount, payback, NPV",
+  "RAG lab logic: chunking, retrieval, evidence, evaluations, quality gates",
+  "Operate evidence engine: release readiness, lineage, monitoring, regression, incidents",
+  "Governance decision engine: scorecard, controls, findings, audit pack",
+  "Agent and tool calling mechanics: schemas, permission boundaries, approvals, misuse evals",
+  "Training and fine tuning readiness: decision memo, dataset readiness, overfitting and generalization",
+  "Realize ROI engine: leakage, risk discount, payback, NPV",
 ];
 
 export default function Page() {
@@ -31,7 +31,7 @@ export default function Page() {
         <p className="eyebrow mt-2">Implementation notes</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">Architecture &amp; how it&rsquo;s built</h1>
         <p className="mt-3 max-w-3xl text-base leading-relaxed text-slatey-300">
-          AI Command Center is an enterprise AI program operating system — a portfolio command center that shows enterprise AI
+          AI Command Center is an enterprise AI program operating system, a portfolio command center that shows enterprise AI
           delivery mechanics without confidential data or cloud infrastructure.
         </p>
       </header>
@@ -51,17 +51,17 @@ export default function Page() {
       <section className="rounded-xl border border-line bg-white p-5 shadow-card">
         <p className="eyebrow">Where model internals sit</p>
         <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slatey-300">
-          The Command Center doesn&rsquo;t replace model-development frameworks — it sits above them as a lifecycle and governance layer.
-          Model internals (transformers, attention, embeddings, fine-tuning) matter because they shape the build path, evaluation strategy,
+          The Command Center doesn&rsquo;t replace model development frameworks. It sits above them as a lifecycle and governance layer.
+          Model internals (transformers, attention, embeddings, fine tuning) matter because they shape the build path, evaluation strategy,
           operating risk, and governance burden. <Link href="/build/internals" className="text-primary hover:underline">See the Under the Hood explainer →</Link>
         </p>
         <div className="mt-3 space-y-1.5">
           {[
             { l: "Model internals", d: "transformers, attention, embeddings" },
-            { l: "Build substrate", d: "prompting, RAG, retrieval, fine-tuning, tools" },
+            { l: "Build substrate", d: "prompting, RAG, retrieval, fine tuning, tools" },
             { l: "Operating layer", d: "release readiness, lineage, monitoring, incidents" },
             { l: "Governance layer", d: "controls, findings, evidence, decisions" },
-            { l: "Business layer", d: "adoption, ROI, leakage, risk-adjusted value" },
+            { l: "Business layer", d: "adoption, ROI, leakage, risk adjusted value" },
           ].map((r, i) => (
             <div key={r.l} className={"flex items-center gap-3 rounded-lg border border-line p-2.5 " + (i === 4 ? "bg-primary/[0.05]" : "bg-slate-50/50")}>
               <span className="font-mono text-[11px] text-slatey-500">{String(i + 1).padStart(2, "0")}</span>

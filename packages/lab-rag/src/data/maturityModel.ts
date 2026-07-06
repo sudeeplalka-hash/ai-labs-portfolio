@@ -32,7 +32,7 @@ export const maturityLevels: MaturityLevel[] = [
     ],
     evidence: [
       "Six evaluation runs tracked and compared with regression detection.",
-      "Golden dataset includes high-risk and critical compliance questions.",
+      "Golden dataset includes high risk and critical compliance questions.",
       "Traces expose retrieved chunks, generated vs expected answers, and scores.",
       "Claim-level verification flags supported, unsupported, and contradicted claims.",
       "Failure categories map to root causes and recommended fixes.",
@@ -63,7 +63,7 @@ export const maturityLevels: MaturityLevel[] = [
 ];
 
 export const productionReadinessChecklist: ChecklistItem[] = [
-  { id: "pr-1", item: "Golden dataset covering high-risk and critical domains", status: "Complete", notes: "50 cases across 8 domains with risk and difficulty labels." },
+  { id: "pr-1", item: "Golden dataset covering high risk and critical domains", status: "Complete", notes: "50 cases across 8 domains with risk and difficulty labels." },
   { id: "pr-2", item: "Automated evaluation with regression detection", status: "Complete", notes: "Six runs compared; regression rules applied automatically." },
   { id: "pr-3", item: "Claim-level verification of answers", status: "Complete", notes: "Claims scored as supported, unsupported, or contradicted." },
   { id: "pr-4", item: "Quality gates wired into the release decision", status: "Complete", notes: "Eight gates evaluated; release recommendation derived from gate status." },
@@ -81,7 +81,7 @@ export const nextInvestments = [
   "Add automated CI/CD regression checks.",
   "Operationalize the human review workflow.",
   "Add document freshness monitoring and stale-version exclusion.",
-  "Add policy-driven routing for high-risk queries.",
+  "Add policy-driven routing for high risk queries.",
   "Expand golden dataset coverage across critical domains.",
   "Add business KPI linkage for successful query resolution.",
   "Create audit-ready evaluation evidence packages.",

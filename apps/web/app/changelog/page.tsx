@@ -5,35 +5,35 @@ import { Panel, Badge } from "@labs/design-system";
 
 export const metadata: Metadata = {
   title: "Changelog",
-  description: "What's shipped and what's next on the AI delivery portfolio — dated and honest.",
+  description: "What's shipped and what's next on the AI delivery portfolio, dated and honest.",
 };
 
 interface Entry { date: string; tag: string; tone: "emerald" | "blue" | "amber"; title: string; items: string[] }
 
 const ENTRIES: Entry[] = [
   {
-    date: "2026-07", tag: "Operate", tone: "emerald", title: "Operate — the 7th stage: day-2 observability + the loop back to Frame",
+    date: "2026-07", tag: "Operate", tone: "emerald", title: "Operate: the 7th stage, day two observability plus the loop back to Frame",
     items: [
-      "Day-2 observability added to the Enterprise AI Program lifecycle: the four signal families (system SLOs · model-quality canary · RAG freshness/staleness · agent & cost) on a 12-week time axis.",
-      "The engineered week-7 incident: SLOs stay green while the answers decay — silent drift caught by canary evals, not infra dashboards.",
-      "The loop closes: a retrain / re-index / rollback / re-scope decision routes a typed feedback contract back to Frame, Build, Deploy, Realize, and Govern — a lifecycle line becomes a program loop.",
-      "Two downloadable artifacts (weekly ops review · incident report), the first real artifact-engine implementations.",
+      "Day two observability added to the Enterprise AI Program lifecycle: the four signal families (system SLOs, model quality canary, RAG freshness and staleness, agent and cost) on a 12 week time axis.",
+      "The engineered week 7 incident: SLOs stay green while the answers decay, silent drift caught by canary evals, not infra dashboards.",
+      "The loop closes: a retrain, reindex, rollback, or rescope decision routes a typed feedback contract back to Frame, Build, Deploy, Realize, and Govern. A lifecycle line becomes a program loop.",
+      "Two downloadable artifacts (weekly ops review, incident report), the first real artifact engine implementations.",
     ],
   },
   {
-    date: "2026-07", tag: "Honesty pass", tone: "emerald", title: "Post-review corrections",
+    date: "2026-07", tag: "Honesty pass", tone: "emerald", title: "Post review corrections",
     items: [
-      "LIVE-ready labs (multi-agent, structured output) relabeled to authored/illustrative — no LIVE badge without a wired call path.",
-      "Model catalog freshened: other-provider entries shown as generic tiers, not version-pinned; Anthropic models current.",
+      "LIVE ready labs (multiagent, structured output) relabeled to authored/illustrative. No LIVE badge without a wired call path.",
+      "Model catalog freshened: other provider entries shown as generic tiers, not version pinned; Anthropic models current.",
       "Registry count fixed to the 23 new labs; internal QA audit trail corrected.",
       "Public changelog shipped (this page).",
     ],
   },
   {
-    date: "2026-07", tag: "Launch", tone: "blue", title: "Portfolio v1 — 23 interactive labs",
+    date: "2026-07", tag: "Launch", tone: "blue", title: "Portfolio v1: 23 interactive labs",
     items: [
-      "Collection 2 · Agent & Protocol (8): MCP playground, loop/failure inspector, orchestration, structured output, context/memory, cost simulator, protocol selection, human-in-the-loop.",
-      "Collection 3 · Business of AI (5): portfolio dashboard, build-vs-buy, cost forecaster, vendor monitor, ROI builder.",
+      "Collection 2 · Agent & Protocol (8): MCP playground, loop/failure inspector, orchestration, structured output, context/memory, cost simulator, protocol selection, human in the loop approval.",
+      "Collection 3 · Business of AI (5): portfolio dashboard, build versus buy, cost forecaster, vendor monitor, ROI builder.",
       "Collection 4 · Engagement Leadership (10): adoption, stakeholders, capacity, RAID radar, compliance, talent, RFP, estimation, onboarding, exec comms.",
       "Layer 0 Competency Map landing, driven by a shared labs registry.",
     ],
@@ -41,18 +41,18 @@ const ENTRIES: Entry[] = [
   {
     date: "2026-07", tag: "Foundations", tone: "blue", title: "Shared spine",
     items: [
-      "@labs/kit — dated model/pricing/protocol config + the registry that auto-updates the map as labs ship.",
+      "@labs/kit: dated model, pricing, and protocol config plus the registry that auto updates the map as labs ship.",
       "One design system across every new collection (matches the Command Center).",
-      "Credibility block on every lab: badge · freshness stamp · steering takeaway · how-it's-built · limitations.",
+      "Credibility block on every lab: badge · freshness stamp · steering takeaway · how it's built · limitations.",
     ],
   },
   {
     date: "Next", tag: "Roadmap", tone: "amber", title: "In flight",
     items: [
       "Genuine LIVE calls on the flagship agent labs (once the deploy host is set).",
-      "Use-Case Layer — 3 real-world, cross-industry scenarios per lab + an Industry Atlas.",
-      "Collection index pages (the toolkit / gallery / control-room structures).",
-      "Shareability + a11y: per-lab OG images, sitemap, full accessibility pass.",
+      "Use Case Layer: 3 real world, cross industry scenarios per lab plus an Industry Atlas.",
+      "Collection index pages (the toolkit / gallery / control room structures).",
+      "Shareability and accessibility: per lab OG images, sitemap, full accessibility pass.",
     ],
   },
 ];
@@ -69,7 +69,7 @@ export default function Page() {
       <main className="mx-auto max-w-3xl px-4 py-8 md:px-5">
         <p className="eyebrow mb-1">Building in public</p>
         <h1 className="text-2xl font-semibold tracking-tight text-ink">Changelog</h1>
-        <p className="mt-2 text-sm leading-relaxed text-slatey-400">Dated and honest — what&apos;s shipped, what&apos;s corrected, and what&apos;s next. A fuller engineering log lives in the repo&apos;s <span className="font-mono text-[13px]">BUILD-LOG.md</span>.</p>
+        <p className="mt-2 text-sm leading-relaxed text-slatey-400">Dated and honest: what&apos;s shipped, what&apos;s corrected, and what&apos;s next. A fuller engineering log lives in the repo&apos;s <span className="font-mono text-[13px]">BUILD-LOG.md</span>.</p>
         <div className="mt-6 space-y-4">
           {ENTRIES.map((e, i) => (
             <Panel key={i}>

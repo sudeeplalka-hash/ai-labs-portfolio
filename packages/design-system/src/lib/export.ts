@@ -1,6 +1,6 @@
 // Export & artifact helpers shared across labs. The pure parts (CSV, scenario JSON)
 // are unit-tested; the download / canvas / clipboard helpers are thin DOM wrappers
-// used client-side. Everything runs in the browser — no backend — honest to the
+// used client side. Everything runs in the browser, no backend, honest to the
 // static deployment.
 
 /** Quote a CSV field only when it contains a comma, quote, or newline (RFC-4180-ish). */
@@ -22,14 +22,14 @@ export function scenarioToJson(scenario: unknown): string {
   return JSON.stringify(scenario, null, 2);
 }
 
-/** Parse scenario JSON. Throws on malformed input — callers should try/catch. Pure. */
+/** Parse scenario JSON. Throws on malformed input, callers should try/catch. Pure. */
 export function parseScenarioJson<T = unknown>(text: string): T {
   return JSON.parse(text) as T;
 }
 
 /* ---------------- DOM helpers (browser only) ---------------- */
 
-/** Trigger a client-side download of a text blob. */
+/** Trigger a client side download of a text blob. */
 export function downloadText(filename: string, text: string, mime = "text/plain;charset=utf-8"): void {
   const blob = new Blob([text], { type: mime });
   const url = URL.createObjectURL(blob);

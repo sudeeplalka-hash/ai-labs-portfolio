@@ -60,7 +60,7 @@ export function ThresholdControls({
       <div className="grid gap-3 sm:grid-cols-2">
         <Toggle
           label="Strict PII policy"
-          hint="Any PII — not just SSN/card — becomes a hard blocker."
+          hint="Any PII, not just SSN/card, becomes a hard blocker."
           on={config.piiStrict}
           onClick={() => set("piiStrict", !config.piiStrict)}
         />

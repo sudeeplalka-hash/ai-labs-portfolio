@@ -21,7 +21,7 @@ export function EngineBadge({
   const Icon = isLlm ? Cpu : Sparkles;
   return (
     <span
-      title={label ?? (isLlm ? "Answered by a real LLM (your API key)" : "Deterministic in-browser engine — no API key")}
+      title={label ?? (isLlm ? "Answered by a real LLM (your API key)" : "Deterministic in-browser engine, no API key")}
       className={cn(
         "inline-flex items-center gap-1 rounded-md font-medium uppercase tracking-wide ring-1 ring-inset whitespace-nowrap",
         size === "xs" ? "px-1.5 py-0.5 text-[10px]" : "px-2 py-0.5 text-[11px]",

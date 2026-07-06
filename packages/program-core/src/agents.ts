@@ -1,5 +1,5 @@
 // ============================================================================
-// Phase 5 — Agent & tool-calling mechanics. Deterministic, client-side, and
+// Phase 5, Agent & tool calling mechanics. Deterministic, client side, and
 // enterprise-safe: scoped tool schemas, a governed workflow trace, permission
 // boundaries, approvals, blocked actions, and misuse evals. No real external
 // actions are ever executed.
@@ -41,7 +41,7 @@ export const TOOL_REGISTRY: ToolSchema[] = [
     auditRequired: true, rollbackAvailable: true, owner: "Support Ops",
   },
   {
-    id: "approve-refund", name: "Approve Refund", description: "Approve a customer refund.",
+    id: "approve refund", name: "Approve Refund", description: "Approve a customer refund.",
     category: "external-action", inputSchema: { caseId: "string", amount: "number" }, outputSchema: { approved: "boolean" },
     allowedRoles: ["manager"], restrictedActions: ["AI cannot approve refunds"], riskLevel: "critical", approvalMode: "blocked",
     auditRequired: true, rollbackAvailable: false, owner: "Finance",
@@ -67,11 +67,11 @@ export const WORKFLOW_TRACE: AgentWorkflowTrace = {
     { id: "s9", stepNumber: 9, label: "Return response for human review", type: "respond", status: "requires-approval", evidence: "Draft returned to Support Lead queue", latencyMs: 10 },
   ],
   finalStatus: "requires-approval",
-  finalResponse: "Drafted a cited eligibility response for Support Lead review. The agent did not send it to the customer and did not approve any refund — those actions are blocked.",
+  finalResponse: "Drafted a cited eligibility response for Support Lead review. The agent did not send it to the customer and did not approve any refund, those actions are blocked.",
   auditLogId: "audit-log-8842",
   rollbackPlan: "Discard draft; no external action was taken.",
   risks: [
-    "Agent attempted to approve the reimbursement directly — blocked by policy boundary (refund approval is a restricted external action); fell back to a human-review draft.",
+    "Agent attempted to approve the reimbursement directly, blocked by policy boundary (refund approval is a restricted external action); fell back to a human-review draft.",
     "Retired policy source (Expense Policy v1.0) was excluded from evidence.",
   ],
 };
@@ -114,7 +114,7 @@ export function buildAgentToolingContract(s: ProgramState): AgentToolingContract
     "Financial actions (refund approval) blocked for AI",
     "Tool-call audit logging required",
   ];
-  if (evalFail) governanceFindings.push("Tool misuse evaluation failing — resolve before enabling agent");
+  if (evalFail) governanceFindings.push("Tool misuse evaluation failing, resolve before enabling agent");
   if (!enabled) governanceFindings.length = 0; // no live agent → no findings
 
   return {

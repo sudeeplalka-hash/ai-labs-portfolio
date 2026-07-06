@@ -2,7 +2,7 @@
   "name": "@labs/lab-deploy",
   "version": "0.0.0",
   "private": true,
-  "description": "Deploy / Operations lab — does it run reliably, at what cost? Scale dial, Operating Envelope, SLO/error-budget, production drift, and incident response. Built on the shared foundation.",
+  "description": "Deploy / Operations lab, does it run reliably, at what cost? Scale dial, Operating Envelope, SLO/error-budget, production drift, and incident response. Built on the shared foundation.",
   "exports": {
     ".": "./src/index.ts"
   },

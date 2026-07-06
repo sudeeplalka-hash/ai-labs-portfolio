@@ -22,7 +22,7 @@ export function DataStage() {
     <div>
       <PageIntro eyebrow="Stage 02 · Data" title="Is your data ready for AI?">
         Drop in a CSV, JSON, Markdown, or text file. The Data Lab profiles it, applies your organization&apos;s
-        ingestion guidelines, clears sensitive data, previews chunking, and gives an honest readiness verdict —
+        ingestion guidelines, clears sensitive data, previews chunking, and gives an honest readiness verdict,
         then hands the approved corpus to the RAG evaluator. Everything runs locally.
       </PageIntro>
       <div className="mb-5"><StageDemonstrates>AI readiness depends on source quality, ownership, sensitivity, metadata, provenance, chunk readiness, and exclusion decisions before build.</StageDemonstrates></div>

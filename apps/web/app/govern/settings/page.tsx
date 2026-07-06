@@ -60,7 +60,7 @@ export default function Settings() {
         <Info size={18} className="text-blue-600 shrink-0 mt-0.5" />
         <div className="text-sm text-blue-900 space-y-1.5">
           <p className="font-medium">How your key is handled</p>
-          <p className="text-blue-800/90">When you add a key, the Runtime Playground sends the prompt directly from your browser to the endpoint you specify — the key is stored only in this browser&apos;s local storage and never reaches this app&apos;s host. The eight governance guardrails then run on the <em>real</em> model&apos;s output, exactly as in mock mode. If a call fails, the lab falls back to the deterministic mock automatically.</p>
+          <p className="text-blue-800/90">When you add a key, the Runtime Playground sends the prompt directly from your browser to the endpoint you specify, the key is stored only in this browser&apos;s local storage and never reaches this app&apos;s host. The eight governance guardrails then run on the <em>real</em> model&apos;s output, exactly as in mock mode. If a call fails, the lab falls back to the deterministic mock automatically.</p>
           <p className="flex items-center gap-1.5 text-blue-800/90"><ShieldCheck size={14} /> In a production deployment the key lives server-side, never in the browser.</p>
         </div>
       </div>

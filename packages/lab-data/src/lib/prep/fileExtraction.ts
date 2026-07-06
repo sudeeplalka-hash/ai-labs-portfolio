@@ -1,6 +1,6 @@
-// Client-side text extraction for corpus uploads.
+// Client side text extraction for corpus uploads.
 // Heavy parsers (PDF, DOCX) are dynamically imported so they only load when a
-// user actually uploads that file type — they never run during SSR or bloat the
+// user actually uploads that file type, they never run during SSR or bloat the
 // initial bundle. mammoth + pdfjs-dist are already app dependencies.
 
 export class FileExtractionError extends Error {}
@@ -69,7 +69,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
       return text;
     }
     if (ext === "doc") {
-      throw new FileExtractionError(`Legacy .doc isn't supported — save "${file.name}" as .docx or .pdf.`);
+      throw new FileExtractionError(`Legacy .doc isn't supported, save "${file.name}" as .docx or .pdf.`);
     }
     // Plain text: txt, md, csv, json, tsv, and similar.
     const text = await file.text();

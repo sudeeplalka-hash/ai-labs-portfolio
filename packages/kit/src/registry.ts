@@ -1,7 +1,7 @@
-// labs-registry — the single source of truth for what exists, its status, and the
+// labs-registry, the single source of truth for what exists, its status, and the
 // decision it maps to. The Competency Map (§C0) and every collection index read
 // from here, so shipping a lab (flipping status) updates the map automatically.
-// C0 mechanics: "No claim without an evidence badge — if a row has none, delete it."
+// C0 mechanics: "No claim without an evidence badge, if a row has none, delete it."
 
 export type Collection = 0 | 1 | 2 | 3 | 4;
 export type LabStatus = "shipped" | "in-build" | "planned"; // ✅ / 🔨 / (backlog)
@@ -39,7 +39,7 @@ export const LABS: LabEntry[] = [
     href: "/",
   },
 
-  // Collection 1 — Enterprise AI Lifecycle (live spine; §A3, do not rebuild)
+  // Collection 1, Enterprise AI Lifecycle (live spine; §A3, do not rebuild)
   {
     id: "C1", collection: 1, title: "Enterprise AI Lifecycle (spine)", status: "shipped", live: "LIVE",
     problem: "Can this person run an AI program end to end, with gates?",
@@ -57,22 +57,22 @@ export const LABS: LabEntry[] = [
     decision: "Score faithfulness/citations/hallucination before trusting a RAG build.", href: "/build",
   },
   {
-    id: "C1-govern", collection: 1, title: "Govern — guardrails & risk tiering", status: "shipped", live: "SIMULATED",
+    id: "C1-govern", collection: 1, title: "Govern, guardrails & risk tiering", status: "shipped", live: "SIMULATED",
     problem: "Which use cases need which controls before they ship?",
     decision: "Risk-tier a use case; map required guardrails.", href: "/govern",
   },
   {
-    id: "C1-operate", collection: 1, title: "Operate — Day-2 Observability", status: "in-build", live: "SIMULATED",
-    problem: "Is the system still working — and what do we do when it isn't?",
-    decision: "Retrain / re-index / rollback / re-scope, triggered by the right signal — the loop back to Frame.",
+    id: "C1-operate", collection: 1, title: "Operate, Day Two Observability", status: "in-build", live: "SIMULATED",
+    problem: "Is the system still working, and what do we do when it isn't?",
+    decision: "Retrain / reindex / rollback / rescope, triggered by the right signal, the loop back to Frame.",
     href: "/operate",
   },
 
-  // Collection 2 — Agent & Protocol Labs (toolkit)
+  // Collection 2, Agent & Protocol Labs (toolkit)
   {
     id: "GAP-01", collection: 2, title: "MCP Server Playground", status: "in-build", live: "SIMULATED", priority: "P0", flagship: true,
     problem: "What actually goes over the wire when an agent calls a tool?",
-    decision: "Expose N internal systems via MCP vs bespoke integrations — the crossover.",
+    decision: "Expose N internal systems via MCP vs bespoke integrations, the crossover.",
     href: "/agents/mcp-playground",
   },
   {
@@ -82,20 +82,20 @@ export const LABS: LabEntry[] = [
     href: "/agents/loop-inspector",
   },
   {
-    id: "GAP-03", collection: 2, title: "Multi-Agent Orchestration Board", status: "in-build", live: "SIMULATED", liveNote: "LIVE-ready — flips to LIVE when the host model endpoint is configured", priority: "P0", flagship: true,
-    problem: "Is multi-agent worth the extra cost, or a party trick?",
-    decision: "When multi-agent's quality gain justifies its cost multiplier.",
+    id: "GAP-03", collection: 2, title: "Multiagent Orchestration Board", status: "in-build", live: "SIMULATED", liveNote: "LIVE ready, flips to LIVE when the host model endpoint is configured", priority: "P0", flagship: true,
+    problem: "Is multiagent worth the extra cost, or a party trick?",
+    decision: "When multiagent's quality gain justifies its cost multiplier.",
     href: "/agents/orchestration",
   },
   {
-    id: "GAP-04", collection: 2, title: "Tool-Use & Structured Output", status: "in-build", live: "SIMULATED", liveNote: "LIVE-ready — flips to LIVE when the host model endpoint is configured", priority: "P1",
+    id: "GAP-04", collection: 2, title: "Tool use & Structured Output", status: "in-build", live: "SIMULATED", liveNote: "LIVE ready, flips to LIVE when the host model endpoint is configured", priority: "P1",
     problem: "How do messy inputs become schema-valid outputs, reliably?",
     decision: "Where to place the validation gate before outputs hit systems of record.",
     href: "/agents/structured-output",
   },
   {
     id: "GAP-05", collection: 2, title: "Context & Memory Engineering", status: "in-build", live: "SIMULATED", priority: "P2",
-    problem: "Which context strategy — dump, summarize, compress, hand off?",
+    problem: "Which context strategy, dump, summarize, compress, hand off?",
     decision: "Set the cost-fidelity dial per use case, not per platform.",
     href: "/agents/context-memory",
   },
@@ -112,22 +112,22 @@ export const LABS: LabEntry[] = [
     href: "/agents/protocol-selection",
   },
   {
-    id: "GAP-08", collection: 2, title: "Human-in-the-Loop Approval Simulator", status: "in-build", live: "SIMULATED", priority: "P1",
+    id: "GAP-08", collection: 2, title: "Human in the loop Approval Simulator", status: "in-build", live: "SIMULATED", priority: "P1",
     problem: "How much autonomy before an edge case slips through?",
     decision: "Set autonomy level per risk tier, not per enthusiasm.",
     href: "/agents/hitl",
   },
 
-  // Collection 3 — Business of AI Delivery (gallery)
+  // Collection 3, Business of AI Delivery (gallery)
   {
     id: "C3-1", collection: 3, title: "AI Initiative Portfolio Dashboard", status: "in-build", live: "SIMULATED", flagship: true,
     problem: "Which initiatives to kill, scale, or hold this quarter?",
-    decision: "Portfolio kill/scale/hold via risk-adjusted ROI thresholds.",
+    decision: "Portfolio kill/scale/hold via risk adjusted ROI thresholds.",
     href: "/business/portfolio",
   },
   {
-    id: "C3-2", collection: 3, title: "Build-vs-Buy-vs-Fine-Tune Evaluator", status: "in-build", live: "SIMULATED",
-    problem: "Build it, buy it, or fine-tune it?",
+    id: "C3-2", collection: 3, title: "Build-vs-Buy-vs-Fine tune Evaluator", status: "in-build", live: "SIMULATED",
+    problem: "Build it, buy it, or fine tune it?",
     decision: "3-year TCO across all three, with the flip condition.",
     href: "/business/build-buy",
   },
@@ -139,18 +139,18 @@ export const LABS: LabEntry[] = [
   },
   {
     id: "C3-4", collection: 3, title: "Vendor Evaluation & Risk Monitor", status: "in-build", live: "SIMULATED",
-    problem: "Which vendor — and what does concentration cost if we're wrong?",
+    problem: "Which vendor, and what does concentration cost if we're wrong?",
     decision: "Weighted vendor pick + concentration/exit-cost exposure.",
     href: "/business/vendor-monitor",
   },
   {
     id: "C3-5", collection: 3, title: "Business Case / ROI Builder", status: "in-build", live: "SIMULATED",
-    problem: "What's the payback — and how fragile is it?",
+    problem: "What's the payback, and how fragile is it?",
     decision: "Fund/defer on an NPV range, not a single point.",
     href: "/business/roi-builder",
   },
 
-  // Collection 4 — Engagement Leadership Labs (control room, two wings)
+  // Collection 4, Engagement Leadership Labs (control room, two wings)
   {
     id: "EL-01", collection: 4, title: "Adoption & Change Readiness Instrument", status: "in-build", live: "SIMULATED", priority: "P0", flagship: true,
     problem: "Are the people ready, or just the model?",
@@ -169,13 +169,13 @@ export const LABS: LabEntry[] = [
     id: "EL-03", collection: 4, title: "Capacity & Resourcing Planner", status: "in-build", live: "SIMULATED", priority: "P0",
     problem: "Do 30 people actually cover this portfolio's skills?",
     decision: "Hire / contract / upskill per gap, with date + cost impact.",
-    resumeEcho: "Direct mirror of the 31-resource AMEX intelligence mapping — the most personal lab on the site.",
+    resumeEcho: "Direct mirror of the 31-resource AMEX intelligence mapping, the most personal lab on the site.",
     href: "/engagement/capacity",
   },
   {
     id: "EL-04", collection: 4, title: "Delivery Health & RAID Radar", status: "in-build", live: "SIMULATED", liveNote: "status narrative may run LIVE", priority: "P1",
     problem: "Which 'green' workstream is actually trending into trouble?",
-    decision: "Report trajectory, not snapshot — surface the reported-vs-actual gap.",
+    decision: "Report trajectory, not snapshot, surface the reported-vs-actual gap.",
     resumeEcho: "The weekly reality of multi-portfolio EM work at AMEX.",
     href: "/engagement/raid-radar",
   },
@@ -183,7 +183,7 @@ export const LABS: LabEntry[] = [
     id: "EL-05", collection: 4, title: "AI Compliance Readiness Navigator", status: "in-build", live: "SIMULATED", priority: "P1",
     problem: "What tier is this AI, and what controls does it owe?",
     decision: "Risk-tier + required-controls map (EU AI Act + finserv overlays).",
-    resumeEcho: "Regulated-industry delivery — AMEX, Morgan Stanley, S&P/CRISIL.",
+    resumeEcho: "Regulated-industry delivery, AMEX, Morgan Stanley, S&P/CRISIL.",
     href: "/engagement/compliance",
   },
   {
@@ -195,14 +195,14 @@ export const LABS: LabEntry[] = [
   },
   {
     id: "EL-07", collection: 4, title: "RFP/RFI Response War Room", status: "in-build", live: "SIMULATED", liveNote: "requirement extraction may run LIVE", priority: "P1",
-    problem: "Should we even bid this — and where's the response weak?",
+    problem: "Should we even bid this, and where's the response weak?",
     decision: "Bid / no-bid as a portfolio decision (fit × win-prob × capacity × margin).",
-    resumeEcho: "$9M pipeline — the instrument of how a pipeline gets built, one qualified pursuit at a time.",
+    resumeEcho: "$9M pipeline, the instrument of how a pipeline gets built, one qualified pursuit at a time.",
     href: "/engagement/rfp",
   },
   {
     id: "EL-08", collection: 4, title: "Estimation & Scoping Studio", status: "in-build", live: "SIMULATED", priority: "P1",
-    problem: "What's the real estimate — and what happens when scope moves?",
+    problem: "What's the real estimate, and what happens when scope moves?",
     decision: "Deliverable estimate range + staffing + change-control impact.",
     resumeEcho: "Consulting delivery estimation across HCLTech/Genpact/Deloitte.",
     href: "/engagement/estimation",
@@ -236,19 +236,19 @@ export interface Domain {
 export const DOMAINS: Domain[] = [
   {
     id: "agentic-protocol", title: "Agentic & Protocol Engineering",
-    claim: "Reads the wire — MCP, A2A, agent loops, structured output.",
+    claim: "Reads the wire, MCP, A2A, agent loops, structured output.",
     labIds: ["GAP-01", "GAP-02", "GAP-03", "GAP-04", "GAP-05", "GAP-06", "GAP-07", "GAP-08"],
     engagementEvidence: ["Gen AI platform work (LLM/RAG/agentic) at AMEX"],
   },
   {
     id: "program-delivery", title: "AI Program Delivery & Governance",
-    claim: "Runs the governed lifecycle, gate by gate — and the day-2 loop after it.",
+    claim: "Runs the governed lifecycle, gate by gate, and the day two loop after it.",
     labIds: ["C1", "C1-backlog", "C1-rag", "C1-govern", "C1-operate"],
     engagementEvidence: ["Multi-portfolio AI delivery at AMEX", "4.5× portfolio scale"],
   },
   {
     id: "business-of-ai", title: "Business of AI / Capital Allocation",
-    claim: "Runs AI as a P&L — allocation, TCO, vendor judgment.",
+    claim: "Runs AI as a P&L, allocation, TCO, vendor judgment.",
     labIds: ["C3-1", "C3-2", "C3-3", "C3-4", "C3-5"],
     engagementEvidence: ["$4M+ cost avoidance", "portfolio P&L ownership"],
   },
@@ -272,7 +272,7 @@ export interface Credential {
   label: string;
 }
 export const CREDENTIALS: Credential[] = [
-  { id: "mba", label: "STEM MBA — AI & Quant, UT Austin McCombs" },
+  { id: "mba", label: "STEM MBA, AI & Quant, UT Austin McCombs" },
   { id: "pmp", label: "PMP" },
   { id: "aws-sa", label: "AWS Solutions Architect" },
   { id: "architect", label: "Licensed Architect" },
@@ -290,7 +290,7 @@ export const labById = (id: string): LabEntry | undefined => LABS.find((l) => l.
 export const shippedLabs = (): LabEntry[] => LABS.filter((l) => l.status === "shipped");
 export const liveShippedCount = (): number => LABS.filter((l) => l.status === "shipped" && l.live === "LIVE").length;
 
-// Count only the 23 new catalog labs (Collections 2–4); exclude Layer 0 and every
+// Count only the 23 new catalog labs (Collections 2 to 4); exclude Layer 0 and every
 // Collection-1 row (spine + instruments) so "X of 23" can never miscount.
 const isCatalogLab = (l: LabEntry) => l.collection >= 2;
 export function progress(): { shipped: number; inBuild: number; planned: number; total: number } {

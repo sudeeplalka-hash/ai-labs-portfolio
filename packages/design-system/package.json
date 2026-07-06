@@ -2,7 +2,7 @@
   "name": "@labs/design-system",
   "version": "0.0.0",
   "private": true,
-  "description": "Lab Suite design system — the shared visual DNA (Tailwind preset, base styles, tokens, and UI components) consumed by every lab.",
+  "description": "Lab Suite design system, the shared visual DNA (Tailwind preset, base styles, tokens, and UI components) consumed by every lab.",
   "exports": {
     ".": "./src/index.ts",
     "./preset": "./src/tailwind/preset.ts",

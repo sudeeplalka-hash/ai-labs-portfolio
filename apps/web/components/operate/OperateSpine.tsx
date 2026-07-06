@@ -1,7 +1,7 @@
 "use client";
 
-// Phase 2 — Operate / AI Ops / MLOps / RAGOps spine. Deterministic
-// production-readiness panels over the Phase 1 lifecycle contracts. Split into a
+// Phase 2, Operate / AI Ops / MLOps / RAGOps spine. Deterministic
+// production readiness panels over the Phase 1 lifecycle contracts. Split into a
 // top Release Readiness summary and a bottom evidence block so the exec headline
 // sits above the existing operating-envelope machinery. Live mode reads the
 // threaded initiative; Demo mode reads the curated demoState.
@@ -38,7 +38,7 @@ export function ReleaseReadinessPanel() {
   const { state, isDemo, hydrated, update, src } = useProgramSource();
   const rr = useMemo(() => computeReleaseReadiness(src), [src]);
 
-  // Phase E — what would make each failing check pass. Click to expand.
+  // Phase E, what would make each failing check pass. Click to expand.
   const fixes = useMemo(() => deriveGateFixes(src), [src]);
   const fixByCheck = useMemo(() => Object.fromEntries(fixes.map((f) => [f.check, f])), [fixes]);
   const [openFix, setOpenFix] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function ReleaseReadinessPanel() {
   return (
     <Panel>
       <SectionHeader eyebrow="Release readiness" title="Is this system ready for pilot or production?" icon={ClipboardCheck}
-        description="A deterministic gate over the lifecycle contracts — Strategy, Data, Build, and Ops — rolled into one recommendation." />
+        description="A deterministic gate over the lifecycle contracts, Strategy, Data, Build, and Ops, rolled into one recommendation." />
       <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
         <div className="flex flex-col items-center justify-center rounded-xl border border-line bg-slate-50/60 p-4 text-center">
           <p className="stat-label">Release readiness</p>
@@ -129,7 +129,7 @@ export function OperateEvidencePanels() {
       {/* Version & lineage */}
       <Panel>
         <SectionHeader eyebrow="MLOps / LLMOps" title="Version & lineage" icon={GitBranch}
-          description="Which model, prompt, index, corpus, eval set, policy, and config produced a result — the trail incidents and audits depend on." />
+          description="Which model, prompt, index, corpus, eval set, policy, and config produced a result, the trail incidents and audits depend on." />
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead><tr className="border-b border-line text-[11px] uppercase tracking-wide text-slatey-500">
@@ -180,7 +180,7 @@ export function OperateEvidencePanels() {
         <SectionHeader eyebrow="LLMOps" title="Evaluation regression" icon={LineChart}
           description="Whether a new prompt, model, index, or data source quietly worsened quality since the last eval." action={<Badge tone={reg.status === "No regression" ? "emerald" : reg.status === "Watch" ? "amber" : "rose"}>{reg.status}</Badge>} />
 
-        {/* Phase D — prior vs current, as a judgment you can see */}
+        {/* Phase D, prior vs current, as a judgment you can see */}
         <div className="mb-4 h-52 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={reg.rows} margin={{ top: 6, right: 12, bottom: 0, left: -18 }} barGap={2}>
@@ -254,10 +254,10 @@ export function OperateEvidencePanels() {
         {ev ? (
           <>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <KpiCard label="Release readiness" value={`${ev.releaseReadinessScore ?? "—"}`} suffix="/100" tone={(ev.releaseReadinessScore ?? 0) >= 80 ? "healthy" : (ev.releaseReadinessScore ?? 0) >= 65 ? "watch" : "risk"} interpretation={ev.releaseRecommendation} />
-              <KpiCard label="Monitoring" value={`${ev.monitoringCoverageScore ?? ev.monitoringCoverage ?? "—"}`} suffix="%" tone={(ev.monitoringCoverageScore ?? 0) >= 80 ? "healthy" : "watch"} interpretation={`${ev.monitoredSignals ?? "—"} signals`} />
-              <KpiCard label="Regression" value={ev.regressionStatus ?? "—"} tone={ev.regressionStatus === "No regression" ? "healthy" : ev.regressionStatus === "Watch" ? "watch" : "risk"} interpretation={`${ev.regressionFindings?.length ?? 0} finding(s)`} />
-              <KpiCard label="Drift risk" value={`${ev.driftRisk ?? "—"}`} suffix="/100" tone={(ev.driftRisk ?? 0) < 40 ? "healthy" : (ev.driftRisk ?? 0) < 60 ? "watch" : "risk"} interpretation={`SLO ${ev.sloStatus ?? "—"}`} />
+              <KpiCard label="Release readiness" value={`${ev.releaseReadinessScore ?? "N/A"}`} suffix="/100" tone={(ev.releaseReadinessScore ?? 0) >= 80 ? "healthy" : (ev.releaseReadinessScore ?? 0) >= 65 ? "watch" : "risk"} interpretation={ev.releaseRecommendation} />
+              <KpiCard label="Monitoring" value={`${ev.monitoringCoverageScore ?? ev.monitoringCoverage ?? "N/A"}`} suffix="%" tone={(ev.monitoringCoverageScore ?? 0) >= 80 ? "healthy" : "watch"} interpretation={`${ev.monitoredSignals ?? "N/A"} signals`} />
+              <KpiCard label="Regression" value={ev.regressionStatus ?? "N/A"} tone={ev.regressionStatus === "No regression" ? "healthy" : ev.regressionStatus === "Watch" ? "watch" : "risk"} interpretation={`${ev.regressionFindings?.length ?? 0} finding(s)`} />
+              <KpiCard label="Drift risk" value={`${ev.driftRisk ?? "N/A"}`} suffix="/100" tone={(ev.driftRisk ?? 0) < 40 ? "healthy" : (ev.driftRisk ?? 0) < 60 ? "watch" : "risk"} interpretation={`SLO ${ev.sloStatus ?? "N/A"}`} />
             </div>
             {(ev.openOperationalRisks?.length ?? 0) > 0 && (
               <div className="mt-3">
@@ -299,7 +299,7 @@ export function OperateEvidencePanels() {
         <SectionHeader eyebrow="For reviewers" title="What this stage demonstrates" icon={ShieldCheck} />
         <p className="max-w-3xl text-sm leading-relaxed text-slatey-300">
           This stage shows how AI systems move from a successful build to controlled operation. It connects model choice, prompt and index lineage,
-          evaluation regression, latency, cost, drift, incidents, rollback, and monitoring coverage into release-readiness evidence — not to replace an
+          evaluation regression, latency, cost, drift, incidents, rollback, and monitoring coverage into release-readiness evidence, not to replace an
           MLOps platform, but to show the operating decisions enterprise teams need before piloting or productionizing AI.
         </p>
         <div className="mt-4 grid gap-3 md:grid-cols-3">

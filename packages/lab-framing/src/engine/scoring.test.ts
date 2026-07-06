@@ -5,7 +5,7 @@ import type { FramingParams } from "./types";
 
 const base: FramingParams = { user: "Customers", job: "Answer", pain: "Too slow", posture: "Rich & ready", risk: "Balanced" };
 
-describe("scoreTriangle — coupling is the lesson", () => {
+describe("scoreTriangle, coupling is the lesson", () => {
   it("produces values in 0..100", () => {
     const s = scoreTriangle(base, 0.5);
     for (const v of [s.value, s.feasibility, s.dataReadiness]) {

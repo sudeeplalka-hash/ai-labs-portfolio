@@ -15,12 +15,11 @@ export function evaluate(a: Record<string, number>): { scores: Record<PKey, numb
   return { scores, primary: ranked[0][0], runnerUp: ranked[1][0] };
 }
 
-// Sensitivity — the judgment layer. For each question, the first alternative answer
+// Sensitivity, the judgment layer. For each question, the first alternative answer
 // (in option order) that changes the primary recommendation: i.e. the single change
 // that would flip the call. Returns one flip per question that has one; an empty
 // array means the call is robust (no single answer flips it). `primaryOf` is supplied
-// by the caller so the exact scored model the UI shows — including any user weights —
-// is the one probed, rather than a second copy that could drift.
+// by the caller so the exact scored model the UI shows, including any user weights, // is the one probed, rather than a second copy that could drift.
 export interface SensitivityQuestion {
   key: string;
   q: string;
@@ -53,10 +52,10 @@ export function sensitivity<K extends string = PKey>(
     .filter((s): s is Flip<K> => s !== null);
 }
 
-// Integration economics — the N×M vs N+M argument behind protocols. Point-to-point
+// Integration economics, the N×M vs N+M argument behind protocols. Point-to-point
 // integrations grow as producers × consumers (bespoke glue); a shared protocol grows
 // as producers + consumers plus a one-off adoption cost. The crossover in consumers is
-// where the protocol starts winning — the quantitative case for MCP/A2A over bespoke.
+// where the protocol starts winning, the quantitative case for MCP/A2A over bespoke.
 // Pure and framework-agnostic.
 export interface IntegrationModel {
   /** cost of one bespoke point-to-point integration. */
@@ -77,7 +76,7 @@ export const protocolCost = (producers: number, consumers: number, model: Integr
 
 /** The consumer count at which the protocol becomes cheaper than bespoke, for a fixed
  *  producer count. Returns null when adding consumers never makes the protocol win
- *  (denominator ≤ 0) — e.g. a single producer, where bespoke is already minimal. */
+ *  (denominator ≤ 0), e.g. a single producer, where bespoke is already minimal. */
 export function crossoverConsumers(producers: number, model: IntegrationModel = {}): number | null {
   const { perLink = 1, perEndpoint = 1, protocolFixed = 0 } = model;
   const denom = producers * perLink - perEndpoint;
@@ -86,11 +85,11 @@ export function crossoverConsumers(producers: number, model: IntegrationModel = 
   return consumers > 0 ? consumers : null;
 }
 
-// Protocol affinity radar — how strongly each protocol's score responds to each decision
+// Protocol affinity radar, how strongly each protocol's score responds to each decision
 // dimension, measured by probing the SAME scorer the UI shows (user weights included).
 // For each dimension we raise its answer from low to high (others held at neutral) and
 // read the change in each protocol's score: that change is the protocol's responsiveness
-// to that dimension. Derived, not hand-authored — the radar moves when weights are edited.
+// to that dimension. Derived, not hand-authored, the radar moves when weights are edited.
 // Negative responsiveness (a protocol favored by the LOW end, e.g. function calling and
 // "few tools") is meaningful and preserved here; the radar mapping renders it as inward.
 export interface ProtocolAxis {
@@ -143,12 +142,12 @@ export function affinityRadar(
   return out;
 }
 
-// Why not the others — for the recommended protocol, the single decision dimension that
+// Why not the others, for the recommended protocol, the single decision dimension that
 // most separates it from each rival GIVEN THE USER'S ANSWERS. A dimension's contribution
 // to a protocol ≈ its per-unit responsiveness × the user's answer on that dimension; the
 // rival lost most on the dimension with the largest (primary − rival) contribution gap.
 // That names the call in the user's own inputs ("A2A only pays off when agents coordinate
-// — you have one agent"). Deterministic; ties break toward the earlier axis.
+//, you have one agent"). Deterministic; ties break toward the earlier axis.
 export interface WhyNot {
   protocol: PKey;
   axisKey: string;
@@ -181,9 +180,9 @@ export function whyNotOthers(
     });
 }
 
-// Recommendation card — normalize the scores into a compact, shareable model: the four
+// Recommendation card, normalize the scores into a compact, shareable model: the four
 // protocols as fit bars (sorted, percent of the leader), the runner-up, the margin, and a
-// confidence read from how far the leader sits above the runner-up. Pure — the component
+// confidence read from how far the leader sits above the runner-up. Pure, the component
 // renders it as an SVG card and exports a PNG; keeping the model here means the exported
 // artifact and the on-screen scores come from one computation.
 export interface ProtoBar {
@@ -218,10 +217,10 @@ export function recommendationCard(
   return { primary, primaryLabel: labelOf(primary), runnerUp, runnerUpLabel: labelOf(runnerUp), margin, confidence, bars };
 }
 
-// Explain the call — compose the already-computed pieces (the card, the why-not contrasts,
+// Explain the call, compose the already-computed pieces (the card, the why-not contrasts,
 // and the sensitivity flips) into an ordered, plain-English rationale a reader can follow
 // without the charts: the verdict and its confidence, the decision dimensions that point to
-// the primary, the closest alternative, and whether any single answer flips it. Pure — it
+// the primary, the closest alternative, and whether any single answer flips it. Pure, it
 // only formats tested outputs, so the transcript can't disagree with the scores.
 export interface ExplanationLine {
   kind: "verdict" | "driver" | "runner-up" | "flip" | "robust";
@@ -234,13 +233,13 @@ export function explainRecommendation(
   labelOf: (k: PKey) => string,
 ): ExplanationLine[] {
   const lines: ExplanationLine[] = [];
-  lines.push({ kind: "verdict", text: `${card.primaryLabel} — a ${card.confidence} call, +${card.margin.toFixed(1)} ahead of ${card.runnerUpLabel}.` });
+  lines.push({ kind: "verdict", text: `${card.primaryLabel}, a ${card.confidence} call, +${card.margin.toFixed(1)} ahead of ${card.runnerUpLabel}.` });
   const driverAxes: string[] = [];
   for (const w of whyNot) if (!driverAxes.includes(w.axisLabel)) driverAxes.push(w.axisLabel);
   for (const ax of driverAxes.slice(0, 3)) lines.push({ kind: "driver", text: `Your "${ax}" answer points to ${card.primaryLabel}.` });
   lines.push({ kind: "runner-up", text: `Closest alternative: ${card.runnerUpLabel}.` });
   if (flips.length === 0) {
-    lines.push({ kind: "robust", text: "No single answer change flips the call — the recommendation is robust." });
+    lines.push({ kind: "robust", text: "No single answer change flips the call, the recommendation is robust." });
   } else {
     const f = flips[0];
     lines.push({ kind: "flip", text: `It would flip to ${labelOf(f.newPrimary)} if "${f.q}" became "${f.to}".` });

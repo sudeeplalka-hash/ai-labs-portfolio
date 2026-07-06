@@ -5,10 +5,10 @@ import type { TokenAnalysis } from "@rag/lib/live-lab/tokenAnalysis";
 export function TokenKpiStrip({ analysis }: { analysis: TokenAnalysis }) {
   const cards = [
     { label: "Token coverage", value: `${analysis.coverage}%`, hint: "Share of your question's content words that appear in the retrieved context. Low coverage is a leading cause of weak answers." },
-    { label: "Input tokens", value: analysis.inputTokens.toLocaleString(), hint: "Question + retrieved context + system prompt — what the model would receive." },
+    { label: "Input tokens", value: analysis.inputTokens.toLocaleString(), hint: "Question + retrieved context + system prompt, what the model would receive." },
     { label: "Output tokens", value: analysis.outputTokens.toLocaleString(), hint: "Tokens in the generated answer." },
     { label: "Context window", value: analysis.contextTokens.toLocaleString(), hint: "Tokens of retrieved evidence packed into the prompt." },
-    { label: "Compression", value: `${analysis.compression}%`, hint: "Context tokens as a share of the whole document — retrieval keeps the prompt small." },
+    { label: "Compression", value: `${analysis.compression}%`, hint: "Context tokens as a share of the whole document, retrieval keeps the prompt small." },
     { label: "Est. cost", value: `$${analysis.estCost.toFixed(5)}`, hint: "Estimated with a sample model pricing profile (GPT-4o-mini-class)." },
   ];
   return (

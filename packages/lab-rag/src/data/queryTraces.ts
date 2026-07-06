@@ -125,14 +125,14 @@ export const queryTraces: QueryTrace[] = [
     generatedAnswer:
       "Manager approval is required before booking any trip expected to exceed $2,500, and for any single expense over $500.",
     expectedAnswer:
-      "Pre-trip manager approval is required for trips expected to exceed $2,500; individual expenses above $500 also require manager sign-off (Employee Travel Policy v3.2).",
+      "Pre-trip manager approval is required for trips expected to exceed $2,500; individual expenses above $500 also require manager sign off (Employee Travel Policy v3.2).",
     retrievedChunks: [
       { id: "c1", sourceDocument: "Employee Travel Policy", documentVersion: "v3.2", chunkId: "TRV-3.1", rank: 1, relevanceScore: 0.9, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Trips with an expected total cost above $2,500 require manager approval prior to booking." },
-      { id: "c2", sourceDocument: "Employee Travel Policy", documentVersion: "v3.2", chunkId: "TRV-3.4", rank: 2, relevanceScore: 0.84, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Any single expense exceeding $500 requires manager sign-off regardless of trip total." },
+      { id: "c2", sourceDocument: "Employee Travel Policy", documentVersion: "v3.2", chunkId: "TRV-3.4", rank: 2, relevanceScore: 0.84, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Any single expense exceeding $500 requires manager sign off regardless of trip total." },
     ],
     claimVerifications: [
       { id: "cl1", claim: "Manager approval is required for trips expected to exceed $2,500.", supportStatus: "Supported", confidence: 0.95, sourceDocument: "Employee Travel Policy v3.2", citationId: "TRV-3.1", evidenceSnippet: "Trips with an expected total cost above $2,500 require manager approval prior to booking." },
-      { id: "cl2", claim: "Single expenses over $500 require manager sign-off.", supportStatus: "Supported", confidence: 0.92, sourceDocument: "Employee Travel Policy v3.2", citationId: "TRV-3.4", evidenceSnippet: "Any single expense exceeding $500 requires manager sign-off regardless of trip total." },
+      { id: "cl2", claim: "Single expenses over $500 require manager sign off.", supportStatus: "Supported", confidence: 0.92, sourceDocument: "Employee Travel Policy v3.2", citationId: "TRV-3.4", evidenceSnippet: "Any single expense exceeding $500 requires manager sign off regardless of trip total." },
     ],
     scores: scores({ contextRelevance: 90, retrievalCompleteness: 88, faithfulness: 90, completeness: 89, citationAccuracy: 91, claimSupport: 94, hallucinationRisk: 6 }),
     failureReasons: [],
@@ -146,7 +146,7 @@ export const queryTraces: QueryTrace[] = [
     originalQuery: "approve finance exception over 100000",
     rewrittenQuery: "approval authority for finance exceptions exceeding $100,000 threshold",
     category: "Finance Policy",
-    queryType: "High-risk policy",
+    queryType: "High risk policy",
     riskLevel: "Critical",
     expectedSource: "Finance Approval Matrix v1.6",
     generatedAnswer:
@@ -296,7 +296,7 @@ export const queryTraces: QueryTrace[] = [
       { id: "cl3", claim: "The 7-year period applies regardless of jurisdiction.", supportStatus: "Not Enough Evidence", confidence: 0.5, reviewerNote: "Retrieved context does not confirm uniform treatment across jurisdictions; statutory exceptions may extend it." },
     ],
     scores: scores({ contextRelevance: 86, retrievalCompleteness: 82, faithfulness: 84, completeness: 82, citationAccuracy: 85, claimSupport: 75, hallucinationRisk: 11, complianceRisk: 32 }),
-    failureReasons: ["Human review required (high-risk domain)"],
+    failureReasons: ["Human review required (high risk domain)"],
     humanReviewRequired: true,
     evaluationStatus: "Needs Review",
     timeline: timeline(2450, { 8: { status: "Warning", notes: "Routed to human review: retention/compliance." } }),
@@ -385,7 +385,7 @@ export const queryTraces: QueryTrace[] = [
     originalQuery: "external AI tools customer data policy",
     rewrittenQuery: "policy on using third-party external AI tools with customer or personal data",
     category: "Compliance",
-    queryType: "High-risk policy",
+    queryType: "High risk policy",
     riskLevel: "Critical",
     expectedSource: "AI Usage Governance Standard v1.3",
     generatedAnswer:
@@ -414,15 +414,15 @@ export const queryTraces: QueryTrace[] = [
     riskLevel: "High",
     expectedSource: "AI Usage Governance Standard v1.3",
     generatedAnswer:
-      "When sources conflict, the assistant should prefer the most recent effective version, flag the conflict, cite both versions, and recommend human review for high-risk topics.",
+      "When sources conflict, the assistant should prefer the most recent effective version, flag the conflict, cite both versions, and recommend human review for high risk topics.",
     expectedAnswer:
-      "On conflict, prefer the current effective version, surface the discrepancy to the user, cite the authoritative source, and escalate to human review when the topic is high-risk (AI Usage Governance Standard v1.3).",
+      "On conflict, prefer the current effective version, surface the discrepancy to the user, cite the authoritative source, and escalate to human review when the topic is high risk (AI Usage Governance Standard v1.3).",
     retrievedChunks: [
-      { id: "c1", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-6.2", rank: 1, relevanceScore: 0.81, usedInAnswer: true, citationMatched: true, freshnessStatus: "Stale", text: "When sources conflict, systems should defer to the current effective version, disclose the conflict to the user, and route high-risk topics to human review." },
+      { id: "c1", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-6.2", rank: 1, relevanceScore: 0.81, usedInAnswer: true, citationMatched: true, freshnessStatus: "Stale", text: "When sources conflict, systems should defer to the current effective version, disclose the conflict to the user, and route high risk topics to human review." },
     ],
     claimVerifications: [
       { id: "cl1", claim: "The assistant should prefer the most recent effective version.", supportStatus: "Supported", confidence: 0.88, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-6.2", evidenceSnippet: "defer to the current effective version" },
-      { id: "cl2", claim: "The assistant should flag the conflict and recommend human review for high-risk topics.", supportStatus: "Supported", confidence: 0.85, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-6.2", evidenceSnippet: "disclose the conflict to the user, and route high-risk topics to human review." },
+      { id: "cl2", claim: "The assistant should flag the conflict and recommend human review for high risk topics.", supportStatus: "Supported", confidence: 0.85, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-6.2", evidenceSnippet: "disclose the conflict to the user, and route high risk topics to human review." },
     ],
     scores: scores({ contextRelevance: 84, retrievalCompleteness: 80, faithfulness: 86, completeness: 84, citationAccuracy: 83, claimSupport: 90, hallucinationRisk: 9, complianceRisk: 26 }),
     failureReasons: [],
@@ -436,7 +436,7 @@ export const queryTraces: QueryTrace[] = [
     originalQuery: "bypass security exception approval",
     rewrittenQuery: "how to skip or bypass the security exception approval workflow",
     category: "Security",
-    queryType: "High-risk policy",
+    queryType: "High risk policy",
     riskLevel: "Critical",
     expectedSource: "Information Security Exception Policy v1.9",
     generatedAnswer:

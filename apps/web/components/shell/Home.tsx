@@ -45,31 +45,31 @@ export function Home() {
       <div className="max-w-3xl">
         <p className="eyebrow">AI Program Command Center</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">
-          Everyone has an AI idea. The hard part is <span className="text-primary">making it real</span>.
+          Every enterprise has an AI idea. The hard part is <span className="text-primary">making it real</span>.
         </h1>
         <p className="mt-3 text-base leading-relaxed text-slatey-300">
-          Most enterprise AI stalls right after the demo, when the real questions show up. Can the data actually feed
-          it? Do the answers hold up? Will it run without blowing the budget? Is it safe enough to trust? And does it
-          ever pay for itself? This walks one real initiative through all of it, from a rough idea to a business case
-          you could defend in a board meeting. Take it from the top and go end to end, or jump into any lab and explore
-          on your own.
+          Most enterprise AI stalls right after the demo, when the real questions surface. Can the data actually
+          support it? Do the answers hold up under scrutiny? Will it run without exceeding budget? Is it safe enough
+          to trust? Does it ever pay for itself? This walks one real initiative through all of it, from a rough idea
+          to a business case you could defend in a board meeting. Take it from the top and go end to end, or open
+          any lab and explore on your own.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <LoadSampleButton label="See it working — load the sample program" />
+          <LoadSampleButton label="Load the sample program to see it in action" />
           <Link href="/story" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary-dark">
-            <BookOpen className="h-4 w-4" /> Short on time? Read the 2-minute story
+            <BookOpen className="h-4 w-4" /> Short on time? Read the two minute story
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
       </div>
 
-      {/* The seven stages — one pane: loop framing + lab cards + collapsible contract loop */}
+      {/* The seven stages, one pane: loop framing + lab cards + collapsible contract loop */}
       <div className="rounded-2xl border border-line p-5 sm:p-6">
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold tracking-tight text-ink">The seven stages</h2>
             <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slatey-400">
-              One initiative, end to end — walk it as a guided loop, or open any lab standalone. Each lab works on its own; it gets richer if you&apos;ve run the upstream stages, but none of them require it.
+              One initiative, end to end: walk it as a guided loop, or open any lab standalone. Each lab works on its own; it gets richer if you&apos;ve run the upstream stages, but none of them require it.
             </p>
           </div>
           <Link href="/frame" className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-primary-dark">
@@ -107,7 +107,7 @@ export function Home() {
         </div>
 
         <details className="mt-5 border-t border-line pt-4">
-          <summary className="cursor-pointer text-sm font-semibold text-ink">How each stage hands off <span className="font-normal text-slatey-500">· the contract-driven loop</span></summary>
+          <summary className="cursor-pointer text-sm font-semibold text-ink">How each stage hands off <span className="font-normal text-slatey-500">· the contract driven loop</span></summary>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">Each stage emits a structured contract the next consumes through shared state.</p>
           <div className="mt-3"><ContractLoop live={live} bare /></div>
         </details>

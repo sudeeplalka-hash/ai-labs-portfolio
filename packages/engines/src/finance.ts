@@ -53,7 +53,7 @@ export function payback(cf: number[]): number | null {
   return null;
 }
 
-// ROI tornado — the sensitivity view for a business case. Swing each driver ±`swing` and read
+// ROI tornado, the sensitivity view for a business case. Swing each driver ±`swing` and read
 // the NPV at each extreme; the bar with the widest low↔high spread is the assumption the case
 // most depends on. Sorted widest-first (tornado convention). Built on the same npv/cashflows
 // the KPIs show, so the chart and the headline can't disagree. Pure.

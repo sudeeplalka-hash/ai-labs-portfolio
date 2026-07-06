@@ -13,7 +13,7 @@ function reportHtml(report: PrepReport, score: number, gate: GateVerdict, profil
     })
     .join("");
   const date = new Date().toISOString().slice(0, 16).replace("T", " ");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Data Readiness Report — ${report.fileName}</title>
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Data Readiness Report, ${report.fileName}</title>
 <style>
 body{font-family:'Public Sans',system-ui,sans-serif;color:#152433;max-width:840px;margin:32px auto;padding:0 20px;background:#f6f7f8}
 h1{font-size:22px;margin:0 0 4px}.sub{color:#5f6f81;font-size:13px;margin:0 0 20px}
@@ -27,7 +27,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;p
 <h1>Data Readiness Report</h1>
 <p class="sub">${report.fileName} · ${report.ext.toUpperCase()} · profile: ${profileName} · generated ${date}</p>
 <div class="card"><div class="score">${score}<span style="font-size:16px;color:#7c8a9a"> / 100</span></div>
-<div style="margin-top:8px"><span class="gate ${gate.gate}">${gate.gate}</span> — ${gate.verdict}</div>
+<div style="margin-top:8px"><span class="gate ${gate.gate}">${gate.gate}</span>, ${gate.verdict}</div>
 <p style="color:#46586b;font-size:14px;margin:10px 0 0">${gate.summary}</p></div>
 <div class="card"><h3 style="margin:0 0 8px;font-size:15px">Profile</h3>
 <table><tr><td>Rules profile</td><td>${profileName}</td></tr>${row("Approved chunks", report.chunk.count.toLocaleString())}${row("Est. embedding tokens", report.chunk.estTokens.toLocaleString())}</table></div>

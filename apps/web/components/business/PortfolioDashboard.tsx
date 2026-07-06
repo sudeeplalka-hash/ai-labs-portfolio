@@ -2,8 +2,8 @@
 
 // C3-1 · AI Initiative Portfolio Dashboard (Collection 3 · gallery · flagship).
 // Twelve initiatives plotted value × risk (sized by spend), each with a
-// risk-adjusted ROI and an explicit kill / scale / hold call. Map / Financials /
-// Stage-gate views. Thread: capital allocation under uncertainty — nothing scored
+// risk adjusted ROI and an explicit kill / scale / hold call. Map / Financials /
+// Stage-gate views. Thread: capital allocation under uncertainty, nothing scored
 // by a black box. SIMULATED; every number is a stated formula over visible inputs.
 
 import { useEffect, useRef, useState } from "react";
@@ -26,8 +26,8 @@ interface Initiative {
   expValueM: number; spendM: number; risk: number; planVar: number;
 }
 
-// The model's assumptions — now editable in the UI (the Assumptions drawer). Defaults
-// are industry-informed; editing them makes it "your model" (still SIMULATED — the
+// The model's assumptions, now editable in the UI (the Assumptions drawer). Defaults
+// are industry-informed; editing them makes it "your model" (still SIMULATED, the
 // figures just reflect your assumptions instead of the defaults).
 interface Assumptions { prob: Record<Stage, number>; scaleMultiple: number; scaleRiskCutoff: number }
 const DEFAULT_ASSUMPTIONS: Assumptions = {
@@ -112,7 +112,7 @@ export function PortfolioDashboard() {
   const recommend = (i: Initiative) => recommendOf(i, A);
   const edited = JSON.stringify(A) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
 
-  // Restore a shared scenario (?cfg=) once on mount — view, selection, assumptions.
+  // Restore a shared scenario (?cfg=) once on mount, view, selection, assumptions.
   useEffect(() => {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
@@ -143,7 +143,7 @@ export function PortfolioDashboard() {
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact scenario"), () => toast("Link is in the address bar"));
+      navigator.clipboard.writeText(url).then(() => toast("Link copied, this exact scenario"), () => toast("Link is in the address bar"));
     } else {
       toast("Link is in the address bar");
     }
@@ -157,7 +157,7 @@ export function PortfolioDashboard() {
   const totalRiskAdj = items.reduce((a, i) => a + riskAdj(i), 0);
   const killCount = items.filter((i) => recommend(i) === "kill").length;
 
-  // Budget-constrained funding — greedy by risk-adjusted return per $ (engine).
+  // Budget-constrained funding, greedy by risk adjusted return per $ (engine).
   const [budgetM, setBudgetM] = useState(5);
   const [sort, setSort] = useState<SortState | null>(null);
   const [domainFilter, setDomainFilter] = useState<string | null>(null);
@@ -199,12 +199,12 @@ export function PortfolioDashboard() {
       .sort((a, b) => riskAdj(b) - riskAdj(a))
       .map((i) => `| ${i.name} | ${i.domain} | ${i.stage} | ${fmtM(i.expValueM)} | ${fmtM(i.spendM)} | ${Math.round(prob(i) * 100)}% | ${fmtM(riskAdj(i))} | ${REC_LABEL[recommend(i)]} |`);
     return [
-      "# AI Initiative Portfolio — review pack",
+      "# AI Initiative Portfolio, review pack",
       "",
       `**Book:** ${activeUc ? activeUc.title : "Default (finserv + telecom)"}`,
-      `**Totals:** Expected value ${fmtM(totalValue)} · Run-rate spend ${fmtM(totalSpend)} · Risk-adjusted ${fmtM(totalRiskAdj)} · Kill list ${killCount}/${items.length}`,
+      `**Totals:** Expected value ${fmtM(totalValue)} · Run-rate spend ${fmtM(totalSpend)} · Risk adjusted ${fmtM(totalRiskAdj)} · Kill list ${killCount}/${items.length}`,
       "",
-      "## Initiatives (sorted by risk-adjusted value)",
+      "## Initiatives (sorted by risk adjusted value)",
       "",
       "| Initiative | Domain | Stage | Exp. value | Spend | P(success) | Risk-adj | Call |",
       "| --- | --- | --- | --- | --- | --- | --- | --- |",
@@ -213,12 +213,12 @@ export function PortfolioDashboard() {
       "## Kill list",
       "",
       kills.length
-        ? kills.map((i) => `- **${i.name}** — risk-adjusted ${fmtM(riskAdj(i))} (negative return)`).join("\n")
-        : "_None — every initiative clears its risk-adjusted hurdle._",
+        ? kills.map((i) => `- **${i.name}**, risk adjusted ${fmtM(riskAdj(i))} (negative return)`).join("\n")
+        : "_None, every initiative clears its risk adjusted hurdle._",
       "",
       "## Method",
       "",
-      `Risk-adjusted value = expected value × P(success by stage) − spend. **Kill** if risk-adjusted < 0; **Scale** if scaling/production AND risk-adjusted ≥ ${A.scaleMultiple}× spend AND risk < ${A.scaleRiskCutoff}; else **Hold**. P(success): discovery ${Math.round(A.prob.discovery * 100)}% · pilot ${Math.round(A.prob.pilot * 100)}% · scaling ${Math.round(A.prob.scaling * 100)}% · production ${Math.round(A.prob.production * 100)}%${edited ? " — your model" : ""}.`,
+      `Risk adjusted value = expected value × P(success by stage) − spend. **Kill** if risk adjusted < 0; **Scale** if scaling/production AND risk adjusted ≥ ${A.scaleMultiple}× spend AND risk < ${A.scaleRiskCutoff}; else **Hold**. P(success): discovery ${Math.round(A.prob.discovery * 100)}% · pilot ${Math.round(A.prob.pilot * 100)}% · scaling ${Math.round(A.prob.scaling * 100)}% · production ${Math.round(A.prob.production * 100)}%${edited ? ", your model" : ""}.`,
     ].join("\n");
   };
   const onGenerate = () =>
@@ -226,10 +226,10 @@ export function PortfolioDashboard() {
       scenario: activeUc ? activeUc.title : "Default book",
     });
 
-  // ---- Export suite + command palette — all export the *visible* model (honest). ----
+  // ---- Export suite + command palette, all export the *visible* model (honest). ----
   const slug = activeUc ? activeUc.id : "default";
   const exportCsv = () => {
-    const headers = ["Initiative", "Domain", "Stage", "Expected value ($M)", "Spend ($M)", "P(success)", "Risk-adjusted ($M)", "Call"];
+    const headers = ["Initiative", "Domain", "Stage", "Expected value ($M)", "Spend ($M)", "P(success)", "Risk adjusted ($M)", "Call"];
     const rows = items.slice().sort((a, b) => riskAdj(b) - riskAdj(a)).map((i) => [
       i.name, i.domain, i.stage, i.expValueM, i.spendM, Math.round(prob(i) * 100) / 100, Number(riskAdj(i).toFixed(3)), REC_LABEL[recommend(i)],
     ]);
@@ -323,14 +323,14 @@ export function PortfolioDashboard() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A book of twelve AI initiatives, governed like capital. Each carries a risk-adjusted ROI and an explicit
-            call — because a portfolio where nothing is ever killed isn&apos;t governed, it&apos;s unattended.
+            A book of twelve AI initiatives, governed like capital. Each carries a risk adjusted ROI and an explicit
+            call, because a portfolio where nothing is ever killed isn&apos;t governed, it&apos;s unattended.
           </p>
         </div>
 
         <UseCaseRail useCases={C31_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Most AI portfolios are a list everyone is proud of and no one governs. Without a kill discipline, capital spreads thin across initiatives that will never pay." approach="Twelve initiatives governed like capital: each carries an expected value, a stage-based probability of success, and a run cost, yielding a risk-adjusted ROI and an explicit kill / hold / scale call across value×risk, financials, stage-gate, funding, and reallocation views." why="Treating initiatives as a capital book — not a wish list — forces the uncomfortable calls: fund the efficient core, kill the negatives, redeploy the freed capital." metric="Risk-adjusted ROI per initiative (expected value × stage probability − run cost) and the efficient frontier of cumulative value vs cumulative spend." tradeoff="Funding the single highest-value initiative can starve three efficient ones; the greedy funder and the frontier knee show where diminishing returns begin." outcome="A defensible funding decision within a budget — what to fund, what to kill, and where the freed capital goes — with the value captured quantified." />
+        <CaseStudy problem="Most AI portfolios are a list everyone is proud of and no one governs. Without a kill discipline, capital spreads thin across initiatives that will never pay." approach="Twelve initiatives governed like capital: each carries an expected value, a stage-based probability of success, and a run cost, yielding a risk adjusted ROI and an explicit kill / hold / scale call across value×risk, financials, stage-gate, funding, and reallocation views." why="Treating initiatives as a capital book, not a wish list, forces the uncomfortable calls: fund the efficient core, kill the negatives, redeploy the freed capital." metric="Risk adjusted ROI per initiative (expected value × stage probability − run cost) and the efficient frontier of cumulative value vs cumulative spend." tradeoff="Funding the single highest-value initiative can starve three efficient ones; the greedy funder and the frontier knee show where diminishing returns begin." outcome="A defensible funding decision within a budget, what to fund, what to kill, and where the freed capital goes, with the value captured quantified." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's assumptions">
@@ -356,8 +356,8 @@ export function PortfolioDashboard() {
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Expected annual value" value={fmtM(totalValue)} tone="neutral" interpretation="Sum of unadjusted upside" />
           <KpiCard label="Run-rate spend" value={fmtM(totalSpend)} tone="watch" interpretation="Annualized" />
-          <KpiCard label="Risk-adjusted value" value={fmtM(totalRiskAdj)} tone={totalRiskAdj > 0 ? "healthy" : "critical"} interpretation="Value × P(success) − spend" />
-          <KpiCard label="Recommend to kill" value={`${killCount}/${items.length}`} tone={killCount >= 1 ? "critical" : "healthy"} interpretation="Negative risk-adjusted ROI" />
+          <KpiCard label="Risk adjusted value" value={fmtM(totalRiskAdj)} tone={totalRiskAdj > 0 ? "healthy" : "critical"} interpretation="Value × P(success) − spend" />
+          <KpiCard label="Recommend to kill" value={`${killCount}/${items.length}`} tone={killCount >= 1 ? "critical" : "healthy"} interpretation="Negative risk adjusted ROI" />
         </div>
 
         {/* View toggle */}
@@ -510,7 +510,7 @@ export function PortfolioDashboard() {
                     <Plus className="h-3.5 w-3.5" /> Add initiative
                   </button>
                 ) : (
-                  <p className="mt-2 text-[11px] text-slatey-500">Plan variance flagged beyond ±10%. Hit <span className="font-semibold">Edit book</span> to bring your own initiatives — every number recomputes.</p>
+                  <p className="mt-2 text-[11px] text-slatey-500">Plan variance flagged beyond ±10%. Hit <span className="font-semibold">Edit book</span> to bring your own initiatives, every number recomputes.</p>
                 )}
               </Panel>
             )}
@@ -535,7 +535,7 @@ export function PortfolioDashboard() {
 
             {view === "fund" && (
               <Panel>
-                <p className="stat-label mb-2">Budget-constrained funding <span className="font-normal text-slatey-500">· greedy by risk-adjusted return per $</span></p>
+                <p className="stat-label mb-2">Budget-constrained funding <span className="font-normal text-slatey-500">· greedy by risk adjusted return per $</span></p>
                 <div className="mb-3">
                   <div className="mb-1 flex items-center justify-between"><label className="text-xs text-slatey-400">Capital available</label><span className="font-mono text-sm font-semibold text-ink">{fmtM(budgetM)}</span></div>
                   <input type="range" min={0} max={Math.ceil(totalSpend)} step={0.1} value={Math.min(budgetM, Math.ceil(totalSpend))} onChange={(e) => setBudgetM(Number(e.target.value))} className="w-full accent-primary" />
@@ -551,7 +551,7 @@ export function PortfolioDashboard() {
                           <span className="block text-[10px] text-slatey-500">{fmtM(i.spendM)} spend · {fmtM(riskAdj(i))} risk-adj</span>
                         </button>
                       ))}
-                      {funded.size === 0 && <p className="text-[11px] text-slatey-500">No budget allocated yet — raise the slider.</p>}
+                      {funded.size === 0 && <p className="text-[11px] text-slatey-500">No budget allocated yet, raise the slider.</p>}
                     </div>
                   </div>
                   <div>
@@ -560,14 +560,14 @@ export function PortfolioDashboard() {
                       {items.filter((i) => !funded.has(i.id)).sort((a, b) => riskAdj(b) - riskAdj(a)).map((i) => (
                         <button key={i.id} onClick={() => setSelId(i.id)} className="block w-full rounded-md border border-line px-2 py-1 text-left text-xs opacity-80">
                           <span className="font-medium text-ink">{i.name}</span>
-                          <span className="block text-[10px] text-slatey-500">{riskAdj(i) < 0 ? "negative ROI — never fund" : `didn't fit · ${fmtM(riskAdj(i))} risk-adj`}</span>
+                          <span className="block text-[10px] text-slatey-500">{riskAdj(i) < 0 ? "negative ROI, never fund" : `didn't fit · ${fmtM(riskAdj(i))} risk-adj`}</span>
                         </button>
                       ))}
                     </div>
                   </div>
                 </div>
                 <p className="mt-3 rounded-md bg-primary/[0.05] px-3 py-2 text-xs text-ink">
-                  <span className="font-semibold">With {fmtM(budgetM)} you fund {funded.size} of {items.length}</span>, capturing {fmtM(fundCaptured)}/yr of risk-adjusted value. Greedy by return-per-dollar — a defensible first cut, not a solved optimum.
+                  <span className="font-semibold">With {fmtM(budgetM)} you fund {funded.size} of {items.length}</span>, capturing {fmtM(fundCaptured)}/yr of risk adjusted value. Greedy by return-per-dollar, a defensible first cut, not a solved optimum.
                 </p>
                 <div className="mt-4 border-t border-line pt-3">
                   <p className="stat-label mb-2">Efficient frontier <span className="font-normal text-slatey-500">· cumulative value vs cumulative spend</span></p>
@@ -580,7 +580,7 @@ export function PortfolioDashboard() {
                     const path = [`M ${X(0)} ${Y(0)}`, ...frontier.points.map((pt) => `L ${X(pt.cumSpend)} ${Y(pt.cumValue)}`)].join(" ");
                     const bx = X(Math.min(budgetM, maxS));
                     return (
-                      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Efficient frontier: cumulative risk-adjusted value against cumulative spend, most-efficient initiatives first.">
+                      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Efficient frontier: cumulative risk adjusted value against cumulative spend, most-efficient initiatives first.">
                         <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} stroke="#cbd2d9" />
                         <line x1={padL} y1={padT} x2={padL} y2={H - padB} stroke="#cbd2d9" />
                         <line x1={X(0)} y1={Y(0)} x2={X(maxS)} y2={Y(maxV)} stroke="#e4e7eb" strokeDasharray="3 3" />
@@ -613,7 +613,7 @@ export function PortfolioDashboard() {
               <Panel>
                 <p className="stat-label mb-2">Redeploy the kills <span className="font-normal text-slatey-500">· cut the losers, fund the winners</span></p>
                 {realloc.killed.length === 0 ? (
-                  <p className="text-sm text-slatey-400">No initiative carries a negative risk-adjusted ROI — nothing to cut. The book is already clean.</p>
+                  <p className="text-sm text-slatey-400">No initiative carries a negative risk adjusted ROI, nothing to cut. The book is already clean.</p>
                 ) : (
                   <>
                     <div className="grid gap-3 sm:grid-cols-2">
@@ -637,7 +637,7 @@ export function PortfolioDashboard() {
                               <span className="block text-[10px] text-slatey-500">+{fmtM(t.allocatedM)} capital → +{fmtM(t.addedValueM)}/yr (illustrative)</span>
                             </button>
                           ) : null; })}
-                          {realloc.targets.length === 0 && <p className="text-[11px] text-slatey-500">No Scale-rated initiative to redeploy into — hold the freed capital.</p>}
+                          {realloc.targets.length === 0 && <p className="text-[11px] text-slatey-500">No Scale-rated initiative to redeploy into, hold the freed capital.</p>}
                           {realloc.reserveM > 0.05 && <p className="text-[11px] text-slatey-500">{fmtM(realloc.reserveM)} held in reserve (past the 1× double-down cap).</p>}
                         </div>
                       </div>
@@ -650,7 +650,7 @@ export function PortfolioDashboard() {
                       <div className="text-center"><p className="text-[10px] uppercase tracking-wide text-slatey-500">After redeploy <span className="text-slatey-400">(illustrative)</span></p><p className="font-mono font-semibold text-ink">{fmtM(realloc.afterRedeployRiskAdjM)}</p></div>
                     </div>
                     <p className="mt-3 rounded-md bg-primary/[0.05] px-3 py-2 text-xs text-ink">
-                      Cutting the kills lifts risk-adjusted value by <span className="font-semibold">{fmtM(realloc.dragRemovedM)}/yr</span> — that part is just accounting. Redeploying the freed {fmtM(realloc.freedCapitalM)} into your Scale initiatives at their current return-per-dollar <span className="italic">could</span> add ~{fmtM(realloc.redeployedValueM)}/yr — illustrative (each dollar credited at the initiative&apos;s current efficiency, capped at a 1× double-down), not a guaranteed return.
+                      Cutting the kills lifts risk adjusted value by <span className="font-semibold">{fmtM(realloc.dragRemovedM)}/yr</span>, that part is just accounting. Redeploying the freed {fmtM(realloc.freedCapitalM)} into your Scale initiatives at their current return-per-dollar <span className="italic">could</span> add ~{fmtM(realloc.redeployedValueM)}/yr, illustrative (each dollar credited at the initiative&apos;s current efficiency, capped at a 1× double-down), not a guaranteed return.
                     </p>
                   </>
                 )}
@@ -674,40 +674,40 @@ export function PortfolioDashboard() {
               <details className="mt-3 rounded-md bg-slate-50 p-2.5 text-xs text-slatey-300">
                 <summary className="cursor-pointer font-semibold text-ink">How this number is computed</summary>
                 <p className="mt-1.5 leading-relaxed">
-                  Risk-adjusted ROI = expected value ({fmtM(sel.expValueM)}) × stage probability ({Math.round(prob(sel) * 100)}% for {sel.stage}) − run-rate spend ({fmtM(sel.spendM)}) = <span className="font-semibold text-ink">{fmtM(riskAdj(sel))}</span>/yr.
+                  Risk adjusted ROI = expected value ({fmtM(sel.expValueM)}) × stage probability ({Math.round(prob(sel) * 100)}% for {sel.stage}) − run-rate spend ({fmtM(sel.spendM)}) = <span className="font-semibold text-ink">{fmtM(riskAdj(sel))}</span>/yr.
                 </p>
                 <p className="mt-1.5 leading-relaxed">
-                  Call: {riskAdj(sel) < 0 ? "negative risk-adjusted ROI → kill." : recommend(sel) === "scale" ? `proven stage, risk-adjusted ROI ≥ ${A.scaleMultiple}× spend, risk < ${A.scaleRiskCutoff} → scale.` : "positive but not yet scale-worthy → hold and de-risk."}
+                  Call: {riskAdj(sel) < 0 ? "negative risk adjusted ROI → kill." : recommend(sel) === "scale" ? `proven stage, risk adjusted ROI ≥ ${A.scaleMultiple}× spend, risk < ${A.scaleRiskCutoff} → scale.` : "positive but not yet scale-worthy → hold and de-risk."}
                 </p>
               </details>
             </Panel>
 
-            <InsightCard title={killCount > 0 ? `${killCount} to cut this quarter` : "No kills — a lean book"} tone={killCount > 0 ? "danger" : "info"}>
-              {killCount} of {items.length} carry a negative risk-adjusted ROI. Keeping them funds optionality theatre — the capital
+            <InsightCard title={killCount > 0 ? `${killCount} to cut this quarter` : "No kills, a lean book"} tone={killCount > 0 ? "danger" : "info"}>
+              {killCount} of {items.length} carry a negative risk adjusted ROI. Keeping them funds optionality theatre, the capital
               they hold is the capital the Scale column needs.
             </InsightCard>
           </div>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Fund the efficient core, kill the negative-ROI initiatives, and redeploy freed capital into scale targets." lift="Risk-adjusted value captured within budget, plus the value recovered by cutting losers and doubling down on winners at current efficiency." measure="Realized vs modeled risk-adjusted ROI per initiative; kill-decision cycle time; portfolio value-per-dollar trend quarter over quarter." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "A portfolio where nothing gets killed isn't governed — it's unattended. Two of these twelve should die this quarter."}</p>
+          <OutcomeFrame call="Fund the efficient core, kill the negative-ROI initiatives, and redeploy freed capital into scale targets." lift="Risk adjusted value captured within budget, plus the value recovered by cutting losers and doubling down on winners at current efficiency." measure="Realized vs modeled risk adjusted ROI per initiative; kill-decision cycle time; portfolio value-per-dollar trend quarter over quarter." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "A portfolio where nothing gets killed isn't governed, it's unattended. Two of these twelve should die this quarter."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Stage probabilities{edited ? " (your model)" : " (defaults)"}: discovery {Math.round(A.prob.discovery * 100)}% · pilot {Math.round(A.prob.pilot * 100)}% · scaling {Math.round(A.prob.scaling * 100)}% · production {Math.round(A.prob.production * 100)}% — editable in the Assumptions drawer.</p>
-              <p>Risk-adjusted ROI = expected annual value × stage probability − run-rate cost. Kill if &lt; 0; scale if proven-stage and ≥ {A.scaleMultiple}× spend with risk &lt; {A.scaleRiskCutoff}; else hold. Plan variance flagged beyond ±10%.</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic client-side math over authored, anonymized finserv + telecom initiatives.</p>
+              <p>Stage probabilities{edited ? " (your model)" : " (defaults)"}: discovery {Math.round(A.prob.discovery * 100)}% · pilot {Math.round(A.prob.pilot * 100)}% · scaling {Math.round(A.prob.scaling * 100)}% · production {Math.round(A.prob.production * 100)}%, editable in the Assumptions drawer.</p>
+              <p>Risk adjusted ROI = expected annual value × stage probability − run-rate cost. Kill if &lt; 0; scale if proven-stage and ≥ {A.scaleMultiple}× spend with risk &lt; {A.scaleRiskCutoff}; else hold. Plan variance flagged beyond ±10%.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic client side math over authored, anonymized finserv + telecom initiatives.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> probabilities are stage-based defaults, not per-initiative Bayesian estimates; value figures are illustrative. The instrument frames the allocation decision — it doesn&apos;t replace the finance model behind it.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> probabilities are stage-based defaults, not per-initiative Bayesian estimates; value figures are illustrative. The instrument frames the allocation decision, it doesn&apos;t replace the finance model behind it.</p>
         </div>
 
         <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Model assumptions">
           <div className="space-y-5">
             <p className="text-xs leading-relaxed text-slatey-400">
-              These drive every risk-adjusted number and every kill / hold / scale call. Editing them makes this{" "}
-              <span className="font-semibold text-ink">your model</span> — the figures stay SIMULATED, but they reflect your assumptions, not the defaults.
+              These drive every risk adjusted number and every kill / hold / scale call. Editing them makes this{" "}
+              <span className="font-semibold text-ink">your model</span>, the figures stay SIMULATED, but they reflect your assumptions, not the defaults.
             </p>
 
             <div>
@@ -728,7 +728,7 @@ export function PortfolioDashboard() {
                 <AssumptionRow label="…and risk below" value={A.scaleRiskCutoff} min={0.3} max={0.9} step={0.05} fixed={2}
                   onChange={(v) => setAssumptions((p) => ({ ...p, scaleRiskCutoff: v }))} />
               </div>
-              <p className="mt-2 text-[11px] text-slatey-500">Kill is fixed at risk-adjusted &lt; 0 — that&apos;s definitional, not a knob.</p>
+              <p className="mt-2 text-[11px] text-slatey-500">Kill is fixed at risk adjusted &lt; 0, that&apos;s definitional, not a knob.</p>
             </div>
 
             <button onClick={resetAssumptions} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slatey-400 transition-colors hover:border-primary/40 hover:text-ink">

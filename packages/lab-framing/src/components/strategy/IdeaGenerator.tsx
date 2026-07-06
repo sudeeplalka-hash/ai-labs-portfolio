@@ -13,8 +13,8 @@ const DEFAULT_AMBITION = "Use AI to improve customer support.";
 const DEFAULT_PARAMS: FramingParams = { user: "Customers", job: "Answer", pain: "Too slow", posture: "Scattered", risk: "Balanced" };
 
 // Idea generator: from a vague ambition + five knobs, generate a sharpened
-// framing and a scored spread of candidate use-cases. Picking one seeds the
-// structured workshop below. Fully deterministic — no model calls.
+// framing and a scored spread of candidate use cases. Picking one seeds the
+// structured workshop below. Fully deterministic, no model calls.
 export function IdeaGenerator({ onUse }: { onUse: (uc: UseCase, params: FramingParams, ambition: string, sharpened: string) => void }) {
   const [ambition, setAmbition] = useState(DEFAULT_AMBITION);
   const [params, setParams] = useState<FramingParams>(DEFAULT_PARAMS);
@@ -34,7 +34,7 @@ export function IdeaGenerator({ onUse }: { onUse: (uc: UseCase, params: FramingP
         <div>
           <label htmlFor="gen-ambition" className="stat-label mb-1 block">What do you wish AI could do?</label>
           <textarea id="gen-ambition" rows={2} value={ambition} onChange={(e) => setAmbition(e.target.value)}
-            placeholder="Say it plainly — a rough, vague ambition is fine."
+            placeholder="Say it plainly, a rough, vague ambition is fine."
             className="w-full rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink placeholder:text-slatey-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">

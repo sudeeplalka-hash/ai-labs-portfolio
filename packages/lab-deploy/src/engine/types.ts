@@ -1,5 +1,5 @@
 // ============================================================================
-// Deploy / Operations — domain types. The engine is pure + deterministic; it
+// Deploy / Operations, domain types. The engine is pure + deterministic; it
 // derives a baseline from the threaded ProgramState and projects it across
 // load (the Scale Dial) and time (drift, incidents).
 // ============================================================================

@@ -6,7 +6,7 @@ import { Home } from "@/components/shell/Home";
 export const metadata: Metadata = {
   title: "Enterprise AI Lifecycle",
   description:
-    "Collection 1 — walk an enterprise AI initiative end to end: Frame, Data, Build (RAG), AI Ops, Govern, Realize.",
+    "Collection 1: walk an enterprise AI initiative end to end. Frame, Data, Build (RAG), AI Ops, Govern, Realize.",
 };
 
 export default function LifecyclePage() {

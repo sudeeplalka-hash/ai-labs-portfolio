@@ -6,24 +6,24 @@ import { SimulationBoundary } from "@/components/reviewer/Reviewer";
 export const metadata: Metadata = { title: "Product Roadmap" };
 
 const CURRENT = [
-  "Six-stage AI lifecycle with shared contracts", "Strategy intake, scoring & build-path recommendation", "Data readiness handoff",
-  "Build/RAG lab — retrieval modes (BM25 / vector / hybrid / re-rank)", "Agent & tool-calling mechanics (schemas, boundaries, approvals, misuse evals)",
-  "Training / fine-tuning readiness — decision memo, dataset readiness, overfitting & generalization",
-  "Operate / AI Ops / MLOps spine", "Govern live evidence loop & decision engine", "Realize risk-adjusted ROI engine",
-  "Model-internals explainer (transformers, attention, embeddings, framework placement)",
+  "Six stage AI lifecycle with shared contracts", "Strategy intake, scoring, and recommended build path", "Data readiness handoff",
+  "Build/RAG lab: retrieval modes (BM25, vector, hybrid, rerank)", "Agent and tool calling mechanics (schemas, boundaries, approvals, misuse evals)",
+  "Training and fine tuning readiness: decision memo, dataset readiness, overfitting and generalization",
+  "Operate / AI Ops / MLOps spine", "Govern live evidence loop and decision engine", "Realize risk adjusted ROI engine",
+  "Model internals explainer (transformers, attention, embeddings, framework placement)",
 ];
 const NEXT = [
   "Real vector retrieval / vector database integration", "Persistent eval run history",
-  "Deeper telemetry integration", "Real tool integrations (APIs, workflow/ticketing engines)", "Real labeling tool + model registry + training pipeline integration",
-  "FinOps: cost chargeback & unit-economics guardrails", "Operating model: staffing & RACI across the six stages",
-  "Vendor procurement & third-party model risk workflow", "Quarterly benefits tracking (planned vs realized value)",
+  "Deeper telemetry integration", "Real tool integrations (APIs, workflow/ticketing engines)", "Real labeling tool plus model registry plus training pipeline integration",
+  "FinOps: cost chargeback and unit economics guardrails", "Operating model: staffing and RACI across the six stages",
+  "Vendor procurement and third party model risk workflow", "Quarterly benefits tracking (planned vs realized value)",
 ];
 const FUTURE = [
   "External eval stores", "Observability tool integrations", "Model registry integration", "Vector DB adapter",
-  "Role-based review workflows", "Exportable governance evidence pack",
+  "Role based review workflows", "Exportable governance evidence pack",
 ];
 const OUT = [
-  "Real enterprise data connectors", "User authentication", "Full MLOps platform replacement", "Full model-training framework",
+  "Real enterprise data connectors", "User authentication", "Full MLOps platform replacement", "Full model training framework",
   "Deep PyTorch / TensorFlow notebooks", "Confidential client data", "Cloud infrastructure provisioning",
 ];
 
@@ -52,7 +52,7 @@ export default function Page() {
 
       <p className="max-w-3xl text-sm leading-relaxed text-slatey-400">
         This roadmap keeps the product focused on enterprise AI program delivery rather than turning it into a generic AI course
-        or a full production platform. It intentionally does not implement a transformer or ship training notebooks — the goal is to
+        or a full production platform. It intentionally does not implement a transformer or ship training notebooks. The goal is to
         demonstrate enterprise AI delivery, not to become a deep learning course.
       </p>
 

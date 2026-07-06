@@ -1,4 +1,4 @@
-// Freshness metadata — powers "last verified" / "as of" stamps (§A4.4, §B3).
+// Freshness metadata, powers "last verified" / "as of" stamps (§A4.4, §B3).
 // The visual component (FreshnessStamp) lives in @labs/design-system and consumes
 // these helpers; the dates and formatting rules live here so they stay data, not copy.
 

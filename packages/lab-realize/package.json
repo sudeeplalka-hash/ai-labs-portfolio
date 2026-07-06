@@ -2,7 +2,7 @@
   "name": "@labs/lab-realize",
   "version": "0.0.0",
   "private": true,
-  "description": "Realize / Business Outcome lab — the traceable, risk-adjusted ROI payoff. Value River, sensitivity, and the Initiative Dossier where every number traces to an upstream decision. Built on the shared foundation.",
+  "description": "Realize / Business Outcome lab, the traceable, risk adjusted ROI payoff. Value River, sensitivity, and the Initiative Dossier where every number traces to an upstream decision. Built on the shared foundation.",
   "exports": {
     ".": "./src/index.ts"
   },

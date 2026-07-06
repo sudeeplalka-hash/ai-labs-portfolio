@@ -1,4 +1,4 @@
-// Phase B — cross-stage read-only selectors. Pure functions over ProgramState
+// Phase B, cross-stage read-only selectors. Pure functions over ProgramState
 // that derive the program's headline numbers and release blockers on the fly
 // (from the same deterministic engines the stages use), so the rail and the
 // contract loop never depend on which pages have been visited.
@@ -60,7 +60,7 @@ export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
       key: "realize",
       value: roi !== undefined ? `${roi}%` : null,
       detail: roi !== undefined
-        ? (payback !== undefined && Number.isFinite(payback) ? `payback ${Math.round(payback)}mo` : "risk-adjusted ROI")
+        ? (payback !== undefined && Number.isFinite(payback) ? `payback ${Math.round(payback)}mo` : "risk adjusted ROI")
         : "visit Realize to compute ROI",
     },
     {
@@ -75,7 +75,7 @@ export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
 
 export interface ReleaseBlocker { text: string; source: StageKey }
 
-/** "What is blocking release?" — the ranked union of failing evidence across
+/** "What is blocking release?", the ranked union of failing evidence across
  * stages: Data exclusions, Build gate failures, Operate readiness blockers, and
  * Critical/High governance findings. Deduped, most actionable first. */
 export function selectReleaseBlockers(s: ProgramState): ReleaseBlocker[] {

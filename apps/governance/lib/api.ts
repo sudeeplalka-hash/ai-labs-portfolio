@@ -37,10 +37,10 @@ const qstr = (params?: Record<string, unknown>) =>
 const liveApi = {
   metrics: { executive: () => request<ExecutiveMetrics>('/api/metrics/executive') },
   useCases: {
-    list: () => request<UseCase[]>('/api/use-cases'),
-    get: (id: string) => request<UseCase>(`/api/use-cases/${id}`),
-    create: (data: unknown) => request<UseCase>('/api/use-cases', { method: 'POST', body: JSON.stringify(data) }),
-    rescore: (id: string) => request<UseCase>(`/api/use-cases/${id}/rescore`, { method: 'POST' }),
+    list: () => request<UseCase[]>('/api/use cases'),
+    get: (id: string) => request<UseCase>(`/api/use cases/${id}`),
+    create: (data: unknown) => request<UseCase>('/api/use cases', { method: 'POST', body: JSON.stringify(data) }),
+    rescore: (id: string) => request<UseCase>(`/api/use cases/${id}/rescore`, { method: 'POST' }),
   },
   policies: {
     list: (params?: { category?: string; severity?: string; enabled?: boolean }) => request<Policy[]>(`/api/policies${qstr(params)}`),
@@ -96,7 +96,7 @@ const reviewState: ReviewItem[] = clone(demo.reviewQueue);
 const evidenceState: EvidenceReport[] = demo.sampleReport ? [clone(demo.sampleReport), ...clone(demo.evidence)] : clone(demo.evidence);
 const resolve = <T>(v: T): Promise<T> => Promise.resolve(v);
 
-// Use-case risk scoring (port of risk_scoring.score_use_case)
+// Use case risk scoring (port of risk_scoring.score_use_case)
 const SW = {
   data_sensitivity: { public: 0, internal: 0.08, confidential: 0.18, regulated: 0.28 } as Record<string, number>,
   deployment_context: { internal: 0.05, 'customer-facing': 0.16, agentic: 0.25 } as Record<string, number>,

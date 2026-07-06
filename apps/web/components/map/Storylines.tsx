@@ -1,4 +1,4 @@
-// Storylines — the "follow one program end-to-end" view. The labs are instruments;
+// Storylines, the "follow one program end-to-end" view. The labs are instruments;
 // this is the operator using them in sequence on a single program. Each step links
 // (and deep-links via ?uc=) into the relevant lab. Pure presentational; data lives
 // in @labs/kit (STORYLINES) so the narrative is a first-class, versioned artifact.
@@ -26,8 +26,8 @@ export function Storylines() {
           <h1 className="text-2xl font-semibold tracking-tight text-ink md:text-3xl">The labs are instruments. This is the operator.</h1>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             Any one lab is a tool. Delivery leadership is knowing which to reach for, in what order, on a real program.
-            Each storyline walks a single initiative through the instruments in the sequence you actually hit them — every
-            step opens the live lab, some pre-loaded to the exact industry scenario.
+            Each storyline walks a single initiative through the instruments in the sequence you actually hit them.
+            Every step opens the live lab, and some are preloaded to the exact industry scenario.
           </p>
         </div>
 
@@ -38,8 +38,8 @@ export function Storylines() {
         </div>
 
         <p className="mt-10 border-t border-line pt-4 text-xs text-slatey-500">
-          Every step is a real, working lab — nothing here is a mockup. Steps marked with an industry chip open that lab
-          pre-loaded to the named use-case. Explore the same instruments by industry in the{" "}
+          Every step is a real, working lab. Nothing here is a mockup. Steps marked with an industry chip open that lab
+          preloaded to the named use case. Explore the same instruments by industry in the{" "}
           <Link href="/industries" className="font-medium text-primary hover:underline">Industry Atlas</Link>.
         </p>
       </main>
@@ -49,7 +49,7 @@ export function Storylines() {
 
 function StorylineCard({ story }: { story: Storyline }) {
   const ind = INDUSTRIES[story.industry];
-  const fh = story.provenance.kind === "first-hand";
+  const fh = story.provenance.kind === "firsthand";
   return (
     <section className="overflow-hidden rounded-2xl border bg-white" style={{ borderColor: `${ind.accent}33`, borderLeftWidth: 4, borderLeftColor: ind.accent }}>
       {/* Header */}
@@ -60,9 +60,9 @@ function StorylineCard({ story }: { story: Storyline }) {
           <span
             className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold ${fh ? "text-white" : "border border-line bg-slate-50 text-slatey-400"}`}
             style={fh ? { background: ind.accent } : undefined}
-            title={fh ? "Grounded in first-hand delivery" : "Informed by public industry patterns"}
+            title={fh ? "Grounded in firsthand delivery" : "Informed by public industry patterns"}
           >
-            {fh ? "First-hand" : "Studied"}
+            {fh ? "Firsthand" : "Studied"}
           </span>
         </div>
         <p className="text-sm font-medium" style={{ color: ind.accent }}>{story.hook}</p>
@@ -103,7 +103,7 @@ function StorylineCard({ story }: { story: Storyline }) {
                   <p className="mt-1 text-xs leading-relaxed text-slatey-400">{step.detail}</p>
                   <p className="mt-1.5 text-[11px] text-slatey-500">
                     {route?.name ?? step.labId}
-                    {step.ucId && <span className="ml-1.5 rounded px-1.5 py-0.5 font-medium" style={{ background: `${ind.accent}18`, color: ind.accent }}>pre-loaded: {ind.label}</span>}
+                    {step.ucId && <span className="ml-1.5 rounded px-1.5 py-0.5 font-medium" style={{ background: `${ind.accent}18`, color: ind.accent }}>preloaded: {ind.label}</span>}
                   </p>
                 </Link>
               </div>

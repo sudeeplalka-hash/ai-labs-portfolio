@@ -1,5 +1,5 @@
 // ============================================================================
-// Realize / Business Outcome — domain types. Every figure carries its source
+// Realize / Business Outcome, domain types. Every figure carries its source
 // stage (the traceability spine) so the ROI is defensible, not asserted.
 // ============================================================================
 import type { StageKey } from "@labs/program-core";

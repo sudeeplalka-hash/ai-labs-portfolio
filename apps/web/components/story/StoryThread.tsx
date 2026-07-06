@@ -9,7 +9,7 @@ import {
 
 // The connective tissue: where this lab sits in the one story. One unified view:
 // a narrated band (question + so-what) with the orientation thread beneath it.
-// Strategy & Framing keeps the slim strip — its own hero already tells the story.
+// Strategy & Framing keeps the slim strip, its own hero already tells the story.
 export function StoryThread({ stage }: { stage: StageKey }) {
   const { src, hydrated } = useProgramSource();
   if (!hydrated) return null;

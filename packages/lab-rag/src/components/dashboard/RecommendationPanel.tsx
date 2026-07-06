@@ -7,7 +7,7 @@ const ACTIONS: { owner: string; action: string; priority: RiskLevel }[] = [
   { owner: "Engineering", action: "Cache reranker scores and trim candidate count to bring P95 latency under 4s.", priority: "High" },
   { owner: "Compliance", action: "Resolve the open critical failure on external AI tool data-use guidance.", priority: "Critical" },
   { owner: "Data / Content", action: "Remove retired Travel Policy v2.7 and revise AI Governance v1.3 ambiguous sections.", priority: "High" },
-  { owner: "Product", action: "Expand golden dataset coverage for finance and legal high-risk queries.", priority: "Medium" },
+  { owner: "Product", action: "Expand golden dataset coverage for finance and legal high risk queries.", priority: "Medium" },
 ];
 
 export function RecommendationPanel() {

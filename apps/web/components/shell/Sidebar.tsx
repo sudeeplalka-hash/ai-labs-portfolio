@@ -254,7 +254,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                           );
                           // Hash links (Deploy/Realize in-page sections) use a plain anchor so the
                           // browser fires a native hashchange the view listens for. Route links use
-                          // Next's Link for client-side navigation.
+                          // Next's Link for client side navigation.
                           const isHash = c.href.includes("#");
                           return (
                             <li key={c.href}>

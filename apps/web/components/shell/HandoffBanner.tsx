@@ -11,14 +11,14 @@ const STAGE: Record<"data" | "build", { icon: LucideIcon; callback: (h: HandoffP
   data: {
     icon: Database,
     callback: (h) =>
-      `Framing guessed Data readiness ${h.scores.dataReadiness}/100 from a self-rated "${h.posture ?? "unknown"}" posture. ` +
-      `Profile your sources below — this stage confirms or punctures that guess.`,
+      `Framing guessed Data readiness ${h.scores.dataReadiness}/100 from a self reported "${h.posture ?? "unknown"}" posture. ` +
+      `Profile your sources below: this stage confirms or punctures that guess.`,
   },
   build: {
     icon: Boxes,
     callback: (h) =>
       `In Framing this bet scored Value ${h.scores.value}/100 and Feasibility ${h.scores.feasibility}/100. ` +
-      `Feasibility was a guess — the evaluator below is the real test of whether the engine works.`,
+      `Feasibility was a guess. The evaluator below is the real test of whether the engine works.`,
   },
 };
 
@@ -27,7 +27,7 @@ export function HandoffBanner({ stage }: { stage: "data" | "build" }) {
   const [h, setH] = useState<HandoffPayload | null>(null);
   const [dismissed, setDismissed] = useState(false);
   useEffect(() => { setH(readHandoff()); }, []);
-  // The banner narrates the LIVE framed bet — hide it in the demo sandbox.
+  // The banner narrates the LIVE framed bet, hide it in the demo sandbox.
   if (!h || dismissed || mode === "demo") return null;
 
   const cfg = STAGE[stage];

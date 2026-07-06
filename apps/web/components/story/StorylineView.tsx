@@ -36,27 +36,27 @@ export function StorylineView() {
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Hero */}
       <header>
-        <p className="eyebrow">The 2-minute story</p>
+        <p className="eyebrow">The two minute story</p>
         <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">
           One initiative, from a rough idea to a <span className="text-primary">business case you can defend</span>.
         </h1>
         <p className="mt-3 text-base leading-relaxed text-slatey-300">
           {betName
-            ? <>Following <span className="font-medium text-ink">&ldquo;{betName}&rdquo;</span> through all six stages. Each stage answers one question and produces one number the next stage builds on — so the final ROI traces all the way back to the first decision.</>
+            ? <>Following <span className="font-medium text-ink">&ldquo;{betName}&rdquo;</span> through all six stages. Each stage answers one question and produces one number the next stage builds on, so the final ROI traces all the way back to the first decision.</>
             : <>This is the shape of the whole program: six stages, each answering one question and handing one number to the next. Frame a bet (or switch to Demo) to see it told with real numbers.</>}
         </p>
         <div className="mt-4 flex items-center gap-3 text-sm">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 font-medium text-primary-dark">
             {progress.done} of {progress.total} stages told
           </span>
-          <span className="text-slatey-400">Read top to bottom — open any stage to go deep.</span>
+          <span className="text-slatey-400">Read top to bottom, open any stage to go deep.</span>
         </div>
       </header>
 
-      {/* Phase K — the six sample programs, as an invitation */}
+      {/* Phase K, the six sample programs, as an invitation */}
       <ArchetypeExplorer />
 
-      {/* Phase F — the whole program in one shape */}
+      {/* Phase F, the whole program in one shape */}
       {betName && <ReadinessRadar state={src} />}
 
       {/* Beats */}
@@ -143,8 +143,8 @@ function ClosingCase({ realize, state }: { realize: StoryBeat; state: Parameters
         ))}
       </div>
       <p className="mt-3 text-sm leading-relaxed text-slatey-400">
-        Every number above is produced by a stage and carried forward — nothing is hand-waved. That traceability is the
-        difference between a demo and a business case.
+        Every number above is produced by a stage and carried forward, nothing is asserted without evidence. That
+        traceability is the difference between a demo and a business case.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Link href="/story/brief" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-glow hover:bg-primary-dark">
@@ -179,7 +179,7 @@ function radarValues(s: ProgramState): Partial<Record<StageKey, number>> {
   };
 }
 
-const TARGET = 80; // the "pilot-ready" reference ring
+const TARGET = 80; // the "pilot ready" reference ring
 
 const bandColor = (v: number) => (v >= 75 ? "#059669" : v >= 55 ? "#d97706" : "#e11d48");
 
@@ -205,7 +205,7 @@ function ReadinessRadar({ state }: { state: ProgramState }) {
 
   return (
     <div className="flex flex-wrap items-center gap-5 rounded-xl border border-line bg-gradient-to-br from-white to-slate-50/70 p-4 shadow-card">
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-56 w-64 shrink-0" role="img" aria-label={`Program readiness radar — average ${avg}, weakest ${weakest.label} at ${vals[weakest.key]}`}>
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-56 w-64 shrink-0" role="img" aria-label={`Program readiness radar. Average ${avg}, weakest ${weakest.label} at ${vals[weakest.key]}`}>
         <defs>
           <radialGradient id="radarFill" cx="50%" cy="50%" r="70%">
             <stop offset="0%" stopColor="#1f6fc4" stopOpacity="0.34" />
@@ -236,9 +236,9 @@ function ReadinessRadar({ state }: { state: ProgramState }) {
 
         {/* pilot-ready target ring */}
         <polygon points={ring(TARGET)} fill="none" stroke="#94a3b8" strokeDasharray="4 3" strokeWidth="1.2" />
-        <text x={CX + 4} y={CY - R * 0.8 - 3} fontSize="7.5" fontWeight="600" fill="#94a3b8">pilot-ready {TARGET}</text>
+        <text x={CX + 4} y={CY - R * 0.8 - 3} fontSize="7.5" fontWeight="600" fill="#94a3b8">pilot ready {TARGET}</text>
 
-        {/* the program shape — draws in on mount */}
+        {/* the program shape, draws in on mount */}
         <g style={{
           transformOrigin: `${CX}px ${CY}px`,
           transform: drawn ? "scale(1)" : "scale(0.55)",
@@ -269,7 +269,7 @@ function ReadinessRadar({ state }: { state: ProgramState }) {
       <div className="min-w-[180px] flex-1">
         <p className="eyebrow">Program shape</p>
         <p className="mt-1 text-sm leading-relaxed text-slatey-400">
-          The closer the shape hugs the dashed <b className="text-slatey-300">pilot-ready</b> ring, the readier the initiative.
+          The closer the shape hugs the dashed <b className="text-slatey-300">pilot ready</b> ring, the readier the initiative.
         </p>
         <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px]">
           {axes.map((a) => (
@@ -280,7 +280,7 @@ function ReadinessRadar({ state }: { state: ProgramState }) {
           ))}
         </div>
         <p className="mt-2.5 rounded-md bg-rose-50 px-2.5 py-1.5 text-[11px] leading-relaxed text-rose-700">
-          Shortest spoke: <b>{weakest.label} · {vals[weakest.key]}</b> — fix this next to round out the shape.
+          Shortest spoke: <b>{weakest.label} · {vals[weakest.key]}</b>. Fix this next to round out the shape.
         </p>
       </div>
     </div>

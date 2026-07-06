@@ -51,7 +51,7 @@ export function LiveExecutiveOverview() {
 
   return (
     <div className="space-y-6">
-      <InsightCard title="Live summary — from your lab sessions" icon={Activity} tone="info">
+      <InsightCard title="Live summary, from your lab sessions" icon={Activity} tone="info">
         These metrics are computed from the {m.questionsAsked} question{m.questionsAsked === 1 ? "" : "s"} you've asked in the Lab.
         The same enterprise views the demo illustrates, populated by your own documents and questions.
       </InsightCard>

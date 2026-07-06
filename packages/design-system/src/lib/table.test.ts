@@ -13,7 +13,7 @@ describe("sortBy", () => {
     expect(sortBy(rows, (r) => r.id, "desc").map((r) => r.id)).toEqual(["c", "b", "a"]);
   });
 
-  it("is stable — equal keys keep their original order", () => {
+  it("is stable, equal keys keep their original order", () => {
     const tied = [{ id: "x", n: 1 }, { id: "y", n: 1 }, { id: "z", n: 1 }];
     expect(sortBy(tied, (r) => r.n, "asc").map((r) => r.id)).toEqual(["x", "y", "z"]);
     expect(sortBy(tied, (r) => r.n, "desc").map((r) => r.id)).toEqual(["x", "y", "z"]);

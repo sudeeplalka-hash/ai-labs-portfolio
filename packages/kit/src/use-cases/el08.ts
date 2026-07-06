@@ -1,4 +1,4 @@
-// EL-08 · Estimation & Scoping Studio — use-cases.
+// EL-08 · Estimation & Scoping Studio, use cases.
 // Payload = a full estimation scenario (same shape EL-08 estimates): a WBS with
 // AI-risk phases flagged, an analogous baseline, a three-point (PERT) triple, and
 // a scope-change package. The three methods, staffing, and change-control margin
@@ -23,18 +23,18 @@ export const EL08_USE_CASES: UseCase<El08Payload>[] = assertUseCases<El08Payload
     industry: "insurance",
     provenance: studied,
     title: "Claims triage & extraction estimate",
-    oneLiner: "The blow-up isn't the model — it's the messy claims documents nobody scoped.",
+    oneLiner: "The blow-up isn't the model, it's the messy claims documents nobody scoped.",
     context:
       "An estimate for an insurance claims-triage and document-extraction build. The modeling is routine; the risk lives in data-readiness on heterogeneous claim documents and in the eval harness that proves extraction is accurate enough to act on.",
     theDecision:
       "Price the document long tail as a line item: data-readiness on non-standard claim forms and the eval harness are where insurance AI estimates blow up, so surface them as their own WBS rows and present the PERT range, not the point.",
     whatMostMiss:
-      "Estimators anchor on the extraction model and treat document variety as a detail. In claims, the document long tail is the schedule — it's a data-readiness problem wearing a modeling costume.",
+      "Estimators anchor on the extraction model and treat document variety as a detail. In claims, the document long tail is the schedule, it's a data-readiness problem wearing a modeling costume.",
     stakes: "Bury data-readiness in 'build' and the estimate is weeks short before the first messy claim form arrives.",
-    takeaway: "In insurance claims, the estimate lives or dies on document-readiness — price the long tail as a line item.",
+    takeaway: "In insurance claims, the estimate lives or dies on document-readiness, price the long tail as a line item.",
     sources: [
       "Insurance claims-automation estimation (studied)",
-      "AI estimation practice — data-readiness & eval as explicit line items",
+      "AI estimation practice, data-readiness & eval as explicit line items",
     ],
     lastVerified: "2026-07-03",
     payload: {
@@ -65,11 +65,11 @@ export const EL08_USE_CASES: UseCase<El08Payload>[] = assertUseCases<El08Payload
     context:
       "An estimate for a pharma R&D evidence-synthesis assistant. The build is manageable; the cost sits in a scientist-graded eval harness (slow, expert-bound) and in the validation and GxP documentation that regulated R&D requires before use.",
     theDecision:
-      "Estimate the validation, not just the build: SME-graded evaluation and GxP documentation dominate a regulated R&D estimate, so size them explicitly — the eval loop is expert-rate-limited, not compute-limited.",
+      "Estimate the validation, not just the build: SME-graded evaluation and GxP documentation dominate a regulated R&D estimate, so size them explicitly, the eval loop is expert-rate-limited, not compute-limited.",
     whatMostMiss:
       "Teams estimate the retrieval build and forget that in pharma the eval must be graded by scientists and the whole thing documented for validation. That's the majority of the calendar, not a tail.",
     stakes: "Under-scope SME-graded eval and the estimate assumes a review capacity the science org doesn't have.",
-    takeaway: "In pharma R&D, SME-graded eval and GxP validation are most of the estimate — size them, don't assume them.",
+    takeaway: "In pharma R&D, SME-graded eval and GxP validation are most of the estimate, size them, don't assume them.",
     sources: [
       "Pharma R&D informatics estimation (studied)",
       "SME-graded evaluation and GxP validation as estimate drivers",
@@ -101,13 +101,13 @@ export const EL08_USE_CASES: UseCase<El08Payload>[] = assertUseCases<El08Payload
     title: "Valuation & underwriting copilot estimate",
     oneLiner: "The innocent-looking 'add a new market' change re-triggers the whole data-readiness phase.",
     context:
-      "An estimate for a property valuation and underwriting copilot. The trap is the scope change: 'add a new market' sounds trivial but re-triggers comps/market data-readiness and eval — the same phase that dominated the original estimate.",
+      "An estimate for a property valuation and underwriting copilot. The trap is the scope change: 'add a new market' sounds trivial but re-triggers comps/market data-readiness and eval, the same phase that dominated the original estimate.",
     theDecision:
       "Make the change-order math visible: a new market isn't a config toggle, it re-runs data-readiness and eval, so estimate the change explicitly and let the margin math show why absorbing it silently is the wrong call.",
     whatMostMiss:
-      "Stakeholders read 'new market' as small because the model is unchanged. The cost is data — comps, rent-rolls, local rules — so the change re-triggers the most expensive phase, not the cheapest.",
+      "Stakeholders read 'new market' as small because the model is unchanged. The cost is data, comps, rent-rolls, local rules, so the change re-triggers the most expensive phase, not the cheapest.",
     stakes: "Absorb 'just one more market' silently and margin bleeds out one data-readiness re-run at a time.",
-    takeaway: "In real-estate AI, 'add a market' re-runs data-readiness — estimate the change order, don't absorb it.",
+    takeaway: "In real-estate AI, 'add a market' re-runs data-readiness, estimate the change order, don't absorb it.",
     sources: [
       "Real-estate / proptech valuation estimation (studied)",
       "Change-control discipline on data-readiness-driven scope",

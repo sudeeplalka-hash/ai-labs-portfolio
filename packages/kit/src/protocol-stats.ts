@@ -1,6 +1,6 @@
 // Dated protocol-landscape stats cited on Collection 2 cards. B5.6: protocol stats
 // live in a dated data file, never in copy. Refresh quarterly (Phase 5 notes ACP/UCP
-// agent-commerce protocols as emerging — add here if the landscape shifts).
+// agent-commerce protocols as emerging, add here if the landscape shifts).
 
 export const PROTOCOL_STATS_AS_OF = "2026-07-02";
 

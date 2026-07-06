@@ -2,7 +2,7 @@ import type { CheckResult, GuidelineId, Level } from "./types";
 
 // Compliance rule profiles. A profile raises the severity of certain guidelines
 // so the same file is judged against an industry's bar (e.g. HIPAA treats any
-// found PII as a hard blocker). Profiles never penalize a clean file — they only
+// found PII as a hard blocker). Profiles never penalize a clean file, they only
 // escalate guidelines that already have a finding.
 export type ProfileId = "general" | "hipaa" | "finance" | "gdpr" | "pci";
 
@@ -30,7 +30,7 @@ export const PROFILES: RuleProfile[] = [
   {
     id: "finance",
     name: "Finance · SOX",
-    blurb: "Provenance sign-off and single-source-of-truth are enforced strictly.",
+    blurb: "Provenance sign off and single-source-of-truth are enforced strictly.",
     escalate: { provenance: "risk", dedup: "risk", freshness: "risk" },
   },
   {

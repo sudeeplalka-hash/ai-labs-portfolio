@@ -1,11 +1,11 @@
 "use client";
 
-// Phase 1 — Lifecycle coherence. Small, additive cards that make each stage's
+// Phase 1, Lifecycle coherence. Small, additive cards that make each stage's
 // handoff visible and write the structured contract into shared program state so
 // the next stage can consume it. All writes derive from the update() draft (never
 // from the contract they write), so there are no update loops. Live mode only.
 //
-// Phase A — ghost states (never render nothing: explain what will appear and
+// Phase A, ghost states (never render nothing: explain what will appear and
 // offer the sample program) and linked handoff chips (→ next stage is a link).
 
 import { useEffect } from "react";
@@ -62,7 +62,7 @@ export function DataHandoffCard() {
   if (!h) {
     return (
       <Ghost icon={<Database className="h-3.5 w-3.5" />} eyebrow="Data readiness handoff">
-        This card will show the structured contract Data hands to Build — readiness score, approved and blocked
+        This card will show the structured contract Data hands to Build, readiness score, approved and blocked
         sources, sensitivity restrictions, and a recommendation. It populates once an initiative is framed in
         Strategy &amp; Planning.
       </Ghost>
@@ -105,7 +105,7 @@ export function BuildContractCard() {
   if (!c) {
     return (
       <Ghost icon={<Boxes className="h-3.5 w-3.5" />} eyebrow="Build output contract">
-        This card will show the contract Build hands to Operate — quality score, faithfulness, citations,
+        This card will show the contract Build hands to Operate, quality score, faithfulness, citations,
         hallucination risk, failed gates, and the selected engine. It populates once an initiative is framed.
       </Ghost>
     );

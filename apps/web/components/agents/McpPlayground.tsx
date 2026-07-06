@@ -3,7 +3,7 @@
 // GAP-01 · MCP Server Playground (Collection 2 · toolkit · flagship).
 // Pick a mock enterprise system → its MCP manifest generates (tools / resources /
 // prompts) → compose a tool call → read the full JSON-RPC round trip, both
-// directions, annotated in plain English — including how malformed arguments get
+// directions, annotated in plain English, including how malformed arguments get
 // rejected at the contract boundary. MCP is just a disciplined contract; this
 // reads the wire. SIMULATED (frames are constructed deterministically).
 
@@ -133,17 +133,17 @@ export function McpPlayground() {
     const missing = tool.args.find((a) => a.required && !String(argVals[a.name] ?? "").trim());
     const badNum = malformed && numArg ? numArg : tool.args.find((a) => a.type === "number" && argVals[a.name] !== "" && Number.isNaN(Number(argVals[a.name])));
 
-    const reqFrame: Frame = { dir: "req", body: request, note: "The client asks the server to run one named tool with typed arguments — nothing else is on the wire." };
+    const reqFrame: Frame = { dir: "req", body: request, note: "The client asks the server to run one named tool with typed arguments, nothing else is on the wire." };
     let frames: Frame[]; let isError: boolean;
     if (missing || badNum) {
       const field = missing?.name ?? badNum!.name;
       const message = missing ? `Missing required parameter: ${field}` : `Invalid type for parameter '${field}': expected number`;
       const error = { jsonrpc: "2.0", id, error: { code: -32602, message, data: { param: field } } };
-      frames = [reqFrame, { dir: "res", body: error, note: "Bad arguments are rejected at the contract boundary with a typed JSON-RPC error (-32602) — not a 500, not a hallucinated answer.", error: true }];
+      frames = [reqFrame, { dir: "res", body: error, note: "Bad arguments are rejected at the contract boundary with a typed JSON-RPC error (-32602), not a 500, not a hallucinated answer.", error: true }];
       isError = true;
     } else {
       const response = { jsonrpc: "2.0", id, result: { content: [{ type: "text", text: JSON.stringify(tool.result(argVals)) }], isError: false } };
-      frames = [reqFrame, { dir: "res", body: response, note: "The server returns structured content the client can trust the shape of — the same envelope for every tool." }];
+      frames = [reqFrame, { dir: "res", body: response, note: "The server returns structured content the client can trust the shape of, the same envelope for every tool." }];
       isError = false;
     }
     // Byte size is real (serialized frames); latency is a deterministic pseudo-figure, labeled as illustrative in the log.
@@ -192,7 +192,7 @@ export function McpPlayground() {
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact call"), () => toast("Link is in the address bar"));
+      navigator.clipboard.writeText(url).then(() => toast("Link copied, this exact call"), () => toast("Link is in the address bar"));
     } else { toast("Link is in the address bar"); }
   };
   const resetLab = () => { onSystem(SYSTEMS[0].key); setNSys(8); setNCon(6); setMalformed(false); setAnnotate(true); toast("Playground reset"); };
@@ -204,7 +204,7 @@ export function McpPlayground() {
     const headers = ["#", "Tool", "System", "Status", "Latency (ms)", "Bytes"];
     const rows = history.map((c) => [c.id, c.tool, c.sysLabel, c.error ? "error" : "ok", c.ms, c.bytes]);
     downloadCsv("mcp-session-log", headers, rows);
-    toast(history.length ? "Session log exported as CSV" : "No calls yet — run one first");
+    toast(history.length ? "Session log exported as CSV" : "No calls yet, run one first");
   };
   const exportSession = () => {
     downloadJson("mcp-session", { version: 1, system: sysKey, tool: toolName, args: argVals, calls: history });
@@ -248,14 +248,14 @@ export function McpPlayground() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            MCP isn&apos;t magic — it&apos;s a disciplined contract. Pick a system, watch its server manifest, then send a
+            MCP isn&apos;t magic, it&apos;s a disciplined contract. Pick a system, watch its server manifest, then send a
             tool call and read the exact JSON-RPC that crosses the wire, both directions.
           </p>
         </div>
 
         <UseCaseRail useCases={GAP01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Every new tool an AI agent needs has meant a new bespoke integration. With N tools and M agent-consumers that is N×M point-to-point connectors to build and maintain — the integration tax that stalls enterprise agent programs." approach="A working MCP client: pick a server, browse its manifest (tools, resources, prompts), compose a call, and read the full JSON-RPC round-trip — including honest typed errors when arguments are malformed. Define a custom tool and watch it appear in the manifest; see the initialize handshake that opens a session." why="MCP is the emerging standard — USB-C for AI — that turns N×M into N+M: expose a tool once against the contract and every compliant client uses it with no new integration code." metric="The crossover in the producers×consumers chart: the consumer count at which the shared protocol becomes cheaper than bespoke glue." tradeoff="A protocol layer is overhead for a tiny surface (a few tools, one consumer). The lab shows exactly where the surface is large enough that standardizing pays." outcome="A defensible recommendation to adopt (or not adopt) MCP for a given integration surface, with the crossover math and honest failure modes on the wire — not a slide asserting it." />
+        <CaseStudy problem="Every new tool an AI agent needs has meant a new bespoke integration. With N tools and M agent-consumers that is N×M point-to-point connectors to build and maintain, the integration tax that stalls enterprise agent programs." approach="A working MCP client: pick a server, browse its manifest (tools, resources, prompts), compose a call, and read the full JSON-RPC round-trip, including honest typed errors when arguments are malformed. Define a custom tool and watch it appear in the manifest; see the initialize handshake that opens a session." why="MCP is the emerging standard, USB-C for AI, that turns N×M into N+M: expose a tool once against the contract and every compliant client uses it with no new integration code." metric="The crossover in the producers×consumers chart: the consumer count at which the shared protocol becomes cheaper than bespoke glue." tradeoff="A protocol layer is overhead for a tiny surface (a few tools, one consumer). The lab shows exactly where the surface is large enough that standardizing pays." outcome="A defensible recommendation to adopt (or not adopt) MCP for a given integration surface, with the crossover math and honest failure modes on the wire, not a slide asserting it." />
 
         <LabToolbar>
           <ToolbarButton onClick={shareScenario} title="Copy a link that reproduces this exact call">
@@ -299,7 +299,7 @@ export function McpPlayground() {
                 </span>
               ))}
             </div>
-            <p className="mt-1.5 text-[10px] text-slatey-500">Same protocol, different surface — a client written to the MCP contract adapts without new integration code.</p>
+            <p className="mt-1.5 text-[10px] text-slatey-500">Same protocol, different surface, a client written to the MCP contract adapts without new integration code.</p>
           </div>
         )}
 
@@ -461,7 +461,7 @@ export function McpPlayground() {
 
         {/* Crossover */}
         <Panel className="mt-6">
-          <p className="stat-label mb-2">MCP vs bespoke — the crossover</p>
+          <p className="stat-label mb-2">MCP vs bespoke, the crossover</p>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-3">
               <Slider label="Systems to expose" value={nSys} min={1} max={40} onChange={setNSys} />
@@ -472,20 +472,20 @@ export function McpPlayground() {
               <div className="rounded-lg border border-line bg-white p-3"><p className="text-[11px] text-slatey-500">MCP endpoints</p><p className="font-mono text-2xl font-semibold text-teal-700">{mcp}</p><p className="text-[10px] text-slatey-500">systems + consumers</p></div>
             </div>
           </div>
-          <p className="mt-2 text-[11px] text-slatey-500">Bespoke integration grows as N×M; a shared protocol grows as N+M. The crossover is early — {bespoke > mcp ? `here MCP is ${(bespoke / mcp).toFixed(1)}× fewer connections` : "at tiny scale bespoke can still win"}.</p>
+          <p className="mt-2 text-[11px] text-slatey-500">Bespoke integration grows as N×M; a shared protocol grows as N+M. The crossover is early, {bespoke > mcp ? `here MCP is ${(bespoke / mcp).toFixed(1)}× fewer connections` : "at tiny scale bespoke can still win"}.</p>
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Adopt MCP as the integration contract for tools and data, instead of bespoke point-to-point connectors." lift="Bespoke integration collapses from N×M to N+M as tools and agent-consumers grow — a new tool is exposed once and every client picks it up with no new integration code." measure="Bespoke connectors retired; new-tool onboarding time (days to hours); share of agents on the shared contract; integration change-failure rate." />
+          <OutcomeFrame call="Adopt MCP as the integration contract for tools and data, instead of bespoke point-to-point connectors." lift="Bespoke integration collapses from N×M to N+M as tools and agent-consumers grow, a new tool is exposed once and every client picks it up with no new integration code." measure="Bespoke connectors retired; new-tool onboarding time (days to hours); share of agents on the shared contract; integration change-failure rate." />
           <InsightCard title="What the wire teaches" tone="info">
-            Every tool call is the same envelope: a named tool, typed arguments, structured content back, typed errors on failure. That uniformity is the whole value — one contract, many systems, many consumers.
+            Every tool call is the same envelope: a named tool, typed arguments, structured content back, typed errors on failure. That uniformity is the whole value, one contract, many systems, many consumers.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Deciding MCP vs bespoke isn't religious — it's how many systems and how many consumers. The crossover is earlier than teams expect."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Deciding MCP vs bespoke isn't religious, it's how many systems and how many consumers. The crossover is earlier than teams expect."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Manifests are authored per mock system (tools with typed args, resources, prompts). The composer builds a real JSON-RPC 2.0 `tools/call` frame; arguments are validated against the tool&apos;s schema, and failures return a −32602 error frame — the same path a real server takes.</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic, client-side. No live server — the round trip is constructed, not fetched, and labeled SIMULATED.</p>
+              <p>Manifests are authored per mock system (tools with typed args, resources, prompts). The composer builds a real JSON-RPC 2.0 `tools/call` frame; arguments are validated against the tool&apos;s schema, and failures return a −32602 error frame, the same path a real server takes.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic, client side. No live server, the round trip is constructed, not fetched, and labeled SIMULATED.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> a real MCP server adds capability negotiation, auth, streaming, and pagination; this shows the core request/response contract, not the full lifecycle.</p>

@@ -76,7 +76,7 @@ export function TalentPlanner() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             {activeUc ? activeUc.oneLiner : "The capabilities that ran the last stack aren't the ones the agentic stack needs."} Map the gap, then choose
-            how to close each one — build is cheap but slow, hire is permanent but pricey, partner is fast but rented.
+            how to close each one, build is cheap but slow, hire is permanent but pricey, partner is fast but rented.
           </p>
         </div>
 
@@ -88,7 +88,7 @@ export function TalentPlanner() {
           <KpiCard label="Readiness now" value={`${readyNow}%`} tone={readyNow >= 70 ? "watch" : "risk"} interpretation="Avg coverage vs target" />
           <KpiCard label="Readiness after plan" value={`${readyAfter}%`} tone="healthy" interpretation="If gaps closed" />
           <KpiCard label="Open gaps" value={`${openGaps}/${gaps.length}`} tone={openGaps > 0 ? "critical" : "healthy"} interpretation="No pathway chosen" />
-          <KpiCard label="Time to ready" value={teamMonths !== null ? `${teamMonths} mo` : "—"} tone={teamMonths !== null && teamMonths > stackMonths ? "risk" : "watch"} interpretation={`Stack moved in ${stackMonths} mo`} />
+          <KpiCard label="Time to ready" value={teamMonths !== null ? `${teamMonths} mo` : "N/A"} tone={teamMonths !== null && teamMonths > stackMonths ? "risk" : "watch"} interpretation={`Stack moved in ${stackMonths} mo`} />
         </div>
 
         <Panel>
@@ -138,22 +138,22 @@ export function TalentPlanner() {
         </Panel>
 
         <div className="mt-6">
-          <InsightCard title={openGaps > 0 ? `${openGaps} capability gaps have no plan` : teamMonths !== null && teamMonths <= stackMonths ? "Team keeps pace with the stack" : "Plan set — but slower than the stack"} tone={openGaps > 0 ? "danger" : teamMonths !== null && teamMonths <= stackMonths ? "success" : "warn"}>
+          <InsightCard title={openGaps > 0 ? `${openGaps} capability gaps have no plan` : teamMonths !== null && teamMonths <= stackMonths ? "Team keeps pace with the stack" : "Plan set, but slower than the stack"} tone={openGaps > 0 ? "danger" : teamMonths !== null && teamMonths <= stackMonths ? "success" : "warn"}>
             {openGaps > 0
-              ? <>Orchestration and eval are the widest gaps and the newest skills — build-only there takes eight months. Mix in partner for speed on the critical path and build for what must live in-house.</>
+              ? <>Orchestration and eval are the widest gaps and the newest skills, build-only there takes eight months. Mix in partner for speed on the critical path and build for what must live in-house.</>
               : <>Partner buys speed where you can&apos;t wait; build owns what becomes your edge. The mix, not the method, is the plan.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="For each role, pick the build/hire/partner path that reaches productive capability by the need-by date." lift="The team reaches agentic-era capability on a defensible timeline, not on hope." measure="Skills assessed pre/post; time-to-productive vs plan; roles still gapped at the milestone." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The stack went agentic in 18 months. Teams take 24. Start the people plan before the platform plan."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — team capability building across delivery portfolios.</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The stack went agentic in 18 months. Teams take 24. Start the people plan before the platform plan."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, team capability building across delivery portfolios.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Each capability has current coverage vs an agentic-era target; gap = target − current. A pathway (build 8mo / hire 4mo / partner 2mo) closes it; team time-to-ready = the slowest chosen pathway, compared against the {stackMonths}-month stack shift.</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> coverage scores and pathway durations are illustrative; real plans weigh individual aptitude and market supply. It frames the build/hire/partner mix and its timeline, not an L&amp;D program.</p>

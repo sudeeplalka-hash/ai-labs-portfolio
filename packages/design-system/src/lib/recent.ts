@@ -1,4 +1,4 @@
-// Recent scenarios — a tiny "keepable" history so a lab can offer jump-back to earlier
+// Recent scenarios, a tiny "keepable" history so a lab can offer jump-back to earlier
 // explorations. Entries are keyed by their encoded config (cfg); pushRecent is pure,
 // the load/save helpers wrap localStorage (a real Next.js app, not a claude.ai artifact,
 // so localStorage is fine). Everything degrades gracefully if storage is unavailable.

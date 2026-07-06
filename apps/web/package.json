@@ -2,7 +2,7 @@
   "name": "@labs/web",
   "version": "0.0.0",
   "private": true,
-  "description": "AI Program Command Center — the single app composing every lab (Frame, Data, Build, Deploy, Govern & Realize) on the shared foundation.",
+  "description": "AI Program Command Center, the single app composing every lab (Frame, Data, Build, Deploy, Govern & Realize) on the shared foundation.",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",

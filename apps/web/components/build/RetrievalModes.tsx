@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 3 — retrieval substrate UI. Mode selector + governed re-rank + mode
+// Phase 3, retrieval substrate UI. Mode selector + governed rerank + mode
 // comparison + trace-by-mode + vector-index readiness + honest simulation
 // boundary. Persists the chosen mode (and refreshes the Build contract) in live
 // mode. Leaves the live-lab BM25 pipeline untouched.
@@ -44,7 +44,7 @@ export function RetrievalModes() {
       {/* Selector + BM25 baseline note */}
       <Panel>
         <SectionHeader eyebrow="Retrieval substrate" title="Retrieval mode" icon={Layers}
-          description="BM25 stays the explainable baseline. Vector, hybrid, and governed re-rank build on the same retriever seam." />
+          description="BM25 stays the explainable baseline. Vector, hybrid, and governed rerank build on the same retriever seam." />
         <div className="flex flex-wrap gap-2">
           {RETRIEVAL_MODES.map((m) => (
             <button key={m.id} onClick={() => pickMode(m.id)} aria-pressed={sel === m.id}
@@ -55,14 +55,14 @@ export function RetrievalModes() {
         </div>
         <p className="mt-2 text-sm leading-relaxed text-slatey-400">{selMeta.desc}</p>
         <div className="mt-3 rounded-lg border border-line bg-slate-50/60 p-3 text-[12px] leading-relaxed text-slatey-400">
-          <b className="text-slatey-300">Lexical BM25 baseline —</b> strong when queries share important terms with source text: fast, explainable, and a useful floor, but it misses semantically similar evidence when wording differs. Query: <span className="italic">&ldquo;{SAMPLE_QUERY}&rdquo;</span>
+          <b className="text-slatey-300">Lexical BM25 baseline:</b> strong when queries share important terms with source text: fast, explainable, and a useful floor, but it misses semantically similar evidence when wording differs. Query: <span className="italic">&ldquo;{SAMPLE_QUERY}&rdquo;</span>
         </div>
       </Panel>
 
       {/* Ranked evidence for selected mode */}
       <Panel>
         <SectionHeader eyebrow={selMeta.label} title="Ranked evidence" icon={ListOrdered}
-          description={sel === "hybrid-rerank" ? "Re-ranked by source authority, freshness, metadata, and citation readiness — with Data-handoff exclusions applied." : "Top evidence for the selected retrieval mode."} />
+          description={sel === "hybrid rerank" ? "Reranked by source authority, freshness, metadata, and citation readiness, with Data handoff exclusions applied." : "Top evidence for the selected retrieval mode."} />
         <div className="space-y-2">
           {result.results.map((r) => (
             <div key={r.id} className={cn("rounded-lg border p-3", r.excluded ? "border-rose-300 bg-rose-50/40" : "border-line bg-white")}>
@@ -80,16 +80,16 @@ export function RetrievalModes() {
               </div>
               <p className="mt-1 text-xs leading-relaxed text-slatey-400">{r.text}</p>
               {r.excluded ? <p className="mt-1 text-[11px] font-medium text-rose-600">{r.excludedReason}</p>
-                : r.rerankReason ? <p className="mt-1 text-[11px] text-slatey-500">Re-rank: {r.rerankReason}</p> : null}
+                : r.rerankReason ? <p className="mt-1 text-[11px] text-slatey-500">Rerank: {r.rerankReason}</p> : null}
             </div>
           ))}
         </div>
       </Panel>
 
-      {/* Phase F — rank slopegraph: the story of re-ranking, drawn */}
+      {/* Phase F, rank slopegraph: the story of reranking, drawn */}
       <Panel>
         <SectionHeader eyebrow="Rank movement" title="How each mode re-orders the evidence" icon={GitCompare}
-          description="Follow a source across the four modes. Rising lines gain authority under governed re-rank; falling lines lose it; blocked sources drop to the exclusion gutter." />
+          description="Follow a source across the four modes. Rising lines gain authority under governed rerank; falling lines lose it; blocked sources drop to the exclusion gutter." />
         <RankSlopegraph traces={traces} />
       </Panel>
 
@@ -116,7 +116,7 @@ export function RetrievalModes() {
       {/* Trace comparison */}
       <Panel className="overflow-x-auto">
         <SectionHeader eyebrow="Trace comparison by retrieval mode" title="How mode changes the pipeline" icon={GitCompare}
-          description="Changing retrieval mode changes which evidence reaches the answer engine — and its citation quality, faithfulness, risk, latency, and cost." />
+          description="Changing retrieval mode changes which evidence reaches the answer engine, and its citation quality, faithfulness, risk, latency, and cost." />
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead><tr className="border-b border-line text-[11px] uppercase tracking-wide text-slatey-500">
             <th className="py-2 pr-3 font-semibold">Mode</th><th className="py-2 pr-3 font-semibold text-right">Citations</th><th className="py-2 pr-3 font-semibold text-right">Faithfulness</th><th className="py-2 pr-3 font-semibold text-right">Hallucination</th><th className="py-2 pr-3 font-semibold text-right">Quality</th><th className="py-2 pr-3 font-semibold text-right">Latency</th><th className="py-2 font-semibold text-right">Cost</th>
@@ -161,10 +161,10 @@ export function RetrievalModes() {
         </p>
         <p className="mt-4 stat-label">What this retrieval layer demonstrates</p>
         <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <InsightCard tone="info" title="Lexical baseline">BM25 as an explainable floor — and a clear view of where it fails.</InsightCard>
+          <InsightCard tone="info" title="Lexical baseline">BM25 as an explainable floor, and a clear view of where it fails.</InsightCard>
           <InsightCard tone="info" title="Semantic retrieval">Local vector similarity handles wording variation the baseline misses.</InsightCard>
           <InsightCard tone="success" title="Hybrid search">Lexical + vector fusion balances precision and recall.</InsightCard>
-          <InsightCard tone="success" title="Governance-aware re-rank">Authority, freshness, metadata, citations, and Data-handoff exclusions reorder evidence.</InsightCard>
+          <InsightCard tone="success" title="Governance-aware rerank">Authority, freshness, metadata, citations, and Data handoff exclusions reorder evidence.</InsightCard>
           <InsightCard tone="warn" title="Traceable quality impact">Every mode shows its effect on citation quality, faithfulness, risk, latency, and cost.</InsightCard>
         </div>
       </Panel>
@@ -250,7 +250,7 @@ function RankSlopegraph({ traces }: { traces: ModeResult[] }) {
         })}
       </svg>
       <p className="mt-1 text-[11px] text-slatey-500">
-        Click a line to isolate it. <span className="text-emerald-700">Green</span> = gains rank under governed re-rank ·{" "}
+        Click a line to isolate it. <span className="text-emerald-700">Green</span> = gains rank under governed rerank ·{" "}
         <span className="text-amber-700">amber</span> = loses rank · <span className="text-rose-700">rose</span> = excluded by the Data handoff.
       </p>
     </div>

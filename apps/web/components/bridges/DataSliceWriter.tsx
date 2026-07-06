@@ -5,7 +5,7 @@ import { useProgram } from "@labs/program-core";
 import { getSessions } from "@data/lib/live/session";
 
 // Writes the real Data lab result into ProgramState.data so Realize/Deploy can
-// read it. Reuses the Data lab's own session store — no duplicated logic.
+// read it. Reuses the Data lab's own session store, no duplicated logic.
 export function DataSliceWriter() {
   const { update, hydrated } = useProgram();
   const last = useRef<string>("");
@@ -22,7 +22,7 @@ export function DataSliceWriter() {
       const sig = JSON.stringify({ readiness, gaps });
       if (sig === last.current) return;
       last.current = sig;
-      // Merge — never replace — so derived fields on the data slice (e.g. the
+      // Merge, never replace, so derived fields on the data slice (e.g. the
       // Data Readiness Handoff written by DataHandoffCard) survive this sync.
       update((d) => { d.data = { ...(d.data ?? {}), readinessScore: readiness, gaps, status }; });
     };

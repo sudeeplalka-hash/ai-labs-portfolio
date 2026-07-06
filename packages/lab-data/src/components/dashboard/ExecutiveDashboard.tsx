@@ -29,7 +29,7 @@ export function ExecutiveDashboard() {
     <div>
       <div className="mb-4 flex items-center justify-between gap-3">
         <p className="text-sm text-slatey-400">
-          {showLive ? `Computed from ${live.total} of your real sessions.` : "Demo data — toggle to recompute from your own activity."}
+          {showLive ? `Computed from ${live.total} of your real sessions.` : "Demo data, toggle to recompute from your own activity."}
         </p>
         <DataSourceToggle value={mode} onChange={setMode} liveCount={sessions.length} />
       </div>

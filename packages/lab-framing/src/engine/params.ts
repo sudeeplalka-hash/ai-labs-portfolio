@@ -1,6 +1,6 @@
 // ============================================================================
 // The 5 framing parameters (BRIEF §8). Every parameter must visibly move the
-// output. These weighting tables are the craft — tune here, not in the UI.
+// output. These weighting tables are the craft, tune here, not in the UI.
 // ============================================================================
 import type {
   UserKey, JobKey, PainKey, PostureKey, RiskKey, BucketKey,

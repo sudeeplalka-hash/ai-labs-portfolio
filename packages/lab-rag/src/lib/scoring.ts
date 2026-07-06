@@ -82,7 +82,7 @@ export function calculateRegressionStatus(
   }
   if (c.highRiskPassRate < p.highRiskPassRate - 2) {
     watch = true;
-    reasons.push(`High-risk pass rate fell ${(p.highRiskPassRate - c.highRiskPassRate).toFixed(1)} pts.`);
+    reasons.push(`High risk pass rate fell ${(p.highRiskPassRate - c.highRiskPassRate).toFixed(1)} pts.`);
   }
   if (c.costPerQuery > THRESHOLDS.costPerQuery) {
     watch = true;

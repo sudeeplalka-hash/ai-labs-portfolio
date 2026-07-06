@@ -4,10 +4,10 @@ import { ArrowRight, RotateCcw } from 'lucide-react';
 
 interface Q { id: string; dim: string; q: string; options: string[]; }
 const QUESTIONS: Q[] = [
-  { id: 'intake', dim: 'Use-case intake', q: 'How do new AI use cases get registered?', options: ['Ad hoc / not tracked', 'A spreadsheet somewhere', 'A central registry with owners', 'Registry + risk gating before build'] },
+  { id: 'intake', dim: 'Use case intake', q: 'How do new AI use cases get registered?', options: ['Ad hoc / not tracked', 'A spreadsheet somewhere', 'A central registry with owners', 'Registry + risk gating before build'] },
   { id: 'risk', dim: 'Risk tiering', q: 'How is AI risk classified?', options: ['It isn’t', 'Informal judgement', 'A documented rubric', 'Automated scoring tied to controls'] },
   { id: 'runtime', dim: 'Runtime controls', q: 'What stops a harmful AI response in production?', options: ['Nothing automated', 'Basic content filter', 'Several guardrails', 'Layered guardrails + decision engine'] },
-  { id: 'oversight', dim: 'Human oversight', q: 'How are high-risk AI actions reviewed?', options: ['They aren’t', 'Occasional spot checks', 'A review process exists', 'Routed escalation queue with SLAs'] },
+  { id: 'oversight', dim: 'Human oversight', q: 'How are high risk AI actions reviewed?', options: ['They aren’t', 'Occasional spot checks', 'A review process exists', 'Routed escalation queue with SLAs'] },
   { id: 'evals', dim: 'Testing & evals', q: 'How do you know the controls actually work?', options: ['We assume they do', 'Manual testing', 'Periodic red-team tests', 'Automated eval suites in CI'] },
   { id: 'evidence', dim: 'Audit & evidence', q: 'Could you show a regulator your AI controls?', options: ['No', 'We’d scramble', 'We keep logs', 'One-click audit-ready evidence'] },
 ];
@@ -91,7 +91,7 @@ export default function Maturity() {
             {weakest.map((q) => (
               <li key={q.id} className="flex items-start gap-2 text-sm text-slate-600">
                 <ArrowRight size={15} className="text-primary mt-0.5 shrink-0" />
-                Strengthen <span className="font-medium">{q.dim.toLowerCase()}</span> — it&apos;s your lowest-scoring dimension.
+                Strengthen <span className="font-medium">{q.dim.toLowerCase()}</span>, it&apos;s your lowest-scoring dimension.
               </li>
             ))}
           </ul>

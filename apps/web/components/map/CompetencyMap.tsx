@@ -1,7 +1,7 @@
-// Layer 0 — the Competency Map, presented as a cinematic browse gallery (§C0/§B4).
+// Layer 0, the Competency Map, presented as a cinematic browse gallery (§C0/§B4).
 // Streaming-service layout: radial-navy hero + horizontal "shelves" per collection
 // with poster tiles. Uses the Command Center design system EXACTLY (ink + brand
-// blue, Public Sans, shared card/shadow tokens). One comprehensive view — no
+// blue, Public Sans, shared card/shadow tokens). One comprehensive view, no
 // audience toggle. Each tile derives its color + icon from its OWN collection, so
 // mixed shelves (Featured) render each instrument in its true collection theme.
 // Static (no client JS): hover quick-look + scroll are pure CSS.
@@ -53,7 +53,7 @@ function Tile({ lab }: { lab: LabEntry }) {
 
   const inner = (
     <div className={`group relative flex h-full w-[15rem] max-w-[80vw] shrink-0 flex-col overflow-hidden rounded-xl border border-line bg-white shadow-card transition duration-200 hover:-translate-y-1 hover:shadow-cardhover hover:ring-1 ${accent.ring}`}>
-      {/* Cover — clean tinted band for now; drop an image into COVER_IMAGE to swap */}
+      {/* Cover, clean tinted band for now; drop an image into COVER_IMAGE to swap */}
       <div className={`relative h-24 overflow-hidden ${accent.band}`}>
         {cover && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -73,7 +73,7 @@ function Tile({ lab }: { lab: LabEntry }) {
         </p>
       </div>
 
-      {/* Hover quick-look — full detail, no truncation (desktop nicety; pointer-events
+      {/* Hover quick-look, full detail, no truncation (desktop nicety; pointer-events
           off so the wrapping link still receives the click) */}
       <div className="pointer-events-none absolute inset-0 flex flex-col bg-white p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <div className="flex items-center justify-between">
@@ -123,10 +123,10 @@ function Shelf({ title, tag, accent, icon: Icon, labs, href }: {
 }
 
 const HERO_PROOF: Record<string, { proves: string; depth: string }> = {
-  "GAP-01": { proves: "Protocol & integration architecture", depth: "A working MCP client — browse a server's manifest, compose a call, read the JSON-RPC round-trip with honest typed errors, build a custom tool, watch the initialize handshake. The N\u00d7M\u2192N+M case made concrete." },
-  "GAP-03": { proves: "Multi-agent orchestration judgment", depth: "Supervisor \u2192 role agents over A2A messages you can inspect frame-by-frame, an agent timeline, and a tested single-vs-multi scorecard \u2014 quality bought with cost and latency." },
+  "GAP-01": { proves: "Protocol & integration architecture", depth: "A working MCP client, browse a server's manifest, compose a call, read the JSON-RPC round-trip with honest typed errors, build a custom tool, watch the initialize handshake. The N\u00d7M\u2192N+M case made concrete." },
+  "GAP-03": { proves: "Multiagent orchestration judgment", depth: "Supervisor \u2192 role agents over A2A messages you can inspect frame-by-frame, an agent timeline, and a tested single-vs-multi scorecard \u2014 quality bought with cost and latency." },
   "GAP-07": { proves: "Architecture decision-making", depth: "Six questions \u2192 function-calling vs MCP vs A2A vs hybrid, with the runner-up, exactly what would flip the call, a four-protocol radar, and a shareable recommendation card." },
-  "C3-1": { proves: "Capital allocation under risk", depth: "Twelve initiatives governed like capital \u2014 risk-adjusted ROI, kill/hold/scale, budget-constrained greedy funding, the efficient frontier, and redeploy-the-kills." },
+  "C3-1": { proves: "Capital allocation under risk", depth: "Twelve initiatives governed like capital \u2014 risk adjusted ROI, kill/hold/scale, budget-constrained greedy funding, the efficient frontier, and redeploy-the-kills." },
   "EL-01": { proves: "Change-management rigor", depth: "Six weighted readiness factors \u2192 a scale/hold gate \u2192 the fewest moves to clear it, a sequenced two-week plan, and the projected path to the gate." },
 };
 
@@ -184,7 +184,7 @@ export function CompetencyMap() {
         </div>
       </header>
 
-      {/* Cinematic hero — radial-navy field + italic blue accent (matches sudeeplalka.com) */}
+      {/* Cinematic hero, radial-navy field + italic blue accent (matches sudeeplalka.com) */}
       <section
         className="text-white"
         style={{ background: "radial-gradient(1100px 600px at 72% 30%, #1d3a5c 0%, #152433 55%, #0e1923 100%)" }}
@@ -195,7 +195,7 @@ export function CompetencyMap() {
             AI delivery leader who works at <span className="italic text-primary">four altitudes</span>.
           </h1>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-slate-300 md:mt-5 md:text-lg">
-            The protocol wire, the program lifecycle, the P&amp;L, and the people — a portfolio of working
+            The protocol wire, the program lifecycle, the P&amp;L, and the people, a portfolio of working
             instruments, each mapped to a decision a VP actually makes.
           </p>
           <p className="mt-4 font-mono text-[11px] leading-relaxed text-slate-400 md:text-xs">
@@ -233,8 +233,8 @@ export function CompetencyMap() {
       <footer className="mx-auto max-w-6xl px-4 pb-14 md:px-5">
         <div className="border-t border-line pt-6 text-sm text-slatey-400">
           <p className="max-w-3xl leading-relaxed">
-            Honest by design — every tile shows its true status (shipped, in build, or planned) and the enterprise
-            decision it maps to. Collection 1 is live; Collections 2–4 build in public. Nothing here is a demo for its
+            Honest by design, every tile shows its true status (shipped, in build, or planned) and the enterprise
+            decision it maps to. Collection 1 is live; Collections 2 to 4 build in public. Nothing here is a demo for its
             own sake.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">

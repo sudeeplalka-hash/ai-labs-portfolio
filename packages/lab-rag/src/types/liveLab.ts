@@ -1,4 +1,4 @@
-// Types for the Live RAG Evaluator Lab — a client-side, deterministic RAG simulation.
+// Types for the Live RAG Evaluator Lab, a client side, deterministic RAG simulation.
 
 export type ProcessingStatus = "Pending" | "Running" | "Complete" | "Warning" | "Failed";
 
@@ -47,7 +47,7 @@ export interface GeneratedLiveAnswer {
   citations: string[];
   mode: "simulated" | "llm";
   caveats: string[];
-  /** Human-readable engine label, e.g. "OpenAI · gpt-4o-mini" — recorded per trace. */
+  /** Human-readable engine label, e.g. "OpenAI · gpt-4o-mini", recorded per trace. */
   engineLabel?: string;
 }
 

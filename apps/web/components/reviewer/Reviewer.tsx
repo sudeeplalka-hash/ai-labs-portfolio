@@ -1,4 +1,4 @@
-// Phase 8 — reviewer-facing positioning components. Pure/presentational (no
+// Phase 8, reviewer-facing positioning components. Pure/presentational (no
 // hooks), so they work in both server pages (/roadmap, /architecture) and the
 // client Home. Reused across the reviewer surfaces.
 
@@ -13,7 +13,7 @@ const LOOP: { icon: LucideIcon; stage: string; line: string; href: string }[] = 
   { icon: Compass, stage: "Strategy", line: "creates the initiative.", href: "/frame" },
   { icon: Database, stage: "Data", line: "decides what can be trusted.", href: "/data" },
   { icon: Boxes, stage: "Build / RAG", line: "evaluates the AI system.", href: "/build" },
-  { icon: Rocket, stage: "Operate", line: "monitors release readiness & production risk.", href: "/deploy" },
+  { icon: Rocket, stage: "Operate", line: "monitors release readiness and production risk.", href: "/deploy" },
   { icon: ShieldCheck, stage: "Govern", line: "approves, restricts, or blocks release.", href: "/govern" },
   { icon: TrendingUp, stage: "Realize", line: "proves value and loops learning back.", href: "/realize" },
 ];
@@ -25,7 +25,7 @@ export function StartHereLoop() {
       <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">See the AI program loop</h2>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">
         Walk through how an AI idea becomes a governed, measurable program. The Command Center follows one initiative across
-        Strategy, Data, Build/RAG, Operate, Govern, and Realize — so you can see the decisions, risks, controls, and business
+        Strategy, Data, Build/RAG, Operate, Govern, and Realize, so you can see the decisions, risks, controls, and business
         value at each stage.
       </p>
       <ol className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -74,12 +74,12 @@ export function ReviewerModes() {
 
 // ---- What this demonstrates -------------------------------------------------
 const PROOF: { title: string; body: string }[] = [
-  { title: "Enterprise AI strategy", body: "Turns vague AI ideas into scoped initiatives with capability tags, a governance tier, and a build-path recommendation." },
+  { title: "Enterprise AI strategy", body: "Turns vague AI ideas into scoped initiatives with capability tags, a governance tier, and a recommended build path." },
   { title: "Data readiness before build", body: "Shows AI quality depends on source ownership, metadata, PII handling, chunk readiness, and excluded data." },
   { title: "RAG evaluation maturity", body: "Retrieval, evidence, citations, faithfulness, hallucination risk, traces, golden datasets, and quality gates." },
-  { title: "AI Ops / MLOps awareness", body: "Release readiness, lineage, monitoring coverage, eval regression, drift, incidents, rollback, and cost/latency." },
+  { title: "AI Ops / MLOps awareness", body: "Release readiness, lineage, monitoring coverage, eval regression, drift, incidents, rollback, and cost and latency." },
   { title: "Governed AI delivery", body: "Connects risk, required controls, open findings, audit evidence, and a decision to the live initiative." },
-  { title: "Business value realization", body: "Adoption, leakage, run cost, risk discount, ROI, payback, and risk-adjusted value." },
+  { title: "Business value realization", body: "Adoption, leakage, run cost, risk discount, ROI, payback, and risk adjusted value." },
 ];
 
 export function WhatThisDemonstrates() {
@@ -88,9 +88,9 @@ export function WhatThisDemonstrates() {
       <p className="eyebrow">What this project demonstrates</p>
       <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">How enterprise AI should be shaped, evaluated, operated, governed, and measured</h2>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">
-        It connects use-case framing, data readiness, RAG evaluation, production-readiness, governance evidence, and
-        risk-adjusted ROI into one traceable lifecycle — MLOps-, LLMOps-, and RAGOps-aware, without trying to replace a
-        specialized ML platform.
+        It connects use case framing, data readiness, RAG evaluation, production readiness, governance evidence, and
+        risk adjusted ROI into one traceable lifecycle. It is aware of MLOps, LLMOps, and RAGOps, without trying to
+        replace a specialized ML platform.
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {PROOF.map((p, i) => (
@@ -111,8 +111,8 @@ const CONTRACTS: { key: string; stage: string; contract: string; fields: string[
   { key: "build", stage: "Build", contract: "Build Output Contract", fields: ["model", "retrieval mode", "eval run", "quality gates", "failure modes"], tone: "text-violet-700" },
   { key: "deploy", stage: "Deploy", contract: "Ops Evidence", fields: ["release readiness", "monitoring coverage", "regression", "incidents", "rollback"], tone: "text-amber-700" },
   { key: "govern", stage: "Govern", contract: "Governance Decision", fields: ["controls", "findings", "audit evidence", "approval status"], tone: "text-rose-700" },
-  { key: "realize", stage: "Realize", contract: "Realization Dossier", fields: ["ROI", "risk-adjusted value", "payback", "leakage", "next action"], tone: "text-primary-dark" },
-  { key: "operate", stage: "Operate", contract: "Day-2 Operations", fields: ["drift + canary decay", "value at risk", "day-2 incidents", "refresh/retrain trigger"], tone: "text-primary" },
+  { key: "realize", stage: "Realize", contract: "Realization Dossier", fields: ["ROI", "risk adjusted value", "payback", "leakage", "next action"], tone: "text-primary-dark" },
+  { key: "operate", stage: "Operate", contract: "Day Two Operations", fields: ["drift + canary decay", "value at risk", "day two incidents", "refresh/retrain trigger"], tone: "text-primary" },
 ];
 
 /** Pure/presentational; `live` (optional) adds each contract's current headline
@@ -123,9 +123,9 @@ export function ContractLoop({ live, bare }: { live?: Partial<Record<string, str
       {!bare && (
         <>
           <p className="eyebrow">Contract-driven</p>
-          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The program loop is contract-driven</h2>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The program loop is contract driven</h2>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">
-            The stages aren&rsquo;t just visually connected — each one emits a structured contract the next consumes through shared state.
+            The stages aren&rsquo;t just visually connected. Each one emits a structured contract the next consumes through shared state.
           </p>
         </>
       )}
@@ -152,7 +152,7 @@ export function ContractLoop({ live, bare }: { live?: Partial<Record<string, str
 
 // ---- Simulation boundary ----------------------------------------------------
 const IMPLEMENTED = [
-  "Lifecycle state & handoff contracts", "Strategy scoring & build-path recommendation", "Data readiness derivation",
+  "Lifecycle state & handoff contracts", "Strategy scoring & build path recommendation", "Data readiness derivation",
   "RAG lab logic (chunking, retrieval, evidence, eval views)", "Operate evidence engine (readiness, lineage, monitoring, regression, incidents)",
   "Governance decision engine", "Realize ROI engine (leakage, risk discount, payback, NPV)",
 ];
@@ -166,9 +166,10 @@ export function SimulationBoundary() {
     <div className="rounded-xl border border-line bg-white p-5 shadow-card">
       <p className="eyebrow">Simulation boundary</p>
       <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slatey-300">
-        This portfolio demo uses deterministic client-side engines and sample data to show enterprise AI delivery mechanics
-        without confidential data or cloud infrastructure. Some signals — production telemetry, incident and regression history —
-        are modeled. The architecture is built around handoff contracts so real integrations can replace modeled signals later.
+        This portfolio demo uses deterministic, client side engines and sample data to show enterprise AI delivery mechanics
+        without confidential data or cloud infrastructure. Some signals, including production telemetry and incident and
+        regression history, are modeled. The architecture is built around handoff contracts so real integrations can replace
+        modeled signals later.
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div>
@@ -207,7 +208,7 @@ export function ReviewerLinks() {
 export function StageDemonstrates({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-line bg-slate-50/50 px-4 py-2.5 text-[13px] leading-relaxed text-slatey-400">
-      <span className="font-semibold text-slatey-300">What this stage demonstrates — </span>{children}
+      <span className="font-semibold text-slatey-300">What this stage demonstrates: </span>{children}
     </div>
   );
 }

@@ -77,7 +77,7 @@ export function StrategyWorkshop({ w, set }: { w: Workshop; set: Set }) {
       </StepCard>
 
       <StepCard n={2} title="AI ambition" done={filled(w.ambition, w.aiPattern)}>
-        <Text label="What should AI help with?" value={w.ambition} onChange={(v) => set({ ambition: v })} area ph="Say it plainly — the wish behind the initiative." />
+        <Text label="What should AI help with?" value={w.ambition} onChange={(v) => set({ ambition: v })} area ph="Say it plainly, the wish behind the initiative." />
         <Chips label="AI pattern" options={AI_PATTERNS} value={w.aiPattern} onChange={(v) => set({ aiPattern: v })} />
         <div className="grid gap-4 sm:grid-cols-2">
           <Text label="Expected user action after the AI output" value={w.expectedAction} onChange={(v) => set({ expectedAction: v })} ph="What do they do with it?" />

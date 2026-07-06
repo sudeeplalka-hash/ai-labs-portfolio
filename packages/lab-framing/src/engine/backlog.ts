@@ -1,7 +1,7 @@
 // ============================================================================
 // Backlog generator. Instead of fixed slots, every bucket draws from a POOL of
 // relevance-scored idea archetypes. Selection is seeded by every parameter AND
-// the full text of the ask, so any change — a dropdown or a single word — re-ranks
+// the full text of the ask, so any change, a dropdown or a single word, re-ranks
 // which ideas surface, while relevance weighting keeps the most fitting ones up
 // top. Deterministic and offline.
 // ============================================================================

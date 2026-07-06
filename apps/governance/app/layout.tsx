@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   applicationName: 'AI Governance Control Plane',
   openGraph: {
     title: 'Enterprise AI Governance Control Plane',
-    description: 'See an unguarded AI cause harm — then watch the control plane catch it. An interactive governance lab.',
+    description: 'See an unguarded AI cause harm, then watch the control plane catch it. An interactive governance lab.',
     type: 'website',
   },
 };

@@ -1,5 +1,5 @@
 // ============================================================================
-// Strategy & Planning — deterministic intake + readiness scoring engine.
+// Strategy & Planning, deterministic intake + readiness scoring engine.
 // Pure functions: a Workshop object in, a Scored result + a mapped ProgramState
 // initiative out. No API calls; everything runs in the browser.
 // ============================================================================
@@ -13,39 +13,39 @@ export type Impact = "Low" | "Medium" | "High" | "Critical" | "";
 
 export interface Workshop {
   initiativeName: string;
-  // Step 1 — Business Context
+  // Step 1, Business Context
   businessFunction: string;
   sponsor: string;
   process: string;
   painPoint: string;
   targetUsers: string;
   facing: "" | "Internal" | "Customer-facing";
-  // Step 2 — AI Ambition
+  // Step 2, AI Ambition
   ambition: string;
   aiPattern: string;
   expectedAction: string;
   humanReview: YNU;
-  // Step 3 — Business Value
+  // Step 3, Business Value
   baseline: string;
   target: string;
   usersImpacted: string;
   frequency: string;
   valueDriver: string;
   timeHorizon: string;
-  // Step 4 — Data Assumptions
+  // Step 4, Data Assumptions
   dataSources: string;
   dataOwner: string;
   dataSensitivity: "" | "Public" | "Internal" | "Confidential" | "PII" | "PHI" | "PCI";
   dataGaps: string;
   freshnessConcern: YNU;
   dataStructure: "" | "Structured" | "Unstructured" | "Mixed";
-  // Step 5 — Risk & Governance
+  // Step 5, Risk & Governance
   impactIfWrong: Impact;
   regulatory: "" | "None" | "Moderate" | "High" | "Unknown";
   auditTrail: YNU;
   citationRequired: YNU;
   escalationPath: YNU;
-  // Step 6 — Delivery Complexity
+  // Step 6, Delivery Complexity
   integrations: string;
   workflowChange: Lvl;
   techDependency: Lvl;
@@ -176,14 +176,14 @@ export function requiredGates(w: Workshop): Gate[] {
 
 function topRisks(w: Workshop): RiskItem[] {
   const out: RiskItem[] = [];
-  if (w.impactIfWrong === "High" || w.impactIfWrong === "Critical") out.push({ label: `${w.impactIfWrong} impact if the AI is wrong — needs strong guardrails`, severity: "high" });
-  if (w.regulatory === "High" || w.regulatory === "Unknown") out.push({ label: `Regulatory exposure is ${w.regulatory.toLowerCase()} — confirm compliance owner`, severity: "high" });
-  if (["PII", "PHI", "PCI"].includes(w.dataSensitivity)) out.push({ label: `${w.dataSensitivity} data in scope — redaction & access controls required`, severity: "high" });
-  if (w.freshnessConcern === "Yes") out.push({ label: "Source freshness is a concern — stale answers risk", severity: "med" });
+  if (w.impactIfWrong === "High" || w.impactIfWrong === "Critical") out.push({ label: `${w.impactIfWrong} impact if the AI is wrong, needs strong guardrails`, severity: "high" });
+  if (w.regulatory === "High" || w.regulatory === "Unknown") out.push({ label: `Regulatory exposure is ${w.regulatory.toLowerCase()}, confirm compliance owner`, severity: "high" });
+  if (["PII", "PHI", "PCI"].includes(w.dataSensitivity)) out.push({ label: `${w.dataSensitivity} data in scope, redaction & access controls required`, severity: "high" });
+  if (w.freshnessConcern === "Yes") out.push({ label: "Source freshness is a concern, stale answers risk", severity: "med" });
   if (has(w.dataGaps)) out.push({ label: "Known data gaps could cap answer quality", severity: "med" });
-  if (w.citationRequired === "Unsure" || w.citationRequired === "No") out.push({ label: "Citation/evidence not settled — trust & auditability risk", severity: "med" });
-  if (w.aiPattern === "Agentic workflow") out.push({ label: "Agentic pattern — needs action approval & permission boundaries", severity: "med" });
-  if (w.humanReview === "Unsure") out.push({ label: "Human-in-the-loop decision unresolved", severity: "low" });
+  if (w.citationRequired === "Unsure" || w.citationRequired === "No") out.push({ label: "Citation/evidence not settled, trust & auditability risk", severity: "med" });
+  if (w.aiPattern === "Agentic workflow") out.push({ label: "Agentic pattern, needs action approval & permission boundaries", severity: "med" });
+  if (w.humanReview === "Unsure") out.push({ label: "Human in the loop decision unresolved", severity: "low" });
   return out.slice(0, 5);
 }
 
@@ -196,7 +196,7 @@ export function scoreWorkshop(w: Workshop): Scored {
 
   let band: Band, recommendation: string;
   if (overall >= 80) { band = "go"; recommendation = "Proceed to Data Lab"; }
-  else if (overall >= 65) { band = "refine"; recommendation = "Good candidate — refine assumptions"; }
+  else if (overall >= 65) { band = "refine"; recommendation = "Good candidate, refine assumptions"; }
   else if (overall >= 50) { band = "redesign"; recommendation = "Needs redesign before pilot"; }
   else { band = "stop"; recommendation = "Do not proceed yet"; }
 
@@ -204,9 +204,9 @@ export function scoreWorkshop(w: Workshop): Scored {
   let nextAction: string;
   if (!gatesPassed) nextAction = `Resolve required gates: ${missingGates.slice(0, 2).join(", ")}${missingGates.length > 2 ? "…" : ""}`;
   else if (band === "go") nextAction = "Confirm data ownership and PII handling, then hand off to the Data Lab.";
-  else if (band === "refine") nextAction = `Strengthen ${weakest.label.toLowerCase()} — it's the weakest link at ${weakest.score}/100.`;
+  else if (band === "refine") nextAction = `Strengthen ${weakest.label.toLowerCase()}, it's the weakest link at ${weakest.score}/100.`;
   else if (band === "redesign") nextAction = "Rework the value case and de-risk the highest-impact assumptions before piloting.";
-  else nextAction = "Reframe the use case — the value or feasibility isn't there yet.";
+  else nextAction = "Reframe the use case, the value or feasibility isn't there yet.";
 
   return { overall, categories, gates, gatesPassed, missingGates, band, recommendation, risks: topRisks(w), nextAction };
 }
@@ -236,13 +236,13 @@ export function buildBrief(w: Workshop, s: Scored): Brief {
   if (["PII", "PHI", "PCI"].includes(w.dataSensitivity)) controls.add("Redaction & access controls");
   return {
     name: w.initiativeName || sharpenName(w),
-    problem: w.painPoint || w.ambition || "—",
-    users: w.targetUsers || "—",
+    problem: w.painPoint || w.ambition || "N/A",
+    users: w.targetUsers || "N/A",
     outcome: valueSentence(w),
-    baseline: w.baseline || "—",
-    target: w.target || "—",
-    pattern: w.aiPattern || "—",
-    dataSources: w.dataSources || "—",
+    baseline: w.baseline || "N/A",
+    target: w.target || "N/A",
+    pattern: w.aiPattern || "N/A",
+    dataSources: w.dataSources || "N/A",
     risks: s.risks.map((r) => r.label),
     controls: [...controls],
     gates: s.gates,
@@ -275,15 +275,15 @@ export function falsifiableTarget(w: Workshop): string {
   if (w.baseline && w.target) {
     return `Within ${horizon}, move from ${w.baseline} to ${w.target}${w.usersImpacted ? ` for ${w.usersImpacted} users` : ""}, while keeping answer quality high.`;
   }
-  // Partial data — still make it move with the driver, users, and horizon.
+  // Partial data, still make it move with the driver, users, and horizon.
   const driver = (w.valueDriver || "a measurable improvement").toLowerCase();
   const who = w.targetUsers ? ` for ${w.targetUsers.toLowerCase()}` : "";
   const anchor = w.baseline ? ` from a baseline of ${w.baseline}` : w.target ? ` toward ${w.target}` : "";
-  return `Within ${horizon}, deliver ${driver}${who}${anchor} — set a baseline and a dated target to make it fully testable.`;
+  return `Within ${horizon}, deliver ${driver}${who}${anchor}, set a baseline and a dated target to make it fully testable.`;
 }
 
 // ---- auto-generate a full workshop from a picked idea -----------------------
-// Turns the idea generator's (use-case + 5 knobs + ambition) into a complete,
+// Turns the idea generator's (use case + 5 knobs + ambition) into a complete,
 // coherent Workshop: every field filled with relevant content and an
 // auto-generated falsifiable baseline→target. Deterministic per idea (seeded),
 // so different picks yield different-but-stable numbers.
@@ -298,7 +298,7 @@ function genMetrics(driver: string, rnd: () => number): { baseline: string; targ
   switch (driver) {
     case "Cost reduction": { const b = j(4.2); return { baseline: `$${b.toFixed(2)} cost per interaction`, target: `$${(b * 0.62).toFixed(2)} cost per interaction` }; }
     case "Cycle-time reduction": { const b = Math.max(8, Math.round(j(18))); return { baseline: `${b} min average handling time`, target: `${Math.round(b * 0.5)} min average handling time` }; }
-    case "Quality improvement": { const b = Math.round(j(71, 0.08)); return { baseline: `${b}% first-contact resolution`, target: `${Math.min(95, b + 16)}% first-contact resolution` }; }
+    case "Quality improvement": { const b = Math.round(j(71, 0.08)); return { baseline: `${b}% first contact resolution`, target: `${Math.min(95, b + 16)}% first contact resolution` }; }
     case "Revenue lift": { const b = j(1.8); return { baseline: `$${b.toFixed(1)}M influenced revenue / quarter`, target: `$${(b * 1.4).toFixed(1)}M influenced revenue / quarter` }; }
     case "Risk reduction": { const b = j(6.4, 0.2); return { baseline: `${b.toFixed(1)}% error rate`, target: `${(b * 0.3).toFixed(1)}% error rate` }; }
     case "Customer experience": { const b = j(3.6, 0.06); return { baseline: `CSAT ${b.toFixed(1)}/5`, target: `CSAT ${Math.min(4.8, b + 0.8).toFixed(1)}/5` }; }
@@ -370,7 +370,7 @@ export function generateWorkshop(uc: UseCase, p: FramingParams, ambition: string
   const painSev = (PAINS as Record<string, { sev: number }>)[p.pain]?.sev ?? 0.6;
   const regulatory = SENS_REG[sens] ?? "None";
 
-  // Impact if the AI is wrong — a property of the use case, nudged by risk appetite.
+  // Impact if the AI is wrong, a property of the use case, nudged by risk appetite.
   const appetitePts = p.risk === "Aggressive" ? 1 : p.risk === "Conservative" ? -1 : 0;
   const impactPts = (hiTouch ? 2 : 0) + (agentic ? 1 : 0) + (custFacing ? 1 : 0) + (sensitive ? 1 : 0) + (jobDiff > 0.7 ? 1 : 0) + appetitePts;
   const impactIfWrong: Impact = impactPts >= 5 ? "Critical" : impactPts >= 3 ? "High" : impactPts >= 1 ? "Medium" : "Low";
@@ -412,7 +412,7 @@ export function generateWorkshop(uc: UseCase, p: FramingParams, ambition: string
     dataSources: PATTERN_SOURCES[aiPattern] ?? "Existing operational records",
     dataOwner: `${um.func} data team`,
     dataSensitivity: sens,
-    dataGaps: sparse ? "Coverage is thin in places — some records are unlabeled or missing." : "",
+    dataGaps: sparse ? "Coverage is thin in places, some records are unlabeled or missing." : "",
     freshnessConcern,
     dataStructure: POSTURE_STRUCT[p.posture] ?? "Mixed",
     impactIfWrong,
@@ -441,7 +441,7 @@ const IMPACT_APPETITE: Record<string, string> = { Low: "Conservative", Medium: "
 
 // ---- Strategy → initiative metadata (Phase 1) -------------------------------
 const PATTERN_TAGS: Record<string, string[]> = {
-  "Search / knowledge assistant": ["Prompting", "RAG", "Embeddings", "Vector database", "Retrieval", "Re-ranking", "Evaluation"],
+  "Search / knowledge assistant": ["Prompting", "RAG", "Embeddings", "Vector database", "Retrieval", "Reranking", "Evaluation"],
   "Summarization": ["Prompting", "Summarization", "Evaluation"],
   "Classification": ["Classification", "Training data", "Evaluation"],
   "Recommendation": ["RAG", "Decision support", "Evaluation"],
@@ -452,7 +452,7 @@ const PATTERN_TAGS: Record<string, string[]> = {
 const PATTERN_BUILD_PATH: Record<string, BuildPathRecommendation> = {
   "Search / knowledge assistant": { path: "RAG knowledge assistant with governed retrieval and citation validation", why: "The use case depends on knowledge-base content, needs current source grounding, and has high risk if stale or unsupported answers are returned.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern audit evidence", "Realize ROI"] },
   "Summarization": { path: "Prompted summarization workflow with human review", why: "Summaries compress source material and must stay faithful; a review step catches drift and omission.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern review", "Realize ROI"] },
-  "Classification": { path: "Classification / routing model with labeled data and evaluation", why: "A repeatable, high-volume decision benefits from a trained classifier with a measured accuracy bar.", requiredStages: ["Training-data readiness", "Build evaluation", "Operate drift monitoring", "Govern review", "Realize ROI"] },
+  "Classification": { path: "Classification / routing model with labeled data and evaluation", why: "A repeatable, high volume decision benefits from a trained classifier with a measured accuracy bar.", requiredStages: ["Training-data readiness", "Build evaluation", "Operate drift monitoring", "Govern review", "Realize ROI"] },
   "Recommendation": { path: "RAG decision-support assistant with evidence and human approval", why: "Recommendations influence outcomes and need traceable evidence plus a human decision point.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern approval", "Realize ROI"] },
   "Decision support": { path: "RAG decision-support assistant with evidence and human approval", why: "Advice used by staff must be grounded, explainable, and approved before action.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern approval", "Realize ROI"] },
   "Workflow automation": { path: "Governed agentic workflow with tool permissions and approvals", why: "Automated actions carry execution risk and need permission boundaries, approval gates, and an audit trail.", requiredStages: ["Data & tool contracts", "Build/agent evaluation", "Operate incident readiness", "Govern audit evidence", "Realize ROI"] },

@@ -1,6 +1,6 @@
-// GAP-02 · Agent Loop & Failure Inspector — use-cases.
+// GAP-02 · Agent Loop & Failure Inspector, use cases.
 // Payload = a self-contained ReAct trace for the industry task, with its
-// characteristic failure → detection → recovery baked in. When a use-case is
+// characteristic failure → detection → recovery baked in. When a use case is
 // active the architecture/failure selectors hide and the authored trace plays.
 
 import { type UseCase, assertUseCases, firstHand, studied } from "../industries";
@@ -18,16 +18,16 @@ export const GAP02_USE_CASES: UseCase<Gap02Payload>[] = assertUseCases<Gap02Payl
     labId: "GAP-02",
     industry: "insurance",
     provenance: studied,
-    title: "FNOL triage — the validation gate as fraud control",
-    oneLiner: "A hallucinated policy number gets rejected at the gate — which is also a fraud control.",
+    title: "FNOL triage, the validation gate as fraud control",
+    oneLiner: "A hallucinated policy number gets rejected at the gate, which is also a fraud control.",
     context:
       "An FNOL (first-notice-of-loss) triage agent opens claims. It hallucinates a policy number and a fuzzy amount; the schema/entity gate rejects the call and forces a re-ask against the real record.",
     theDecision:
-      "The validation gate isn't just hygiene — on claims intake it doubles as a fraud control, because 'unknown policy / non-numeric amount' is exactly what a bad claim looks like.",
+      "The validation gate isn't just hygiene, on claims intake it doubles as a fraud control, because 'unknown policy / non-numeric amount' is exactly what a bad claim looks like.",
     whatMostMiss:
-      "Teams treat schema validation as plumbing. On FNOL it's the cheapest fraud signal you have — the same gate that catches a hallucination catches a fabricated claim.",
+      "Teams treat schema validation as plumbing. On FNOL it's the cheapest fraud signal you have, the same gate that catches a hallucination catches a fabricated claim.",
     stakes: "An auto-opened claim on a hallucinated or fabricated policy is a leakage and fraud exposure, not a bug ticket.",
-    takeaway: "On claims intake, the validation gate is a fraud control — reject at the boundary, re-ask against the record.",
+    takeaway: "On claims intake, the validation gate is a fraud control, reject at the boundary, re-ask against the record.",
     sources: [
       "Insurance FNOL / claims intake automation patterns",
       "Schema/entity validation as a fraud-signal control",
@@ -43,7 +43,7 @@ export const GAP02_USE_CASES: UseCase<Gap02Payload>[] = assertUseCases<Gap02Payl
         { role: "action", label: "open_claim(policy=\"POL-99999\", loss=\"rear collision\", amount=\"around 4k\")" },
         { role: "failure", label: "Hallucinated args", detail: "policy POL-99999 not found; amount 'around 4k' is non-numeric" },
         { role: "detect", label: "Detection signal", detail: "Schema + entity validation: unknown policy id, non-numeric amount" },
-        { role: "recover", label: "Recovery policy", detail: "Reject at the gate, re-ask with the schema — the same gate is a fraud control" },
+        { role: "recover", label: "Recovery policy", detail: "Reject at the gate, re-ask with the schema, the same gate is a fraud control" },
         { role: "action", label: "open_claim(policy=\"POL-77341\", loss=\"rear collision\", amount=4000)" },
         { role: "observation", label: "claim CLM-2210 opened" },
         { role: "final", label: "Filed after the gate caught the bad reference. The validation gate is the fraud control." },
@@ -55,7 +55,7 @@ export const GAP02_USE_CASES: UseCase<Gap02Payload>[] = assertUseCases<Gap02Payl
     labId: "GAP-02",
     industry: "cybersecurity",
     provenance: studied,
-    title: "SOC alert triage — breaking the flapping-alert loop",
+    title: "SOC alert triage, breaking the flapping-alert loop",
     oneLiner: "The agent loops on a flapping alert; the loop-breaker caps it and escalates.",
     context:
       "A SOC triage agent investigates a flapping alert source and re-queries it repeatedly with no new information. The loop detector caps iterations, suppresses the source, and escalates with the transcript.",
@@ -64,7 +64,7 @@ export const GAP02_USE_CASES: UseCase<Gap02Payload>[] = assertUseCases<Gap02Payl
     whatMostMiss:
       "People fear the agent doing something wrong; the common failure is it doing the same thing forever. A loop-breaker is cheaper than the analyst hours a flapping source burns.",
     stakes: "An un-capped triage agent on a flapping source burns budget and buries the real alert under noise.",
-    takeaway: "Cap the loop and suppress the flapping source — observability spend buys back alert-fatigue.",
+    takeaway: "Cap the loop and suppress the flapping source, observability spend buys back alert-fatigue.",
     sources: [
       "SOC alert-triage automation patterns",
       "Agent loop detection / iteration-cap recovery",
@@ -93,18 +93,18 @@ export const GAP02_USE_CASES: UseCase<Gap02Payload>[] = assertUseCases<Gap02Payl
     labId: "GAP-02",
     industry: "telecom",
     provenance: firstHand,
-    title: "NOC incident correlation — 503 under load",
+    title: "NOC incident correlation, 503 under load",
     oneLiner: "A tool 503s during the incident; retry/backoff plus a cached fallback keeps it moving.",
     context:
-      "An NOC agent correlating a network incident hits a 503 on the topology service — overloaded by the very incident it's diagnosing. Retry with backoff, then fall back to the cached topology, flagging staleness.",
+      "An NOC agent correlating a network incident hits a 503 on the topology service, overloaded by the very incident it's diagnosing. Retry with backoff, then fall back to the cached topology, flagging staleness.",
     theDecision:
-      "Resilience here is a network-SLA duty, not a nicety — the tools you depend on are least available exactly when the incident is worst, so the recovery policy is the design.",
+      "Resilience here is a network-SLA duty, not a nicety, the tools you depend on are least available exactly when the incident is worst, so the recovery policy is the design.",
     whatMostMiss:
       "Demos assume tools are up. In a real incident the dependency is overloaded precisely when you need it; the backoff-and-cache path is what keeps the agent useful under load.",
     stakes: "An agent that stalls on a 503 mid-incident extends the outage it was meant to shorten.",
-    takeaway: "Under load, resilience is the design — backoff plus a cached fallback is a network-SLA duty.",
+    takeaway: "Under load, resilience is the design, backoff plus a cached fallback is a network-SLA duty.",
     sources: [
-      "Telecom NOC incident-correlation workflows — first-hand (Verizon)",
+      "Telecom NOC incident-correlation workflows, firsthand (Verizon)",
       "Retry/backoff + cached-fallback resilience patterns",
     ],
     lastVerified: "2026-07-03",

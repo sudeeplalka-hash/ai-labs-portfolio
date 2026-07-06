@@ -3,7 +3,7 @@
 // GAP-06 · Prompt Cost & Token Simulator (Collection 2 · toolkit).
 // Type a prompt → live token estimate → set volume → monthly + annual cost at
 // current published pricing (dated, from @labs/kit) → toggle caching + batching
-// and watch the annual figure drop. Unit economics decide build-vs-buy long before
+// and watch the annual figure drop. Unit economics decide build versus buy long before
 // architecture does. SIMULATED (deterministic arithmetic; pricing in a dated file).
 
 import { useState } from "react";
@@ -124,13 +124,13 @@ export function CostSimulator() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             Architecture debates stall on taste; unit economics settle them. Size a single call, set the volume, and the
-            annual number is the build-vs-buy conversation — before anyone draws a box.
+            annual number is the build versus buy conversation, before anyone draws a box.
           </p>
         </div>
 
         <UseCaseRail useCases={GAP06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="What will this actually cost per month at volume?" approach="Size a single call, price the workload across every model, and stack the caching and batching leverage into a savings ladder." why="Unit economics settle architecture debates that taste cannot." metric="Cost per call and monthly run-rate; the monthly delta of switching models." tradeoff="The cheapest model is not always adequate; caching adds engineering for a real saving." outcome="A defensible build-vs-buy number before anyone draws an architecture box." />
+        <CaseStudy problem="What will this actually cost per month at volume?" approach="Size a single call, price the workload across every model, and stack the caching and batching leverage into a savings ladder." why="Unit economics settle architecture debates that taste cannot." metric="Cost per call and monthly run-rate; the monthly delta of switching models." tradeoff="The cheapest model is not always adequate; caching adds engineering for a real saving." outcome="A defensible build versus buy number before anyone draws an architecture box." />
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           {/* Inputs */}
@@ -207,7 +207,7 @@ export function CostSimulator() {
                       })}
                     </div>
                     {modelId !== cheapest.id && curRow && (
-                      <p className="mt-2 text-[11px] text-slatey-500">Switching to <span className="font-semibold text-ink">{modelLabel(cheapest.id)}</span> saves <span className="font-semibold text-emerald-700">{usd0.format(curRow.monthly - cheapest.monthly)}/mo</span> on this workload — weigh against answer quality for your job.</p>
+                      <p className="mt-2 text-[11px] text-slatey-500">Switching to <span className="font-semibold text-ink">{modelLabel(cheapest.id)}</span> saves <span className="font-semibold text-emerald-700">{usd0.format(curRow.monthly - cheapest.monthly)}/mo</span> on this workload, weigh against answer quality for your job.</p>
                     )}
                   </>
                 );
@@ -229,10 +229,10 @@ export function CostSimulator() {
               </div>
             </Panel>
 
-            <InsightCard title={savings > 0 ? `Caching + batching cut ${savingsPct}% — ${usd0.format(savings)} / year` : "No leverage applied yet"} tone={savings > 0 ? "success" : "info"}>
+            <InsightCard title={savings > 0 ? `Caching + batching cut ${savingsPct}%, ${usd0.format(savings)} / year` : "No leverage applied yet"} tone={savings > 0 ? "success" : "info"}>
               {savings > 0
-                ? <>Before leverage this workload runs <span className="font-semibold">{usd0.format(baseAnnual)}</span>/year; after, <span className="font-semibold">{usd0.format(effAnnual)}</span>. The static context you send on every call is the lever — cache it and the input line collapses.</>
-                : <>Toggle caching on. Most enterprise prompts carry a large, static context block on every call — pricing it at cache-read rates is where the savings live.</>}
+                ? <>Before leverage this workload runs <span className="font-semibold">{usd0.format(baseAnnual)}</span>/year; after, <span className="font-semibold">{usd0.format(effAnnual)}</span>. The static context you send on every call is the lever, cache it and the input line collapses.</>
+                : <>Toggle caching on. Most enterprise prompts carry a large, static context block on every call, pricing it at cache-read rates is where the savings live.</>}
             </InsightCard>
           </div>
         </div>
@@ -240,12 +240,12 @@ export function CostSimulator() {
         {/* Credibility */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Standardize on the cheapest model that clears the quality bar, with caching on the static context." lift="Caching plus batching cut the run-rate materially; the model swap compounds it." measure="$/call and monthly run-rate vs budget; cache-hit rate; a quality eval on the cheaper model before the swap." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Unit economics decide build-vs-buy long before architecture does. Size the call, then argue the design."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Unit economics decide build versus buy long before architecture does. Size the call, then argue the design."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Stack: Next.js (static) + shared design system; pure client-side arithmetic.</p>
-              <p>Pricing lives in a dated config (`@labs/kit`, as of {PRICING_AS_OF}) — never in copy — with a per-model cache-read price. Tokens are estimated at ~4 chars/token.</p>
+              <p>Stack: Next.js (static) + shared design system; pure client side arithmetic.</p>
+              <p>Pricing lives in a dated config (`@labs/kit`, as of {PRICING_AS_OF}), never in copy, with a per-model cache-read price. Tokens are estimated at ~4 chars/token.</p>
               <p>Cost/call = input tokens × input price + output tokens × output price. Caching reprices the cacheable share of input at the cache-read rate; batching applies a {Math.round(COST_LEVERS.batchDiscount * 100)}% discount to the eligible share.</p>
             </div>
           </details>

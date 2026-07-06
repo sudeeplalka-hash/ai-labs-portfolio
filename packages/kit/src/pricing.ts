@@ -1,5 +1,5 @@
 // Dated pricing data for cost labs (GAP-06 token simulator, C3 #3 forecaster).
-// USD per 1M tokens. Illustrative published list prices — every cost lab shows an
+// USD per 1M tokens. Illustrative published list prices, every cost lab shows an
 // "as of" stamp and lets the visitor edit assumptions (§A4.3, no black-box numbers).
 // Refresh on the quarterly sweep (B5.6).
 
@@ -14,7 +14,7 @@ export interface ModelPrice {
 
 // Numbers are plausible illustrative list prices, not a live quote. The point of
 // the lab is the *shape* of the economics (caching/batching leverage), not the
-// third decimal — which is why they're editable in-lab.
+// third decimal, which is why they're editable in-lab.
 export const MODEL_PRICING: ModelPrice[] = [
   { id: "claude-sonnet-5", inputPerMTok: 3.0, outputPerMTok: 15.0, cachedInputPerMTok: 0.3 },
   { id: "claude-opus-4-8", inputPerMTok: 15.0, outputPerMTok: 75.0, cachedInputPerMTok: 1.5 },

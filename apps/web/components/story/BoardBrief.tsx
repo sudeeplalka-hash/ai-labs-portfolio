@@ -16,7 +16,7 @@ const CHIP: Record<StoryTone, string> = {
 };
 
 function verdict(roi: number | null, done: boolean): { label: string; tone: StoryTone } {
-  if (!done || roi === null) return { label: "Pending — case not yet complete", tone: "neutral" };
+  if (!done || roi === null) return { label: "Pending, case not yet complete", tone: "neutral" };
   if (roi > 50) return { label: "Recommended to fund", tone: "healthy" };
   if (roi > 0) return { label: "Proceed with conditions", tone: "watch" };
   return { label: "Not yet fundable", tone: "risk" };
@@ -36,7 +36,7 @@ export function BoardBrief() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      {/* actions — never printed */}
+      {/* actions, never printed */}
       <div className="no-print mb-4 flex items-center justify-between gap-3">
         <Link href="/story" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-primary">
           <ArrowLeft className="h-4 w-4" /> Back to the story
@@ -77,7 +77,7 @@ export function BoardBrief() {
 
         {/* The traceable path */}
         <section className="mt-6">
-          <p className="stat-label mb-3">How we got there — every figure traces to a stage</p>
+          <p className="stat-label mb-3">How we got there, every figure traces to a stage</p>
           <ol className="divide-y divide-line">
             {STORY_SPINE.map((b) => {
               const heads = b.read(src);
@@ -105,7 +105,7 @@ export function BoardBrief() {
 
         <footer className="mt-6 border-t border-line pt-3 text-[11px] leading-relaxed text-slatey-400">
           Generated from the AI Program Command Center{printedOn ? ` · ${printedOn}` : ""}{isDemo ? " · demo data" : ""}.
-          Figures are illustrative of the method; each is produced by its stage and carried forward — nothing is hand-waved.
+          Figures are illustrative of the method; each is produced by its stage and carried forward, nothing is hand-waved.
         </footer>
       </article>
 

@@ -1,4 +1,4 @@
-// @labs/engines — the pure decision engines behind the labs. Framework-agnostic;
+// @labs/engines, the pure decision engines behind the labs. Framework-agnostic;
 // tested in isolation (see the colocated *.test.ts). The lab components will import
 // from here so the exact formulas the UI shows are the ones under test.
 

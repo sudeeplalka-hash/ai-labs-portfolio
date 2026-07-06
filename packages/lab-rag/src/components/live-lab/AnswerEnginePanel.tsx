@@ -14,7 +14,7 @@ interface Props {
 }
 
 // Inline answer-engine selector. The two choices (Simulated / Bring your own API
-// key) are surfaced directly as tabs — no separate "Configure" step or modal.
+// key) are surfaced directly as tabs, no separate "Configure" step or modal.
 // Picking Simulated applies instantly; picking Bring your own reveals the key form
 // right here.
 export function AnswerEnginePanel({ engine, config, onSave, onClear }: Props) {
@@ -136,8 +136,7 @@ export function AnswerEnginePanel({ engine, config, onSave, onClear }: Props) {
           <div className="flex items-start gap-2 rounded-lg border border-line bg-slate-50 p-3 text-xs leading-relaxed text-slatey-400">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
             <span>
-              Your key is stored only in <span className="font-medium text-ink">this browser</span> and sent <span className="font-medium text-ink">directly</span> to {meta.label} —
-              never to us or any server. Calls are made from your browser, so the provider must allow direct browser (CORS) access.
+              Your key is stored only in <span className="font-medium text-ink">this browser</span> and sent <span className="font-medium text-ink">directly</span> to {meta.label}, never to us or any server. Calls are made from your browser, so the provider must allow direct browser (CORS) access.
               {meta.docs && <> Get a key at {meta.docs}.</>}
             </span>
           </div>

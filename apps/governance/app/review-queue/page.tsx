@@ -75,7 +75,7 @@ export default function ReviewQueue() {
                     </div>
                   </div>
                   <p className="text-xs text-slate-700 truncate mt-1">{item.original_prompt}</p>
-                  <p className="text-xs text-slate-400 mt-1">{item.created_at ? formatDateTime(item.created_at) : '—'}</p>
+                  <p className="text-xs text-slate-400 mt-1">{item.created_at ? formatDateTime(item.created_at) : 'N/A'}</p>
                 </button>
               ))}
               {items.length === 0 && <p className="text-slate-400 text-sm py-10 text-center">No items in queue.</p>}
@@ -137,7 +137,7 @@ export default function ReviewQueue() {
                   )
                 ) : (
                   <div className="border-t border-slate-100 pt-4">
-                    <p className="text-xs text-slate-500">Reviewed by <strong>{selected.reviewed_by}</strong> · {selected.reviewed_at ? formatDateTime(selected.reviewed_at) : '—'}</p>
+                    <p className="text-xs text-slate-500">Reviewed by <strong>{selected.reviewed_by}</strong> · {selected.reviewed_at ? formatDateTime(selected.reviewed_at) : 'N/A'}</p>
                   </div>
                 )}
               </div>

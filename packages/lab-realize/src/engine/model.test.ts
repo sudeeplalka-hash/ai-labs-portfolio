@@ -28,7 +28,7 @@ describe("realize model", () => {
     expect(withDeploy.annualRunCost.source).toBe("deploy");
   });
 
-  it("leaks reduce value: addressable > realized > risk-adjusted", () => {
+  it("leaks reduce value: addressable > realized > risk adjusted", () => {
     const r = computeRoi(deriveInputs(state()));
     expect(r.addressable).toBeGreaterThan(r.realized);
     expect(r.realized).toBeGreaterThan(r.riskAdjustedValue);
@@ -43,7 +43,7 @@ describe("realize model", () => {
     expect(Math.abs(inAmt - rest)).toBeLessThan(5); // rounding
   });
 
-  it("higher adoption raises risk-adjusted value", () => {
+  it("higher adoption raises risk adjusted value", () => {
     const inp = deriveInputs(state());
     const lo = computeRoi(applyOverrides(inp, { adoption: 0.3 }));
     const hi = computeRoi(applyOverrides(inp, { adoption: 0.9 }));

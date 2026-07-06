@@ -1,5 +1,5 @@
 // ============================================================================
-// Realize — pure deterministic ROI model. Inputs are DERIVED from the threaded
+// Realize, pure deterministic ROI model. Inputs are DERIVED from the threaded
 // ProgramState (Frame + the data/rag/deploy/governance slices) and tagged with
 // their source stage. Degrades gracefully to Frame + defaults when a slice is
 // missing, so the chain strengthens as upstream labs are completed.
@@ -23,28 +23,28 @@ export function deriveInputs(state: ProgramState): RealizeInputs {
   const i = state.initiative;
   const scores = i.scores ?? { value: 60, feasibility: 60, dataReadiness: 60 };
   const annualTasks = Math.round((USER_VOLUME[i.params?.user ?? "Customers"] ?? 250000) * (0.5 + (i.scope ?? 0.5)));
-  // minutes of labor saved per task — a tunable estimate (success-metric units vary,
+  // minutes of labor saved per task, a tunable estimate (success-metric units vary,
   // so we default and let the practitioner override in the assumptions panel)
   const minutesSaved = 10;
 
-  // adoption — feasibility + data readiness drive how widely it gets used
+  // adoption, feasibility + data readiness drive how widely it gets used
   // prefer the Data lab's real readiness when it has run; else Frame's guess
   const dataReadiness = state.data?.readinessScore ?? scores.dataReadiness;
   const adoption = clamp(0.25 + scores.feasibility / 250 + dataReadiness / 400, 0.2, 0.92);
 
-  // quality — Build faithfulness if present, else derived from feasibility/readiness
+  // quality, Build faithfulness if present, else derived from feasibility/readiness
   const quality = typeof state.rag?.faithfulness === "number"
     ? clamp(state.rag.faithfulness / 100, 0.3, 0.99)
     : clamp((scores.feasibility + scores.dataReadiness) / 200, 0.35, 0.95);
 
-  // run cost — from Deploy if present (already engine-scaled there), else a rough
+  // run cost, from Deploy if present (already engine-scaled there), else a rough
   // estimate scaled by the chosen engine's relative cost so the ROI still moves.
   const engineCost = typeof state.rag?.modelCostFactor === "number" ? state.rag.modelCostFactor : 1;
   const annualRunCost = typeof state.deploy?.monthlyCostAtTarget === "number"
     ? state.deploy.monthlyCostAtTarget * 12
     : Math.round(annualTasks * 0.04 * engineCost);
 
-  // risk discount — governance tier (Strategy-emitted meta, or a govern-slice
+  // risk discount, governance tier (Strategy-emitted meta, or a govern-slice
   // override) if present, else from risk appetite; then folded with live ops +
   // build + open-governance-finding risk so Govern and Operate actually move ROI.
   const tier = state.governance?.riskTier ?? i.meta?.governanceTier ?? APPETITE_TIER[i.params?.risk ?? "Balanced"] ?? "Medium";
@@ -59,7 +59,7 @@ export function deriveInputs(state: ProgramState): RealizeInputs {
   const govDecision = state.governance?.decision ?? deriveGovernanceDecision(state);
   const openFindings = govDecision.openFindings?.length ?? 0;
   if (openFindings) extra += Math.min(0.08, openFindings * 0.03);
-  // Phase 6 — training / generalization risk nudge for trained/fine-tuned models.
+  // Phase 6, training / generalization risk nudge for trained/fine tuned models.
   const tc = state.rag?.trainingContract;
   if (tc?.enabled) {
     const ovf = tc.generalizationAssessment.overfittingRisk;
@@ -123,7 +123,7 @@ export function valueRiver(inp: RealizeInputs, r: RoiResult): RiverFlow[] {
     { key: "quality", label: "Quality gap", amount: Math.round(r.qualityLoss), kind: "leak", source: "build" },
     { key: "runcost", label: "Run cost", amount: Math.round(r.runCost), kind: "leak", source: "deploy" },
     { key: "risk", label: "Risk discount", amount: Math.round(r.riskDiscountAmt), kind: "leak", source: "govern" },
-    { key: "realized", label: "Risk-adjusted value", amount: Math.round(r.riskAdjustedValue), kind: "out", source: "govern" },
+    { key: "realized", label: "Risk adjusted value", amount: Math.round(r.riskAdjustedValue), kind: "out", source: "govern" },
   ];
 }
 
@@ -156,8 +156,8 @@ export function dossier(state: ProgramState, inp: RealizeInputs, r: RoiResult): 
     { stage: "frame", label: "The bet", metric: i.name ?? "Initiative", value: `V ${s.value} · F ${s.feasibility} · D ${s.dataReadiness}`, basis: i.sharpenedProblem ?? "" },
     { stage: "data", label: "Data readiness", metric: "Fuel", value: `${state.data?.readinessScore ?? s.dataReadiness}/100`, basis: "is the data good enough?" },
     { stage: "build", label: "Answer quality", metric: "Engine", value: `${Math.round(inp.quality.value * 100)}% faithful`, basis: inp.quality.basis },
-    { stage: "deploy", label: "Reliability & run cost", metric: "Ops", value: `${state.deploy?.reliability ? (state.deploy.reliability * 100).toFixed(1) + "%" : "—"} · ${usd(inp.annualRunCost.value)}/yr`, basis: inp.annualRunCost.basis },
+    { stage: "deploy", label: "Reliability & run cost", metric: "Ops", value: `${state.deploy?.reliability ? (state.deploy.reliability * 100).toFixed(1) + "%" : "N/A"} · ${usd(inp.annualRunCost.value)}/yr`, basis: inp.annualRunCost.basis },
     { stage: "govern", label: "Risk tier", metric: "Guardrails", value: `${state.governance?.riskTier ?? "Medium"} · −${Math.round(inp.riskDiscount.value * 100)}%`, basis: inp.riskDiscount.basis },
-    { stage: "govern", label: "Risk-adjusted value", metric: "Outcome", value: `${usd(r.riskAdjustedValue)}/yr · ${r.roiPct}% ROI · ${Number.isFinite(r.paybackMonths) ? r.paybackMonths + "mo" : "no"} payback`, basis: "every number traces above" },
+    { stage: "govern", label: "Risk adjusted value", metric: "Outcome", value: `${usd(r.riskAdjustedValue)}/yr · ${r.roiPct}% ROI · ${Number.isFinite(r.paybackMonths) ? r.paybackMonths + "mo" : "no"} payback`, basis: "every number traces above" },
   ];
 }

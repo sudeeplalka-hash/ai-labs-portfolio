@@ -1,6 +1,6 @@
 "use client";
 
-// Phase B — "What is blocking release?" The one answer aggregated from four
+// Phase B, "What is blocking release?" The one answer aggregated from four
 // pages of evidence: Data exclusions, Build gate failures, Operate readiness
 // blockers, and Critical/High governance findings. Each row links to the stage
 // that owns the fix.

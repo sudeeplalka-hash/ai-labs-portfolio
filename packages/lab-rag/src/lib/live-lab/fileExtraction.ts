@@ -1,6 +1,6 @@
-// Client-side text extraction for uploaded documents.
+// Client side text extraction for uploaded documents.
 // Heavy parsers (PDF, DOCX) are dynamically imported so they are only loaded
-// when a user actually uploads that file type — they never run during SSR or
+// when a user actually uploads that file type, they never run during SSR or
 // bloat the initial bundle.
 
 export interface ExtractedFile {
@@ -61,7 +61,7 @@ export async function extractTextFromFile(file: File): Promise<ExtractedFile> {
       const text = await extractPdf(file);
       if (!looksLikeText(text)) {
         throw new FileExtractionError(
-          "Couldn't read selectable text from that PDF. It may be a scanned image — try a text-based PDF, a .docx, or paste the text.",
+          "Couldn't read selectable text from that PDF. It may be a scanned image, try a text-based PDF, a .docx, or paste the text.",
         );
       }
       return { text, fileType: "pdf" };

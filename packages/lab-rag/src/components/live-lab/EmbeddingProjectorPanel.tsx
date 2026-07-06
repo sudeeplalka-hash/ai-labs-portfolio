@@ -74,10 +74,10 @@ export function EmbeddingProjectorPanel({ chunks, trace }: { chunks: DocumentChu
   return (
     <Panel>
       <SectionHeader
-        title="Embedding Projector — Document in 3D"
+        title="Embedding Projector, Document in 3D"
         description={
           isKw
-            ? "The document's top keywords placed in 3D — terms that co-occur sit near each other. Words from your question are highlighted."
+            ? "The document's top keywords placed in 3D, terms that co-occur sit near each other. Words from your question are highlighted."
             : `Every chunk placed in 3D by similarity (TF-IDF → PCA), colored by ${colorByLabel}. Ask a question and the retrieved chunks light up with beams to the query.`
         }
         icon={Orbit}
@@ -132,7 +132,7 @@ export function EmbeddingProjectorPanel({ chunks, trace }: { chunks: DocumentChu
             <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full ring-2 ring-ink" /> retrieved &amp; cited</span>
             <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full ring-2 ring-slate-400" /> retrieved</span>
             <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-white ring-1 ring-ink" /> your question</span>
-            <span className="text-slatey-500">Lexical projection — neural embeddings drop into the same view.</span>
+            <span className="text-slatey-500">Lexical projection, neural embeddings drop into the same view.</span>
           </>
         )}
       </div>

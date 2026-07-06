@@ -1,10 +1,10 @@
 "use client";
 
-// Phase 6 — Data Purpose Readiness. Not all data is RAG corpus data: each asset
-// has a different downstream use (eval, golden test, fine-tuning, training,
+// Phase 6, Data Purpose Readiness. Not all data is RAG corpus data: each asset
+// has a different downstream use (eval, golden test, fine tuning, training,
 // telemetry, outcomes, tool logs). Deterministic, read-only.
 //
-// Phase F — heat-strip presentation: one glance answers "what's blocking which
+// Phase F, heat-strip presentation: one glance answers "what's blocking which
 // downstream use". Click a cell for the why; the table is gone.
 
 import { useMemo, useState } from "react";
@@ -32,7 +32,7 @@ export function DataPurposes() {
   return (
     <Panel>
       <SectionHeader eyebrow="Data purpose readiness" title="Every data asset has a different downstream use" icon={Layers}
-        description="AI readiness isn't one score — RAG corpus, evaluation sets, training data, telemetry, and outcome data each serve a different stage. Click a cell for the why." />
+        description="AI readiness isn't one score, RAG corpus, evaluation sets, training data, telemetry, and outcome data each serve a different stage. Click a cell for the why." />
 
       <div className="flex flex-wrap gap-1.5">
         {rows.map((r) => (

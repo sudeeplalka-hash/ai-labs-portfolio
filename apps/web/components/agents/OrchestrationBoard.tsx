@@ -1,13 +1,13 @@
 "use client";
 
-// GAP-03 · Multi-Agent Orchestration Board (Collection 2 · toolkit · flagship).
+// GAP-03 · Multiagent Orchestration Board (Collection 2 · toolkit · flagship).
 // Supervisor decomposes a goal → agents coordinate over A2A-style messages with
 // visible task-lifecycle states → result assembles → a running cost/latency/quality
 // meter compares this run to a single-agent baseline. The meter is the judgment
-// layer: multi-agent is a tradeoff, not a party trick.
+// layer: multiagent is a tradeoff, not a party trick.
 //
-// LIVE-ready: when a host model endpoint is configured (NEXT_PUBLIC_AGENT_ENDPOINT)
-// the run goes real; with none set it replays a dignified CACHED run — labeled as
+// LIVE ready: when a host model endpoint is configured (NEXT_PUBLIC_AGENT_ENDPOINT)
+// the run goes real; with none set it replays a dignified CACHED run, labeled as
 // such, never fake-streamed as if live (§B2 / §A4.4).
 
 import { useEffect, useRef, useState } from "react";
@@ -51,8 +51,8 @@ const PRESETS: Preset[] = [
       { from: "Critic", to: "Supervisor", label: "return · approved w/ edit" },
     ],
     assembled: [
-      "They win on integration speed — API-first, live in days, but SOC 2 only and no on-prem.",
-      "We win on regulated scale and governance — case-level audit trail is a moat they don't have.",
+      "They win on integration speed, API-first, live in days, but SOC 2 only and no on-prem.",
+      "We win on regulated scale and governance, case-level audit trail is a moat they don't have.",
       "Watch: their audit-trail roadmap. If they close that gap, the speed advantage compounds.",
     ],
     single: { quality: 62, costUsd: 0.018, latencyS: 4.2 },
@@ -75,15 +75,15 @@ const PRESETS: Preset[] = [
     ],
     assembled: [
       "Five-step flow: intake → classify → evidence → decide → notify, one owner per step.",
-      "Four decision paths from 12 reason codes; auto-resolve duplicates, manual-review two high-risk paths.",
-      "Every step maps to a chargeback-policy clause — auditable end to end.",
+      "Four decision paths from 12 reason codes; auto-resolve duplicates, manual-review two high risk paths.",
+      "Every step maps to a chargeback-policy clause, auditable end to end.",
     ],
     single: { quality: 58, costUsd: 0.021, latencyS: 4.8 },
     multi: { quality: 79, costUsd: 0.052, latencyS: 11.0 },
   },
 ];
 
-// SIMULATED — the run is authored and deterministic; a live-model variant is on the roadmap (no live call path is wired today).
+// SIMULATED, the run is authored and deterministic; a live-model variant is on the roadmap (no live call path is wired today).
 const BASE_STEP_MS = 950;
 
 export function OrchestrationBoard() {
@@ -141,7 +141,7 @@ export function OrchestrationBoard() {
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => toast("Link copied — this run setup"), () => toast("Link is in the address bar"));
+      navigator.clipboard.writeText(url).then(() => toast("Link copied, this run setup"), () => toast("Link is in the address bar"));
     } else { toast("Link is in the address bar"); }
   };
   const resetLab = () => { onPreset(PRESETS[0].key); setSpeed(1); toast("Board reset"); };
@@ -151,7 +151,7 @@ export function OrchestrationBoard() {
     const headers = ["Approach", "Quality", "Cost (USD)", "Latency (s)"];
     const rows = [
       ["Single-agent baseline", preset.single.quality, preset.single.costUsd, preset.single.latencyS],
-      ["Multi-agent", preset.multi.quality, preset.multi.costUsd, preset.multi.latencyS],
+      ["Multiagent", preset.multi.quality, preset.multi.costUsd, preset.multi.latencyS],
     ];
     downloadCsv(`orchestration-${presetKey}`, headers, rows);
     toast("Run metrics exported as CSV");
@@ -161,7 +161,7 @@ export function OrchestrationBoard() {
     toast("Run exported as JSON");
   };
   const exportActions: ExportAction[] = [
-    { id: "csv", label: "Run metrics as CSV", hint: "Single vs multi-agent", onSelect: exportCsv },
+    { id: "csv", label: "Run metrics as CSV", hint: "Single vs multiagent", onSelect: exportCsv },
     { id: "json", label: "Export run (JSON)", hint: "Setup + assembled result", onSelect: exportRun },
   ];
   const paletteCommands: Command[] = [
@@ -183,7 +183,7 @@ export function OrchestrationBoard() {
   const qualityDelta = Math.round((preset.multi.quality / preset.single.quality - 1) * 100);
   const costMult = (preset.multi.costUsd / preset.single.costUsd).toFixed(1);
   const h2h = baselineVsMulti(preset.single, preset.multi);
-  const frac = idle ? 0 : Math.min(progress, A) / A; // fraction of the run complete — drives the live meter
+  const frac = idle ? 0 : Math.min(progress, A) / A; // fraction of the run complete, drives the live meter
   const singleFrac = idle ? 0 : Math.min(1, frac * (preset.multi.latencyS / preset.single.latencyS)); // single agent is faster → finishes first
   const timeline = agentTimeline(preset.agents.map((a) => a.role), preset.multi.latencyS);
 
@@ -200,20 +200,20 @@ export function OrchestrationBoard() {
         <div className="mb-5">
           <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Multi-Agent Orchestration Board</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Multiagent Orchestration Board</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02", note: "Authored illustrative run" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             A supervisor decomposes the goal, agents coordinate, and a result assembles. The meter on the right is the
-            point: multi-agent buys quality — but at a cost and latency multiple you should be able to name.
+            point: multiagent buys quality, but at a cost and latency multiple you should be able to name.
           </p>
-          <p className="mt-1 text-[11px] text-slatey-500">Authored, deterministic run — the steps and the cost/latency/quality figures are hand-built to teach the tradeoff, not captured from a live model. A real-model variant is on the roadmap.</p>
+          <p className="mt-1 text-[11px] text-slatey-500">Authored, deterministic run, the steps and the cost/latency/quality figures are hand-built to teach the tradeoff, not captured from a live model. A real-model variant is on the roadmap.</p>
         </div>
 
         <UseCaseRail useCases={GAP03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Multi-agent demos look impressive, but the question a sponsor asks is whether the extra agents are worth it — because they are not free." approach="A supervisor decomposes a goal and delegates to role-specialized agents that coordinate over inspectable A2A messages; an animated run assembles the result while a live meter compares it to a single-agent baseline." why="Multi-agent buys quality through decomposition and critique but pays for it in cost and latency from sequential handoffs. Showing both sides turns a party trick into an architecture decision." metric="The head-to-head scorecard: quality delta vs the single-agent baseline and the cost and latency multiples — the ratio, not the demo, is the decision." tradeoff="More agents raise quality and cost and latency together; the single-agent baseline finishes first at lower quality. The lab makes that tension literal." outcome="A per-task-class verdict on whether multi-agent is worth it, with the tradeoff quantified — the judgment a delivery leader is accountable for." />
+        <CaseStudy problem="Multiagent demos look impressive, but the question a sponsor asks is whether the extra agents are worth it, because they are not free." approach="A supervisor decomposes a goal and delegates to role-specialized agents that coordinate over inspectable A2A messages; an animated run assembles the result while a live meter compares it to a single-agent baseline." why="Multiagent buys quality through decomposition and critique but pays for it in cost and latency from sequential handoffs. Showing both sides turns a party trick into an architecture decision." metric="The head-to-head scorecard: quality delta vs the single-agent baseline and the cost and latency multiples, the ratio, not the demo, is the decision." tradeoff="More agents raise quality and cost and latency together; the single-agent baseline finishes first at lower quality. The lab makes that tension literal." outcome="A per-task-class verdict on whether multiagent is worth it, with the tradeoff quantified, the judgment a delivery leader is accountable for." />
 
         <LabToolbar>
           <ToolbarButton onClick={run} active title="Run / re-run the orchestration">
@@ -253,7 +253,7 @@ export function OrchestrationBoard() {
               <Bot className={`h-5 w-5 ${!idle && progress === 0 ? "text-white" : "text-ink"}`} />
               <div>
                 <p className={`text-sm font-semibold ${!idle && progress === 0 ? "text-white" : "text-ink"}`}>Supervisor</p>
-                <p className={`text-[11px] ${!idle && progress === 0 ? "text-slate-300" : "text-slatey-500"}`}>{idle ? "Idle — press Run" : progress === 0 ? "Decomposing goal into subtasks…" : done ? "Assembled the final result" : "Coordinating agents…"}</p>
+                <p className={`text-[11px] ${!idle && progress === 0 ? "text-slate-300" : "text-slatey-500"}`}>{idle ? "Idle, press Run" : progress === 0 ? "Decomposing goal into subtasks…" : done ? "Assembled the final result" : "Coordinating agents…"}</p>
               </div>
             </div>
 
@@ -319,7 +319,7 @@ export function OrchestrationBoard() {
             </Panel>
 
             <Panel>
-              <p className="stat-label mb-2">Multi-agent vs single-agent</p>
+              <p className="stat-label mb-2">Multiagent vs single-agent</p>
               {!idle && (
                 <div className="mb-3 rounded-md bg-slate-50 px-3 py-2">
                   <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Run cost so far</span><span className="font-mono font-semibold text-ink">${(preset.multi.costUsd * frac).toFixed(3)}<span className="text-slatey-500"> / ${preset.multi.costUsd.toFixed(3)}</span></span></div>
@@ -350,10 +350,10 @@ export function OrchestrationBoard() {
             </Panel>
 
             <Panel>
-              <p className="stat-label mb-2">Agent timeline <span className="font-normal text-slatey-500">· why multi-agent is slower</span></p>
+              <p className="stat-label mb-2">Agent timeline <span className="font-normal text-slatey-500">· why multiagent is slower</span></p>
               <div className="space-y-2">
                 <div>
-                  <div className="mb-1 flex items-center justify-between text-[11px] text-slatey-500"><span>Multi-agent (sequential handoff)</span><span className="font-mono">{preset.multi.latencyS}s</span></div>
+                  <div className="mb-1 flex items-center justify-between text-[11px] text-slatey-500"><span>Multiagent (sequential handoff)</span><span className="font-mono">{preset.multi.latencyS}s</span></div>
                   <div className="flex h-6 w-full overflow-hidden rounded-md border border-line">
                     {timeline.map((sp, i) => {
                       const isAgent = sp.label !== "Decompose" && sp.label !== "Assemble";
@@ -383,17 +383,17 @@ export function OrchestrationBoard() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Use the multi-agent pattern for this task class, and stay single-agent where it does not pay." lift="The scorecard quality gain over the single-agent baseline, bought for a known cost and latency multiple — a tradeoff you can defend, not a demo." measure="Answer-quality eval delta vs baseline; cost per run and p95 latency; human-escalation rate; share of tasks where multi-agent actually wins." />
-          <InsightCard title="When multi-agent is worth it" tone="info">
-            Decompose only when the subtasks genuinely differ (research vs critique) and quality matters more than the 2–3× cost. For high-volume, low-stakes calls, a single agent wins. Budget for the harness, not the party trick.
+          <OutcomeFrame call="Use the multiagent pattern for this task class, and stay single-agent where it does not pay." lift="The scorecard quality gain over the single-agent baseline, bought for a known cost and latency multiple, a tradeoff you can defend, not a demo." measure="Answer-quality eval delta vs baseline; cost per run and p95 latency; human-escalation rate; share of tasks where multiagent actually wins." />
+          <InsightCard title="When multiagent is worth it" tone="info">
+            Decompose only when the subtasks genuinely differ (research vs critique) and quality matters more than the 2 to 3× cost. For high volume, low stakes calls, a single agent wins. Budget for the harness, not the party trick.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : `Multi-agent bought +${qualityDelta}% quality on this task class for ${costMult}× cost. That ratio, not the demo, is the decision.`}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : `Multiagent bought +${qualityDelta}% quality on this task class for ${costMult}× cost. That ratio, not the demo, is the decision.`}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Orchestration pattern: a supervisor decomposes the goal and delegates to role-specialized agents that coordinate over A2A-style messages with explicit lifecycle states (assigned → working → completed).</p>
-              <p>The run is authored and deterministic — a scripted supervisor/worker trace with illustrative cost, latency, and quality figures for this task class, not measured from a live model. A real-model variant against {LIVE_MODEL} is designed for but not wired today, so the badge stays SIMULATED.</p>
-              <p>Stack: Next.js (static) + shared design system; client-side.</p>
+              <p>The run is authored and deterministic, a scripted supervisor/worker trace with illustrative cost, latency, and quality figures for this task class, not measured from a live model. A real-model variant against {LIVE_MODEL} is designed for but not wired today, so the badge stays SIMULATED.</p>
+              <p>Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the outputs and the cost/latency/quality figures are authored illustrations of a typical run on this task class, not measured from a live execution. The +{qualityDelta}% / {costMult}× ratio is representative, not a benchmarked result.</p>

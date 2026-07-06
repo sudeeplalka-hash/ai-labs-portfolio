@@ -1,4 +1,4 @@
-// Narrative case-study layer — the skimmable read reviewers actually spend time on (problem →
+// Narrative case-study layer, the skimmable read reviewers actually spend time on (problem →
 // approach → why → metric → trade-off → outcome), for someone who would rather read the story
 // than drive the tool. Collapsible so it never gets in the way of the instrument. Server-safe.
 export interface CaseStudyProps {
@@ -20,7 +20,7 @@ export function CaseStudy(p: CaseStudyProps) {
   ];
   return (
     <details className="mb-5 rounded-xl border border-line bg-white p-4 shadow-card">
-      <summary className="cursor-pointer text-sm font-semibold text-ink">Prefer to read? The 2-minute case study <span className="font-normal text-slatey-500">· problem &rarr; approach &rarr; metric &rarr; outcome</span></summary>
+      <summary className="cursor-pointer text-sm font-semibold text-ink">Prefer to read? The two minute case study <span className="font-normal text-slatey-500">· problem &rarr; approach &rarr; metric &rarr; outcome</span></summary>
       <div className="mt-3 space-y-2.5">
         {beats.map(([k, v]) => (
           <div key={k} className="grid gap-1 sm:grid-cols-[120px_1fr]">

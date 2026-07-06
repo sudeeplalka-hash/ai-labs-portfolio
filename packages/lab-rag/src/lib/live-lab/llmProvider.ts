@@ -2,7 +2,7 @@ import type { AnswerGenerator } from "./answerGeneration";
 import type { GeneratedLiveAnswer, RetrievedLiveChunk } from "@rag/types/liveLab";
 import { PROVIDER_DEFAULT_MODEL } from "@labs/kit";
 
-// Bring-your-own-key LLM answer generation. Runs entirely in the browser — the
+// Bring-your-own-key LLM answer generation. Runs entirely in the browser, the
 // user's key is sent directly to the chosen provider and never to any server.
 
 export type LlmProviderId = "openai" | "anthropic" | "gemini" | "openai-compatible";
@@ -40,8 +40,8 @@ export class LlmError extends Error {}
 
 const SYSTEM =
   "You are a careful retrieval-augmented assistant. Answer the user's question using ONLY the numbered context passages provided. " +
-  "Cite the passages you rely on inline using their labels, like [C1] or [C2]. Keep the answer concise (2–4 sentences). " +
-  "If the passages do not contain the answer, say you couldn't find it in the document — do not use outside knowledge.";
+  "Cite the passages you rely on inline using their labels, like [C1] or [C2]. Keep the answer concise (2 to 4 sentences). " +
+  "If the passages do not contain the answer, say you couldn't find it in the document, do not use outside knowledge.";
 
 function buildUser(question: string, chunks: RetrievedLiveChunk[]): string {
   const context = chunks.map((c) => `[${c.citationLabel}] ${c.text}`).join("\n\n");

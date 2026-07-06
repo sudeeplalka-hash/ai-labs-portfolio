@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FlaskConical, ArrowRight, Upload, Search, Brain } from "lucide-react";
 
 // Eye-catching call-to-action on the landing page that pulls visitors into the
-// interactive lab — the most engaging part of the project.
+// interactive lab, the most engaging part of the project.
 export function LiveLabPromo() {
   const steps = [
     { icon: Upload, label: "Upload a doc" },
@@ -30,7 +30,7 @@ export function LiveLabPromo() {
             <h2 className="mt-1.5 text-lg font-semibold text-ink">Run the Live RAG Evaluator Lab</h2>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-slatey-300">
               Upload a document, ask a question, and watch the evaluator score retrieval, citations, grounding, and hallucination
-              risk in real time. No setup, no API keys — it runs right here.
+              risk in real time. No setup, no API keys, it runs right here.
             </p>
           </div>
         </div>

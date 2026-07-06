@@ -1,7 +1,7 @@
 "use client";
 
-// Artifact engine — turns a lab from a dashboard into a tool by letting the
-// document it already computes leave the screen. Client-side only (Blob + anchor),
+// Artifact engine, turns a lab from a dashboard into a tool by letting the
+// document it already computes leave the screen. Client side only (Blob + anchor),
 // zero-dependency, works under static export. Every artifact carries a provenance
 // footer, extending the type-enforced honesty doctrine into the filesystem:
 // nothing downloads without its date, scenario, and SIMULATED/LIVE label attached.

@@ -1,6 +1,6 @@
 // Artifact formatting (shared by the download engine).
 // The provenance footer extends the honesty doctrine into every generated file;
-// the CSV helpers escape correctly. Pure — no DOM, so they are unit-testable.
+// the CSV helpers escape correctly. Pure, no DOM, so they are unit-testable.
 
 export interface ArtifactProvenance {
   scenario: string;
@@ -14,7 +14,7 @@ export function provenanceFooter(p: ArtifactProvenance, now: Date = new Date()):
   return [
     "",
     "---",
-    `*Generated ${date} · Scenario: ${p.scenario} · ${mode} · AI Labs Portfolio — portfolio.sudeeplalka.com*`,
+    `*Generated ${date} · Scenario: ${p.scenario} · ${mode} · AI Labs Portfolio, portfolio.sudeeplalka.com*`,
     `*${p.note ?? "Illustrative: figures are authored sample data unless a live model is connected. Structure and reasoning are the point, not the numbers."}*`,
   ].join("\n");
 }

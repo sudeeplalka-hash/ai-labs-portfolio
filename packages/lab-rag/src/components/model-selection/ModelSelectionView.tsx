@@ -31,7 +31,7 @@ function fitColor(fit: number) {
   if (fit >= 48) return "bg-amber-500";
   return "bg-rose-500";
 }
-// Compact headers — wrap to ~2 lines so the matrix fits without horizontal scroll.
+// Compact headers, wrap to ~2 lines so the matrix fits without horizontal scroll.
 const HEAD: Record<CriterionId, string> = {
   capability: "Capability & quality",
   cost: "Cost efficiency",
@@ -39,7 +39,7 @@ const HEAD: Record<CriterionId, string> = {
   context: "Context headroom",
   dataControl: "Data residency",
   portability: "Portability",
-  customization: "Fine-tuning",
+  customization: "Fine tuning",
   opsSimplicity: "Ops simplicity",
 };
 
@@ -127,7 +127,7 @@ export function ModelSelectionView() {
         <SectionHeader
           icon={SlidersHorizontal}
           title="What matters most for this initiative?"
-          description="Pick a priority profile — the ranking re-weights live. There's no universally best model, only the best fit for your constraints. Fine-tune the criterion weights below, or inspect the full matrix at the bottom."
+          description="Pick a priority profile, the ranking re-weights live. There's no universally best model, only the best fit for your constraints. Fine tune the criterion weights below, or inspect the full matrix at the bottom."
         />
 
         <div className="flex flex-wrap gap-2">
@@ -156,7 +156,7 @@ export function ModelSelectionView() {
         {suggested && (
           <p className="mt-3 text-xs text-slatey-400">
             Suggested <span className="font-medium text-ink">{scenarioLabel}</span> from your framed bet
-            {" "}&ldquo;{suggested.from}&rdquo; — change it anytime.
+            {" "}&ldquo;{suggested.from}&rdquo;, change it anytime.
           </p>
         )}
 
@@ -236,13 +236,12 @@ export function ModelSelectionView() {
             </InsightCard>
           ) : (
             <InsightCard icon={ArrowRight} tone="info" title="Pick an engine to lock it in">
-              Choosing a model carries its cost, latency, and deployment profile downstream into AI Ops and Govern —
-              and frames the retrieval tuning you do next in this lab.
+              Choosing a model carries its cost, latency, and deployment profile downstream into AI Ops and Govern, and frames the retrieval tuning you do next in this lab.
             </InsightCard>
           )}
 
           <InsightCard icon={Gauge} tone="warn" title="Choose, then revisit">
-            Model choice and retrieval design co-evolve. Treat this as the starting gate — re-run it once your
+            Model choice and retrieval design co-evolve. Treat this as the starting gate, re-run it once your
             evaluations show where quality, cost, or latency actually bind.
           </InsightCard>
         </div>
@@ -353,8 +352,8 @@ function CandidateCard({
       </div>
 
       <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-        <p className="text-slatey-400"><span className="font-medium text-emerald-700">Best for —</span> {m.bestFor}</p>
-        <p className="text-slatey-400"><span className="font-medium text-orange-700">Watch out —</span> {m.watchOut}</p>
+        <p className="text-slatey-400"><span className="font-medium text-emerald-700">Best for:</span> {m.bestFor}</p>
+        <p className="text-slatey-400"><span className="font-medium text-orange-700">Watch out:</span> {m.watchOut}</p>
       </div>
 
       <div className="mt-3 flex items-center justify-between">

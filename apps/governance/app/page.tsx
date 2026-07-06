@@ -53,7 +53,7 @@ export default function ExecutiveCockpit() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-900">New here? See governance actually work.</p>
-            <p className="text-xs text-slate-500 mt-0.5">Watch an unguarded AI cause harm — then watch the control plane catch it.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Watch an unguarded AI cause harm, then watch the control plane catch it.</p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -177,18 +177,18 @@ export default function ExecutiveCockpit() {
           </div>
         </div>
 
-        {/* Recent High-Risk Events */}
+        {/* Recent High risk Events */}
         <div className="bg-white rounded-lg border border-slate-200 p-5">
-          <h3 className="text-sm font-semibold text-slate-700 mb-4">Recent High-Risk Events</h3>
+          <h3 className="text-sm font-semibold text-slate-700 mb-4">Recent High risk Events</h3>
           {metrics.recent_high_risk_events.length === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center">No high-risk events in this period</p>
+            <p className="text-sm text-slate-400 py-8 text-center">No high risk events in this period</p>
           ) : (
             <div className="space-y-3">
               {metrics.recent_high_risk_events.map((ev) => (
                 <div key={ev.id} className="flex gap-3 items-start py-2 border-b border-slate-100 last:border-0">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-slate-700 truncate font-medium">{ev.prompt_excerpt}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{ev.created_at ? formatDateTime(ev.created_at) : '—'}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{ev.created_at ? formatDateTime(ev.created_at) : 'N/A'}</p>
                   </div>
                   <DecisionBadge decision={ev.decision} />
                 </div>

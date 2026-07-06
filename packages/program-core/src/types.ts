@@ -72,7 +72,7 @@ export interface Initiative {
   scores: TriangleScores;
   valueHypothesis: string | null;
   createdAt: string | null;
-  meta?: InitiativeMeta; // Phase 1 — Strategy classification + downstream plan
+  meta?: InitiativeMeta; // Phase 1, Strategy classification + downstream plan
 }
 
 // ---- Stage handoff contracts (Phase 1) --------------------------------------
@@ -117,7 +117,7 @@ export interface BuildOutputContract {
   latencyEstimateMs?: number;
   releaseRecommendation?: string;
   createdAt?: string;
-  // Phase 3 — retrieval substrate lineage (consumed by Operate + Govern).
+  // Phase 3, retrieval substrate lineage (consumed by Operate + Govern).
   retrievalModeLabel?: string;
   vectorReadiness?: string;         // "Ready" | "Partial" | "Missing" | "Not required"
   hybridSearchEnabled?: boolean;
@@ -127,7 +127,7 @@ export interface BuildOutputContract {
   retrievalLatencyEstimateMs?: number;
   retrievalCostEstimate?: number;
   topRetrievalRisks?: string[];
-  // Phase 5 — agent / tool-calling (present when the initiative is agentic).
+  // Phase 5, agent / tool calling (present when the initiative is agentic).
   agenticWorkflowEnabled?: boolean;
   toolsEnabled?: boolean;
   toolSchemaCount?: number;
@@ -136,10 +136,10 @@ export interface BuildOutputContract {
   toolMisuseEvalStatus?: string;   // "pass" | "warning" | "fail"
   agenticRiskLevel?: string;       // ToolRiskLevel
   agentReleaseRecommendation?: string;
-  // Phase 6 — training / fine-tuning (present when applicable).
+  // Phase 6, training / fine tuning (present when applicable).
   trainingRequired?: boolean;
   fineTuningRecommended?: boolean;
-  recommendedApproach?: string;    // prompting | rag | fine-tuning | traditional-ml | hybrid
+  recommendedApproach?: string;    // prompting | rag | fine tuning | traditional-ml | hybrid
   trainingReadinessStatus?: string;
   overfittingRisk?: string;
   generalizationScore?: number;
@@ -162,7 +162,7 @@ export interface OpsEvidence {
   versionLineage?: Record<string, string>;
   operationalDecision?: string;     // "Ready for pilot" | "Ready with restrictions" | "Hold" | "Not production ready"
   createdAt?: string;
-  // Phase 2 — richer operational evidence for Govern (Phase 4) + Realize.
+  // Phase 2, richer operational evidence for Govern (Phase 4) + Realize.
   releaseReadinessScore?: number;   // 0..100
   releaseRecommendation?: string;   // "Ready for pilot" | "Ready with restrictions" | "Hold before pilot" | "Not production ready"
   monitoredSignals?: number;
@@ -172,7 +172,7 @@ export interface OpsEvidence {
   errorBudgetStatus?: string;
   incidentSummary?: string;
   openOperationalRisks?: string[];
-  // Phase 5 — agent / tool-call telemetry (present when the initiative is agentic).
+  // Phase 5, agent / tool-call telemetry (present when the initiative is agentic).
   toolCallLatencyMs?: number;
   toolFailureRate?: number;
   approvalQueueCount?: number;
@@ -180,7 +180,7 @@ export interface OpsEvidence {
   rollbackEvents?: number;
   toolIncidentRisk?: number;
   agentMonitoringCoverage?: number;
-  // Phase 6 — training / generalization telemetry (present when a trained/fine-tuned model).
+  // Phase 6, training / generalization telemetry (present when a trained/fine tuned model).
   generalizationScore?: number;
   overfittingRiskLevel?: string;
   trainingDriftMonitoringRequired?: boolean;
@@ -198,7 +198,7 @@ export interface GovernanceDecision {
   humanReviewRequired?: boolean;
   auditReady?: boolean;
   createdAt?: string;
-  // Phase 4 — full governance review.
+  // Phase 4, full governance review.
   score?: number;                   // 0..100 governance score
   rationale?: string;
   evidenceUsed?: string[];
@@ -210,7 +210,7 @@ export interface GovernanceDecision {
   updatedAt?: string;
 }
 
-// ---- Agent / tool-calling contracts (Phase 5) -------------------------------
+// ---- Agent / tool calling contracts (Phase 5) -------------------------------
 export type ToolRiskLevel = "low" | "medium" | "high" | "critical";
 export type ToolApprovalMode = "none" | "human-review" | "manager-approval" | "policy-owner-approval" | "blocked";
 export type ToolExecutionStatus = "allowed" | "requires-approval" | "blocked" | "executed" | "failed" | "rolled-back";
@@ -283,7 +283,7 @@ export interface AgentToolingContract {
   governanceFindings: string[];
 }
 
-// ---- Training / fine-tuning / generalization readiness (Phase 6) ------------
+// ---- Training / fine tuning / generalization readiness (Phase 6) ------------
 export type TrainingReadinessStatus = "ready" | "ready-with-cautions" | "not-ready" | "not-required";
 export type DatasetSplitStatus = "complete" | "partial" | "missing" | "not-required";
 export type GeneralizationRiskLevel = "low" | "medium" | "high" | "critical";
@@ -313,7 +313,7 @@ export interface TrainingDatasetReadiness {
 }
 
 export interface FineTuneDecisionMemo {
-  recommendedApproach: "prompting" | "rag" | "fine-tuning" | "traditional-ml" | "hybrid";
+  recommendedApproach: "prompting" | "rag" | "fine tuning" | "traditional-ml" | "hybrid";
   headline: string;
   rationale: string[];
   whyNotPromptOnly: string[];
@@ -360,21 +360,21 @@ export interface RagSlice {
   // actually drives Deploy's envelope and Realize's ROI. modelCapability (0..100)
   // lets a stronger engine escalate less (lower the dominant escalation cost).
   modelCostFactor?: number; modelLatencyFactor?: number; modelCapability?: number;
-  contract?: BuildOutputContract; // Phase 1 — Build Output Contract for AI Ops
-  retrievalMode?: string;         // Phase 3 — chosen retrieval mode (lexical | simulated-vector | hybrid | hybrid-rerank)
-  agentTooling?: AgentToolingContract; // Phase 5 — agent / tool-calling contract
-  trainingContract?: TrainingReadinessContract; // Phase 6 — training / fine-tuning readiness
+  contract?: BuildOutputContract; // Phase 1, Build Output Contract for AI Ops
+  retrievalMode?: string;         // Phase 3, chosen retrieval mode (lexical | simulated-vector | hybrid | hybrid rerank)
+  agentTooling?: AgentToolingContract; // Phase 5, agent / tool calling contract
+  trainingContract?: TrainingReadinessContract; // Phase 6, training / fine tuning readiness
 }
 export interface DeploySlice {
   costPerQuery?: number; monthlyCostAtTarget?: number;
   latencyP95?: number; latencyP99?: number;
   reliability?: number; errorBudgetPct?: number; driftRisk?: number; status?: string;
-  evidence?: OpsEvidence; // Phase 1 — Ops Evidence for Govern / Realize
+  evidence?: OpsEvidence; // Phase 1, Ops Evidence for Govern / Realize
 }
 export interface GovernanceSlice { riskTier?: string; controls?: number; status?: string; decision?: GovernanceDecision }
 export interface OutcomesSlice {
   roi?: number; adoption?: number; riskAdjustedValue?: number; paybackMonths?: number;
-  // Phase 1 — richer realization outcomes for the iteration loop.
+  // Phase 1, richer realization outcomes for the iteration loop.
   addressableValue?: number; realizedValue?: number; npv3yr?: number;
   valueLeakage?: string; recommendedNextAction?: string; createdAt?: string;
 }
@@ -385,15 +385,15 @@ export interface IterationSlice {
   assumptionsToRevise?: string[];
 }
 
-/** Operate → the loop. The day-2 remediation decision, persisted so Frame / Build /
+/** Operate → the loop. The day two remediation decision, persisted so Frame / Build /
  * Govern can surface it cross-stage (written by the Operate stage on decision). */
 export interface OperateSlice {
-  decisionLabel?: string;   // "Re-index" · "Retrain / re-tune" · "Rollback / restrict" · "Re-scope"
+  decisionLabel?: string;   // "Reindex" · "Retrain / re-tune" · "Rollback / restrict" · "Rescope"
   loopTarget?: StageKey;    // where the loop-back points: frame | build | deploy
   nextAction?: string;      // the concrete next action (mirrors iteration.recommendedNextAction)
   valueAtRiskUsd?: number;  // annualized $ exposed while the breach stays open
   evidenceNote?: string;    // one-line record for Govern's audit pack
-  buildTask?: string;       // the retrain / re-index task, when loopTarget is build
+  buildTask?: string;       // the retrain / reindex task, when loopTarget is build
   issuedAt?: string;
 }
 
@@ -405,13 +405,13 @@ export interface ProgramState {
   deploy?: DeploySlice;
   governance?: GovernanceSlice;
   outcomes?: OutcomesSlice;
-  iteration?: IterationSlice; // Phase 1 — Realize→Strategy feedback
-  operate?: OperateSlice;     // Operate → the loop: the persisted day-2 remediation decision
+  iteration?: IterationSlice; // Phase 1, Realize→Strategy feedback
+  operate?: OperateSlice;     // Operate → the loop: the persisted day two remediation decision
   /** True when the curated sample program was loaded into live state. */
   seededSample?: boolean;
 }
 
-/** A value plus where it came from — the traceability spine for Realize. */
+/** A value plus where it came from, the traceability spine for Realize. */
 export interface Traced<T> { value: T; source: StageKey; basis: string }
 
 export interface PortfolioEntry {

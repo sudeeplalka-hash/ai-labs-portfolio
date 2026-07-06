@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-// Bespoke per-lab cover art. Each motif is a small, flat SVG that depicts what the
+// Bespoke per lab cover art. Each motif is a small, flat SVG that depicts what the
 // lab actually does (the wire, a scatter, a gauge, a radar…). Drawn in currentColor
 // so the parent sets the collection accent; opacity layers give depth. Fills the
 // tile's cover band behind the id chip + status marker.

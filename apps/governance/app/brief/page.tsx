@@ -38,13 +38,13 @@ export default function Brief() {
       {!m ? (
         <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-card">
           <FileText size={28} className="text-slate-300 mx-auto" />
-          <p className="text-sm text-slate-400 mt-2">Generate the brief to see the board-ready one-pager.</p>
+          <p className="text-sm text-slate-400 mt-2">Generate the brief to see the board ready one-pager.</p>
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-card space-y-6">
           <div className="flex items-start justify-between border-b border-slate-100 pb-4">
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Enterprise AI Governance — Board Brief</h2>
+              <h2 className="text-lg font-semibold text-slate-900">Enterprise AI Governance, Board Brief</h2>
               <p className="text-xs text-slate-500 mt-0.5">{today} · Financial Services AI Portfolio · Confidential</p>
             </div>
             <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br from-brand to-sky-400 text-white shrink-0">
@@ -57,7 +57,7 @@ export default function Brief() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { l: 'Active AI use cases', v: m.active_use_cases },
-                { l: 'High-risk systems', v: m.high_risk_use_cases },
+                { l: 'High risk systems', v: m.high_risk_use_cases },
                 { l: 'Launch readiness', v: `${m.value_metrics.launch_readiness_pct}%` },
                 { l: 'Active policies', v: m.active_policies },
               ].map((x) => (

@@ -1,10 +1,10 @@
 // ============================================================================
-// The Story Spine — the single source of truth for the *narrative* layer.
+// The Story Spine, the single source of truth for the *narrative* layer.
 //
 // Each lab is one beat in a six-part story: a question it answers, the decision
 // made there, what it inherits and what it hands on, and the live headline(s)
 // read straight from ProgramState. The Storyline overview, the per-page
-// "in ← / out →" thread, and the board one-pager all render from THIS — so the
+// "in ← / out →" thread, and the board one-pager all render from THIS, so the
 // exec narrative and the technical deep-dive can never drift apart.
 //
 // This module is pure: it only *reads* state. No React, no side effects.
@@ -16,7 +16,7 @@ import { deriveOpsSeries, detectSignals, valueAtRisk } from "./operate-day2";
 
 export type StoryTone = "healthy" | "watch" | "risk" | "neutral";
 
-/** One headline chip for a beat — a value, what it is, and a health tone. */
+/** One headline chip for a beat, a value, what it is, and a health tone. */
 export interface StoryHeadline {
   label: string;
   value: string;
@@ -36,7 +36,7 @@ export interface StoryBeat {
   inFrom: string;
   /** What this beat hands to downstream (human phrase). */
   outTo: string;
-  /** Live headline chips (1–3), read from state; empty-ish when not run. */
+  /** Live headline chips (1 to 3), read from state; empty-ish when not run. */
   read: (s: ProgramState) => StoryHeadline[];
   /** Has this beat produced real output yet? */
   isDone: (s: ProgramState) => boolean;
@@ -46,7 +46,7 @@ export interface StoryBeat {
 
 // ---- small, dependency-free formatters --------------------------------------
 
-const DASH = "—";
+const DASH = "N/A";
 const num = (v: unknown): number | null => (typeof v === "number" && isFinite(v) ? v : null);
 
 function usd(v: number): string {
@@ -89,7 +89,7 @@ function beat(
 export const STORY_SPINE: StoryBeat[] = [
   beat(
     "frame",
-    "What should we build — and is it worth a bet?",
+    "What should we build, and is it worth a bet?",
     "Sharpen a fuzzy ambition into one scoped, scored bet.",
     "a rough ambition",
     "the framed bet → Data",
@@ -104,9 +104,9 @@ export const STORY_SPINE: StoryBeat[] = [
     (s) => !!s.initiative?.name,
     (s) => {
       const i = s.initiative;
-      if (!i?.name) return "No bet framed yet — start by sharpening the ambition.";
+      if (!i?.name) return "No bet framed yet, start by sharpening the ambition.";
       const v = num(i.scores?.value);
-      return `The bet: "${i.name}"${v !== null ? ` — value ${v}/100, scoped and scored.` : "."}`;
+      return `The bet: "${i.name}"${v !== null ? `, value ${v}/100, scoped and scored.` : "."}`;
     },
   ),
 
@@ -126,14 +126,14 @@ export const STORY_SPINE: StoryBeat[] = [
     (s) => num(s.data?.readinessScore) !== null,
     (s) => {
       const r = num(s.data?.readinessScore);
-      if (r === null) return "Data not assessed yet — the framing readiness guess is still unproven.";
+      if (r === null) return "Data not assessed yet, the framing readiness guess is still unproven.";
       return `The corpus scores ${r}/100${s.data?.status ? ` (${s.data.status})` : ""} against your ingestion guidelines.`;
     },
   ),
 
   beat(
     "build",
-    "Which engine — and does it actually work?",
+    "Which engine, and does it actually work?",
     "Choose the LLM, then tune retrieval and score the answers.",
     "a ready-enough corpus",
     "engine + answer quality → Deploy",
@@ -172,7 +172,7 @@ export const STORY_SPINE: StoryBeat[] = [
     (s) => num(s.deploy?.monthlyCostAtTarget) !== null,
     (s) => {
       const c = num(s.deploy?.monthlyCostAtTarget);
-      if (c === null) return "Operating envelope not yet run — cost and latency at scale are unproven.";
+      if (c === null) return "Operating envelope not yet run, cost and latency at scale are unproven.";
       const p = num(s.deploy?.latencyP95);
       return `Runs at ${usd(c)}/month${p !== null ? `, p95 ${(p / 1000).toFixed(2)}s` : ""} at target load.`;
     },
@@ -193,7 +193,7 @@ export const STORY_SPINE: StoryBeat[] = [
     },
     (s) => !!s.governance?.riskTier,
     (s) => {
-      if (!s.governance?.riskTier) return "Risk not yet assessed — controls and guardrails are undefined.";
+      if (!s.governance?.riskTier) return "Risk not yet assessed, controls and guardrails are undefined.";
       const ct = num(s.governance?.controls);
       return `Classified ${s.governance.riskTier} risk${ct !== null ? `, with ${ct} controls mapped.` : "."}`;
     },
@@ -202,7 +202,7 @@ export const STORY_SPINE: StoryBeat[] = [
   beat(
     "realize",
     "What is it actually worth?",
-    "Assemble the risk-adjusted business case.",
+    "Assemble the risk adjusted business case.",
     "every upstream decision",
     "the defended business case",
     (s) => {
@@ -219,17 +219,17 @@ export const STORY_SPINE: StoryBeat[] = [
     (s) => {
       const roi = num(s.outcomes?.roi);
       const rav = num(s.outcomes?.riskAdjustedValue);
-      if (roi === null) return "Business case not yet assembled — the payoff is still a hypothesis.";
+      if (roi === null) return "Business case not yet assembled, the payoff is still a hypothesis.";
       return `The defensible case: ${rav !== null ? `${usd(rav)}/yr` : "value"} at ${Math.round(roi)}% ROI, every number traceable upstream.`;
     },
   ),
 
   beat(
     "operate",
-    "Is it still working — and what do we do when it isn't?",
-    "Read the signals, then retrain / re-index / rollback / re-scope — and loop it back.",
+    "Is it still working, and what do we do when it isn't?",
+    "Read the signals, then retrain / reindex / rollback / rescope, and loop it back.",
     "the live system + its defended business case",
-    "the next Frame — the loop closes",
+    "the next Frame, the loop closes",
     (s) => {
       if (!s.initiative?.name) return [{ label: "Signals", value: DASH, tone: "neutral" }];
       const series = deriveOpsSeries(s);
@@ -242,10 +242,10 @@ export const STORY_SPINE: StoryBeat[] = [
     },
     (s) => !!s.iteration?.recommendedNextAction,
     (s) => {
-      if (!s.initiative?.name) return "Nothing in production yet — Operate begins the day you deploy.";
+      if (!s.initiative?.name) return "Nothing in production yet, Operate begins the day you deploy.";
       const series = deriveOpsSeries(s);
       const signals = detectSignals(series, s.initiative?.meta?.governanceTier);
-      if (!signals.length) return "In production and steady — SLOs green and canary evals holding.";
+      if (!signals.length) return "In production and steady, SLOs green and canary evals holding.";
       const vaR = valueAtRisk(s, series);
       return `${signals.length} open signal${signals.length === 1 ? "" : "s"}: SLOs read green while the answers decay, ${usd(vaR.valueAtRiskUsd)}/yr at risk. The remediation call loops back to the next Frame.`;
     },
@@ -257,7 +257,7 @@ export const STORY_MAP: Record<StageKey, StoryBeat> = STORY_SPINE.reduce(
   {} as Record<StageKey, StoryBeat>,
 );
 
-/** Beats either side of a stage — for the in ← / out → thread. */
+/** Beats either side of a stage, for the in ← / out → thread. */
 export function storyNeighbors(key: StageKey): { prev: StoryBeat | null; next: StoryBeat | null } {
   const idx = STORY_SPINE.findIndex((b) => b.key === key);
   return {
@@ -266,7 +266,7 @@ export function storyNeighbors(key: StageKey): { prev: StoryBeat | null; next: S
   };
 }
 
-/** How far the story has been told — for an overview progress read. */
+/** How far the story has been told, for an overview progress read. */
 export function storyProgress(s: ProgramState): { done: number; total: number } {
   return { done: STORY_SPINE.filter((b) => b.isDone(s)).length, total: STORY_SPINE.length };
 }

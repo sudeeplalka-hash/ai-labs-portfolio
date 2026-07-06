@@ -4,7 +4,7 @@
 // Estimate three ways (bottom-up / analogous / three-point PERT), watch them
 // disagree, staff the chosen number, then push a scope change through change
 // control and watch schedule, staffing, and MARGIN move. AI estimates blow up in
-// data discovery and evaluation — those are explicit line items here. SIMULATED.
+// data discovery and evaluation, those are explicit line items here. SIMULATED.
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -106,7 +106,7 @@ export function EstimationStudio() {
     const schedDelta = duration(effort) - duration(baseEffort);
     const price = changeWeeks * RATE.bill;
     return [
-      "# Change order — draft",
+      "# Change order, draft",
       "",
       `**Engagement:** ${uc.label}`,
       `**Estimation basis:** ${method === "pert" ? "PERT (three-point)" : method} · base effort ${baseEffort} person-weeks`,
@@ -127,7 +127,7 @@ export function EstimationStudio() {
       "",
       "## Added-work breakdown",
       "",
-      ...uc.change.add.map((t) => `- ${t.phase} — ${t.weeks}w${t.ai ? " *(AI-risk: data/eval)*" : ""}`),
+      ...uc.change.add.map((t) => `- ${t.phase}, ${t.weeks}w${t.ai ? " *(AI-risk: data/eval)*" : ""}`),
       "",
       "## Recommendation",
       "",
@@ -180,14 +180,14 @@ export function EstimationStudio() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Estimate the same engagement three ways, watch them disagree, and price the unknowns as line items — because
+            Estimate the same engagement three ways, watch them disagree, and price the unknowns as line items, because
             AI work blows up in data discovery and evaluation, not modeling.
           </p>
         </div>
 
         <UseCaseRail useCases={EL08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="What is the real estimate — and what happens when scope moves?" approach="Estimate the same engagement three ways (bottom-up, analogous, PERT), watch them disagree, commit at P80, then push a scope change through change control and watch margin move." why="Present a range and commit at P80, not the point estimate everyone quotes." metric="The P80 commit; gross margin under a scope change." tradeoff="Absorbing scope silently protects the relationship but drops margin; a change order holds margin but is a harder conversation." outcome="A defensible committed estimate plus the change-control impact of moving scope." />
+        <CaseStudy problem="What is the real estimate, and what happens when scope moves?" approach="Estimate the same engagement three ways (bottom-up, analogous, PERT), watch them disagree, commit at P80, then push a scope change through change control and watch margin move." why="Present a range and commit at P80, not the point estimate everyone quotes." metric="The P80 commit; gross margin under a scope change." tradeoff="Absorbing scope silently protects the relationship but drops margin; a change order holds margin but is a harder conversation." outcome="A defensible committed estimate plus the change-control impact of moving scope." />
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -213,13 +213,13 @@ export function EstimationStudio() {
           <MethodCard on={method === "analogous"} onClick={() => setMethod("analogous")} title="Analogous" weeks={analogous}>
             <p className="mt-2 text-[11px] text-slatey-400">Past similar engagement {uc.analogous.baseWeeks}w × complexity {uc.analogous.factor.toFixed(2)}. Fast, but blind to what&apos;s new about this one.</p>
           </MethodCard>
-          <MethodCard on={method === "pert"} onClick={() => setMethod("pert")} title="Three-point (PERT)" weeks={pert} range={`${pert - pertStd}–${pert + pertStd}w`}>
+          <MethodCard on={method === "pert"} onClick={() => setMethod("pert")} title="Three-point (PERT)" weeks={pert} range={`${pert - pertStd} to ${pert + pertStd}w`}>
             <p className="mt-2 text-[11px] text-slatey-400">O {uc.three.o} · M {uc.three.m} · P {uc.three.p}. PERT = (O+4M+P)/6; ±1σ = {pertStd}w. Present the range, not the point &mdash; <span className="font-semibold text-ink">commit at P80 = {pertP80}w</span> (P90 {pertP90}w).</p>
           </MethodCard>
         </div>
 
         <InsightCard title={`The three disagree by ${spread} weeks`} tone="warn">
-          That spread is the conversation. The analogous number is cheapest and most wrong; bottom-up misses the unknowns it hasn&apos;t imagined; PERT&apos;s range is the honest answer — <span className="font-semibold">{pert - pertStd}–{pert + pertStd} weeks</span>.
+          That spread is the conversation. The analogous number is cheapest and most wrong; bottom-up misses the unknowns it hasn&apos;t imagined; PERT&apos;s range is the honest answer, <span className="font-semibold">{pert - pertStd} to {pert + pertStd} weeks</span>.
         </InsightCard>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -255,7 +255,7 @@ export function EstimationStudio() {
               <p className="stat-label">Change control</p>
               <button onClick={() => setScopeOn((v) => !v)} className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition ${scopeOn ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{scopeOn ? "Scope change applied" : "Apply scope change"}</button>
             </div>
-            <p className="text-xs text-slatey-400">{uc.change.label} — <span className="font-mono">+{changeWeeks}w</span>, concentrated in data + eval.</p>
+            <p className="text-xs text-slatey-400">{uc.change.label}, <span className="font-mono">+{changeWeeks}w</span>, concentrated in data + eval.</p>
 
             <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
               <MarginPill label="Baseline" pct={baselineMargin} />
@@ -265,7 +265,7 @@ export function EstimationStudio() {
 
             {scopeOn && (
               <div className="mt-3 rounded-md border border-line bg-slate-50 p-2.5 text-xs text-slatey-300">
-                <p className="font-semibold text-ink">Change order — draft</p>
+                <p className="font-semibold text-ink">Change order, draft</p>
                 <p className="mt-1">Scope: {uc.change.label}. Added effort +{changeWeeks} person-weeks; schedule +{duration(effort) - duration(baseEffort)} weeks; price +${(changeWeeks * RATE.bill).toLocaleString()}k. Absorbing it silently drops margin to {absorbedMargin}%; the change order holds it at {coMargin}%.</p>
                 <div className="mt-2"><ArtifactButton label="Download the change order" onClick={onGenerate} title="Download this change order as Markdown" /></div>
               </div>
@@ -275,14 +275,14 @@ export function EstimationStudio() {
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Commit at P80 rather than the mean, and process scope as a change order instead of absorbing it." lift="A committed number that holds about eighty percent of the time and protects margin when scope moves." measure="Actuals vs the P80 commit; margin held vs absorbed; change-orders raised vs scope events." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "AI estimates blow up in data discovery and evaluation, not modeling. Price the unknowns as line items or eat them later."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — consulting delivery estimation across HCLTech/Genpact/Deloitte.</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "AI estimates blow up in data discovery and evaluation, not modeling. Price the unknowns as line items or eat them later."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, consulting delivery estimation across HCLTech/Genpact/Deloitte.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Bottom-up = sum of a WBS with AI-specific line items flagged. Analogous = past baseline × complexity factor. PERT = (O + 4M + P)/6 with ±(P−O)/6 as the range.</p>
               <p>Duration = effort ÷ effective team capacity ({CAPACITY} FTE-weeks/week); margin = (revenue − cost)/revenue at ${RATE.bill}k bill / ${RATE.cost}k cost per person-week. A scope change absorbed silently drops margin; a change order re-prices it.</p>
-              <p>Stack: Next.js (static) + shared design system; client-side only.</p>
+              <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> WBS and rates are illustrative; capacity ignores ramp and dependency stalls. It frames the estimate and the change-control discipline, not a full resource-levelled plan.</p>

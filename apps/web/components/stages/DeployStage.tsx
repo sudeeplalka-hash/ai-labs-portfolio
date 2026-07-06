@@ -9,7 +9,7 @@ import { ReleaseReadinessPanel, OperateEvidencePanels } from "@/components/opera
 import { NextStageCTA } from "@/components/lifecycle/NextStageCTA";
 import { ReleaseBlockers } from "@/components/operate/ReleaseBlockers";
 
-// Stage 04 — Operate (AI Ops · MLOps · LLMOps). Route stays /deploy for
+// Stage 04, Operate (AI Ops · MLOps · LLMOps). Route stays /deploy for
 // compatibility. The existing operating-envelope engine is preserved; Phase 2
 // wraps it with release readiness, lineage, monitoring, regression, incidents,
 // and an enriched ops-evidence handoff for Govern + Realize.
@@ -20,10 +20,10 @@ export function DeployStage() {
 
   return (
     <div className="space-y-6">
-      <PageIntro eyebrow="Stage 04 · Operate — AI Ops · MLOps · LLMOps" title="Does it run reliably, at what cost?" icon={Rocket}>
+      <PageIntro eyebrow="Stage 04 · Operate, AI Ops · MLOps · LLMOps" title="Does it run reliably, at what cost?" icon={Rocket}>
         Build proves the system can answer. Operate proves it can run. This stage turns the Build/RAG output contract into
-        production-readiness evidence: release gates, version lineage, monitoring coverage, evaluation regression, drift,
-        incidents, rollback options, and cost/latency controls.
+        production readiness evidence: release gates, version lineage, monitoring coverage, evaluation regression, drift,
+        incidents, rollback options, and cost and latency controls.
       </PageIntro>
       <ReleaseBlockers />
       <ReleaseReadinessPanel />

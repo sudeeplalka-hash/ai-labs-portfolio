@@ -2,7 +2,7 @@
 
 export type Level = "healthy" | "watch" | "risk" | "critical";
 
-// The organization's guideline categories — the Data Lab's signature concept.
+// The organization's guideline categories, the Data Lab's signature concept.
 export type GuidelineId =
   | "admissibility"
   | "format"

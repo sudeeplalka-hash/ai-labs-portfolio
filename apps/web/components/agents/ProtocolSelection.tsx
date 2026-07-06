@@ -4,7 +4,7 @@
 // Six questions about an integration scenario → a recommendation across function
 // calling / MCP / A2A / hybrid, with rationale, the runner-up, and the flip
 // condition. Showing the runner-up and what flips it is what makes this architecture
-// judgment, not a quiz. SIMULATED — deterministic scoring over visible inputs.
+// judgment, not a quiz. SIMULATED, deterministic scoring over visible inputs.
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -20,23 +20,23 @@ import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type PKey = "fc" | "mcp" | "a2a" | "hybrid";
 const PROTO: Record<PKey, { label: string; blurb: string; rationale: string }> = {
-  fc: { label: "Function calling", blurb: "The model calls a handful of typed functions directly.", rationale: "Small surface — a few tools, one consumer, one agent. A protocol layer is overhead you don't need yet." },
+  fc: { label: "Function calling", blurb: "The model calls a handful of typed functions directly.", rationale: "Small surface, a few tools, one consumer, one agent. A protocol layer is overhead you don't need yet." },
   mcp: { label: "MCP", blurb: "One shared protocol for tool/resource access across many systems and consumers.", rationale: "Many systems and many consumers: bespoke integrations explode as N×M. One MCP contract makes it N+M." },
-  a2a: { label: "A2A", blurb: "A protocol for coordination between independent agents.", rationale: "The work is coordination between agents, not just tool calls — A2A gives them a shared task and message contract." },
-  hybrid: { label: "MCP + A2A hybrid", blurb: "MCP vertically for tools, A2A horizontally for agents — the 2026 two-layer stack.", rationale: "You have both: many tools to expose AND agents that must coordinate, under central governance. Use each on its axis." },
+  a2a: { label: "A2A", blurb: "A protocol for coordination between independent agents.", rationale: "The work is coordination between agents, not just tool calls, A2A gives them a shared task and message contract." },
+  hybrid: { label: "MCP + A2A hybrid", blurb: "MCP vertically for tools, A2A horizontally for agents, the 2026 two-layer stack.", rationale: "You have both: many tools to expose AND agents that must coordinate, under central governance. Use each on its axis." },
 };
 const DRIVER: Record<PKey, string> = {
   fc: "you drop to ~3 tools and a single consumer",
   mcp: "you expose more systems to more consumers",
   a2a: "agents need to coordinate, not just call tools",
-  hybrid: "you add multi-agent coordination on top of the tool sprawl",
+  hybrid: "you add multiagent coordination on top of the tool sprawl",
 };
 
 const QUESTIONS: { key: string; q: string; opts: string[] }[] = [
-  { key: "q1", q: "How many systems / tools to expose?", opts: ["1–3 tools", "4–10 systems", "10+ systems"] },
+  { key: "q1", q: "How many systems / tools to expose?", opts: ["1 to 3 tools", "4 to 10 systems", "10+ systems"] },
   { key: "q2", q: "How many agent consumers?", opts: ["One", "A few teams", "Many teams / org-wide"] },
   { key: "q3", q: "Coordination needs?", opts: ["One agent does it", "Some handoffs", "Many agents collaborate"] },
-  { key: "q4", q: "Governance / central control?", opts: ["Low", "Moderate", "High — central policy + audit"] },
+  { key: "q4", q: "Governance / central control?", opts: ["Low", "Moderate", "High, central policy + audit"] },
   { key: "q5", q: "Reuse across teams?", opts: ["One-off", "Shared in a team", "Org-wide platform"] },
   { key: "q6", q: "Simplicity sensitivity?", opts: ["Keep it minimal", "Moderate", "Complexity is fine"] },
 ];
@@ -90,7 +90,7 @@ export function ProtocolSelection() {
   const router = useRouter();
   const cardRef = useRef<SVGSVGElement>(null);
 
-  // Restore a shared recommendation (?cfg=) once on mount — answers + weights.
+  // Restore a shared recommendation (?cfg=) once on mount, answers + weights.
   useEffect(() => {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
@@ -109,7 +109,7 @@ export function ProtocolSelection() {
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => toast("Link copied — this exact recommendation"), () => toast("Link is in the address bar"));
+      navigator.clipboard.writeText(url).then(() => toast("Link copied, this exact recommendation"), () => toast("Link is in the address bar"));
     } else { toast("Link is in the address bar"); }
   };
   const resetWeights = () => { setWeights(DEFAULT_WEIGHTS); toast("Weights reset to defaults"); };
@@ -126,7 +126,7 @@ export function ProtocolSelection() {
   // Sensitivity: which single answer change would flip the call? (engine)
   const sensitivity = protocolSensitivity(ans, QUESTIONS, (a) => evaluate(a, W).primary);
 
-  // Protocol radar + why-not-others — probe the SAME weighted scorer for each protocol's
+  // Protocol radar + why-not-others, probe the SAME weighted scorer for each protocol's
   // responsiveness to each decision dimension (engine), then explain the call per rival.
   const scoreOf = (a: Record<string, number>) => evaluate(a, W).scores;
   const affinity = protocolAffinity(scoreOf, AXES);
@@ -207,7 +207,7 @@ export function ProtocolSelection() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02", asOf: PROTOCOL_STATS_AS_OF }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The question every enterprise architect is asking in 2026. Describe the integration and get a call — with the
+            The question every enterprise architect is asking in 2026. Describe the integration and get a call, with the
             runner-up and the condition that flips it, because that&apos;s the part that&apos;s actually judgment.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -217,7 +217,7 @@ export function ProtocolSelection() {
 
         <UseCaseRail useCases={GAP07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Teams argue function-calling vs MCP vs A2A vs hybrid on taste, and either over-engineer a protocol layer they do not need or under-build one they will." approach="Six questions about the integration scenario feed a transparent weighted scorer; the lab returns a recommendation, the runner-up, and the single answer that would flip the call, plus a four-protocol radar and a producers×consumers crossover curve." why="The decision is a function of how many systems, how many consumers, and how much coordination — not religion. Making the scorer editable keeps it honest." metric="The fit scores and the flip conditions: which single input change would change the recommendation." tradeoff="Broadening scope raises value but lowers feasibility; the radar shows function-calling and MCP as mirror opposites on tool breadth — you choose where on that curve to sit." outcome="A protocol recommendation you can defend in a design review, with the runner-up and the exact condition that would flip it — exportable as a one-page card." />
+        <CaseStudy problem="Teams argue function-calling vs MCP vs A2A vs hybrid on taste, and either over-engineer a protocol layer they do not need or under-build one they will." approach="Six questions about the integration scenario feed a transparent weighted scorer; the lab returns a recommendation, the runner-up, and the single answer that would flip the call, plus a four-protocol radar and a producers×consumers crossover curve." why="The decision is a function of how many systems, how many consumers, and how much coordination, not religion. Making the scorer editable keeps it honest." metric="The fit scores and the flip conditions: which single input change would change the recommendation." tradeoff="Broadening scope raises value but lowers feasibility; the radar shows function-calling and MCP as mirror opposites on tool breadth, you choose where on that curve to sit." outcome="A protocol recommendation you can defend in a design review, with the runner-up and the exact condition that would flip it, exportable as a one-page card." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Tune how much each signal counts">
@@ -417,7 +417,7 @@ export function ProtocolSelection() {
             <Panel>
               <p className="stat-label mb-2">What would change the call <span className="font-normal text-slatey-500">· sensitivity</span></p>
               {sensitivity.length === 0 ? (
-                <p className="text-xs text-slatey-500">Robust — no single answer change flips the recommendation. That&apos;s a strong signal the call survives the next scale-up.</p>
+                <p className="text-xs text-slatey-500">Robust, no single answer change flips the recommendation. That&apos;s a strong signal the call survives the next scale-up.</p>
               ) : (
                 <ul className="space-y-1.5">
                   {sensitivity.map((s) => (
@@ -436,15 +436,15 @@ export function ProtocolSelection() {
           <OutcomeFrame call="Standardize on the recommended protocol for this integration shape, with the runner-up noted." lift="Avoids the rework of an under- or over-engineered integration layer; the recommendation and the single input that would flip it are explicit." measure="Integration lead time; number of point-to-point connectors; rework and incident tickets 90 days after the decision; re-run the six answers if scope changes." />
           <InsightCard title="Why the runner-up matters" tone="info">
             A recommendation without a runner-up is a quiz answer. The flip condition tells leadership exactly what would
-            change the architecture — so the decision survives the next scale-up instead of being re-litigated.
+            change the architecture, so the decision survives the next scale-up instead of being re-litigated.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The protocol isn't the decision — the number of producers and consumers is. Count those first."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The protocol isn't the decision, the number of producers and consumers is. Count those first."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Each protocol scores against the six answers: function calling rewards small surface + single consumer; MCP rewards systems × consumers + governance + reuse; A2A rewards multi-agent coordination; hybrid tops only when MCP and A2A signals are both strong.</p>
+              <p>Each protocol scores against the six answers: function calling rewards small surface + single consumer; MCP rewards systems × consumers + governance + reuse; A2A rewards multiagent coordination; hybrid tops only when MCP and A2A signals are both strong.</p>
               <p>Primary = top score, runner-up = second; the flip condition names the runner-up&apos;s dominant driver. Protocol-landscape stats are dated config (as of {PROTOCOL_STATS_AS_OF}).</p>
-              <p>Stack: Next.js (static) + shared design system; client-side only.</p>
+              <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> weights are heuristic judgment, not a benchmarked model; real selection also weighs vendor support, team skill, and existing investments. It structures the call and its sensitivity, not a procurement decision.</p>
@@ -454,12 +454,12 @@ export function ProtocolSelection() {
           <div className="space-y-5">
             <p className="text-xs leading-relaxed text-slatey-400">
               Each slider multiplies how much a signal counts. All at <span className="font-mono">1.0</span> is the default model; tilt them to reflect your context. Editing makes this{" "}
-              <span className="font-semibold text-ink">your model</span> — still SIMULATED.
+              <span className="font-semibold text-ink">your model</span>, still SIMULATED.
             </p>
             <div className="space-y-3">
               <AssumptionRow label="Scale (systems × consumers → MCP)" value={W.scale} min={0} max={2} step={0.1} fixed={1}
                 onChange={(v) => setWeights((p) => ({ ...p, scale: v }))} />
-              <AssumptionRow label="Coordination (multi-agent → A2A)" value={W.coordination} min={0} max={2} step={0.1} fixed={1}
+              <AssumptionRow label="Coordination (multiagent → A2A)" value={W.coordination} min={0} max={2} step={0.1} fixed={1}
                 onChange={(v) => setWeights((p) => ({ ...p, coordination: v }))} />
               <AssumptionRow label="Governance (central control → MCP / hybrid)" value={W.governance} min={0} max={2} step={0.1} fixed={1}
                 onChange={(v) => setWeights((p) => ({ ...p, governance: v }))} />

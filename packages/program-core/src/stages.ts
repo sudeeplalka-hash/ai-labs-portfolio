@@ -20,7 +20,7 @@ export const STAGES: StageDef[] = [
     will: "Frame the use case. Score the opportunity. Create the initiative brief." },
   { key: "data", n: "02", href: "/data", label: "Data", sub: "fuel",
     question: "Can we feed it?", raises: "Does the system work?",
-    reason: "Frame a bet first — then we test whether your data can feed it.",
+    reason: "Frame a bet first, then we test whether your data can feed it.",
     will: "Assess the fuel: profile sources, score readiness, and puncture the framing readiness guess." },
   { key: "build", n: "03", href: "/build", label: "Build · RAG", sub: "engine",
     question: "Does the system work?", raises: "Can we trust it in production?",
@@ -29,7 +29,7 @@ export const STAGES: StageDef[] = [
   { key: "deploy", n: "04", href: "/deploy", label: "Deploy", sub: "run",
     question: "Does it run reliably at cost?", raises: "Is it safe to run?",
     reason: "Prove the engine works before running it reliably.",
-    will: "Ship it safely — day 0/1: release readiness, cost-per-query scaling, latency, rollback capability, and the instrumentation you'll live on." },
+    will: "Ship it safely, day 0/1: release readiness, cost per query scaling, latency, rollback capability, and the instrumentation you'll live on." },
   { key: "govern", n: "05", href: "/govern", label: "Govern", sub: "trust",
     question: "Is it safe to run?", raises: "What is it actually worth?",
     reason: "Prove it runs reliably first, then put the controls around it.",
@@ -40,8 +40,8 @@ export const STAGES: StageDef[] = [
     will: "The payoff: a risk adjusted business case where every number traces back to an upstream decision." },
   { key: "operate", n: "07", href: "/operate", label: "Operate", sub: "loop",
     question: "Is it still working?", raises: "Re-frame the next cycle.",
-    reason: "Placed after Realize, scoped from Deploy onward — day-2 begins the moment you ship.",
-    will: "The loop: drift and staleness against green SLOs, one day-2 incident, and the retrain / re-index / rollback / re-scope call that feeds the next Frame." },
+    reason: "Placed after Realize, scoped from Deploy onward, day two begins the moment you ship.",
+    will: "The loop: drift and staleness against green SLOs, one day two incident, and the retrain / reindex / rollback / rescope call that feeds the next Frame." },
 ];
 
 export const STAGE_MAP: Record<StageKey, StageDef> = STAGES.reduce(

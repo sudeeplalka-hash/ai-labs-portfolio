@@ -3,7 +3,7 @@
 // C3-3 · Inference Cost Forecaster (Collection 3 · gallery).
 // Portfolio-level run-rate over 24 months: API (grows with volume) vs self-host
 // (fixed capacity that steps up), with the crossover CLIFF marked. Self-host cost =
-// hardware amortization + utilization + ops headcount — all visible. Distinct
+// hardware amortization + utilization + ops headcount, all visible. Distinct
 // altitude from GAP-06 (portfolio vs per-call). SIMULATED, stated formulas.
 
 import { useState } from "react";
@@ -101,7 +101,7 @@ export function InferenceForecaster() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             Portfolio-level, 24 months out. API scales linearly with volume; self-host is fixed capacity that steps up.
-            Where they cross is the cliff — and utilization decides where it lands. (Per-call economics live in{" "}
+            Where they cross is the cliff, and utilization decides where it lands. (Per-call economics live in{" "}
             <Link href="/agents/cost-simulator" className="font-medium text-primary hover:underline">GAP-06</Link>.)
           </p>
         </div>
@@ -153,7 +153,7 @@ export function InferenceForecaster() {
             </Panel>
 
             <div className="grid grid-cols-3 gap-3">
-              <KpiCard label="The cliff" value={cliff > 0 ? `Mo ${cliff + 1}` : "—"} tone={cliff > 0 ? "watch" : "healthy"} interpretation={cliff > 0 ? "Self-host undercuts API" : "Beyond 24 mo"} />
+              <KpiCard label="The cliff" value={cliff > 0 ? `Mo ${cliff + 1}` : "N/A"} tone={cliff > 0 ? "watch" : "healthy"} interpretation={cliff > 0 ? "Self-host undercuts API" : "Beyond 24 mo"} />
               <KpiCard label="API · 24-mo total" value={fmt(apiCum)} tone="neutral" interpretation="Cumulative" />
               <KpiCard label="Self-host · 24-mo total" value={fmt(selfCum)} tone="neutral" interpretation="Cumulative" />
             </div>
@@ -180,20 +180,20 @@ export function InferenceForecaster() {
         <div className="mt-6">
           <InsightCard title={cliff > 0 ? `The cliff is at month ${cliff + 1}` : "No cliff inside 24 months"} tone={cliff > 0 ? "warn" : "success"}>
             {cliff > 0
-              ? <>Below month {cliff + 1}, API&apos;s pay-per-use wins; above it, fixed capacity amortizes. Now drop utilization — the cliff slides right. Idle GPUs are the cost vendors leave out of the pitch.</>
-              : <>At these assumptions API stays cheaper for all 24 months. Raise growth or lower the frontier-model share to bring a cliff into view — or accept that self-host doesn&apos;t pay yet.</>}
+              ? <>Below month {cliff + 1}, API&apos;s pay-per-use wins; above it, fixed capacity amortizes. Now drop utilization, the cliff slides right. Idle GPUs are the cost vendors leave out of the pitch.</>
+              : <>At these assumptions API stays cheaper for all 24 months. Raise growth or lower the frontier-model share to bring a cliff into view, or accept that self-host doesn&apos;t pay yet.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Stay on API until the crossover, then revisit self-host — and track utilization, the lever that decides it." lift="Avoid premature capex; capture the self-host saving only after the crossover is real." measure="Actual $/mo vs the projection; utilization vs assumed; the crossover re-computed monthly." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "The cliff is real but further out than vendors say — utilization assumptions decide it, not sticker price."}</p>
+          <OutcomeFrame call="Stay on API until the crossover, then revisit self-host, and track utilization, the lever that decides it." lift="Avoid premature capex; capture the self-host saving only after the crossover is real." measure="Actual $/mo vs the projection; utilization vs assumed; the crossover re-computed monthly." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The cliff is real but further out than vendors say, utilization assumptions decide it, not sticker price."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>API/mo = volume × tokens/call × blended price (${CHEAP_PRICE}–${FRONTIER_PRICE}/1M tokens by frontier share). Volume compounds at the monthly growth rate.</p>
+              <p>API/mo = volume × tokens/call × blended price (${CHEAP_PRICE} to ${FRONTIER_PRICE}/1M tokens by frontier share). Volume compounds at the monthly growth rate.</p>
               <p>Self-host/mo = ⌈tokens ÷ (cluster capacity {(CLUSTER_CAP_TOKENS / 1e9).toFixed(1)}B × utilization)⌉ × ${(CLUSTER_COST / 1000)}k amortized + ops FTE × ${(OPS_COST_PER_FTE / 1000)}k. The cliff is the first month self-host &lt; API.</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> cluster capacity, amortization, and ops load are illustrative defaults; real forecasts need your hardware, contracts, and utilization telemetry. It finds the crossover&apos;s shape, not the exact date.</p>

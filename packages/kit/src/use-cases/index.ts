@@ -1,5 +1,5 @@
-// @labs/kit · use-cases — aggregation + computed coverage.
-// Each lab's use-cases live in their own file (typed payload). This index rolls
+// @labs/kit · use cases, aggregation + computed coverage.
+// Each lab's use cases live in their own file (typed payload). This index rolls
 // them up and computes coverage from the data (the Atlas reads USE_CASE_COVERAGE;
 // nothing is asserted). Extend USE_CASES_BY_LAB as labs are added.
 
@@ -84,5 +84,5 @@ export function useCasesForLab(labId: string): UseCase[] {
   return USE_CASES_BY_LAB[labId] ?? [];
 }
 
-// Coverage computed from the registry — the honest headline the Atlas renders.
+// Coverage computed from the registry, the honest headline the Atlas renders.
 export const USE_CASE_COVERAGE = coverageFrom(ALL_USE_CASES);

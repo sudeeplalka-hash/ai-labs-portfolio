@@ -2,7 +2,7 @@
 
 // EL-10 · Executive Communication Studio (Collection 4 · control room).
 // Consumes EL-04's delivery data (shared portfolioData) and produces a steering
-// pre-read / weekly update / QBR outline — disciplined into Status → Decisions →
+// pre-read / weekly update / QBR outline, disciplined into Status → Decisions →
 // Risks & mitigations → Asks, reordered and reframed per audience, with a talk
 // track per section. The senior-EM tell: every artifact forces a decision.
 // SIMULATED; the per-section talk track can be generated LIVE via LIVE_MODEL.
@@ -68,16 +68,16 @@ export function ExecCommStudio() {
 
   const statusHeadline =
     aud === "cio"
-      ? `Portfolio health ${idx}/100 — ${red} red, ${amber} amber, ${green} green, with ${gaps} reported-vs-actual gap${gaps === 1 ? "" : "s"}. ${decisions.length} decision${decisions.length === 1 ? "" : "s"} need this forum.`
+      ? `Portfolio health ${idx}/100, ${red} red, ${amber} amber, ${green} green, with ${gaps} reported-vs-actual gap${gaps === 1 ? "" : "s"}. ${decisions.length} decision${decisions.length === 1 ? "" : "s"} need this forum.`
       : aud === "sponsor"
       ? `Adoption at ${scenario.adoptionIndex}% of target; ${green} of ${ws.length} workstreams on track. ${wins.length} improving, ${decisions.length} decision${decisions.length === 1 ? "" : "s"} to land below.`
       : `Spend ${scenario.burnVariance >= 0 ? "+" : ""}${scenario.burnVariance}% vs plan; ${deps.length} dependencies in flight (${vendorDeps.length} vendor). ${decisions.length} decision${decisions.length === 1 ? "" : "s"} carry commercial impact.`;
 
   const talk: Record<string, string> = {
-    status: aud === "cio" ? "Open with the red and the gaps — don't bury the decisions." : aud === "sponsor" ? "Lead with adoption and the wins, then the asks." : "Anchor on spend-to-plan and the vendor dependencies.",
+    status: aud === "cio" ? "Open with the red and the gaps, don't bury the decisions." : aud === "sponsor" ? "Lead with adoption and the wins, then the asks." : "Anchor on spend-to-plan and the vendor dependencies.",
     outcomes: "Quantify the wins and tie each to the metric this audience cares about.",
-    decisions: "Name the decision, the options, and the date — don't leave without a call.",
-    risks: "Pair every risk with the mitigation already in motion — show control, not alarm.",
+    decisions: "Name the decision, the options, and the date, don't leave without a call.",
+    risks: "Pair every risk with the mitigation already in motion, show control, not alarm.",
     asks: "Restate each ask as a yes/no with an owner and a date.",
   };
 
@@ -103,11 +103,11 @@ export function ExecCommStudio() {
       node: wins.length ? (
         <ul className="space-y-1.5 text-sm text-slatey-300">
           {wins.map((w) => (
-            <li key={w.id} className="flex gap-2"><span className="font-semibold text-emerald-700">▲</span><span><span className="font-medium text-ink">{w.name}</span> — {w.brief.whatChanged}</span></li>
+            <li key={w.id} className="flex gap-2"><span className="font-semibold text-emerald-700">▲</span><span><span className="font-medium text-ink">{w.name}</span>, {w.brief.whatChanged}</span></li>
           ))}
           <li className="flex gap-2 text-slatey-400"><span className="font-semibold text-primary">•</span><span>Adoption reached {scenario.adoptionIndex}% of target users across the portfolio.</span></li>
         </ul>
-      ) : <p className="text-sm text-slatey-400">No workstreams improved this quarter — the story is stabilization, not wins.</p>,
+      ) : <p className="text-sm text-slatey-400">No workstreams improved this quarter, the story is stabilization, not wins.</p>,
     },
     decisions: {
       title: "Decisions needed",
@@ -120,7 +120,7 @@ export function ExecCommStudio() {
             </li>
           ))}
         </ol>
-      ) : <p className="text-sm text-slatey-400">No decisions required this cycle — informational update only.</p>,
+      ) : <p className="text-sm text-slatey-400">No decisions required this cycle, informational update only.</p>,
     },
     risks: {
       title: "Risks & mitigations",
@@ -134,7 +134,7 @@ export function ExecCommStudio() {
             </li>
           ))}
         </ul>
-      ) : <p className="text-sm text-slatey-400">No high-severity risks open.</p>,
+      ) : <p className="text-sm text-slatey-400">No high severity risks open.</p>,
     },
     asks: {
       title: "Asks",
@@ -158,23 +158,23 @@ export function ExecCommStudio() {
       `${statusHeadline}\n\n- ${green} on track · ${amber} at risk · ${red} off track${gaps > 0 ? ` · ${gaps} reported-vs-actual gap${gaps === 1 ? "" : "s"}` : ""}\n- Adoption ${scenario.adoptionIndex}% · Burn ${scenario.burnVariance >= 0 ? "+" : ""}${scenario.burnVariance}% vs plan`,
     outcomes: () =>
       wins.length
-        ? `${wins.map((w) => `- ▲ **${w.name}** — ${w.brief.whatChanged}`).join("\n")}\n- Adoption reached ${scenario.adoptionIndex}% of target users across the portfolio.`
-        : "_No workstreams improved this quarter — the story is stabilization, not wins._",
+        ? `${wins.map((w) => `- ▲ **${w.name}**, ${w.brief.whatChanged}`).join("\n")}\n- Adoption reached ${scenario.adoptionIndex}% of target users across the portfolio.`
+        : "_No workstreams improved this quarter, the story is stabilization, not wins._",
     decisions: () =>
       decisions.length
-        ? decisions.map((w, i) => `${i + 1}. **${w.name}** — ${w.brief.ask}`).join("\n")
-        : "_No decisions required this cycle — informational update only._",
+        ? decisions.map((w, i) => `${i + 1}. **${w.name}**, ${w.brief.ask}`).join("\n")
+        : "_No decisions required this cycle, informational update only._",
     risks: () =>
       highRisks.length
         ? highRisks.map((r) => `- **[high]** ${r.text}\n  - _Mitigation:_ ${r.w.brief.ask} (${r.w.name} · ${r.w.owner})`).join("\n")
-        : "_No high-severity risks open._",
+        : "_No high severity risks open._",
     asks: () =>
       ws.map((w) => `- ${isDecision(w.brief.ask) ? "**[Decision]**" : "[FYI]"} ${w.brief.ask}`).join("\n"),
   };
   const buildPreRead = (): string => {
-    const out: string[] = [`# ${artifact.label} — ${scenario.label}`, "", `**For ${audience.label}.** ${audience.frame}`];
+    const out: string[] = [`# ${artifact.label}, ${scenario.label}`, "", `**For ${audience.label}.** ${audience.frame}`];
     for (const k of orderedKeys) {
-      out.push("", `## ${SECTION[k].title}`, `_Talk track — ${talk[k]}_`, "", sectionMd[k] ? sectionMd[k]() : "");
+      out.push("", `## ${SECTION[k].title}`, `_Talk track, ${talk[k]}_`, "", sectionMd[k] ? sectionMd[k]() : "");
     }
     return out.join("\n");
   };
@@ -203,7 +203,7 @@ export function ExecCommStudio() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The same delivery data, turned into the artifact the moment needs — and reframed for who&apos;s in the room.
+            The same delivery data, turned into the artifact the moment needs, and reframed for who&apos;s in the room.
             Juniors report status; seniors force decisions. Every draft here ends in an <span className="font-semibold text-ink">ask</span>.
           </p>
         </div>
@@ -233,7 +233,7 @@ export function ExecCommStudio() {
           </Control>
         </div>
 
-        {/* Data-in strip — proves it consumes EL-04's delivery data */}
+        {/* Data-in strip, proves it consumes EL-04's delivery data */}
         <div className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-line bg-white px-3 py-2 text-[11px] text-slatey-500">
           <span className="font-mono uppercase tracking-wide text-slatey-400">Data in →</span>
           {activeUc
@@ -259,7 +259,7 @@ export function ExecCommStudio() {
               return (
                 <section key={k} className="px-5 py-4">
                   <h2 className="text-sm font-semibold text-ink">{sec.title}</h2>
-                  <p className="mb-2 mt-0.5 text-[11px] italic text-slatey-500">Talk track — {talk[k]}</p>
+                  <p className="mb-2 mt-0.5 text-[11px] italic text-slatey-500">Talk track, {talk[k]}</p>
                   {sec.node}
                 </section>
               );
@@ -271,16 +271,16 @@ export function ExecCommStudio() {
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Lead the update with the specific decision you need this week, framed for the audience in the room." lift="Decisions get made in the meeting instead of deferred to the next one." measure="Decisions requested vs made per update; cycle time from raise to decision; status-only updates eliminated." />
           <p className="text-sm leading-relaxed text-ink">
-            <span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "An exec update that contains no decision request is a diary entry. Every pre-read I send asks for something."}
+            <span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "An exec update that contains no decision request is a diary entry. Every pre-read I send asks for something."}
           </p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — weekly leadership updates and QBRs across multiple AMEX portfolios.</p>}
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, weekly leadership updates and QBRs across multiple AMEX portfolios.</p>}
 
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Stack: Next.js (static) + the shared design system; client-side state only.</p>
-              <p>Input: the same authored portfolio data EL-04 reads (RAID + trend + adoption + burn) — a single source, so this genuinely consumes the delivery instrument rather than restating it.</p>
-              <p>Generation: deterministic. Decisions are extracted from each workstream&apos;s ask; risks pull the high-severity items and pair each with the mitigation already in motion; the status headline and section order rewrite by audience.</p>
+              <p>Stack: Next.js (static) + the shared design system; client side state only.</p>
+              <p>Input: the same authored portfolio data EL-04 reads (RAID + trend + adoption + burn), a single source, so this genuinely consumes the delivery instrument rather than restating it.</p>
+              <p>Generation: deterministic. Decisions are extracted from each workstream&apos;s ask; risks pull the high severity items and pair each with the mitigation already in motion; the status headline and section order rewrite by audience.</p>
               <p>The per-section talk track is templated here; a LIVE variant can generate it via LIVE_MODEL without changing the Status → Decisions → Risks → Asks discipline.</p>
             </div>
           </details>

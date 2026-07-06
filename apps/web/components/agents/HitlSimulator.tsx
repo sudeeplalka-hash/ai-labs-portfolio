@@ -1,7 +1,7 @@
 "use client";
 
-// GAP-08 · Human-in-the-Loop Approval Simulator (Collection 2 · toolkit).
-// Raise autonomy and throughput climbs — until a deliberately-engineered edge case
+// GAP-08 · Human in the loop Approval Simulator (Collection 2 · toolkit).
+// Raise autonomy and throughput climbs, until a deliberately-engineered edge case
 // slips through unreviewed. Find the level where risk tier and throughput balance.
 // Autonomy is set per risk tier, not per enthusiasm. Bridges EL-05 / C1 Govern.
 // SIMULATED.
@@ -29,9 +29,9 @@ const LEVELS = [
 ];
 
 const TIER_GUIDE = [
-  { tier: "High-risk (EU AI Act)", tone: "rose" as const, max: "L1–L2" },
+  { tier: "High risk (EU AI Act)", tone: "rose" as const, max: "L1 to L2" },
   { tier: "Limited / significant", tone: "amber" as const, max: "L3" },
-  { tier: "Minimal / internal", tone: "emerald" as const, max: "L4–L5" },
+  { tier: "Minimal / internal", tone: "emerald" as const, max: "L4 to L5" },
 ];
 
 export function HitlSimulator() {
@@ -93,18 +93,18 @@ export function HitlSimulator() {
         <div className="mb-5">
           <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Human-in-the-Loop Approval Simulator</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Human in the loop Approval Simulator</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? `${activeUc.payload.taskLine} Raise the autonomy level: throughput climbs, human load falls — and at some point an edge case slips through. Find the balance.` : "An agent processes a queue of 20 items, four of them edge cases. Raise the autonomy level: throughput climbs, human load falls — and at some point an edge case slips through unreviewed. Find the balance."}
+            {activeUc ? `${activeUc.payload.taskLine} Raise the autonomy level: throughput climbs, human load falls, and at some point an edge case slips through. Find the balance.` : "An agent processes a queue of 20 items, four of them edge cases. Raise the autonomy level: throughput climbs, human load falls, and at some point an edge case slips through unreviewed. Find the balance."}
           </p>
         </div>
 
         <UseCaseRail useCases={GAP08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="How much autonomy before an edge case slips through?" approach="Raise the autonomy level and watch throughput climb until a deliberately-engineered edge case slips through unreviewed; the engine recommends the safe level." why="Autonomy is set per risk tier, not per enthusiasm." metric="Edge-case coverage versus throughput; the recommended (highest zero-slip) level." tradeoff="More autonomy means more throughput and, eventually, an unreviewed high-severity error." outcome="The autonomy level to run per risk tier — the most speed that still catches every edge." />
+        <CaseStudy problem="How much autonomy before an edge case slips through?" approach="Raise the autonomy level and watch throughput climb until a deliberately-engineered edge case slips through unreviewed; the engine recommends the safe level." why="Autonomy is set per risk tier, not per enthusiasm." metric="Edge-case coverage versus throughput; the recommended (highest zero-slip) level." tradeoff="More autonomy means more throughput and, eventually, an unreviewed high severity error." outcome="The autonomy level to run per risk tier, the most speed that still catches every edge." />
 
         <Panel className="mb-4">
           <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Autonomy level</label><span className="font-mono text-xs font-semibold text-ink">L{level} · {LEVELS[level - 1].label}</span></div>
@@ -146,7 +146,7 @@ export function HitlSimulator() {
         <div className="grid gap-4 lg:grid-cols-[1fr_1fr]">
           <InsightCard title={slips.length === 0 ? `L${level} clears every edge case` : `L${level}: ${slips.length} edge case${slips.length > 1 ? "s" : ""} slipped ($${exposure}k)`} tone={slips.length === 0 ? "success" : "danger"}>
             {level < sweet
-              ? <>Every item reviewed — zero risk, but you&apos;re paying for a human on trivial approvals. There&apos;s throughput to reclaim.</>
+              ? <>Every item reviewed, zero risk, but you&apos;re paying for a human on trivial approvals. There&apos;s throughput to reclaim.</>
               : level === sweet
                 ? <>The sweet spot: reviewing high- and medium-risk catches all four edge cases at {throughput}/hr. One step further trades a $20k medium-risk error for a little more speed.</>
                 : <>Past the balance point: a medium-risk edge case now auto-approves and becomes an incident. Speed bought with unpriced risk.</>}
@@ -162,18 +162,18 @@ export function HitlSimulator() {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] text-slatey-500">The level isn&apos;t a global setting — it&apos;s set per use case by its risk tier.</p>
+            <p className="mt-2 text-[11px] text-slatey-500">The level isn&apos;t a global setting, it&apos;s set per use case by its risk tier.</p>
           </Panel>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Set autonomy to the highest level that still catches every edge case for this risk tier." lift="Reclaim throughput on low-risk items while holding zero unreviewed high-severity errors." measure="Edge-case escape rate; human review load; throughput/hr; incidents from auto-approved items." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Autonomy is set per risk tier, not per enthusiasm."}</p>
+          <OutcomeFrame call="Set autonomy to the highest level that still catches every edge case for this risk tier." lift="Reclaim throughput on low-risk items while holding zero unreviewed high severity errors." measure="Edge-case escape rate; human review load; throughput/hr; incidents from auto-approved items." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Autonomy is set per risk tier, not per enthusiasm."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Twenty items carry a risk tier and four are edge cases (errors if auto-approved). Each level defines a review policy; an edge case slips when it isn&apos;t reviewed. Throughput rises with autonomy; exposure = Σ severity of slipped edges. The medium-risk edge is engineered to slip exactly one level past the balance point.</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the queue and severities are illustrative; real autonomy also weighs reversibility and detection latency. It shows the throughput-vs-risk trade and the per-tier rule, not a policy engine.</p>

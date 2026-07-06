@@ -4,7 +4,7 @@ import { buildBoilerplateSet } from "./boilerplate";
 
 // Deterministic "embedding" projector for the 3D visualizer.
 //
-// v1 builds a TF-IDF term vector per chunk and reduces it to 3D with PCA — fully
+// v1 builds a TF-IDF term vector per chunk and reduces it to 3D with PCA, fully
 // local, instant, and deterministic. The SAME interface (vectorize -> project)
 // is what a neural embedding model (MiniLM, OpenAI, etc.) would plug into later.
 

@@ -1,8 +1,8 @@
-// GAP-06 · Prompt Cost & Token Simulator — use-cases.
+// GAP-06 · Prompt Cost & Token Simulator, use cases.
 // Payload = an input preset (model + prompt + volume + caching/batching levers).
 // Retail: caching the shared brand prompt is the lever. Telecom: async batch
 // discount is the go/no-go. Adtech: unit economics gate the feature. Model id
-// references LIVE_MODEL_CHEAP — no hardcoded model string.
+// references LIVE_MODEL_CHEAP, no hardcoded model string.
 
 import { type UseCase, assertUseCases, firstHand, studied } from "../industries";
 import { LIVE_MODEL_CHEAP } from "../models";
@@ -29,11 +29,11 @@ export const GAP06_USE_CASES: UseCase<Gap06Payload>[] = assertUseCases<Gap06Payl
     context:
       "A retailer regenerates product copy for ~4M SKUs each season. Every call carries a large, identical brand-voice + policy prompt; caching that shared prefix collapses the input-token bill.",
     theDecision:
-      "Caching is the build-vs-buy lever — with a high shared-prefix cache share the per-call cost drops enough to make the feature economically obvious.",
+      "Caching is the build versus buy lever, with a high shared-prefix cache share the per-call cost drops enough to make the feature economically obvious.",
     whatMostMiss:
-      "Teams price this at the naive per-call rate and conclude it's too expensive. The brand prompt is most of the tokens — cache it and the economics flip.",
+      "Teams price this at the naive per-call rate and conclude it's too expensive. The brand prompt is most of the tokens, cache it and the economics flip.",
     stakes: "Priced without caching, a 4M-SKU refresh looks unaffordable and the feature dies in the business case.",
-    takeaway: "Cache the shared prefix — on high-volume templated generation it's the difference between viable and not.",
+    takeaway: "Cache the shared prefix, on high volume templated generation it's the difference between viable and not.",
     sources: [
       "Retail catalog copy generation at scale",
       "Prompt-caching / shared-prefix economics",
@@ -59,15 +59,15 @@ export const GAP06_USE_CASES: UseCase<Gap06Payload>[] = assertUseCases<Gap06Payl
     title: "Summarize 1.2M care calls a month",
     oneLiner: "The batch discount is the go/no-go on the whole program.",
     context:
-      "A telecom summarizes ~1.2M care-center calls a month for QA and coaching — an offline, non-urgent workload. Because it's async, most of it can run through the batch API at a steep discount.",
+      "A telecom summarizes ~1.2M care-center calls a month for QA and coaching, an offline, non-urgent workload. Because it's async, most of it can run through the batch API at a steep discount.",
     theDecision:
-      "Batching is the go/no-go: at this volume the batch discount is what moves the program from 'too expensive' to fundable — the workload is async, so there's no reason to pay real-time rates.",
+      "Batching is the go/no-go: at this volume the batch discount is what moves the program from 'too expensive' to fundable, the workload is async, so there's no reason to pay real-time rates.",
     whatMostMiss:
       "People price offline workloads at real-time rates. Summarization is async; routing it through batch is money left on the table if you don't.",
     stakes: "Priced at real-time rates, a 1.2M-call summarization program doesn't clear its business case.",
-    takeaway: "For async volume, batch it — the discount is the go/no-go, not a nice-to-have.",
+    takeaway: "For async volume, batch it, the discount is the go/no-go, not a nice-to-have.",
     sources: [
-      "Telecom care-center call summarization at scale — first-hand (Verizon)",
+      "Telecom care-center call summarization at scale, firsthand (Verizon)",
       "Batch-inference discount economics",
     ],
     lastVerified: "2026-07-03",
@@ -93,11 +93,11 @@ export const GAP06_USE_CASES: UseCase<Gap06Payload>[] = assertUseCases<Gap06Payl
     context:
       "An adtech platform generates 30 creative variants for each of thousands of campaigns. The per-variant cost is tiny, but multiplied across campaign volume it becomes the number that gates the feature.",
     theDecision:
-      "Economics before architecture: unit cost × volume decides if the variant feature is viable — model choice, caching, and batching are the levers that gate the roadmap.",
+      "Economics before architecture: unit cost × volume decides if the variant feature is viable, model choice, caching, and batching are the levers that gate the roadmap.",
     whatMostMiss:
       "Engineers design the variant pipeline before anyone models the unit economics; at this volume the cost decides the feature, not the other way around.",
     stakes: "Ship the feature without the unit-economics model and a tiny per-call cost becomes a budget surprise at campaign scale.",
-    takeaway: "Model the unit economics before the architecture — at scale, cost decides the feature.",
+    takeaway: "Model the unit economics before the architecture, at scale, cost decides the feature.",
     sources: [
       "Adtech creative-variant generation at scale",
       "Unit-economics-gated feature decisions",

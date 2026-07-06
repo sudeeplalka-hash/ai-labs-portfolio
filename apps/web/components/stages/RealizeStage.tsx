@@ -7,7 +7,7 @@ import { PageIntro } from "@labs/design-system";
 import { StagePlaceholder } from "@/components/shell/StagePlaceholder";
 import { StageDemonstrates } from "@/components/reviewer/Reviewer";
 
-// Stage 06 · Realize — its own lab now (split out of Govern). The risk-adjusted
+// Stage 06 · Realize, its own lab now (split out of Govern). The risk adjusted
 // business case where every number traces back to an upstream decision.
 const fmtUsd = (n: number) => (Math.abs(n) >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1000)}k`);
 
@@ -25,12 +25,12 @@ export function RealizeStage() {
         The payoff. A risk adjusted business case assembled from every upstream decision: addressable value minus the
         adoption, quality, run cost, and risk leaks, where each number traces back to the stage that produced it.
       </PageIntro>
-      <div className="mb-5"><StageDemonstrates>business-value realization through adoption, leakage, run cost, risk discount, ROI, payback, and risk-adjusted value.</StageDemonstrates></div>
+      <div className="mb-5"><StageDemonstrates>business value realization through adoption, leakage, run cost, risk discount, ROI, payback, and risk adjusted value.</StageDemonstrates></div>
       {typeof varUsd === "number" && varUsd > 0 && (
         <div className="mb-5 rounded-xl border border-rose-300 bg-rose-50/60 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-700">Open day-2 exposure · from Operate</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-700">Open day two exposure · from Operate</p>
           <p className="mt-0.5 text-sm leading-relaxed text-ink">
-            A production breach is exposing <b>{fmtUsd(varUsd)}/yr</b> of the risk-adjusted value.
+            A production breach is exposing <b>{fmtUsd(varUsd)}/yr</b> of the risk adjusted value.
             {typeof rav === "number" && (
               <> Net of it, the case stands at <b>{fmtUsd(rav - varUsd)}/yr</b> until the Operate remediation lands.</>
             )}

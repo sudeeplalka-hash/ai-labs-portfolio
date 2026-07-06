@@ -19,7 +19,7 @@ const CRM = `customer_id,name,email,signup_date,plan,monthly_spend,region,notes
 ,,,,,,,
 1007,Margaret Hamilton,mh@example.com,2024-06-30,Pro,89.00,AMER,phone 415-555-0192`;
 
-const STALE_POLICY = `Travel & Expense Policy — Version 2.7 (SUPERSEDED)
+const STALE_POLICY = `Travel & Expense Policy, Version 2.7 (SUPERSEDED)
 Effective: 2022-01-01
 
 1. Reimbursement limits
@@ -60,7 +60,7 @@ of stale documents that reach the index.`;
 
 // A clinical note packed with protected health information (PHI). Great for
 // trying the Healthcare · HIPAA profile, which turns any of these into a blocker.
-const CLINICAL = `Clinical Intake Note — Riverside Family Practice
+const CLINICAL = `Clinical Intake Note, Riverside Family Practice
 
 Patient: J. Doe    DOB: 1984-07-12
 MRN: 0048213
@@ -76,12 +76,12 @@ Billing contact: billing@riverside-health.example`;
 
 // A payments remittance with bank + card identifiers. Pairs well with the
 // Payments · PCI DSS and Finance profiles.
-const PAYMENTS = `Vendor Remittance Advice — Q2 Payments Run
+const PAYMENTS = `Vendor Remittance Advice, Q2 Payments Run
 
 Beneficiary: Acme Supplies Ltd
 IBAN: DE89 3704 0044 0532 0130 00
 SWIFT/BIC: COBADEFFXXX
-US backup account — routing number 021000021, account 000123456789
+US backup account, routing number 021000021, account 000123456789
 
 Invoice INV-4471 .... $12,400.00  paid 2026-04-02
 Invoice INV-4490 .... $ 3,150.00  paid 2026-04-18
@@ -89,9 +89,9 @@ Card on file for expedited fees: 4111 1111 1111 1111
 
 Questions: ap@acme-supplies.example`;
 
-// A leaked .env config — secrets that should never reach an index.
+// A leaked .env config, secrets that should never reach an index.
 const SECRETS = `# deploy.env  (DO NOT COMMIT)
-# Pasted into the wiki by mistake — a sample of what NOT to ingest.
+# Pasted into the wiki by mistake, a sample of what NOT to ingest.
 
 AWS_ACCESS_KEY_ID=<redacted-fake-sample-not-a-real-key>
 STRIPE_SECRET_KEY=<redacted-fake-sample-not-a-real-key>
@@ -104,17 +104,17 @@ DB_USER=app
 
 export const SAMPLE_CORPUS: SampleFile[] = [
   { id: "crm", name: "crm_export_v2.csv", label: "Messy CRM export", blurb: "Duplicates, missing values & PII (SSN + card).", content: CRM },
-  { id: "clinical", name: "intake_note_riverside.txt", label: "Clinical intake note", blurb: "Health records — MRN, NPI, DEA & ICD-10 (try HIPAA).", content: CLINICAL },
-  { id: "payments", name: "remittance_q2.txt", label: "Payments remittance", blurb: "Bank + card data — IBAN, routing, account (try PCI).", content: PAYMENTS },
+  { id: "clinical", name: "intake_note_riverside.txt", label: "Clinical intake note", blurb: "Health records, MRN, NPI, DEA & ICD-10 (try HIPAA).", content: CLINICAL },
+  { id: "payments", name: "remittance_q2.txt", label: "Payments remittance", blurb: "Bank + card data, IBAN, routing, account (try PCI).", content: PAYMENTS },
   { id: "secrets", name: "deploy.env", label: "Leaked config dump", blurb: "Live API keys & tokens that must never be ingested.", content: SECRETS },
   { id: "stale", name: "travel_policy_v2.7_legacy.txt", label: "Stale policy version", blurb: "Superseded version with repeated boilerplate.", content: STALE_POLICY },
-  { id: "kb", name: "vendor_onboarding_kb.md", label: "Mixed knowledge base", blurb: "Mostly clean; needs metadata & sign-off.", content: KB },
-  { id: "clean", name: "eng_update_q2.md", label: "Clean reference doc", blurb: "Well-formed — should clear the gate.", content: CLEAN },
+  { id: "kb", name: "vendor_onboarding_kb.md", label: "Mixed knowledge base", blurb: "Mostly clean; needs metadata & sign off.", content: KB },
+  { id: "clean", name: "eng_update_q2.md", label: "Clean reference doc", blurb: "Well-formed, should clear the gate.", content: CLEAN },
 ];
 
-// The current version of the travel policy — a near-duplicate of the stale v2.7
+// The current version of the travel policy, a near-duplicate of the stale v2.7
 // with a DIFFERENT meal allowance. Together they form a version-conflict pair.
-const CURRENT_POLICY = `Travel & Expense Policy — Version 3.1 (CURRENT)
+const CURRENT_POLICY = `Travel & Expense Policy, Version 3.1 (CURRENT)
 Effective: 2024-01-01
 
 1. Reimbursement limits
@@ -127,7 +127,7 @@ Expenses over $500 require manager approval.
 This is the current, authoritative travel policy.
 Contact travel-admin@example.com for questions.`;
 
-// A second copy of the CRM data under a different name — an exact DUPLICATE that
+// A second copy of the CRM data under a different name, an exact DUPLICATE that
 // should never be embedded twice.
 const CRM_DUP = CRM;
 

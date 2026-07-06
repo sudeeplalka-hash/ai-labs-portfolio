@@ -1,6 +1,6 @@
 "use client";
 
-// Phase 6 — Training / fine-tuning / generalization readiness UI. Decision memo,
+// Phase 6, Training / fine tuning / generalization readiness UI. Decision memo,
 // dataset readiness, train/val/test split, overfitting & generalization, and the
 // contract handoff to Operate + Govern. No real training is performed. Persists
 // rag.trainingContract in live mode.
@@ -28,7 +28,7 @@ const riskTone = (r: string): "emerald" | "amber" | "rose" => (r === "low" ? "em
 const APPROACHES = [
   { id: "prompting", label: "Prompting", best: "Simple, instruction-following, low risk", risk: "Brittle prompts, weak grounding" },
   { id: "rag", label: "RAG", best: "Current documents, citations, changing knowledge", risk: "Stale sources, weak retrieval" },
-  { id: "fine-tuning", label: "Fine-tuning", best: "Consistent behavior/format, stable task, labeled data", risk: "Overfitting, leakage, harder rollback" },
+  { id: "fine tuning", label: "Fine tuning", best: "Consistent behavior/format, stable task, labeled data", risk: "Overfitting, leakage, harder rollback" },
   { id: "traditional-ml", label: "Traditional ML", best: "Structured prediction/classification with labels", risk: "Bias, imbalance, poor generalization" },
   { id: "hybrid", label: "Hybrid", best: "Workflow needs evidence + responses + actions", risk: "Complex debugging, integration risk" },
 ];
@@ -41,7 +41,7 @@ export function TrainingReadiness() {
   const gen = useMemo(() => deriveGeneralizationAssessment(src), [src]);
   const contract = useMemo(() => buildTrainingReadinessContract(src), [src]);
 
-  // Phase D — interactive learning curve. Slider picks a dataset size; the
+  // Phase D, interactive learning curve. Slider picks a dataset size; the
   // deterministic engine recomputes train/validation divergence live.
   const [sizeIdx, setSizeIdx] = useState(2); // default 2,400 examples
   const curve = useMemo(() => deriveLearningCurve(src, CURVE_SIZES[sizeIdx]), [src, sizeIdx]);
@@ -63,14 +63,14 @@ export function TrainingReadiness() {
           <Badge tone={ds.required ? "amber" : "emerald"}>{memo.recommendedApproach}</Badge>
         </div>
         <p className="mt-1 text-sm text-slatey-400">{ds.required
-          ? "This initiative is a fit for a trained / fine-tuned model, so training-data readiness and generalization risk matter."
-          : "Training dataset not required — this use case is better served by RAG, evaluation datasets, and monitoring, because answers must stay grounded in current source documents."}</p>
+          ? "This initiative is a fit for a trained / fine tuned model, so training-data readiness and generalization risk matter."
+          : "Training dataset not required, this use case is better served by RAG, evaluation datasets, and monitoring, because answers must stay grounded in current source documents."}</p>
       </div>
 
       {/* Decision memo */}
       <Panel>
-        <SectionHeader eyebrow="Decision memo" title="Fine-tune vs RAG vs prompt" icon={GitBranch}
-          description="Enterprise teams should not fine-tune by default. The right approach depends on the workflow, data, freshness, governance burden, and evaluation evidence." />
+        <SectionHeader eyebrow="Decision memo" title="Fine tune vs RAG vs prompt" icon={GitBranch}
+          description="Enterprise teams should not fine tune by default. The right approach depends on the workflow, data, freshness, governance burden, and evaluation evidence." />
         <div className="grid gap-4 lg:grid-cols-2">
           <div>
             <p className="stat-label mb-1">Why this approach</p>
@@ -83,7 +83,7 @@ export function TrainingReadiness() {
           <div className="space-y-2 text-[12px]">
             {memo.whyNotPromptOnly.length > 0 && <WhyNot label="Why not prompt-only" items={memo.whyNotPromptOnly} />}
             {memo.whyNotRagOnly.length > 0 && <WhyNot label="Why not RAG-only" items={memo.whyNotRagOnly} />}
-            {memo.whyNotFineTune.length > 0 && <WhyNot label="Why not fine-tune" items={memo.whyNotFineTune} />}
+            {memo.whyNotFineTune.length > 0 && <WhyNot label="Why not fine tune" items={memo.whyNotFineTune} />}
           </div>
         </div>
         <div className="mt-4 overflow-x-auto">
@@ -143,7 +143,7 @@ export function TrainingReadiness() {
               {ds.edgeCaseCoverageScore < 65 && <Badge tone="amber">Too few edge cases</Badge>}
             </div>
           </>
-        ) : <p className="text-sm text-slatey-400">No split required — RAG/eval datasets are used instead of a supervised training split.</p>}
+        ) : <p className="text-sm text-slatey-400">No split required, RAG/eval datasets are used instead of a supervised training split.</p>}
       </Panel>
 
       {/* Overfitting & generalization */}
@@ -151,10 +151,10 @@ export function TrainingReadiness() {
         <SectionHeader eyebrow="Model quality" title="Overfitting & generalization" icon={LineChart}
           description="Overfitting = strong on seen examples, weak on new cases. Generalization = performing well on unseen examples. Detect overfitting before release." />
 
-        {/* Phase D — the divergence curve, made interactive */}
+        {/* Phase D, the divergence curve, made interactive */}
         <div className="mb-5 rounded-lg border border-line bg-slate-50/50 p-4">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-semibold text-ink">Train vs validation accuracy — where memorizing begins</p>
+            <p className="text-sm font-semibold text-ink">Train vs validation accuracy, where memorizing begins</p>
             <Badge tone={curve.overfittingRisk === "low" ? "emerald" : curve.overfittingRisk === "medium" ? "amber" : "rose"}>
               {curve.overfittingRisk} overfitting risk · {curve.finalGap}pt gap
             </Badge>
@@ -186,7 +186,7 @@ export function TrainingReadiness() {
             </ResponsiveContainer>
           </div>
           <p className="mt-2 text-[12px] leading-relaxed text-slatey-400">{curve.note}</p>
-          <p className="mt-1 text-[11px] italic text-slatey-500">Simulated curves — no model is trained. The shape is deterministic and driven by dataset size.</p>
+          <p className="mt-1 text-[11px] italic text-slatey-500">Simulated curves, no model is trained. The shape is deterministic and driven by dataset size.</p>
         </div>
         <table className="w-full min-w-[520px] text-left text-sm">
           <thead><tr className="border-b border-line text-[11px] uppercase tracking-wide text-slatey-500"><th className="py-2 pr-3 font-semibold">Scenario</th><th className="py-2 pr-3 font-semibold text-right">Train</th><th className="py-2 pr-3 font-semibold text-right">Validation</th><th className="py-2 pr-3 font-semibold text-right">Test</th><th className="py-2 font-semibold">Risk</th></tr></thead>
@@ -227,12 +227,12 @@ export function TrainingReadiness() {
       <Panel>
         <SectionHeader eyebrow="For reviewers" title="What this training layer demonstrates" icon={Info} />
         <p className="max-w-3xl text-sm leading-relaxed text-slatey-300">
-          This layer demonstrates that enterprise AI teams should not fine-tune by default. The right approach depends on the workflow,
-          data, freshness, governance burden, and evaluation evidence. Fine-tuning requires high-quality labeled data, clean splits,
+          This layer demonstrates that enterprise AI teams should not fine tune by default. The right approach depends on the workflow,
+          data, freshness, governance burden, and evaluation evidence. Fine tuning requires high-quality labeled data, clean splits,
           holdout evaluation, overfitting checks, and operational monitoring.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <InsightCard tone="info" title="Fine-tune vs RAG decisioning">A memo picks the right approach from the initiative, not a default.</InsightCard>
+          <InsightCard tone="info" title="Fine tune vs RAG decisioning">A memo picks the right approach from the initiative, not a default.</InsightCard>
           <InsightCard tone="info" title="Labeled-data readiness">Quality, consistency, balance, and coverage are checked before training.</InsightCard>
           <InsightCard tone="success" title="Train/validation/test split">Leakage and holdout gaps are surfaced explicitly.</InsightCard>
           <InsightCard tone="success" title="Overfitting & generalization">Train-vs-test gaps and risk triggers are made visible.</InsightCard>
@@ -242,7 +242,7 @@ export function TrainingReadiness() {
         <div className="mt-4 rounded-lg border border-line bg-slate-50/60 p-3">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">Training simulation boundary</p>
           <p className="mt-1 text-[12px] leading-relaxed text-slatey-400">
-            This portfolio demo does not train or fine-tune a model. It uses deterministic readiness checks and simulated learning-curve
+            This portfolio demo does not train or fine tune a model. It uses deterministic readiness checks and simulated learning-curve
             examples to show the decisions enterprise teams make before training. In production these contracts could connect to labeling
             platforms, model registries, eval stores, MLflow, W&amp;B, SageMaker, Vertex AI, or Azure ML. No real training is performed here.
           </p>

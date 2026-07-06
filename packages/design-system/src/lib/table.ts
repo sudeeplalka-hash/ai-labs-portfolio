@@ -1,4 +1,4 @@
-// Table sort helpers — a small, tested primitive so any lab's data table can get
+// Table sort helpers, a small, tested primitive so any lab's data table can get
 // clickable, stable sorting without re-deriving the logic. Pure.
 
 export type SortDir = "asc" | "desc";

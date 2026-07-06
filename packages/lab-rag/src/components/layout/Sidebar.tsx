@@ -21,7 +21,7 @@ import { cn } from "@rag/lib/cn";
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
-// The demo dashboards (mock evaluation data) — grouped under one section so the
+// The demo dashboards (mock evaluation data), grouped under one section so the
 // hierarchy is obvious: the Lab is the live product, these tell the story.
 const DASHBOARD_NAV: NavItem[] = [
   { href: "/overview", label: "Executive Overview", icon: LayoutDashboard },

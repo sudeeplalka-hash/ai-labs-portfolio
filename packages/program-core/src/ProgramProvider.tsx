@@ -90,7 +90,7 @@ export function useProgram() {
 }
 
 /** The canonical mode-aware read. `src` is the curated demo archetype in Demo
- * mode and the live threaded program otherwise — every display derivation
+ * mode and the live threaded program otherwise, every display derivation
  * should come from it, so no component can forget the archetype again.
  * Writers keep using `state`/`update` and must stay live-gated via `isDemo`. */
 export function useProgramSource() {

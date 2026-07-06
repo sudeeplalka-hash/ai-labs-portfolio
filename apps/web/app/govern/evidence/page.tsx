@@ -95,7 +95,7 @@ export default function EvidenceCenter() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-slate-900">{selected.title}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Period: {formatDate(selected.period_start)} – {formatDate(selected.period_end)}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">Period: {formatDate(selected.period_start)} to {formatDate(selected.period_end)}</p>
                 </div>
                 <a href={api.evidence.downloadUrl(selected.id)} download className="flex items-center gap-1.5 text-xs border border-slate-200 px-3 py-1.5 rounded text-slate-600 hover:bg-slate-50">
                   <Download size={13} /> Download .md

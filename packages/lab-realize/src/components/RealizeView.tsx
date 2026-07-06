@@ -27,7 +27,7 @@ function Src({ s }: { s: StageKey }) {
 export function RealizeView() {
   const { state, isDemo, update, hydrated, src } = useProgramSource();
   const [ov, setOv] = useState<Overrides>({});
-  // Phase F — scenario A/B: snapshot the current assumption set and compare.
+  // Phase F, scenario A/B: snapshot the current assumption set and compare.
   const [scenarioA, setScenarioA] = useState<{ ov: Overrides; riskAdjustedValue: number; roiPct: number; paybackMonths: number } | null>(null);
 
   const base = useMemo(() => deriveInputs(src), [src]);
@@ -43,21 +43,21 @@ export function RealizeView() {
   const leaks = flows.filter((f) => f.kind === "leak");
   const biggestLeak = [...leaks].sort((a, b) => b.amount - a.amount)[0];
 
-  // Recommended next action for the Strategy iteration loop — driven by the
+  // Recommended next action for the Strategy iteration loop, driven by the
   // largest leak so the program knows what to improve on the next pass.
   const nextAction = useMemo(() => {
     const k = biggestLeak?.key;
-    if (k === "adoption") return "Strengthen the adoption plan — it is the largest value leak.";
+    if (k === "adoption") return "Strengthen the adoption plan, it is the largest value leak.";
     if (k === "quality") return "Raise answer quality in Build to close the quality leak.";
     if (k === "runcost") return "Optimize run cost in AI Ops (caching / model tier).";
     if (k === "risk") return "Resolve open governance findings to lower the risk discount.";
-    return "Re-run the workshop with tighter scope to lift risk-adjusted return.";
+    return "Re-run the workshop with tighter scope to lift risk adjusted return.";
   }, [biggestLeak?.key]);
 
   useEffect(() => {
     if (!hydrated || isDemo) return;
     update((d) => {
-      // Only re-stamp createdAt when the outcome actually changed — merely
+      // Only re-stamp createdAt when the outcome actually changed, merely
       // visiting the page must not imply a fresh realization run.
       const prev = d.outcomes;
       const changed = !prev
@@ -73,7 +73,7 @@ export function RealizeView() {
         createdAt: changed ? new Date().toISOString() : prev?.createdAt,
       };
       d.iteration = {
-        lastOutcomeSummary: `${roi.roiPct}% risk-adjusted ROI · ${Number.isFinite(roi.paybackMonths) ? Math.round(roi.paybackMonths) + "mo payback" : "no payback"} · biggest leak: ${biggestLeak?.label ?? "n/a"}`,
+        lastOutcomeSummary: `${roi.roiPct}% risk adjusted ROI · ${Number.isFinite(roi.paybackMonths) ? Math.round(roi.paybackMonths) + "mo payback" : "no payback"} · biggest leak: ${biggestLeak?.label ?? "n/a"}`,
         recommendedNextAction: nextAction,
       };
     });
@@ -93,11 +93,11 @@ export function RealizeView() {
             {engine.modelDeployment ? ` (${engine.modelDeployment})` : ""}
             {typeof engine.modelCostFactor === "number" ? ` · cost ×${engine.modelCostFactor}` : ""}
           </span>
-          <span className="text-slatey-500">— set in Build · Model Fit</span>
+          <span className="text-slatey-500">set in Build · Model Fit</span>
         </div>
       )}
 
-      {/* 1 · THE VERDICT — say the answer in one plain sentence */}
+      {/* 1 · THE VERDICT, say the answer in one plain sentence */}
       <section id="verdict" className="scroll-mt-24">
         <div className={cn(
           "rounded-2xl border p-6 shadow-card",
@@ -115,32 +115,32 @@ export function RealizeView() {
             {worth ? (
               <>Returns <span className="text-emerald-700">{usd(roi.riskAdjustedValue)}/yr</span> on a {usd(inp.investment)} build{payback !== null ? <>, paying for itself in <span className="text-emerald-700">{payback} months</span></> : ""}.</>
             ) : (
-              <>Not fundable as it stands — the value it creates doesn&rsquo;t yet cover what it costs to build and run.</>
+              <>Not fundable as it stands, the value it creates doesn&rsquo;t yet cover what it costs to build and run.</>
             )}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slatey-400">
-            This is the <span className="font-medium text-ink">risk‑adjusted</span> number — the honest one you could defend to finance. It starts from all the value on the table and subtracts every real‑world leak, each traced to the stage that caused it (shown below).
+            This is the <span className="font-medium text-ink">risk‑adjusted</span> number, the honest one you could defend to finance. It starts from all the value on the table and subtracts every real‑world leak, each traced to the stage that caused it (shown below).
           </p>
         </div>
 
         {/* supporting numbers */}
         <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <KpiCard label="Risk-adjusted value" value={`${usd(roi.riskAdjustedValue)}`} suffix="/yr" tone={worth ? "healthy" : "critical"} interpretation="defensible, traceable"
+          <KpiCard label="Risk adjusted value" value={`${usd(roi.riskAdjustedValue)}`} suffix="/yr" tone={worth ? "healthy" : "critical"} interpretation="defensible, traceable"
             tooltip="The annual value this initiative is expected to create after every leak is subtracted: low adoption, imperfect answer quality, run cost, and a risk discount. It starts from the addressable value (tasks × time saved × labor rate) and removes each loss, each sourced from an upstream stage. This is the defensible number you would put in front of finance." />
           <KpiCard label="ROI" value={`${roi.roiPct}`} suffix="%" tone={roi.roiPct > 50 ? "healthy" : roi.roiPct > 0 ? "watch" : "critical"} target="return vs cost, year one"
-            tooltip="Return on investment: the risk-adjusted annual value divided by the total cost to build and run it for one year, shown as a percent. Above 0% means it returns more than it costs, and higher is better." />
-          <KpiCard label="Payback" value={payback !== null ? `${payback}` : "—"} suffix="mo" tone={payback !== null && payback <= 12 ? "healthy" : payback !== null && payback <= 24 ? "watch" : "risk"} target="time to recoup the build"
-            tooltip="How many months of risk-adjusted value it takes to recoup the upfront build investment. Shorter paybacks are easier to fund and lower risk; a dash means the value never covers the cost." />
+            tooltip="Return on investment: the risk adjusted annual value divided by the total cost to build and run it for one year, shown as a percent. Above 0% means it returns more than it costs, and higher is better." />
+          <KpiCard label="Payback" value={payback !== null ? `${payback}` : "N/A"} suffix="mo" tone={payback !== null && payback <= 12 ? "healthy" : payback !== null && payback <= 24 ? "watch" : "risk"} target="time to recoup the build"
+            tooltip="How many months of risk adjusted value it takes to recoup the upfront build investment. Shorter paybacks are easier to fund and lower risk; a dash means the value never covers the cost." />
           <KpiCard label="Value captured" value={`${captured}`} suffix="%" tone={captured >= 55 ? "healthy" : captured >= 35 ? "watch" : "risk"} target="of everything on the table"
-            tooltip="Of the full addressable value (all the time that could be saved), the share you actually keep after adoption and answer-quality losses — before run cost and risk. Higher means less leaks away before it even reaches the bottom line." />
+            tooltip="Of the full addressable value (all the time that could be saved), the share you actually keep after adoption and answer-quality losses, before run cost and risk. Higher means less leaks away before it even reaches the bottom line." />
         </div>
       </section>
 
-      {/* 2 · WHERE THE VALUE GOES — the waterfall */}
+      {/* 2 · WHERE THE VALUE GOES, the waterfall */}
       <section id="value" className="scroll-mt-24">
         <Panel>
           <SectionHeader eyebrow="Follow the money" title="Where the value goes"
-            description="Start with everything on the table, subtract each real-world leak, and you land on the defensible number."
+            description="Start with everything on the table, subtract each real world leak, and you land on the defensible number."
             icon={GitBranch} action={<Badge tone={worth ? "emerald" : "rose"}>{worth ? "Worth funding" : "Not yet"}</Badge>} />
           <ValueWaterfall flows={flows} />
           <div className="mt-4 rounded-lg border border-line bg-slate-50/60 p-3 text-sm leading-relaxed text-slatey-300">
@@ -152,10 +152,10 @@ export function RealizeView() {
           </div>
         </Panel>
 
-        {/* Phase D — when does it pay for itself? Reacts to the scenario sliders. */}
+        {/* Phase D, when does it pay for itself? Reacts to the scenario sliders. */}
         <Panel className="mt-6">
           <SectionHeader eyebrow="The CFO question" title="When does it pay for itself?"
-            description="Cumulative risk-adjusted value against the upfront build investment. The crossing point is the payback moment — drag the scenario sliders below and watch it move."
+            description="Cumulative risk adjusted value against the upfront build investment. The crossing point is the payback moment, drag the scenario sliders below and watch it move."
             icon={TrendingUp}
             action={payback !== null
               ? <Badge tone={payback <= 12 ? "emerald" : payback <= 24 ? "amber" : "rose"}>{payback} months</Badge>
@@ -164,11 +164,11 @@ export function RealizeView() {
         </Panel>
       </section>
 
-      {/* 3 · WHAT MOVES IT MOST — levers + scenario sliders + the takeaways */}
+      {/* 3 · WHAT MOVES IT MOST, levers + scenario sliders + the takeaways */}
       <section id="levers" className="scroll-mt-24">
         <div className="grid gap-6 lg:grid-cols-2">
           <Panel>
-            <SectionHeader title="What moves it most" description="The assumptions with the biggest effect on the outcome — where effort pays off." icon={TrendingUp} />
+            <SectionHeader title="What moves it most" description="The assumptions with the biggest effect on the outcome, where effort pays off." icon={TrendingUp} />
             <div className="space-y-2.5">
               {shownSens.map((s) => (
                 <div key={s.key}>
@@ -180,12 +180,12 @@ export function RealizeView() {
               ))}
             </div>
             <p className="mt-3 rounded-md bg-primary-soft/50 p-2.5 text-[11px] leading-relaxed text-slatey-500">
-              Pull the longest bar first — <b className="text-ink">{sens[0]?.label.toLowerCase()}</b> shifts the outcome more than anything else here.
+              Pull the longest bar first, <b className="text-ink">{sens[0]?.label.toLowerCase()}</b> shifts the outcome more than anything else here.
             </p>
           </Panel>
 
           <Panel>
-            <SectionHeader title="Test a scenario" description="Override any assumption to see the whole page move — nothing is hard-coded." icon={SlidersHorizontal}
+            <SectionHeader title="Test a scenario" description="Override any assumption to see the whole page move, nothing is hard-coded." icon={SlidersHorizontal}
               action={Object.keys(ov).length > 0 ? <button onClick={() => setOv({})} className="inline-flex items-center gap-1 text-xs font-semibold text-primary"><RotateCcw className="h-3 w-3" /> reset</button> : null} />
             <div className="space-y-4">
               <OvSlider label="Adoption" suffix="%" min={10} max={95} value={Math.round(inp.adoption.value * 100)} src={base.adoption.source} onChange={(v) => setOv((o) => ({ ...o, adoption: v / 100 }))} />
@@ -195,13 +195,13 @@ export function RealizeView() {
             </div>
             <p className="mt-3 text-[11px] text-slatey-500">Run cost <b className="text-ink">{usd(inp.annualRunCost.value)}/yr</b><Src s={base.annualRunCost.source} /> · risk discount <b className="text-ink">{Math.round(inp.riskDiscount.value * 100)}%</b><Src s={base.riskDiscount.source} /> are inherited from downstream stages.</p>
 
-            {/* Phase F — scenario A/B */}
+            {/* Phase F, scenario A/B */}
             <div className="mt-3 border-t border-line/70 pt-3">
               {!scenarioA ? (
                 <button
                   onClick={() => setScenarioA({ ov: { ...ov }, riskAdjustedValue: roi.riskAdjustedValue, roiPct: roi.roiPct, paybackMonths: roi.paybackMonths })}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slatey-300 hover:bg-slate-50">
-                  Save as scenario A — then tweak and compare
+                  Save as scenario A, then tweak and compare
                 </button>
               ) : (
                 <div>
@@ -215,7 +215,7 @@ export function RealizeView() {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <ScenarioDelta label="Risk-adj. value" a={usd(scenarioA.riskAdjustedValue)} b={usd(roi.riskAdjustedValue)} better={roi.riskAdjustedValue >= scenarioA.riskAdjustedValue} />
                     <ScenarioDelta label="ROI" a={`${scenarioA.roiPct}%`} b={`${roi.roiPct}%`} better={roi.roiPct >= scenarioA.roiPct} />
-                    <ScenarioDelta label="Payback" a={Number.isFinite(scenarioA.paybackMonths) ? `${Math.round(scenarioA.paybackMonths)}mo` : "—"} b={Number.isFinite(roi.paybackMonths) ? `${Math.round(roi.paybackMonths)}mo` : "—"} better={roi.paybackMonths <= scenarioA.paybackMonths} />
+                    <ScenarioDelta label="Payback" a={Number.isFinite(scenarioA.paybackMonths) ? `${Math.round(scenarioA.paybackMonths)}mo` : "N/A"} b={Number.isFinite(roi.paybackMonths) ? `${Math.round(roi.paybackMonths)}mo` : "N/A"} better={roi.paybackMonths <= scenarioA.paybackMonths} />
                   </div>
                 </div>
               )}
@@ -225,7 +225,7 @@ export function RealizeView() {
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <InsightCard tone={inp.adoption.value > 0.6 ? "success" : "warn"} title="Adoption is usually the biggest lever">
-            At {Math.round(inp.adoption.value * 100)}% adoption you capture {usd(roi.realized)} of {usd(roi.addressable)}. Adoption traces to feasibility &amp; data readiness — fix those upstream to lift it.
+            At {Math.round(inp.adoption.value * 100)}% adoption you capture {usd(roi.realized)} of {usd(roi.addressable)}. Adoption traces to feasibility &amp; data readiness, fix those upstream to lift it.
           </InsightCard>
           <InsightCard tone={inp.riskDiscount.value > 0.3 ? "danger" : "info"} title={`Risk discount is −${Math.round(inp.riskDiscount.value * 100)}%`}>
             Governance&rsquo;s risk tier discounts the value. Lower-risk, better-governed initiatives keep more of what they earn. Use the scenario sliders above to test it yourself.
@@ -233,7 +233,7 @@ export function RealizeView() {
         </div>
       </section>
 
-      {/* 3.5 · ADOPTION & CHANGE PLAN — the treatment for the biggest leak */}
+      {/* 3.5 · ADOPTION & CHANGE PLAN, the treatment for the biggest leak */}
       <section id="adoption" className="scroll-mt-24">
         <AdoptionPlanPanel
           audience={src.initiative?.params?.user ?? null}
@@ -247,10 +247,10 @@ export function RealizeView() {
         />
       </section>
 
-      {/* 4 · TRACEABILITY — the one-page dossier */}
+      {/* 4 · TRACEABILITY, the one-page dossier */}
       <section id="dossier" className="scroll-mt-24">
         <Panel>
-          <SectionHeader eyebrow="The payoff, on one page" title="Traceability dossier" description="Every number above, traced to the decision it came from — click any row to open that stage." icon={FileText} />
+          <SectionHeader eyebrow="The payoff, on one page" title="Traceability dossier" description="Every number above, traced to the decision it came from, click any row to open that stage." icon={FileText} />
           <div className="overflow-hidden rounded-xl border border-line">
             {rows.map((r, idx) => (
               <Link key={idx} href={STAGE_HREF[r.stage]} className={cn("flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 transition-colors hover:bg-slate-50", idx < rows.length - 1 && "border-b border-line", idx === rows.length - 1 && "bg-emerald-50/50")}>
@@ -262,7 +262,7 @@ export function RealizeView() {
             ))}
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-slatey-400">This is the whole program on one screen — the artifact you hand a stakeholder.</p>
+            <p className="text-sm text-slatey-400">This is the whole program on one screen, the artifact you hand a stakeholder.</p>
             <Link href="/story/brief" className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-glow hover:bg-primary-dark">
               Open the board brief <ArrowRight className="h-4 w-4" />
             </Link>
@@ -286,9 +286,9 @@ function OvSlider({ label, suffix, min, max, value, src, onChange }: { label: st
 }
 
 // ---- Phase I · adoption & change plan ------------------------------------------
-// Realize's own math names adoption as the biggest leak — this panel is the
+// Realize's own math names adoption as the biggest leak, this panel is the
 // treatment. Pick interventions and watch projected adoption + recaptured value
-// move. Uplifts are modeled planning numbers (labeled as such), session-local.
+// move. Uplifts are modeled planning numbers (labeled as such), session local.
 function AdoptionPlanPanel({ audience, adoptionPct, citationAccuracy, humanReviewRequired, addressable, quality, riskDiscount, usd }: {
   audience: string | null; adoptionPct: number; citationAccuracy?: number; humanReviewRequired?: boolean;
   addressable: number; quality: number; riskDiscount: number; usd: (n: number) => string;
@@ -308,13 +308,13 @@ function AdoptionPlanPanel({ audience, adoptionPct, citationAccuracy, humanRevie
   const projected = projectAdoption(adoptionPct, chosen);
   const upliftPts = projected - adoptionPct;
   // Value per adoption point: realized = addressable × adoption × quality, so
-  // each point recaptures addressable × quality / 100 — risk-adjusted here.
+  // each point recaptures addressable × quality / 100, risk adjusted here.
   const recaptured = Math.round(((upliftPts / 100) * addressable * quality) * (1 - riskDiscount));
 
   return (
     <Panel>
       <SectionHeader eyebrow="Adoption & change plan" title="The treatment for the biggest leak" icon={Users}
-        description={`Adoption is where most AI value dies. Build the change plan for ${audience?.toLowerCase() ?? "your users"} — each intervention carries a modeled uplift, and the value it recaptures shows up live.`}
+        description={`Adoption is where most AI value dies. Build the change plan for ${audience?.toLowerCase() ?? "your users"}, each intervention carries a modeled uplift, and the value it recaptures shows up live.`}
         action={
           <Badge tone={projected >= ADOPTION_TARGET ? "emerald" : projected > adoptionPct ? "amber" : "rose"}>
             {adoptionPct}% → {projected}% adoption
@@ -351,12 +351,12 @@ function AdoptionPlanPanel({ audience, adoptionPct, citationAccuracy, humanRevie
         <p className="text-sm leading-relaxed text-slatey-300">
           {upliftPts > 0 ? (
             <>This plan lifts adoption <b className="text-ink">{adoptionPct}% → {projected}%</b>, recapturing{" "}
-              <b className="text-emerald-700">~{usd(recaptured)}/yr</b> of risk-adjusted value{projected >= ADOPTION_TARGET ? " — clearing the healthy-adoption bar." : "."}</>
+              <b className="text-emerald-700">~{usd(recaptured)}/yr</b> of risk adjusted value{projected >= ADOPTION_TARGET ? ", clearing the healthy-adoption bar." : "."}</>
           ) : (
             <>Select interventions to see how much of the adoption leak the plan recaptures.</>
           )}
         </p>
-        <span className="text-[11px] italic text-slatey-500">Modeled uplifts — planning numbers, not measurements.</span>
+        <span className="text-[11px] italic text-slatey-500">Modeled uplifts, planning numbers, not measurements.</span>
       </div>
     </Panel>
   );
@@ -377,8 +377,8 @@ function ScenarioDelta({ label, a, b, better }: { label: string; a: string; b: s
 }
 
 // ---- Phase D · payback crossover ---------------------------------------------
-// Cumulative risk-adjusted value vs the upfront investment over 36 months.
-// Hand-rolled SVG (house style, no chart dependency) — deterministic and
+// Cumulative risk adjusted value vs the upfront investment over 36 months.
+// Hand-rolled SVG (house style, no chart dependency), deterministic and
 // print-safe. The crossing point is the payback moment.
 function PaybackCrossover({ investment, annualNetValue, paybackMonths, usd }: {
   investment: number; annualNetValue: number; paybackMonths: number; usd: (n: number) => string;
@@ -409,7 +409,7 @@ function PaybackCrossover({ investment, annualNetValue, paybackMonths, usd }: {
         {/* cumulative value line */}
         <path d={valuePath} fill="none" stroke={annualNetValue > 0 ? "#1f6fc4" : "#e11d48"} strokeWidth="2.5" />
         <text x={W - padR} y={y((annualNetValue / 12) * MONTHS) - 6} textAnchor="end" fontSize="10" fill={annualNetValue > 0 ? "#15508c" : "#be123c"}>
-          cumulative risk-adjusted value
+          cumulative risk adjusted value
         </text>
         {/* crossover marker */}
         {crosses && (

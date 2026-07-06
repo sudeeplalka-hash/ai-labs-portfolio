@@ -34,7 +34,7 @@ export function uniqueContentWords(text: string): Set<string> {
   return new Set(contentWords(text));
 }
 
-// Extract numbers, currency, and percentages — used to detect ungrounded specifics.
+// Extract numbers, currency, and percentages, used to detect ungrounded specifics.
 export function extractNumerics(text: string): string[] {
   const matches = text.match(/\$?\d[\d,]*(?:\.\d+)?%?/g) ?? [];
   return matches.map((m) => m.replace(/,/g, "")).filter((m) => m.replace(/[^0-9]/g, "").length > 0);

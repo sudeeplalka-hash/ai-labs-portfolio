@@ -1,17 +1,17 @@
 // ============================================================================
-// Phase 3 — retrieval substrate demonstration engine. Self-contained and
+// Phase 3, retrieval substrate demonstration engine. Self-contained and
 // deterministic: BM25 lexical baseline, local TF-IDF "vector" retrieval, hybrid
-// fusion, and governance-aware re-ranking over a small sample corpus. Does NOT
+// fusion, and governance-aware reranking over a small sample corpus. Does NOT
 // touch the live-lab BM25 pipeline; this is an analytical layer for /build/retrieval.
 // ============================================================================
 
-export type RetrievalMode = "lexical" | "simulated-vector" | "hybrid" | "hybrid-rerank";
+export type RetrievalMode = "lexical" | "simulated-vector" | "hybrid" | "hybrid rerank";
 
 export const RETRIEVAL_MODES: { id: RetrievalMode; label: string; desc: string }[] = [
   { id: "lexical", label: "Lexical BM25", desc: "Term-overlap ranking. Fast and explainable, but misses semantically similar evidence when wording differs." },
-  { id: "simulated-vector", label: "Simulated vector retrieval", desc: "Deterministic local embeddings + cosine similarity — illustrates semantic retrieval without a hosted vector DB." },
+  { id: "simulated-vector", label: "Simulated vector retrieval", desc: "Deterministic local embeddings + cosine similarity, illustrates semantic retrieval without a hosted vector DB." },
   { id: "hybrid", label: "Hybrid lexical + vector", desc: "Blends BM25 and vector scores (0.55 / 0.45) for balanced evidence. Strongest general option." },
-  { id: "hybrid-rerank", label: "Hybrid + re-rank", desc: "Reorders hybrid evidence using source authority, freshness, metadata, citation readiness, and Data-handoff exclusions." },
+  { id: "hybrid rerank", label: "Hybrid + rerank", desc: "Reorders hybrid evidence using source authority, freshness, metadata, citation readiness, and Data handoff exclusions." },
 ];
 export const LEXICAL_WEIGHT = 0.55;
 export const VECTOR_WEIGHT = 0.45;
@@ -101,7 +101,7 @@ export function runRetrieval(mode: RetrievalMode, blockedSources: string[] = [],
   }));
   ranked.sort((a, b) => b.finalScore - a.finalScore).forEach((r, i) => (r.rank = i + 1));
 
-  if (mode === "hybrid-rerank") {
+  if (mode === "hybrid rerank") {
     const prev = new Map(ranked.map((r) => [r.id, r.rank]));
     ranked = ranked.map((r) => {
       const src = chunks.find((c) => c.id === r.id)!;
@@ -122,8 +122,8 @@ export function runRetrieval(mode: RetrievalMode, blockedSources: string[] = [],
   }
 
   const top = ranked.filter((r) => !r.excluded).slice(0, topK);
-  // Deterministic quality estimates per mode (governed re-rank is best).
-  const base = { lexical: { c: 82, f: 84, h: 12, q: 78, lat: 120, cost: 0.009 }, "simulated-vector": { c: 84, f: 85, h: 11, q: 82, lat: 180, cost: 0.011 }, hybrid: { c: 88, f: 88, h: 9, q: 86, lat: 210, cost: 0.013 }, "hybrid-rerank": { c: 93, f: 91, h: 6, q: 90, lat: 280, cost: 0.015 } }[mode];
+  // Deterministic quality estimates per mode (governed rerank is best).
+  const base = { lexical: { c: 82, f: 84, h: 12, q: 78, lat: 120, cost: 0.009 }, "simulated-vector": { c: 84, f: 85, h: 11, q: 82, lat: 180, cost: 0.011 }, hybrid: { c: 88, f: 88, h: 9, q: 86, lat: 210, cost: 0.013 }, "hybrid rerank": { c: 93, f: 91, h: 6, q: 90, lat: 280, cost: 0.015 } }[mode];
   return {
     mode, results: [...top, ...ranked.filter((r) => r.excluded)],
     metrics: { citationAccuracy: base.c, faithfulness: base.f, hallucinationRisk: base.h, quality: base.q, latencyMs: base.lat, cost: base.cost },
@@ -136,11 +136,11 @@ export function compareModes(blockedSources: string[] = []): ModeComparisonRow[]
     "lexical": { strength: "Explainable exact matches", risk: "Misses semantic matches" },
     "simulated-vector": { strength: "Handles wording variation", risk: "May retrieve vague neighbors" },
     "hybrid": { strength: "Balanced, strongest general option", risk: "Requires weight tuning" },
-    "hybrid-rerank": { strength: "Governed top evidence (release candidate)", risk: "Higher latency" },
+    "hybrid rerank": { strength: "Governed top evidence (release candidate)", risk: "Higher latency" },
   };
   return RETRIEVAL_MODES.map((m) => {
     const r = runRetrieval(m.id, blockedSources);
-    return { mode: m.id, label: m.label, topSource: r.results.find((x) => !x.excluded)?.source ?? "—", strength: meta[m.id].strength, risk: meta[m.id].risk, latencyMs: r.metrics.latencyMs, cost: r.metrics.cost };
+    return { mode: m.id, label: m.label, topSource: r.results.find((x) => !x.excluded)?.source ?? "N/A", strength: meta[m.id].strength, risk: meta[m.id].risk, latencyMs: r.metrics.latencyMs, cost: r.metrics.cost };
   });
 }
 
@@ -168,6 +168,6 @@ export function vectorIndexReadiness(opts: { dataReadinessScore?: number; blocke
   const readiness = !opts.hasHandoff ? "Missing" : missing >= 4 ? "Missing" : missing >= 2 ? "Partial" : "Ready";
   const recommendation = readiness === "Ready" ? "Ready for vector database integration"
     : readiness === "Partial" ? "Ready for simulated vector retrieval; resolve gaps before production vector indexing"
-    : opts.hasHandoff ? "Ready for lexical retrieval only" : "Not ready for vector indexing — complete the Data handoff first";
+    : opts.hasHandoff ? "Ready for lexical retrieval only" : "Not ready for vector indexing, complete the Data handoff first";
   return { fields, readiness, recommendation };
 }

@@ -2,7 +2,7 @@
 // Coupled scoring (BRIEF §8). Pure + deterministic.
 //   Value          ↑ pain × user volume × job frequency; ↑ as scope broadens
 //   Feasibility    ↑ as scope narrows + simpler job; ↓ with scope × difficulty
-//   Data Readiness  blend(self-rated posture, data-need by job); ↓ as scope broadens
+//   Data Readiness  blend(self reported posture, data-need by job); ↓ as scope broadens
 // ============================================================================
 import type { FramingParams, TriangleScores } from "./types";
 import { USERS, JOBS, PAINS, POSTURE } from "./params";

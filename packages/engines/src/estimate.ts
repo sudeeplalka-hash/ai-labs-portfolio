@@ -1,6 +1,6 @@
 // Delivery estimation (EL-08). Three-point / PERT with an honest confidence ladder: the mean
 // is a coin-flip (P50); a defensible commit adds contingency to hit P80/P90. Plus margin under
-// a scope change (absorb silently vs. hold via change order). Pure — the same arithmetic the
+// a scope change (absorb silently vs. hold via change order). Pure, the same arithmetic the
 // studio shows, so the committed number and the chart can't drift.
 export interface ThreePoint {
   o: number; // optimistic

@@ -170,7 +170,7 @@ export const evaluationRuns: EvaluationRun[] = [
     regressionStatus: "Watch",
     releaseRecommendation: "Hold",
     notes:
-      "Compliance guardrails cut critical failures to one and improved high-risk handling. Citation accuracy and P95 latency remain below target.",
+      "Compliance guardrails cut critical failures to one and improved high risk handling. Citation accuracy and P95 latency remain below target.",
   },
 ];
 

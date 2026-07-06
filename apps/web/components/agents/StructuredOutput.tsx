@@ -1,10 +1,10 @@
 "use client";
 
-// GAP-04 · Tool-Use & Structured Output (Collection 2 · toolkit).
+// GAP-04 · Tool use & Structured Output (Collection 2 · toolkit).
 // Messy text → schema-validated JSON. A hard sample fails validation (wrong type /
-// missing required), triggers a corrective retry, and passes — the trace is the
+// missing required), triggers a corrective retry, and passes, the trace is the
 // point. Where outputs feed a system of record, the validation gate is not optional.
-// LIVE-ready (host endpoint → real model); ships deterministic + honestly badged.
+// LIVE ready (host endpoint → real model); ships deterministic + honestly badged.
 
 import { useState } from "react";
 import Link from "next/link";
@@ -25,7 +25,7 @@ interface Sample {
 const SAMPLES: Sample[] = [
   {
     key: "dispute", label: "Dispute email", hard: false,
-    raw: "Hi, this is really frustrating — I've been a cardmember for years. There's a charge for $214.50 from 'GLOBEX DIGITAL' on the account ending 0021 that I absolutely did not make. I've called twice. Please open a dispute. Unacceptable.",
+    raw: "Hi, this is really frustrating, I've been a cardmember for years. There's a charge for $214.50 from 'GLOBEX DIGITAL' on the account ending 0021 that I absolutely did not make. I've called twice. Please open a dispute. Unacceptable.",
     schema: [
       { name: "intent", type: "enum(open_dispute|status|general)", required: true },
       { name: "account_id", type: "string|null", required: true },
@@ -51,11 +51,11 @@ const SAMPLES: Sample[] = [
     attempt1: { intent: "status", amount_usd: "around 50", sentiment: "negative", priority: "med", summary: "Member reports possible unrecognized charges around $50." },
     errors: ["account_id: required key missing", "amount_usd: expected number|null, got string \"around 50\"", "needs_followup: required key missing"],
     retryNote: "Re-prompt with the schema + the three errors: null unknown numerics, include every required key, and flag missing identifiers for human follow-up.",
-    final: { intent: "status", account_id: null, amount_usd: null, sentiment: "negative", priority: "med", needs_followup: true, summary: "Member reports possible unrecognized charges (~$50, unconfirmed); no account number provided — route to follow-up." },
+    final: { intent: "status", account_id: null, amount_usd: null, sentiment: "negative", priority: "med", needs_followup: true, summary: "Member reports possible unrecognized charges (~$50, unconfirmed); no account number provided, route to follow-up." },
   },
   {
     key: "timeoff", label: "Time-off request", hard: false,
-    raw: "Hey, I'd like to take next Mon–Fri (Aug 4–8) off for a family trip — that's 5 days. My ID is EMP-3391. Can my manager get a heads up? Thanks!",
+    raw: "Hey, I'd like to take next Mon to Fri (Aug 4 to 8) off for a family trip, that's 5 days. My ID is EMP-3391. Can my manager get a heads up? Thanks!",
     schema: [
       { name: "employee_id", type: "string", required: true },
       { name: "days", type: "number", required: true },
@@ -67,7 +67,7 @@ const SAMPLES: Sample[] = [
   },
 ];
 
-// SIMULATED — extractions are authored/deterministic; a live-model variant is on the roadmap (no live call path is wired today).
+// SIMULATED, extractions are authored/deterministic; a live-model variant is on the roadmap (no live call path is wired today).
 
 export function StructuredOutput() {
   const [key, setKey] = useState(SAMPLES[0].key);
@@ -102,19 +102,19 @@ export function StructuredOutput() {
         <div className="mb-5">
           <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Tool-Use &amp; Structured Output</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Tool use &amp; Structured Output</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02", note: "Authored illustrative extraction" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             Getting JSON out of a model is easy. Getting <span className="font-semibold text-ink">valid</span> JSON, every
-            time, into a system of record is reliability engineering — schema, validation, and a corrective retry.
+            time, into a system of record is reliability engineering, schema, validation, and a corrective retry.
           </p>
         </div>
 
         <UseCaseRail useCases={GAP04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="How do messy inputs become schema-valid outputs, reliably?" approach="Run messy inputs through a validation gate — schema check, repair/retry, honest typed errors — and watch what gets caught before it moves on." why="The gate belongs before outputs hit systems of record, not after." metric="Schema-valid rate at the gate; repair success rate; escapes downstream." tradeoff="A strict gate adds retries and latency; a loose one lets bad data write to systems of record." outcome="A clear answer on where to place the validation gate and how strict to make it." />
+        <CaseStudy problem="How do messy inputs become schema-valid outputs, reliably?" approach="Run messy inputs through a validation gate, schema check, repair/retry, honest typed errors, and watch what gets caught before it moves on." why="The gate belongs before outputs hit systems of record, not after." metric="Schema-valid rate at the gate; repair success rate; escapes downstream." tradeoff="A strict gate adds retries and latency; a loose one lets bad data write to systems of record." outcome="A clear answer on where to place the validation gate and how strict to make it." />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {!activeUc && SAMPLES.map((x) => (
@@ -182,17 +182,17 @@ export function StructuredOutput() {
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Put a schema-validation and repair gate before any output writes to a system of record." lift="Near-zero malformed writes downstream, at a bounded retry cost." measure="Schema-valid rate at the gate; repair success rate; malformed records reaching systems of record." />
           <InsightCard title="The retry is the reliability" tone="info">
-            The first pass is often almost-right — a string where a number belongs, a missing key. A validation gate with a
+            The first pass is often almost-right, a string where a number belongs, a missing key. A validation gate with a
             single corrective retry turns "usually valid" into "always valid or explicitly flagged." That&apos;s the
             difference between a demo and production.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Where outputs feed systems of record, the validation gate is not optional. I place it between the model and the write."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Where outputs feed systems of record, the validation gate is not optional. I place it between the model and the write."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Each sample targets a JSON schema (typed, nullable, required keys). The output is validated key-by-key; on failure the errors are fed back in a corrective retry and re-validated.</p>
               <p>Extractions are authored and deterministic (not live model output); the hard sample&apos;s first attempt is constructed to fail schema validation so the corrective retry is visible. A live-model variant is designed for but not wired today, so the badge stays SIMULATED.</p>
-              <p>Stack: Next.js (static) + shared design system; client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the extractions are authored illustrations, not live model output; custom text needs a live model (roadmap). Real deployments add a max-retry cap and a dead-letter path for repeated failures.</p>
@@ -207,7 +207,7 @@ function AttemptCard({ n, valid, json, errors }: { n: number; valid: boolean; js
     <div className={`rounded-xl border p-3 ${valid ? "border-emerald-300 bg-white" : "border-rose-200 bg-rose-50"}`}>
       <div className="mb-1.5 flex items-center gap-1.5">
         {valid ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <XCircle className="h-4 w-4 text-rose-600" />}
-        <p className={`text-xs font-semibold ${valid ? "text-emerald-700" : "text-rose-700"}`}>Attempt {n} · {valid ? "valid — passes the gate" : "invalid — blocked"}</p>
+        <p className={`text-xs font-semibold ${valid ? "text-emerald-700" : "text-rose-700"}`}>Attempt {n} · {valid ? "valid, passes the gate" : "invalid, blocked"}</p>
       </div>
       <pre className="overflow-x-auto rounded-lg border border-line bg-ink p-3 font-mono text-[11px] leading-relaxed text-slate-100">{JSON.stringify(json, null, 2)}</pre>
       {errors && errors.length > 0 && (

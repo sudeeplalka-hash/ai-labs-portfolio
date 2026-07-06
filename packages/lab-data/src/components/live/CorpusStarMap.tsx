@@ -91,7 +91,7 @@ export function CorpusStarMap({
           <text x="50" y="99" textAnchor="middle" fontSize="2.6" fill="#9aa7b4" fontWeight="600">documents spread by content similarity</text>
         </svg>
 
-        {/* hover / selected tooltip — clamped & wrapping so it never clips */}
+        {/* hover / selected tooltip, clamped & wrapping so it never clips */}
         {active && (() => {
           const below = active.y < 24;
           return (
@@ -114,7 +114,7 @@ export function CorpusStarMap({
 
       {/* grounding caption */}
       <p className="mx-auto mt-2 max-w-[460px] text-center text-[11px] leading-relaxed text-slatey-400">
-        Each dot is a document. The closer two dots sit, the more similar their content — tight clusters are usually duplicates or versions of the same doc. Lines flag exact duplicates and stale versions.
+        Each dot is a document. The closer two dots sit, the more similar their content, tight clusters are usually duplicates or versions of the same doc. Lines flag exact duplicates and stale versions.
       </p>
 
       {/* legend */}

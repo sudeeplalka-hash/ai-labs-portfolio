@@ -1,6 +1,6 @@
 // Delivery health & RAID (EL-04). A steering board should report trajectory, not a snapshot:
 // pair each workstream's reported RAG with its ACTUAL health and trend, and surface the ones
-// that "read green but are sinking" — reported green while actual is worse, or green trending
+// that "read green but are sinking", reported green while actual is worse, or green trending
 // down. Plus the portfolio health rollup. Pure; the same numbers the radar shows.
 export type Rag = "green" | "amber" | "red";
 export type TrendDir = "up" | "flat" | "down";

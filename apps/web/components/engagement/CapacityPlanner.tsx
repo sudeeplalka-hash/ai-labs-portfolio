@@ -2,7 +2,7 @@
 
 // EL-03 · Capacity & Resourcing Planner (Collection 4 · control room).
 // Portfolio demand vs a ~30-person skill inventory. The heatmap flags where you're
-// over-allocated — not on headcount, on specific skills — and hire / contract /
+// over-allocated, not on headcount, on specific skills, and hire / contract /
 // upskill toggles move the delivery date and cost live. Capacity plans fail on
 // skills, not headcount: thirty people ≠ thirty people. SIMULATED.
 
@@ -85,8 +85,8 @@ export function CapacityPlanner() {
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? activeUc.oneLiner : "Thirty people, five short — but only in three skills."} The heatmap shows where the portfolio is over-allocated;
-            the toggles show what hire, contract, or upskill each does to the date and the cost.{!activeUc && " This one is personal — it mirrors a 31-resource intelligence mapping I ran."}
+            {activeUc ? activeUc.oneLiner : "Thirty people, five short, but only in three skills."} The heatmap shows where the portfolio is over-allocated;
+            the toggles show what hire, contract, or upskill each does to the date and the cost.{!activeUc && " This one is personal, it mirrors a 31-resource intelligence mapping I ran."}
           </p>
         </div>
 
@@ -140,20 +140,20 @@ export function CapacityPlanner() {
         <div className="mt-6">
           <InsightCard title={bottleneck ? `Bottleneck: ${bottleneck.label}` : "No bottleneck"} tone={unresolved > 0 ? "danger" : "success"}>
             {unresolved > 0
-              ? <>The plan doesn&apos;t fail on headcount — it fails in {gapRows.map((g) => g.label).join(", ")}. Contract is fastest to the date, upskill is cheapest but leans on the slack in Delivery and SME, hiring is permanent but adds six weeks. Pick per constraint, not per habit.</>
-              : <>Every gap is resolved. Delivery lands at ~{deliveryWeeks} weeks for +${addedCost}k/month — now decide whether the pulled-in date is worth the run-rate.</>}
+              ? <>The plan doesn&apos;t fail on headcount, it fails in {gapRows.map((g) => g.label).join(", ")}. Contract is fastest to the date, upskill is cheapest but leans on the slack in Delivery and SME, hiring is permanent but adds six weeks. Pick per constraint, not per habit.</>
+              : <>Every gap is resolved. Delivery lands at ~{deliveryWeeks} weeks for +${addedCost}k/month, now decide whether the pulled-in date is worth the run-rate.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Close each skill gap with the cheapest adequate lever that still hits the need-by date." lift="Coverage on the critical skills without over-hiring, with the schedule impact explicit." measure="Skill-coverage % vs demand; utilization vs target; slippage traced to an unfilled gap." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering-committee takeaway:</span> {activeUc ? activeUc.takeaway : "Capacity plans fail on skills, not headcount. Thirty people ≠ thirty people."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo — a direct mirror of the 31-resource AMEX intelligence mapping; the most personal instrument on the site.</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Capacity plans fail on skills, not headcount. Thirty people ≠ thirty people."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, a direct mirror of the 31-resource AMEX intelligence mapping; the most personal instrument on the site.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Utilization = demand ÷ effective capacity per skill. Resolving a gap adds its shortfall as capacity; delivery slip = the worst gap&apos;s overflow (unresolved) or its resolution lead time (resolved). Monthly cost = base team + Σ(gap × resolution rate).</p>
-              <p>Stack: Next.js (static) + shared design system; deterministic client-side.</p>
+              <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> skills are aggregated pools, not named individuals; upskill assumes the slack is transferable. It exposes the skill-shaped bottleneck and the trade, not a resource-levelled schedule.</p>

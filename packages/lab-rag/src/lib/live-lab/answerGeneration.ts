@@ -111,7 +111,7 @@ export class SimulatedAnswerGenerator implements AnswerGenerator {
 
     const onTopic = ranked.filter((c) => c.score >= 0.6);
 
-    // Distinct ORIGINAL question content words present in a sentence — the key
+    // Distinct ORIGINAL question content words present in a sentence, the key
     // calibration signal (matching only the document's main noun isn't enough).
     const qContent = [...qWords].filter((w) => w.length >= 4);
     const distinctMatches = (sentence: string) => {
@@ -161,7 +161,7 @@ export class SimulatedAnswerGenerator implements AnswerGenerator {
       const first = cleaned[0];
       const lower = first.text.charAt(0).toLowerCase() + first.text.slice(1);
       body = `The document indicates that ${lower.replace(/[.?!]$/, "")} [${first.cite}].`;
-      caveats.unshift("Retrieval was moderate — worth verifying against the cited passage.");
+      caveats.unshift("Retrieval was moderate, worth verifying against the cited passage.");
     } else {
       const first = cleaned[0];
       body = `I couldn't find a passage that directly answers this. The closest detail the document offers is: “${first.text.replace(/[.?!]$/, "")}” [${first.cite}].`;

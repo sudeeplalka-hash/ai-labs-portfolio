@@ -1,4 +1,4 @@
-// C3-5 · Business Case / ROI Builder — use-cases.
+// C3-5 · Business Case / ROI Builder, use cases.
 // Payload = an input preset (the five ROI drivers). The same NPV/IRR/payback +
 // tornado engine runs it. Each preset is shaped so a different driver dominates the
 // tornado: education → adoption ramp; manufacturing → annual value (scrap rate);
@@ -23,9 +23,9 @@ export const C35_USE_CASES: UseCase<C35Payload>[] = assertUseCases<C35Payload>([
     title: "AI-tutoring rollout across a district",
     oneLiner: "The whole case rides on how fast students and teachers adopt it.",
     context:
-      "A school district builds the business case for an AI tutoring rollout. The value is real but back-loaded — it only lands once teachers embed it and students use it, and that ramp in a district is slow and uncertain.",
+      "A school district builds the business case for an AI tutoring rollout. The value is real but back-loaded, it only lands once teachers embed it and students use it, and that ramp in a district is slow and uncertain.",
     theDecision:
-      "Present the range, not the point — the tornado shows adoption ramp swings the NPV more than any cost line, so fund conditional on the ramp, not the plan number.",
+      "Present the range, not the point, the tornado shows adoption ramp swings the NPV more than any cost line, so fund conditional on the ramp, not the plan number.",
     whatMostMiss:
       "Education cases over-index on the annual-value estimate; the real uncertainty is the adoption ramp, and a slow ramp quietly halves the three-year value.",
     stakes: "Funding on a single optimistic NPV and missing the ramp turns a 'positive' case negative by year two.",
@@ -45,7 +45,7 @@ export const C35_USE_CASES: UseCase<C35Payload>[] = assertUseCases<C35Payload>([
     title: "Defect-detection rollout on the line",
     oneLiner: "The scrap-rate assumption is the whole business case.",
     context:
-      "A manufacturer builds the case for AI defect detection on a production line. The value is scrap-rate reduction — but the assumed baseline scrap rate and the improvement are estimates, and the case lives or dies on them.",
+      "A manufacturer builds the case for AI defect detection on a production line. The value is scrap-rate reduction, but the assumed baseline scrap rate and the improvement are estimates, and the case lives or dies on them.",
     theDecision:
       "The tornado shows the annual-value (scrap-rate) assumption dominates; fund on the band and instrument the baseline before scaling.",
     whatMostMiss:
@@ -65,11 +65,11 @@ export const C35_USE_CASES: UseCase<C35Payload>[] = assertUseCases<C35Payload>([
     industry: "travel",
     provenance: studied,
     title: "Airline irregular-ops automation",
-    oneLiner: "Value depends on how bad the disruption year is — fund on the band.",
+    oneLiner: "Value depends on how bad the disruption year is, fund on the band.",
     context:
-      "An airline builds the case for automating irregular-ops rebooking. The value is realized during disruptions (storms, IROPs) — so the annual value swings with how bad the disruption year is, which no one can forecast.",
+      "An airline builds the case for automating irregular-ops rebooking. The value is realized during disruptions (storms, IROPs), so the annual value swings with how bad the disruption year is, which no one can forecast.",
     theDecision:
-      "Present the range — the annual-value band (disruption frequency) is wide, so fund on the downside-positive band rather than a point estimate tied to an average year.",
+      "Present the range, the annual-value band (disruption frequency) is wide, so fund on the downside-positive band rather than a point estimate tied to an average year.",
     whatMostMiss:
       "The case is built on an 'average' disruption year that never happens; the value is lumpy, and the honest case funds on the band that stays positive even in a mild year.",
     stakes: "Justify the spend on a heavy-disruption year and a mild one leaves the case underwater.",

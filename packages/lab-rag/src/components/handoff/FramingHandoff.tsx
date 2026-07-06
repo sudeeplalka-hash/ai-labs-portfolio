@@ -8,14 +8,14 @@ const STAGE: Record<"data" | "build", { icon: LucideIcon; callback: (h: HandoffD
   data: {
     icon: Database,
     callback: (h) =>
-      `Framing guessed Data readiness ${h.scores.dataReadiness}/100 from a self-rated "${h.posture ?? "unknown"}" posture. ` +
-      `Profile your sources below — this stage confirms or punctures that guess.`,
+      `Framing guessed Data readiness ${h.scores.dataReadiness}/100 from a self reported "${h.posture ?? "unknown"}" posture. ` +
+      `Profile your sources below, this stage confirms or punctures that guess.`,
   },
   build: {
     icon: Boxes,
     callback: (h) =>
       `In Framing this bet scored Value ${h.scores.value}/100 and Feasibility ${h.scores.feasibility}/100. ` +
-      `Feasibility was a guess — the evaluator below is the real test of whether the engine works.`,
+      `Feasibility was a guess, the evaluator below is the real test of whether the engine works.`,
   },
 };
 
