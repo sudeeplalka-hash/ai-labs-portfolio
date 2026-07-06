@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity } from "./adoption";
+import { deriveAdoptionPlan, projectAdoption, ADOPTION_CEILING, weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity, scheduleAdoptionPlan, compareReadiness, readinessTrajectory, type PlanItem } from "./adoption";
 
 describe("deriveAdoptionPlan", () => {
   it("always offers a plan with at least two recommended interventions", () => {
@@ -171,5 +171,120 @@ describe("factorSensitivity", () => {
     const avg = keys.reduce((s, k) => s + weights[k] * factors[k], 0) / W;
     const total = factorSensitivity(factors, weights, keys).reduce((s, l) => s + l.impact, 0);
     expect(total).toBeCloseTo(100 - avg, 6);
+  });
+});
+
+describe("scheduleAdoptionPlan", () => {
+  const items: PlanItem[] = [
+    { key: "trust", label: "Trust", score: 40 },
+    { key: "training", label: "Training", score: 55 },
+    { key: "comms", label: "Comms", score: 65 },
+  ];
+
+  it("returns an empty schedule for no items", () => {
+    expect(scheduleAdoptionPlan([])).toEqual([]);
+  });
+
+  it("orders weakest-first and starts the weakest on day 0", () => {
+    const spans = scheduleAdoptionPlan(items);
+    expect(spans.map((s) => s.key)).toEqual(["trust", "training", "comms"]);
+    expect(spans[0].startDay).toBe(0);
+  });
+
+  it("gives the weakest factor the longest run and marks the first two 'focus'", () => {
+    const spans = scheduleAdoptionPlan(items);
+    const weakest = spans[0].durationDays;
+    for (const s of spans.slice(1)) expect(weakest).toBeGreaterThanOrEqual(s.durationDays);
+    expect(spans[0].intensity).toBe("focus");
+    expect(spans[1].intensity).toBe("focus");
+    expect(spans[2].intensity).toBe("support");
+  });
+
+  it("keeps every span inside the horizon with at least the minimum duration", () => {
+    const spans = scheduleAdoptionPlan(items, { horizonDays: 14, minDays: 3 });
+    for (const s of spans) {
+      expect(s.startDay).toBeGreaterThanOrEqual(0);
+      expect(s.endDay).toBeLessThanOrEqual(14);
+      expect(s.durationDays).toBeGreaterThanOrEqual(3);
+      expect(s.endDay).toBe(s.startDay + s.durationDays);
+    }
+  });
+
+  it("is deterministic", () => {
+    expect(scheduleAdoptionPlan(items)).toEqual(scheduleAdoptionPlan(items));
+  });
+});
+
+describe("compareReadiness", () => {
+  const keys = ["a", "b", "c"] as const;
+  const weights = { a: 0.5, b: 0.3, c: 0.2 };
+
+  it("reports both composites, verdicts, and the signed gap", () => {
+    const cmp = compareReadiness({ a: 50, b: 50, c: 50 }, { a: 80, b: 80, c: 80 }, weights, keys, 75, 60);
+    expect(cmp.compositeA).toBe(50);
+    expect(cmp.compositeB).toBe(80);
+    expect(cmp.compositeDelta).toBe(30);
+    expect(cmp.verdictA).toBe("Hold");
+    expect(cmp.verdictB).toBe("Scale");
+  });
+
+  it("names the driver as the factor with the largest weighted delta", () => {
+    // a moves +10 (weight .5 -> contrib 5), b moves +20 (weight .3 -> contrib 6) => b drives
+    const cmp = compareReadiness({ a: 40, b: 40, c: 40 }, { a: 50, b: 60, c: 40 }, weights, keys, 75, 60);
+    expect(cmp.driver!.key).toBe("b");
+    expect(cmp.deltas[0].key).toBe("b");
+  });
+
+  it("returns a null driver when the populations are identical", () => {
+    const cmp = compareReadiness({ a: 60, b: 60, c: 60 }, { a: 60, b: 60, c: 60 }, weights, keys, 75, 60);
+    expect(cmp.driver).toBeNull();
+    expect(cmp.compositeDelta).toBe(0);
+  });
+
+  it("contributions sum to the un-rounded composite gap", () => {
+    const A = { a: 52, b: 66, c: 45 };
+    const B = { a: 70, b: 55, c: 80 };
+    const W = weightSumOf(weights, keys);
+    const gap = keys.reduce((s, k) => s + weights[k] * (B[k] - A[k]), 0) / W;
+    const cmp = compareReadiness(A, B, weights, keys, 75, 60);
+    const total = cmp.deltas.reduce((s, d) => s + d.contribution, 0);
+    expect(total).toBeCloseTo(gap, 6);
+  });
+});
+
+describe("readinessTrajectory", () => {
+  const keys = ["a", "b", "c"] as const;
+  const weights = { a: 0.5, b: 0.3, c: 0.2 };
+  const factors = { a: 50, b: 50, c: 50 };
+  const moves = [ { key: "a" as const, from: 50, to: 90 }, { key: "b" as const, from: 50, to: 80 } ];
+
+  it("samples one composite per day across the horizon (0..14 inclusive)", () => {
+    const t = readinessTrajectory(factors, moves, weights, keys, 75);
+    expect(t.points).toHaveLength(15);
+    expect(t.points[0].day).toBe(0);
+    expect(t.points[14].day).toBe(14);
+  });
+
+  it("rises monotonically as the fixes land (all moves are increases)", () => {
+    const t = readinessTrajectory(factors, moves, weights, keys, 75);
+    for (let i = 1; i < t.points.length; i++) expect(t.points[i].composite).toBeGreaterThanOrEqual(t.points[i - 1].composite);
+  });
+
+  it("starts at the current composite and ends at the fully-applied composite", () => {
+    const t = readinessTrajectory(factors, moves, weights, keys, 75);
+    expect(t.startComposite).toBe(readinessComposite(factors, weights, keys));
+    expect(t.endComposite).toBe(readinessComposite({ a: 90, b: 80, c: 50 }, weights, keys));
+  });
+
+  it("reports the first day the composite reaches the target", () => {
+    const t = readinessTrajectory(factors, moves, weights, keys, 75);
+    expect(t.gateDay).not.toBeNull();
+    expect(t.points[t.gateDay as number].composite).toBeGreaterThanOrEqual(75);
+  });
+
+  it("returns a flat line and no gate day when there are no moves", () => {
+    const t = readinessTrajectory(factors, [], weights, keys, 75);
+    expect(new Set(t.points.map((p) => p.composite)).size).toBe(1);
+    expect(t.gateDay).toBeNull();
   });
 });

@@ -23,7 +23,7 @@ import {
 } from "@labs/design-system";
 import {
   useProgramSource,
-  deriveOpsSeries, detectSignals, deriveDay2Incident, valueAtRisk,
+  deriveOpsSeries, detectSignals, deriveDay2Incident, valueAtRisk, projectCanaryBreach,
   buildOperateFeedback, buildWeeklyOpsReview, buildIncidentReport,
   type OpsSignal, type RemediationOption, type OperateFeedback,
 } from "@labs/program-core";
@@ -113,6 +113,8 @@ export function OperateStage() {
   const signals = useMemo(() => detectSignals(series, src.initiative?.meta?.governanceTier), [series, src]);
   const incident = useMemo(() => deriveDay2Incident(src), [src]);
   const vaR = useMemo(() => valueAtRisk(src, series), [src, series]);
+  const qualityFloor = Math.max(60, Math.round(series.canaryBaselinePct - 15));
+  const projection = useMemo(() => projectCanaryBreach(series, qualityFloor), [series, qualityFloor]);
   const feedback: OperateFeedback | null = useMemo(
     () => (decision ? buildOperateFeedback(src, decision, series) : null),
     [decision, src, series],
@@ -327,6 +329,18 @@ export function OperateStage() {
                 </div>
               ))}
             </div>
+          </Panel>
+
+          <Panel>
+            <p className="stat-label mb-2">Projected quality breach <span className="font-normal text-slatey-500">· at the current decay rate</span></p>
+            {projection.alreadyBelow ? (
+              <p className="text-sm text-slatey-300">Canary is already at <span className="font-semibold text-rose-600">{projection.lastPct}%</span>, at or below the {projection.floorPct}% quality floor &mdash; refresh or retrain now.</p>
+            ) : projection.breachWeek !== null ? (
+              <p className="text-sm text-slatey-300">Canary is sliding <span className="font-mono">{projection.slopePerWeek}pts/wk</span>. At that rate it crosses the <span className="font-semibold">{projection.floorPct}%</span> quality floor in <span className="font-semibold text-amber-700">~{projection.weeksToBreach} weeks</span> (week {projection.breachWeek}) &mdash; schedule the refresh before then, not after.</p>
+            ) : (
+              <p className="text-sm text-slatey-300">Canary trend is flat or improving &mdash; no projected breach of the {projection.floorPct}% floor. Keep monitoring.</p>
+            )}
+            <p className="mt-1 text-[10px] text-slatey-500">Illustrative linear extrapolation of the trailing canary trend against a {projection.floorPct}% floor.</p>
           </Panel>
 
           <InsightCard title={`Value at risk while this stays open: $${Math.round(vaR.valueAtRiskUsd / 1000)}k/yr`} tone="danger">

@@ -12,7 +12,7 @@ import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
 import { EL01_USE_CASES, LABS } from "@labs/kit";
-import { weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity, type ReadinessVerdict } from "@labs/lab-realize";
+import { weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity, scheduleAdoptionPlan, compareReadiness, readinessTrajectory, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -31,6 +31,12 @@ const FACTORS: { key: FactorKey; label: string; weight: number; hint: string }[]
 
 // Illustrative reference — a "typical rollout at this stage" shape for the radar overlay.
 const BENCHMARK: Factors = { sponsorship: 70, trust: 55, workflow: 62, training: 58, comms: 60, incentives: 50 };
+// Illustrative reference populations to compare a rollout against.
+const POPULATIONS: { key: string; label: string; factors: Factors }[] = [
+  { key: "typical", label: "Typical rollout", factors: BENCHMARK },
+  { key: "leading", label: "Leading pilot", factors: { sponsorship: 85, trust: 78, workflow: 80, training: 76, comms: 82, incentives: 70 } },
+  { key: "lagging", label: "Lagging unit", factors: { sponsorship: 48, trust: 40, workflow: 45, training: 42, comms: 44, incentives: 35 } },
+];
 
 const ACTION: Record<FactorKey, string> = {
   sponsorship: "Lock a visible executive sponsor and a leader-led kickoff; a 5-minute sponsor message every week.",
@@ -86,6 +92,7 @@ export function AdoptionReadiness() {
   const setF = (key: FactorKey, v: number) => setFactors((f) => ({ ...f, [key]: v }));
 
   const [assumptions, setAssumptions] = useState<Assumptions>(DEFAULT_ASSUMPTIONS);
+  const [compareKey, setCompareKey] = useState(POPULATIONS[0].key);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const A = assumptions;
   const edited = JSON.stringify(A) !== JSON.stringify(DEFAULT_ASSUMPTIONS);
@@ -128,10 +135,14 @@ export function AdoptionReadiness() {
   const c = readinessComposite(factors, A.weights, FACTOR_KEYS);
   const gate = gateForOf(c, A);
   const gatePlan = planToReachGate(factors, A.weights, FACTOR_KEYS, A.scaleCut);
+  const trajectory = readinessTrajectory(factors, gatePlan.moves.map((m) => ({ key: m.key, from: m.from, to: m.to })), A.weights, FACTOR_KEYS, A.scaleCut);
   const levers = factorSensitivity(factors, A.weights, FACTOR_KEYS);
+  const popB = POPULATIONS.find((p) => p.key === compareKey) ?? POPULATIONS[0];
+  const cmp = compareReadiness(factors, popB.factors, A.weights, FACTOR_KEYS, A.scaleCut, A.condCut);
   const factorLabel = (k: FactorKey) => FACTORS.find((f) => f.key === k)?.label ?? k;
   const weak = FACTORS.filter((x) => factors[x.key] < 70).sort((a, b) => factors[a.key] - factors[b.key]);
   const priorities = weak.slice(0, 3);
+  const planSpans = scheduleAdoptionPlan(weak.map((x) => ({ key: x.key, label: x.label, score: factors[x.key] })));
 
   const buildAdoptionMemo = (): string => {
     const gnarr = c >= A.scaleCut
@@ -354,6 +365,43 @@ export function AdoptionReadiness() {
               </div>
             </Panel>
 
+            <Panel>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="stat-label">Compare populations</p>
+                <select value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="rounded-md border border-line bg-white px-2 py-1 text-[11px]">
+                  {POPULATIONS.map((pp) => <option key={pp.key} value={pp.key}>vs {pp.label}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-md border border-line bg-white p-2.5 text-center">
+                  <p className="text-[10px] uppercase tracking-wide text-slatey-500">This rollout</p>
+                  <p className="mt-0.5 text-2xl font-semibold text-ink">{cmp.compositeA}</p>
+                  <Badge tone={gateForOf(cmp.compositeA, A).tone}>{cmp.verdictA}</Badge>
+                </div>
+                <div className="rounded-md border border-line bg-white p-2.5 text-center">
+                  <p className="text-[10px] uppercase tracking-wide text-slatey-500">{popB.label}</p>
+                  <p className="mt-0.5 text-2xl font-semibold text-ink">{cmp.compositeB}</p>
+                  <Badge tone={gateForOf(cmp.compositeB, A).tone}>{cmp.verdictB}</Badge>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-slatey-400">
+                {cmp.compositeDelta === 0 ? "Identical composite." : <>Gap of <span className="font-semibold text-ink">{cmp.compositeDelta > 0 ? `+${cmp.compositeDelta}` : cmp.compositeDelta}</span> pts{cmp.driver ? <>, driven most by <span className="font-semibold text-ink">{factorLabel(cmp.driver.key)}</span> ({cmp.driver.a} <span className="text-slatey-500">vs</span> {cmp.driver.b}).</> : "."}</>}
+              </p>
+              <div className="mt-2 space-y-1">
+                {cmp.deltas.map((d) => (
+                  <div key={d.key} className="flex items-center gap-2 text-[11px]">
+                    <span className="shrink-0 truncate text-slatey-400" style={{ width: 104 }}>{factorLabel(d.key)}</span>
+                    <div className="relative h-3 flex-1 rounded bg-slate-100">
+                      <div className="absolute inset-y-0 left-1/2 w-px bg-slate-300" />
+                      <div className="absolute inset-y-0 rounded" style={{ background: d.delta >= 0 ? "#0d9488" : "#e11d48", left: d.delta >= 0 ? "50%" : `${50 - Math.min(50, Math.abs(d.delta) / 2)}%`, width: `${Math.min(50, Math.abs(d.delta) / 2)}%` }} />
+                    </div>
+                    <span className="w-9 shrink-0 text-right font-mono text-slatey-500">{d.delta > 0 ? `+${d.delta}` : d.delta}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[10px] text-slatey-500">Factor deltas (B &minus; A), centered at zero &mdash; teal = reference ahead, rose = behind. Reference populations are illustrative.</p>
+            </Panel>
+
             {c < A.scaleCut && (
               <Panel>
                 <p className="stat-label mb-2">Flip the gate <span className="font-normal text-slatey-500">· smallest moves to reach Scale ({A.scaleCut})</span></p>
@@ -368,6 +416,36 @@ export function AdoptionReadiness() {
                       ))}
                     </ol>
                     <p className="mt-2 text-[11px] text-slatey-500">The fewest total points to clear the gate &mdash; highest-leverage (highest-weight) factors first. Lands the composite at ~{gatePlan.projected}.</p>
+                    <div className="mt-3">
+                      <p className="stat-label mb-1">Projected path to Scale <span className="font-normal text-slatey-500">· as the moves land on the 2-week schedule</span></p>
+                      {(() => {
+                        const W = 300, H = 120, padL = 24, padR = 8, padT = 8, padB = 16;
+                        const plotW = W - padL - padR, plotH = H - padT - padB;
+                        const days = trajectory.points.length - 1;
+                        const yMin = Math.min(trajectory.startComposite, A.condCut) - 4;
+                        const yMax = Math.max(A.scaleCut, trajectory.endComposite) + 4;
+                        const X = (d: number) => padL + (d / days) * plotW;
+                        const Y = (v: number) => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+                        const path = trajectory.points.map((pt, i) => `${i ? "L" : "M"} ${X(pt.day)} ${Y(pt.composite)}`).join(" ");
+                        return (
+                          <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`Projected readiness composite over ${days} days rising toward the Scale cutoff of ${A.scaleCut}.`}>
+                            <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} stroke="#e4e7eb" />
+                            <line x1={padL} y1={padT} x2={padL} y2={H - padB} stroke="#e4e7eb" />
+                            <line x1={padL} y1={Y(A.scaleCut)} x2={W - padR} y2={Y(A.scaleCut)} stroke="#16a34a" strokeDasharray="3 3" />
+                            <text x={W - padR} y={Y(A.scaleCut) - 2} textAnchor="end" fontSize="7.5" fill="#16a34a">Scale {A.scaleCut}</text>
+                            <path d={path} fill="none" stroke="#0d9488" strokeWidth="2" />
+                            {trajectory.gateDay !== null && (
+                              <g>
+                                <circle cx={X(trajectory.gateDay)} cy={Y(A.scaleCut)} r="3" fill="#16a34a" />
+                                <text x={X(trajectory.gateDay)} y={H - 3} textAnchor="middle" fontSize="7.5" fill="#16a34a">day {trajectory.gateDay}</text>
+                              </g>
+                            )}
+                            <text x={padL - 3} y={Y(trajectory.startComposite) + 3} textAnchor="end" fontSize="7.5" fill="#94a3b8">{trajectory.startComposite}</text>
+                          </svg>
+                        );
+                      })()}
+                      <p className="mt-1 text-[10px] text-slatey-500">{trajectory.gateDay !== null ? `Clears Scale around day ${trajectory.gateDay} if the moves land on schedule.` : "Even fully applied these moves fall short — revisit the model."} Illustrative linear ramp.</p>
+                    </div>
                   </>
                 ) : (
                   <p className="text-sm text-slatey-400">Even maxing every factor can&apos;t reach {A.scaleCut} under these weights &mdash; revisit the model, not just the rollout.</p>
@@ -376,7 +454,31 @@ export function AdoptionReadiness() {
             )}
 
             <Panel>
-              <p className="stat-label mb-2">Two-week adoption plan</p>
+              <p className="stat-label mb-2">Two-week adoption plan <span className="font-normal text-slatey-500">· sequenced</span></p>
+              {planSpans.length > 0 && (
+                <div className="mb-3">
+                  <div className="relative mb-1 h-3 text-[9px] text-slatey-500" style={{ marginLeft: 92 }}>
+                    <span className="absolute left-0">Day 1</span>
+                    <span className="absolute left-1/2 -translate-x-1/2">Week 2</span>
+                    <span className="absolute right-0">Day 14</span>
+                  </div>
+                  <div className="space-y-1">
+                    {planSpans.map((s) => (
+                      <div key={s.key} className="flex items-center gap-2">
+                        <span className="shrink-0 truncate text-[11px] text-slatey-300" style={{ width: 88 }}>{s.label}</span>
+                        <div className="relative h-4 flex-1 rounded bg-slate-100">
+                          <div className="absolute inset-y-0 left-1/2 w-px bg-slate-200" />
+                          <div className="absolute inset-y-0 flex items-center justify-center rounded text-[9px] font-semibold text-white"
+                            style={{ left: `${(s.startDay / 14) * 100}%`, width: `${(s.durationDays / 14) * 100}%`, background: s.intensity === "focus" ? "#0d9488" : "#94a3b8" }}>
+                            {s.durationDays}d
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-1 text-[10px] text-slatey-500">Illustrative 14-day sequencing &mdash; weakest factors start first and run longest. <span className="text-teal-700">Focus</span> vs <span className="text-slatey-400">support</span>.</p>
+                </div>
+              )}
               {priorities.length === 0 ? (
                 <p className="text-sm text-slatey-400">All factors are healthy — proceed to scale with the standard champion model and a weekly pulse.</p>
               ) : (

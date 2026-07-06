@@ -10,9 +10,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, pushRecent, loadRecent, saveRecent, type ExportAction, type Command, type SortState, type RecentEntry, type BadgeTone } from "@labs/design-system";
+import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, pushRecent, loadRecent, saveRecent, ScatterPlot, type ExportAction, type Command, type SortState, type RecentEntry, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES, LABS } from "@labs/kit";
-import { greedyFund, reallocateKills, initiativesFromCsvRows } from "@labs/engines";
+import { greedyFund, reallocateKills, initiativesFromCsvRows, efficientFrontier } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown } from "../artifact/artifact";
@@ -70,6 +70,7 @@ const RECENT_KEY = "portfolio-recent";
 
 export function PortfolioDashboard() {
   const [view, setView] = useState<View>("map");
+  const [scaleMode, setScaleMode] = useState<"linear" | "log">("linear");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C31_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
   useUseCaseDeepLink(C31_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
@@ -160,6 +161,10 @@ export function PortfolioDashboard() {
   const [domainFilter, setDomainFilter] = useState<string | null>(null);
   const [recFilter, setRecFilter] = useState<Rec | null>(null);
   const fund = greedyFund(items, budgetM, riskAdj);
+  const frontier = efficientFrontier(items, riskAdj, (i) => i.spendM);
+  const frontierFunded = frontier.points.filter((pt) => pt.cumSpend <= budgetM);
+  const marginalEff = frontierFunded.length ? frontierFunded[frontierFunded.length - 1].efficiency : (frontier.points[0]?.efficiency ?? 0);
+  const topEff = frontier.points[0]?.efficiency ?? 0;
   const funded = new Set(fund.funded);
   const fundSpent = fund.spent;
   const fundCaptured = fund.captured;
@@ -366,58 +371,56 @@ export function PortfolioDashboard() {
           <div>
             {view === "map" && (
               <Panel>
-                <p className="stat-label mb-2">Value × risk · bubble = run-rate spend</p>
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="stat-label">Value × risk · bubble = run-rate spend</p>
+                  <div className="inline-flex overflow-hidden rounded-md border border-line text-[10px]">
+                    {(["linear", "log"] as const).map((m) => (
+                      <button key={m} onClick={() => setScaleMode(m)}
+                        className={`px-2 py-0.5 font-medium transition ${scaleMode === m ? "bg-teal-600 text-white" : "bg-white text-slatey-400 hover:text-ink"}`}>{m === "linear" ? "Linear" : "Log"} Y</button>
+                    ))}
+                  </div>
+                </div>
                 {(() => {
-                  const W = 520, H = 320, padL = 46, padR = 16, padT = 26, padB = 34;
-                  const plotW = W - padL - padR, plotH = H - padT - padB;
-                  const xf = (risk: number) => padL + risk * plotW;             // 0..1 left→right
-                  const yf = (v: number) => padT + (1 - v / maxVal) * plotH;    // 0..maxVal bottom→top
-                  const rf = (spend: number) => 6 + spend * 11;
+                  const yPos = items.map((it) => it.expValueM).filter((v) => v > 0);
+                  const yFloor = yPos.length ? Math.min(...yPos) : 1;
                   const hov = items.find((i) => i.id === hoverId) ?? null;
+                  const rf = (spend: number) => 6 + spend * 11;
                   return (
-                    <svg ref={scatterRef} viewBox={`0 0 ${W} ${H}`} className="w-full" role="img"
-                      aria-label="Initiatives plotted by expected value (vertical) against risk (horizontal); bubble size is run-rate spend; color is the kill / hold / scale call.">
-                      {/* quadrant split */}
-                      <line x1={xf(0.5)} y1={padT} x2={xf(0.5)} y2={H - padB} stroke="#e4e7eb" strokeDasharray="3 3" />
-                      <line x1={padL} y1={yf(maxVal / 2)} x2={W - padR} y2={yf(maxVal / 2)} stroke="#e4e7eb" strokeDasharray="3 3" />
-                      {/* axes */}
-                      <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} stroke="#cbd2d9" />
-                      <line x1={padL} y1={padT} x2={padL} y2={H - padB} stroke="#cbd2d9" />
-                      {/* axis ticks / labels */}
-                      <text x={padL - 6} y={yf(maxVal) + 3} textAnchor="end" fontSize="9" fill="#94a3b8">{fmtM(maxVal)}</text>
-                      <text x={padL - 6} y={yf(0)} textAnchor="end" fontSize="9" fill="#94a3b8">$0</text>
-                      <text x={padL - 30} y={padT + plotH / 2} textAnchor="middle" fontSize="9" fill="#94a3b8" transform={`rotate(-90 ${padL - 30} ${padT + plotH / 2})`}>expected value</text>
-                      <text x={padL} y={H - padB + 16} textAnchor="middle" fontSize="9" fill="#94a3b8">low risk</text>
-                      <text x={W - padR} y={H - padB + 16} textAnchor="end" fontSize="9" fill="#94a3b8">high risk →</text>
-                      {/* quadrant labels */}
-                      <text x={xf(0.25)} y={padT - 10} textAnchor="middle" fontSize="9" fontWeight="600" fill="#16a34a">safe bets</text>
-                      <text x={xf(0.78)} y={padT - 10} textAnchor="middle" fontSize="9" fontWeight="600" fill="#d97706">big bets</text>
-                      <text x={xf(0.78)} y={H - padB - 8} textAnchor="middle" fontSize="9" fontWeight="600" fill="#e11d48">question marks</text>
-                      {/* bubbles */}
-                      {items.map((i) => {
-                        const rec = recommend(i); const on = i.id === selId; const hv = i.id === hoverId;
-                        return (
-                          <circle key={i.id} cx={xf(i.risk)} cy={yf(i.expValueM)} r={rf(i.spendM)}
-                            fill={REC_HEX[rec]} fillOpacity={on || hv ? 0.9 : 0.7}
-                            stroke={on ? "#152433" : "#fff"} strokeWidth={on ? 2 : 1}
-                            style={{ cursor: "pointer" }} onClick={() => setSelId(i.id)}
-                            onMouseEnter={() => setHoverId(i.id)} onMouseLeave={() => setHoverId(null)}>
-                            <title>{i.name} · {REC_LABEL[rec]}</title>
-                          </circle>
-                        );
-                      })}
-                      {/* hover card (on top) */}
-                      {hov && (() => {
-                        const bx = Math.min(xf(hov.risk) + 10, W - 150), by = Math.max(yf(hov.expValueM) - 34, 2);
-                        return (
-                          <g pointerEvents="none">
-                            <rect x={bx} y={by} width={144} height={32} rx={4} fill="#152433" />
-                            <text x={bx + 7} y={by + 13} fontSize="9" fontWeight="600" fill="#fff">{hov.name}</text>
-                            <text x={bx + 7} y={by + 25} fontSize="8.5" fill="#cbd5e1">{fmtM(riskAdj(hov))} risk-adj · {REC_LABEL[recommend(hov)]}</text>
-                          </g>
-                        );
-                      })()}
-                    </svg>
+                    <ScatterPlot
+                      svgRef={scatterRef}
+                      data={items.map((i) => ({ x: i.risk, y: i.expValueM, r: rf(i.spendM), color: REC_HEX[recommend(i)], id: i.id }))}
+                      xDomain={[0, 1]}
+                      yDomain={scaleMode === "log" ? [yFloor, maxVal] : [0, maxVal]}
+                      yScale={scaleMode}
+                      fmtY={fmtM}
+                      selectedId={selId}
+                      hoverId={hoverId}
+                      onSelect={setSelId}
+                      onHover={setHoverId}
+                      xLabelLeft="low risk"
+                      xLabelRight="high risk \u2192"
+                      ariaLabel="Initiatives plotted by expected value (vertical) against risk (horizontal); bubble size is run-rate spend; color is the kill / hold / scale call."
+                      overlay={(layout) => (
+                        <>
+                          <line x1={layout.toX(0.5)} y1={layout.plot.top} x2={layout.toX(0.5)} y2={layout.plot.bottom} stroke="#e4e7eb" strokeDasharray="3 3" />
+                          <line x1={layout.plot.left} y1={layout.toY(maxVal / 2)} x2={layout.plot.right} y2={layout.toY(maxVal / 2)} stroke="#e4e7eb" strokeDasharray="3 3" />
+                          <text x={layout.plot.left - 30} y={(layout.plot.top + layout.plot.bottom) / 2} textAnchor="middle" fontSize="9" fill="#94a3b8" transform={`rotate(-90 ${layout.plot.left - 30} ${(layout.plot.top + layout.plot.bottom) / 2})`}>expected value</text>
+                          <text x={layout.toX(0.25)} y={layout.plot.top - 10} textAnchor="middle" fontSize="9" fontWeight="600" fill="#16a34a">safe bets</text>
+                          <text x={layout.toX(0.78)} y={layout.plot.top - 10} textAnchor="middle" fontSize="9" fontWeight="600" fill="#d97706">big bets</text>
+                          <text x={layout.toX(0.78)} y={layout.plot.bottom - 8} textAnchor="middle" fontSize="9" fontWeight="600" fill="#e11d48">question marks</text>
+                          {hov && (() => {
+                            const bx = Math.min(layout.toX(hov.risk) + 10, 520 - 150), by = Math.max(layout.toY(hov.expValueM) - 34, 2);
+                            return (
+                              <g pointerEvents="none">
+                                <rect x={bx} y={by} width={144} height={32} rx={4} fill="#152433" />
+                                <text x={bx + 7} y={by + 13} fontSize="9" fontWeight="600" fill="#fff">{hov.name}</text>
+                                <text x={bx + 7} y={by + 25} fontSize="8.5" fill="#cbd5e1">{fmtM(riskAdj(hov))} risk-adj \u00b7 {REC_LABEL[recommend(hov)]}</text>
+                              </g>
+                            );
+                          })()}
+                        </>
+                      )}
+                    />
                   );
                 })()}
                 <div className="mt-2 flex flex-wrap gap-3 text-[11px] text-slatey-500">
@@ -563,6 +566,44 @@ export function PortfolioDashboard() {
                 <p className="mt-3 rounded-md bg-primary/[0.05] px-3 py-2 text-xs text-ink">
                   <span className="font-semibold">With {fmtM(budgetM)} you fund {funded.size} of {items.length}</span>, capturing {fmtM(fundCaptured)}/yr of risk-adjusted value. Greedy by return-per-dollar — a defensible first cut, not a solved optimum.
                 </p>
+                <div className="mt-4 border-t border-line pt-3">
+                  <p className="stat-label mb-2">Efficient frontier <span className="font-normal text-slatey-500">· cumulative value vs cumulative spend</span></p>
+                  {(() => {
+                    const W = 520, H = 200, padL = 44, padR = 12, padT = 12, padB = 28;
+                    const plotW = W - padL - padR, plotH = H - padT - padB;
+                    const maxS = frontier.totalSpend || 1, maxV = frontier.totalValue || 1;
+                    const X = (sp: number) => padL + (sp / maxS) * plotW;
+                    const Y = (v: number) => padT + (1 - v / maxV) * plotH;
+                    const path = [`M ${X(0)} ${Y(0)}`, ...frontier.points.map((pt) => `L ${X(pt.cumSpend)} ${Y(pt.cumValue)}`)].join(" ");
+                    const bx = X(Math.min(budgetM, maxS));
+                    return (
+                      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Efficient frontier: cumulative risk-adjusted value against cumulative spend, most-efficient initiatives first.">
+                        <line x1={padL} y1={H - padB} x2={W - padR} y2={H - padB} stroke="#cbd2d9" />
+                        <line x1={padL} y1={padT} x2={padL} y2={H - padB} stroke="#cbd2d9" />
+                        <line x1={X(0)} y1={Y(0)} x2={X(maxS)} y2={Y(maxV)} stroke="#e4e7eb" strokeDasharray="3 3" />
+                        <path d={path} fill="none" stroke="#0d9488" strokeWidth="2" />
+                        {frontier.points.map((pt) => <circle key={pt.index} cx={X(pt.cumSpend)} cy={Y(pt.cumValue)} r="2.5" fill="#0d9488" />)}
+                        {frontier.kneeCount > 0 && frontier.kneeCount < frontier.points.length && (
+                          <g>
+                            <line x1={X(frontier.kneeSpend)} y1={padT} x2={X(frontier.kneeSpend)} y2={H - padB} stroke="#d97706" strokeDasharray="3 3" />
+                            <text x={X(frontier.kneeSpend) + 3} y={padT + 8} fontSize="8" fill="#d97706">knee · {frontier.kneeCount} in the core</text>
+                          </g>
+                        )}
+                        <line x1={bx} y1={padT} x2={bx} y2={H - padB} stroke="#152433" strokeWidth="1" opacity="0.25" />
+                        <text x={bx} y={H - 4} fontSize="8" textAnchor="middle" fill="#64748b">budget {fmtM(budgetM)}</text>
+                        <text x={padL - 6} y={Y(maxV) + 3} textAnchor="end" fontSize="8" fill="#94a3b8">{fmtM(maxV)}</text>
+                        <text x={padL - 6} y={Y(0)} textAnchor="end" fontSize="8" fill="#94a3b8">$0</text>
+                        <text x={W - padR} y={H - padB + 16} textAnchor="end" fontSize="8" fill="#94a3b8">spend {fmtM(maxS)} &rarr;</text>
+                      </svg>
+                    );
+                  })()}
+                  <p className="mt-1 text-[10px] text-slatey-500">Steepest first: the concave curve shows diminishing returns. The knee (amber) is where per-initiative efficiency drops below the book average &mdash; the {frontier.kneeCount} before it are the efficient core.</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <button onClick={() => setBudgetM(Number(frontier.kneeSpend.toFixed(1)))} className="rounded-md border border-teal-500/40 bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700 hover:bg-teal-100">Fund the efficient core ({frontier.kneeCount})</button>
+                    <button onClick={() => setBudgetM(Number(frontier.totalSpend.toFixed(1)))} className="rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-slatey-400 hover:text-ink">Fund all</button>
+                    <span className="text-[10px] text-slatey-500">Marginal return-per-$ at budget &asymp; <span className="font-mono text-ink">{marginalEff.toFixed(2)}</span> vs <span className="font-mono">{topEff.toFixed(2)}</span> at the top.</span>
+                  </div>
+                </div>
               </Panel>
             )}
             {view === "reallocate" && (

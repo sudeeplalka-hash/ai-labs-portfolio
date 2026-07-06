@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { prob, riskAdj, recommend, greedyFund, reallocateKills, initiativesFromCsvRows, STAGE_PROB, type Initiative } from "./portfolio";
+import { prob, riskAdj, recommend, greedyFund, reallocateKills, initiativesFromCsvRows, STAGE_PROB, type Initiative , efficientFrontier } from "./portfolio";
 
 const mk = (over: Partial<Initiative> = {}): Initiative => ({
   id: "x", name: "X", domain: "Finserv", stage: "scaling",
@@ -223,5 +223,46 @@ describe("initiativesFromCsvRows", () => {
 
   it("clamps risk into 0..1", () => {
     expect(initiativesFromCsvRows([{ name: "R", stage: "pilot", expValueM: "2", spendM: "1", risk: "5" }]).items[0].risk).toBe(1);
+  });
+});
+
+describe("efficientFrontier", () => {
+  const val = (x: { v: number }) => x.v;
+  const cost = (x: { c: number }) => x.c;
+  // efficiencies: A 5, B 3, C 1  (value per $)
+  const items = [
+    { v: 10, c: 2 }, // A eff 5
+    { v: 6, c: 2 },  // B eff 3
+    { v: 2, c: 2 },  // C eff 1
+  ];
+
+  it("orders most-efficient-first and accumulates value and spend", () => {
+    const f = efficientFrontier(items, val, cost);
+    expect(f.points.map((p) => p.efficiency)).toEqual([5, 3, 1]);
+    expect(f.points.map((p) => p.cumSpend)).toEqual([2, 4, 6]);
+    expect(f.points.map((p) => p.cumValue)).toEqual([10, 16, 18]);
+    expect(f.totalValue).toBe(18);
+    expect(f.totalSpend).toBe(6);
+  });
+
+  it("marks the knee at the last above-average-efficiency item", () => {
+    // avg eff = 18/6 = 3; items with eff >= 3 are A(5) and B(3) -> B(3) is not < 3, so knee after B? 
+    // belowIdx = first eff < 3 => C at index 2 => kneeCount 2
+    const f = efficientFrontier(items, val, cost);
+    expect(f.kneeCount).toBe(2);
+    expect(f.kneeSpend).toBe(4);
+    expect(f.kneeValue).toBe(16);
+  });
+
+  it("ignores zero-cost and non-positive-value items", () => {
+    const f = efficientFrontier([{ v: 10, c: 2 }, { v: 5, c: 0 }, { v: 0, c: 3 }], val, cost);
+    expect(f.points).toHaveLength(1);
+  });
+
+  it("returns an empty frontier for no usable items", () => {
+    const f = efficientFrontier([] as { v: number; c: number }[], val, cost);
+    expect(f.points).toEqual([]);
+    expect(f.totalSpend).toBe(0);
+    expect(f.kneeCount).toBe(0);
   });
 });

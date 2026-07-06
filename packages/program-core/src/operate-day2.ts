@@ -315,3 +315,40 @@ export function buildIncidentReport(s: ProgramState, incident: Day2Incident, fee
     FOOTER(s),
   ].join("\n");
 }
+
+// Forward projection — the day-2 point is to act before the breach, not after. Fit the recent
+// canary decay (average week-over-week slope over a trailing window) and project the week the
+// canary pass-rate crosses a quality floor below which answers can't be trusted. Extrapolates
+// the same deterministic series the health view shows — honest linear projection, labeled as
+// such; a flat or improving trend yields no breach. Pure.
+export interface CanarySeriesLike {
+  weeks: { week: number; canaryPassPct: number }[];
+}
+export interface CanaryProjection {
+  slopePerWeek: number;        // avg canary change/week over the window (negative = decaying)
+  lastPct: number;
+  floorPct: number;
+  breachWeek: number | null;   // projected week canary <= floor
+  weeksToBreach: number | null;
+  alreadyBelow: boolean;
+}
+export function projectCanaryBreach(series: CanarySeriesLike, floorPct: number, window = 4): CanaryProjection {
+  const wk = series.weeks;
+  const last = wk[wk.length - 1];
+  const lastPct = last?.canaryPassPct ?? 0;
+  const alreadyBelow = lastPct <= floorPct;
+  const tail = wk.slice(-Math.max(2, window));
+  let slope = 0;
+  for (let i = 1; i < tail.length; i++) slope += tail[i].canaryPassPct - tail[i - 1].canaryPassPct;
+  slope = tail.length > 1 ? slope / (tail.length - 1) : 0;
+  let breachWeek: number | null = null;
+  let weeksToBreach: number | null = null;
+  if (alreadyBelow) {
+    breachWeek = last.week;
+    weeksToBreach = 0;
+  } else if (slope < 0) {
+    weeksToBreach = Math.ceil((lastPct - floorPct) / -slope);
+    breachWeek = last.week + weeksToBreach;
+  }
+  return { slopePerWeek: Math.round(slope * 100) / 100, lastPct, floorPct, breachWeek, weeksToBreach, alreadyBelow };
+}

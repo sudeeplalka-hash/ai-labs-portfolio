@@ -16,7 +16,7 @@ import Link from "next/link";
 import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, Share2, RotateCcw, Gauge, type LucideIcon } from "lucide-react";
 import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
 import { LIVE_MODEL, GAP03_USE_CASES, LABS } from "@labs/kit";
-import { agentTimeline } from "@labs/engines";
+import { agentTimeline, messageFrames, baselineVsMulti } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -91,11 +91,13 @@ export function OrchestrationBoard() {
   useUseCaseDeepLink(GAP03_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const preset: Preset = activeUc ? { key: activeUc.id, label: activeUc.title, ...activeUc.payload } : PRESETS.find((p) => p.key === presetKey)!;
   const A = preset.agents.length;
+  const frames = messageFrames(preset.messages, preset.agents, preset.goal);
 
   const [runId, setRunId] = useState(0);
   const [progress, setProgress] = useState(-1); // -1 idle · 0..A running · >A done
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const [speed, setSpeed] = useState(1); // replay speed: 0.5× / 1× / 2×
+  const [inspected, setInspected] = useState<number | null>(null);
   const stepMs = Math.round(BASE_STEP_MS / speed);
 
   useEffect(() => {
@@ -112,8 +114,8 @@ export function OrchestrationBoard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runId, A]);
 
-  const onPreset = (k: string) => { setPresetKey(k); setActiveUcId(null); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
-  const selectUseCase = (id: string | null) => { setActiveUcId(id); setProgress(-1); setRunId(0); if (timer.current) clearInterval(timer.current); };
+  const onPreset = (k: string) => { setPresetKey(k); setActiveUcId(null); setProgress(-1); setRunId(0); setInspected(null); if (timer.current) clearInterval(timer.current); };
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); setProgress(-1); setRunId(0); setInspected(null); if (timer.current) clearInterval(timer.current); };
   const run = () => setRunId((r) => r + 1);
   const cycleSpeed = () => setSpeed((s) => (s === 1 ? 2 : s === 2 ? 0.5 : 1));
 
@@ -178,7 +180,9 @@ export function OrchestrationBoard() {
 
   const qualityDelta = Math.round((preset.multi.quality / preset.single.quality - 1) * 100);
   const costMult = (preset.multi.costUsd / preset.single.costUsd).toFixed(1);
+  const h2h = baselineVsMulti(preset.single, preset.multi);
   const frac = idle ? 0 : Math.min(progress, A) / A; // fraction of the run complete — drives the live meter
+  const singleFrac = idle ? 0 : Math.min(1, frac * (preset.multi.latencyS / preset.single.latencyS)); // single agent is faster → finishes first
   const timeline = agentTimeline(preset.agents.map((a) => a.role), preset.multi.latencyS);
 
   return (
@@ -270,15 +274,32 @@ export function OrchestrationBoard() {
             <Panel>
               <p className="stat-label mb-2">A2A-style coordination <span className="font-normal text-slatey-500">· task lifecycle: assigned → working → completed</span></p>
               {idle ? <p className="text-xs text-slatey-500">No messages yet.</p> : (
-                <ul className="space-y-1 font-mono text-[11px]">
-                  {preset.messages.slice(0, Math.max(0, Math.min(progress + 1, preset.messages.length))).map((m, i) => (
-                    <li key={i} className="flex items-center gap-2 text-slatey-300">
-                      <span className="text-slatey-500">{m.from}</span><span className="text-teal-700">→</span><span className="text-slatey-500">{m.to}</span>
-                      <span className="text-ink">{m.label}</span>
-                      <Badge tone="emerald" className="ml-auto">completed</Badge>
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className="space-y-1 font-mono text-[11px]">
+                    {preset.messages.slice(0, Math.max(0, Math.min(progress + 1, preset.messages.length))).map((m, i) => (
+                      <li key={i}>
+                        <button type="button" onClick={() => setInspected(inspected === i ? null : i)}
+                          className={`flex w-full items-center gap-2 rounded px-1 py-0.5 text-left transition hover:bg-slate-50 ${inspected === i ? "bg-slate-50 ring-1 ring-teal-500/30" : ""}`}
+                          aria-expanded={inspected === i} aria-label={`Inspect A2A frame: ${m.from} to ${m.to}, ${m.label}`}>
+                          <span className="text-slatey-500">{m.from}</span><span className="text-teal-700">→</span><span className="text-slatey-500">{m.to}</span>
+                          <span className="text-ink">{m.label}</span>
+                          <Badge tone="emerald" className="ml-auto">completed</Badge>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                  {inspected !== null && frames[inspected] && (
+                    <div className="mt-2 rounded-md border border-line bg-slate-900 p-2.5 font-mono text-[10.5px] leading-relaxed">
+                      <div className="mb-1 flex items-center gap-2">
+                        <span className="rounded bg-teal-600/30 px-1.5 py-0.5 text-teal-200">{frames[inspected].kind}</span>
+                        <span className="text-slate-400">{frames[inspected].method}</span>
+                        <span className="ml-auto text-slate-500">seq {frames[inspected].seq}</span>
+                      </div>
+                      <pre className="whitespace-pre-wrap break-words text-slate-200">{JSON.stringify({ from: frames[inspected].from, to: frames[inspected].to, method: frames[inspected].method, params: frames[inspected].params }, null, 2)}</pre>
+                    </div>
+                  )}
+                  <p className="mt-1.5 text-[10px] text-slatey-500">Click a message to inspect its A2A frame &mdash; the envelope an agent-to-agent protocol carries.</p>
+                </>
               )}
             </Panel>
           </div>
@@ -301,13 +322,27 @@ export function OrchestrationBoard() {
                   <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Run cost so far</span><span className="font-mono font-semibold text-ink">${(preset.multi.costUsd * frac).toFixed(3)}<span className="text-slatey-500"> / ${preset.multi.costUsd.toFixed(3)}</span></span></div>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-teal-600 transition-all duration-300" style={{ width: `${frac * 100}%` }} /></div>
                   <div className="mt-1.5 flex items-center justify-between text-[11px]"><span className="text-slatey-500">Elapsed</span><span className="font-mono text-ink">{(preset.multi.latencyS * frac).toFixed(1)}s / {preset.multi.latencyS}s</span></div>
+                  <div className="mt-2 border-t border-line pt-2">
+                    <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Baseline (single agent)</span><span className="font-mono text-ink">{singleFrac >= 1 ? "done" : `${(preset.single.latencyS * singleFrac).toFixed(1)}s / ${preset.single.latencyS}s`}</span></div>
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-slate-400 transition-all duration-300" style={{ width: `${singleFrac * 100}%` }} /></div>
+                    {singleFrac >= 1 && !done && <p className="mt-1 text-[10px] text-slatey-500">Single agent already finished &mdash; at {preset.single.quality} quality vs {preset.multi.quality} for multi.</p>}
+                  </div>
                 </div>
               )}
               <Compare label="Quality" single={`${preset.single.quality}`} multi={`${preset.multi.quality}`} sVal={preset.single.quality} mVal={preset.multi.quality} betterHigh />
               <Compare label="Cost / run" single={`$${preset.single.costUsd.toFixed(3)}`} multi={`$${preset.multi.costUsd.toFixed(3)}`} sVal={preset.single.costUsd} mVal={preset.multi.costUsd} />
               <Compare label="Latency" single={`${preset.single.latencyS}s`} multi={`${preset.multi.latencyS}s`} sVal={preset.single.latencyS} mVal={preset.multi.latencyS} />
+              <div className="mt-3 grid grid-cols-3 gap-1.5">
+                {h2h.metrics.map((m) => (
+                  <div key={m.key} className={`rounded-md border p-1.5 text-center ${m.multiWins ? "border-teal-500/40 bg-teal-50" : "border-line bg-slate-50"}`}>
+                    <p className="text-[9px] uppercase tracking-wide text-slatey-500">{m.label}</p>
+                    <p className={`text-[11px] font-semibold ${m.multiWins ? "text-teal-700" : "text-slatey-400"}`}>{m.multiWins ? "multi wins" : "baseline wins"}</p>
+                    <p className="font-mono text-[9px] text-slatey-400">{m.deltaPct > 0 ? "+" : ""}{Math.round(m.deltaPct)}%</p>
+                  </div>
+                ))}
+              </div>
               <div className="mt-3 rounded-md bg-teal-50 px-3 py-2 text-xs text-teal-800">
-                <span className="font-semibold">The ratio:</span> multi-agent bought <span className="font-semibold">+{qualityDelta}% quality</span> for <span className="font-semibold">{costMult}× cost</span> on this task class. That ratio — not the demo — is the decision.
+                <span className="font-semibold">The tradeoff:</span> {h2h.verdict}. That ratio &mdash; not the demo &mdash; is the decision.
               </div>
             </Panel>
 

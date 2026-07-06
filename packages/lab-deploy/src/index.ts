@@ -3,5 +3,7 @@ export { OperatingEnvelope } from "./components/OperatingEnvelope";
 export * from "./engine/types";
 export {
   deriveBaseline, computeOps, envelopeGrid, driftSeries, runIncident, deployVerdict,
+  recommendOperatingPoint,
   ENVELOPE_VOLUMES, ENVELOPE_CACHE,
+  type OperatingPoint,
 } from "./engine/model";

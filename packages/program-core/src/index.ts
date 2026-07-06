@@ -34,10 +34,10 @@ export {
   type OpsIncident,
 } from "./operate";
 export {
-  deriveOpsSeries, detectSignals, deriveDay2Incident, valueAtRisk,
+  deriveOpsSeries, detectSignals, deriveDay2Incident, valueAtRisk, projectCanaryBreach,
   buildOperateFeedback, buildWeeklyOpsReview, buildIncidentReport,
   OPS_WEEKS, INCIDENT_WEEK,
-  type OpsWeek, type OpsSeries, type OpsSignal, type OpsSignalKey, type OpsSeverity,
+  type OpsWeek, type OpsSeries, type OpsSignal, type OpsSignalKey, type OpsSeverity, type CanaryProjection, type CanarySeriesLike,
   type ValueAtRisk, type RemediationOption, type Day2Incident, type OperateFeedback, type LoopTarget,
 } from "./operate-day2";
 export { STAGES, STAGE_MAP, type StageDef } from "./stages";

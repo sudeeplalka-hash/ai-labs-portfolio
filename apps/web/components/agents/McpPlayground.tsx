@@ -10,10 +10,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare, Share2, RotateCcw, Eye } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare, Share2, RotateCcw, Eye, X } from "lucide-react";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, copyToClipboard, type ExportAction, type Command } from "@labs/design-system";
 import { GAP01_USE_CASES, LABS } from "@labs/kit";
-import { diffManifests } from "@labs/engines";
+import { diffManifests, validateToolDef, manifestWithTool, lifecycleFrames, traceToJson } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -74,8 +74,15 @@ export function McpPlayground() {
     ? { key: activeUc.id, label: activeUc.payload.label, blurb: activeUc.payload.blurb, tools: activeUc.payload.tools, resources: activeUc.payload.resources, prompts: activeUc.payload.prompts }
     : SYSTEMS.find((s) => s.key === sysKey)!;
   const [tab, setTab] = useState<"tools" | "resources" | "prompts">("tools");
+  const [customTools, setCustomTools] = useState<Tool[]>([]);
+  const allTools = customTools.length ? [...sys.tools, ...customTools] : sys.tools;
+  const lifecycle = lifecycleFrames({ name: sys.label, tools: allTools.map((t) => t.name), resources: sys.resources.map((r) => r.name), prompts: sys.prompts.map((pp) => pp.name) });
+  const [ntName, setNtName] = useState("");
+  const [ntDesc, setNtDesc] = useState("");
+  const [ntArgs, setNtArgs] = useState<{ name: string; type: ArgType; required: boolean }[]>([{ name: "", type: "string", required: true }]);
+  const [ntErrors, setNtErrors] = useState<string[]>([]);
   const [toolName, setToolName] = useState(sys.tools[0].name);
-  const tool = sys.tools.find((t) => t.name === toolName) ?? sys.tools[0];
+  const tool = allTools.find((t) => t.name === toolName) ?? allTools[0];
   const [argVals, setArgVals] = useState<Record<string, string>>(() => Object.fromEntries(sys.tools[0].args.map((a) => [a.name, a.example])));
   const [annotate, setAnnotate] = useState(true);
   const [malformed, setMalformed] = useState(false);
@@ -92,7 +99,7 @@ export function McpPlayground() {
     setPrevSys(sys);
     setSysKey(k); setActiveUcId(null); setToolName(s.tools[0].name);
     setArgVals(Object.fromEntries(s.tools[0].args.map((a) => [a.name, a.example])));
-    setHistory([]); setViewCallId(null); setTab("tools");
+    setHistory([]); setViewCallId(null); setTab("tools"); setCustomTools([]);
   };
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
@@ -100,11 +107,11 @@ export function McpPlayground() {
     const tools = uc ? uc.payload.tools : SYSTEMS[0].tools;
     setToolName(tools[0].name);
     setArgVals(Object.fromEntries(tools[0].args.map((a) => [a.name, a.example])));
-    setHistory([]); setViewCallId(null); setTab("tools");
+    setHistory([]); setViewCallId(null); setTab("tools"); setCustomTools([]);
     setNSys(uc ? uc.payload.nSys : 8); setNCon(uc ? uc.payload.nCon : 6);
   };
   const onTool = (name: string) => {
-    const t = sys.tools.find((x) => x.name === name)!;
+    const t = allTools.find((x) => x.name === name)!;
     setToolName(name);
     setArgVals(Object.fromEntries(t.args.map((a) => [a.name, a.example])));
   };
@@ -142,6 +149,19 @@ export function McpPlayground() {
     const ms = 38 + tool.name.length * 3 + Object.keys(argVals).length * 7;
     setHistory((h) => [{ id, tool: tool.name, sysLabel: sys.label, frames, error: isError, ms, bytes }, ...h]);
     setViewCallId(id);
+  };
+
+  const addTool = () => {
+    const v = validateToolDef({ name: ntName, description: ntDesc, args: ntArgs.map((a) => ({ name: a.name, type: a.type, required: a.required, example: "" })) }, allTools.map((t) => t.name));
+    if (!v.ok || !v.def) { setNtErrors(v.errors); return; }
+    const def = v.def;
+    const t: Tool = { name: def.name, description: def.description, args: def.args.map((a) => ({ name: a.name, type: a.type, required: a.required, example: a.example, enumVals: a.enumVals })), result: (a) => ({ ok: true, tool: def.name, arguments: a, note: "custom tool \u2014 deterministic echo of your typed arguments" }) };
+    setCustomTools((cs) => manifestWithTool(cs, t));
+    setToolName(def.name);
+    setArgVals(Object.fromEntries(def.args.map((a) => [a.name, a.example])));
+    setNtName(""); setNtDesc(""); setNtArgs([{ name: "", type: "string", required: true }]); setNtErrors([]);
+    setTab("tools");
+    toast(`Added \u201c${def.name}\u201d to ${sys.label}`);
   };
 
   // Restore a shared call (?cfg=) once on mount.
@@ -288,20 +308,46 @@ export function McpPlayground() {
               {TABS.map(({ key, label, Icon }) => (
                 <button key={key} onClick={() => setTab(key)}
                   className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${tab === key ? "border-teal-600 bg-teal-50 text-teal-700" : "border-line text-slatey-400 hover:text-ink"}`}>
-                  <Icon className="h-3.5 w-3.5" /> {label} · {key === "tools" ? sys.tools.length : key === "resources" ? sys.resources.length : sys.prompts.length}
+                  <Icon className="h-3.5 w-3.5" /> {label} · {key === "tools" ? allTools.length : key === "resources" ? sys.resources.length : sys.prompts.length}
                 </button>
               ))}
             </div>
 
             {tab === "tools" && (
               <div className="space-y-2">
-                {sys.tools.map((t) => (
+                {allTools.map((t) => (
                   <button key={t.name} onClick={() => onTool(t.name)}
                     className={`block w-full rounded-lg border p-2.5 text-left transition ${t.name === toolName ? "border-teal-600 bg-teal-50/60" : "border-line hover:border-teal-500/40"}`}>
-                    <p className="font-mono text-xs font-semibold text-ink">{t.name}<span className="ml-1 font-sans font-normal text-slatey-500">({t.args.map((a) => a.name).join(", ")})</span></p>
+                    <p className="font-mono text-xs font-semibold text-ink">{t.name}<span className="ml-1 font-sans font-normal text-slatey-500">({t.args.map((a) => a.name).join(", ")})</span>{customTools.some((c) => c.name === t.name) && <span className="ml-1 rounded bg-teal-100 px-1 py-0.5 align-middle text-[9px] font-semibold text-teal-700">custom</span>}</p>
                     <p className="mt-0.5 text-[11px] text-slatey-400">{t.description}</p>
                   </button>
                 ))}
+                <details className="rounded-lg border border-dashed border-teal-500/40 bg-teal-50/20 p-2.5">
+                  <summary className="cursor-pointer text-xs font-semibold text-teal-700">+ Build a custom tool</summary>
+                  <div className="mt-2 space-y-2">
+                    <input value={ntName} onChange={(e) => setNtName(e.target.value)} placeholder="tool_name (lower_snake_case)" className="w-full rounded-md border border-line bg-white px-2.5 py-1.5 font-mono text-xs" />
+                    <input value={ntDesc} onChange={(e) => setNtDesc(e.target.value)} placeholder="description (optional)" className="w-full rounded-md border border-line bg-white px-2.5 py-1.5 text-xs" />
+                    <div className="space-y-1.5">
+                      {ntArgs.map((a, i) => (
+                        <div key={i} className="flex items-center gap-1.5">
+                          <input value={a.name} onChange={(e) => setNtArgs((xs) => xs.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} placeholder="arg_name" className="min-w-0 flex-1 rounded-md border border-line bg-white px-2 py-1 font-mono text-[11px]" />
+                          <select value={a.type} onChange={(e) => setNtArgs((xs) => xs.map((x, j) => (j === i ? { ...x, type: e.target.value as ArgType } : x)))} className="rounded-md border border-line bg-white px-1.5 py-1 text-[11px]">
+                            <option value="string">string</option>
+                            <option value="number">number</option>
+                          </select>
+                          <label className="inline-flex items-center gap-1 text-[10px] text-slatey-500"><input type="checkbox" checked={a.required} onChange={(e) => setNtArgs((xs) => xs.map((x, j) => (j === i ? { ...x, required: e.target.checked } : x)))} />req</label>
+                          {ntArgs.length > 1 && <button type="button" onClick={() => setNtArgs((xs) => xs.filter((_, j) => j !== i))} className="text-slatey-400 hover:text-rose-600" aria-label="Remove argument"><X className="h-3.5 w-3.5" /></button>}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => setNtArgs((xs) => [...xs, { name: "", type: "string", required: false }])} className="text-[11px] font-medium text-teal-700 hover:underline">+ Arg</button>
+                      <button type="button" onClick={addTool} className="ml-auto rounded-md bg-teal-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-teal-700">Add to server</button>
+                    </div>
+                    {ntErrors.length > 0 && <ul className="space-y-0.5">{ntErrors.map((e, i) => <li key={i} className="text-[10.5px] text-rose-600">&bull; {e}</li>)}</ul>}
+                    <p className="text-[10px] text-slatey-500">Validated against the MCP tool shape, then callable above with real JSON-RPC frames (honest -32602 on bad args).</p>
+                  </div>
+                </details>
               </div>
             )}
             {tab === "resources" && (
@@ -315,6 +361,22 @@ export function McpPlayground() {
               </ul>
             )}
             <p className="mt-3 text-[11px] text-slatey-500">Most demos stop at tools. Resources (read-only context) and prompts (reusable templates) are part of the same contract.</p>
+            <details className="mt-3 border-t border-line pt-3">
+              <summary className="cursor-pointer text-xs font-semibold text-slatey-400">Session lifecycle <span className="font-normal text-slatey-500">· the initialize handshake</span></summary>
+              <ol className="mt-2 space-y-1.5">
+                {lifecycle.map((f) => (
+                  <li key={f.seq} className="rounded-md border border-line p-2">
+                    <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                      <span className="font-mono text-slatey-500">{f.dir}</span>
+                      <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slatey-600">{f.kind}</span>
+                      {f.method && <span className="font-mono font-semibold text-teal-700">{f.method}</span>}
+                    </div>
+                    <pre className="mt-1 overflow-x-auto rounded bg-slate-900 p-2 font-mono text-[10px] leading-relaxed text-slate-200">{JSON.stringify(f.body, null, 2)}</pre>
+                    <p className="mt-1 text-[10px] text-slatey-500">{f.note}</p>
+                  </li>
+                ))}
+              </ol>
+            </details>
           </Panel>
 
           {/* Composer + trace */}
@@ -347,12 +409,17 @@ export function McpPlayground() {
               const viewCall = history.find((c) => c.id === viewCallId) ?? history[0];
               return (
                 <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="stat-label">Call trace <span className="font-normal text-slatey-500">· #{viewCall.id} · {viewCall.tool}</span></p>
+                    <button onClick={() => { downloadJson(`mcp-trace-${viewCall.id}`, traceToJson(viewCall)); toast("Trace downloaded as JSON"); }} className="rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-slatey-400 hover:text-ink">Download trace</button>
+                  </div>
                   {viewCall.frames.map((f, i) => (
                     <div key={i}>
                       <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide">
                         {f.dir === "req"
                           ? <span className="text-slatey-500">→ request <span className="font-normal normal-case">#{viewCall.id} · {viewCall.tool}</span></span>
                           : <span className={f.error ? "text-rose-600" : "text-teal-700"}>← response{f.error ? " · error" : ""}</span>}
+                        <button onClick={() => { copyToClipboard(JSON.stringify(f.body, null, 2)); toast("Frame copied"); }} className="ml-auto rounded border border-line px-1.5 py-0.5 text-[10px] font-medium normal-case text-slatey-400 hover:text-ink">copy</button>
                       </div>
                       <pre className={`overflow-x-auto rounded-lg border p-3 font-mono text-[11px] leading-relaxed ${f.error ? "border-rose-200 bg-rose-50 text-rose-900" : "border-line bg-ink text-slate-100"}`}>{JSON.stringify(f.body, null, 2)}</pre>
                       {annotate && <p className="mt-1 text-[11px] italic text-slatey-500">{f.note}</p>}

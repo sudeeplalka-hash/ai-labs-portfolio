@@ -192,3 +192,142 @@ export function factorSensitivity<K extends string>(
     })
     .sort((a, b) => b.impact - a.impact);
 }
+
+// Two-week sequencing — turns the flat "fix these weak factors" list into an illustrative
+// 14-day plan a steering committee can read as a schedule. The weakest factors start first
+// and run longest (duration scales with how far below "healthy" each sits); later factors
+// stagger in behind them. Deterministic and clamped to the horizon. This is a *sequencing
+// aid*, not a project plan — the ordering and the "weakest gets the most days" rule are the
+// honest point; the exact day counts are illustrative.
+export interface PlanItem {
+  key: string;
+  label: string;
+  score: number;
+}
+export interface PlanSpan {
+  key: string;
+  label: string;
+  startDay: number;   // 0-based day index within the horizon
+  endDay: number;     // exclusive
+  durationDays: number;
+  intensity: "focus" | "support";
+}
+export interface ScheduleOpts {
+  horizonDays?: number;
+  healthy?: number;
+  minDays?: number;
+  stagger?: number;
+}
+export function scheduleAdoptionPlan(items: PlanItem[], opts: ScheduleOpts = {}): PlanSpan[] {
+  const horizon = opts.horizonDays ?? 14;
+  const healthy = opts.healthy ?? 70;
+  const minDays = opts.minDays ?? 3;
+  const stagger = opts.stagger ?? 3;
+  const sorted = [...items].sort((a, b) => a.score - b.score); // weakest first
+  return sorted.map((it, i) => {
+    const gap = Math.max(0, healthy - it.score);
+    const dur = Math.min(horizon, Math.round(minDays + (gap / healthy) * (horizon - minDays)));
+    const start = Math.min(i * stagger, horizon - minDays);
+    const end = Math.min(horizon, start + Math.max(minDays, dur));
+    return { key: it.key, label: it.label, startDay: start, endDay: end, durationDays: end - start, intensity: i < 2 ? "focus" : "support" };
+  });
+}
+
+// Compare two populations — put two readiness vectors side by side under the same weights
+// and gate, and attribute the composite gap to the factors that drive it. Each factor's
+// contribution to (composite B − composite A) is its weight-share × the factor delta; the
+// biggest-magnitude contribution is the "driver" of the difference. That turns "our rollout
+// scores lower than the benchmark" into "…because sponsorship is 30 points behind." Pure;
+// the contributions sum to the (un-rounded) composite gap.
+export interface FactorDelta<K extends string = string> {
+  key: K;
+  a: number;
+  b: number;
+  delta: number;        // b - a
+  contribution: number; // signed contribution to (compositeB - compositeA)
+}
+export interface ReadinessComparison<K extends string = string> {
+  compositeA: number;
+  compositeB: number;
+  compositeDelta: number; // compositeB - compositeA (rounded composites)
+  verdictA: ReadinessVerdict;
+  verdictB: ReadinessVerdict;
+  deltas: FactorDelta<K>[];      // per factor, largest |contribution| first
+  driver: FactorDelta<K> | null; // the factor that moves the gap most (null if identical)
+}
+export function compareReadiness<K extends string>(
+  a: Record<K, number>,
+  b: Record<K, number>,
+  weights: Record<K, number>,
+  keys: readonly K[],
+  scaleCut: number,
+  condCut: number,
+): ReadinessComparison<K> {
+  const W = weightSumOf(weights, keys);
+  const compositeA = readinessComposite(a, weights, keys);
+  const compositeB = readinessComposite(b, weights, keys);
+  const deltas = keys
+    .map((k) => {
+      const delta = b[k] - a[k];
+      return { key: k, a: a[k], b: b[k], delta, contribution: (weights[k] / W) * delta };
+    })
+    .sort((x, y) => Math.abs(y.contribution) - Math.abs(x.contribution));
+  const driver = deltas.length > 0 && deltas[0].contribution !== 0 ? deltas[0] : null;
+  return {
+    compositeA,
+    compositeB,
+    compositeDelta: compositeB - compositeA,
+    verdictA: readinessGate(compositeA, scaleCut, condCut),
+    verdictB: readinessGate(compositeB, scaleCut, condCut),
+    deltas,
+    driver,
+  };
+}
+
+// Readiness trajectory — ties the flip-the-gate moves and the two-week schedule together
+// into one projection: as each factor's fix runs over its scheduled span, its score ramps
+// from current to target, and the weighted composite is recomputed day by day. The result
+// is the curve to the Scale cutoff — and the day it (illustratively) crosses. Reuses the
+// tested scheduler and composite, so the curve and the plan can't drift. Pure.
+export interface TrajectoryPoint { day: number; composite: number; }
+export interface Trajectory {
+  points: TrajectoryPoint[];
+  startComposite: number;
+  endComposite: number;
+  gateDay: number | null; // first day the composite reaches the target
+  target: number;
+}
+export function readinessTrajectory<K extends string>(
+  factors: Record<K, number>,
+  moves: { key: K; from: number; to: number }[],
+  weights: Record<K, number>,
+  keys: readonly K[],
+  target: number,
+  opts: ScheduleOpts = {},
+): Trajectory {
+  const horizon = opts.horizonDays ?? 14;
+  const spans = scheduleAdoptionPlan(moves.map((m) => ({ key: m.key, label: m.key, score: m.from })), opts);
+  const spanOf = (k: K) => spans.find((s) => s.key === k);
+  const moveOf = (k: K) => moves.find((m) => m.key === k);
+  const valueAt = (k: K, day: number): number => {
+    const mv = moveOf(k);
+    const sp = spanOf(k);
+    if (!mv || !sp) return factors[k];
+    const frac = day <= sp.startDay ? 0 : day >= sp.endDay ? 1 : (day - sp.startDay) / (sp.endDay - sp.startDay);
+    return mv.from + (mv.to - mv.from) * frac;
+  };
+  const points: TrajectoryPoint[] = [];
+  for (let day = 0; day <= horizon; day++) {
+    const fs = {} as Record<K, number>;
+    for (const k of keys) fs[k] = valueAt(k, day);
+    points.push({ day, composite: readinessComposite(fs, weights, keys) });
+  }
+  const gateHit = points.find((p) => p.composite >= target);
+  return {
+    points,
+    startComposite: points[0].composite,
+    endComposite: points[points.length - 1].composite,
+    gateDay: gateHit ? gateHit.day : null,
+    target,
+  };
+}

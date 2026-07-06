@@ -6,13 +6,13 @@
 // condition. Showing the runner-up and what flips it is what makes this architecture
 // judgment, not a quiz. SIMULATED — deterministic scoring over visible inputs.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, type ExportAction, type Command } from "@labs/design-system";
+import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, svgElementToPng, downloadText, type ExportAction, type Command } from "@labs/design-system";
 import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES, LABS } from "@labs/kit";
-import { sensitivity as protocolSensitivity, bespokeCost, protocolCost, crossoverConsumers } from "@labs/engines";
+import { sensitivity as protocolSensitivity, bespokeCost, protocolCost, crossoverConsumers, protocolAffinity, affinityRadar, whyNotOthers, recommendationCard, explainRecommendation, type ProtocolAxis } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
@@ -55,6 +55,17 @@ function evaluate(a: Record<string, number>, W: Weights) {
   return { scores, primary: ranked[0][0], runnerUp: ranked[1][0] };
 }
 
+// Short axis labels for the protocol radar (the six decision dimensions).
+const AXES: ProtocolAxis[] = [
+  { key: "q1", label: "Tools" },
+  { key: "q2", label: "Consumers" },
+  { key: "q3", label: "Coordination" },
+  { key: "q4", label: "Governance" },
+  { key: "q5", label: "Reuse" },
+  { key: "q6", label: "Simplicity" },
+];
+const PROTO_COLOR: Record<PKey, string> = { fc: "#94a3b8", mcp: "#0d9488", a2a: "#6366f1", hybrid: "#f59e0b" };
+
 const SYS_COUNT = [2, 7, 15];
 const CON_COUNT = [1, 4, 12];
 
@@ -75,6 +86,7 @@ export function ProtocolSelection() {
   const W = weights;
   const edited = JSON.stringify(W) !== JSON.stringify(DEFAULT_WEIGHTS);
   const router = useRouter();
+  const cardRef = useRef<SVGSVGElement>(null);
 
   // Restore a shared recommendation (?cfg=) once on mount — answers + weights.
   useEffect(() => {
@@ -112,6 +124,15 @@ export function ProtocolSelection() {
   // Sensitivity: which single answer change would flip the call? (engine)
   const sensitivity = protocolSensitivity(ans, QUESTIONS, (a) => evaluate(a, W).primary);
 
+  // Protocol radar + why-not-others — probe the SAME weighted scorer for each protocol's
+  // responsiveness to each decision dimension (engine), then explain the call per rival.
+  const scoreOf = (a: Record<string, number>) => evaluate(a, W).scores;
+  const affinity = protocolAffinity(scoreOf, AXES);
+  const radar = affinityRadar(affinity, AXES);
+  const whyNot = whyNotOthers(affinity, ans, AXES, primary);
+  const card = recommendationCard(scores, primary, runnerUp, (k) => PROTO[k].label);
+  const explanation = explainRecommendation(card, whyNot, sensitivity, (k) => PROTO[k].label);
+
   // ---- Export suite + command palette ----
   const exportCsv = () => {
     const order: PKey[] = ["fc", "mcp", "a2a", "hybrid"];
@@ -124,6 +145,16 @@ export function ProtocolSelection() {
     downloadJson("protocol-scenario", { version: 1, answers: ans, weights: W });
     toast("Scenario exported as JSON");
   };
+  const exportCard = () => {
+    if (!cardRef.current) { toast("Card isn't ready yet"); return; }
+    svgElementToPng(cardRef.current, `protocol-card-${primary}`).then((ok) => toast(ok ? "Recommendation card exported as PNG" : "Couldn't render the card"));
+  };
+  const explanationText = () => explanation.map((l) => `\u2022 ${l.text}`).join("\n");
+  const copyExplanation = () => {
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(explanationText()).then(() => toast("Explanation copied"), () => toast("Couldn't copy"));
+    else toast("Clipboard unavailable");
+  };
+  const exportExplanation = () => { downloadText("protocol-explanation", explanationText()); toast("Explanation exported as text"); };
   const importScenario = async () => {
     const text = await pickTextFile();
     if (!text) return;
@@ -140,6 +171,8 @@ export function ProtocolSelection() {
   const exportActions: ExportAction[] = [
     { id: "csv", label: "Protocol scores as CSV", hint: "All four, with fit %", onSelect: exportCsv },
     { id: "json", label: "Export scenario (JSON)", hint: "Answers + weights, re-importable", onSelect: exportScenario },
+    { id: "card", label: "Recommendation card (PNG)", hint: "Shareable image of the call", onSelect: exportCard },
+    { id: "explain", label: "Explanation (text)", hint: "Plain-English rationale", onSelect: exportExplanation },
     { id: "import", label: "Import scenario (JSON)…", hint: "Load a saved .json", onSelect: importScenario },
   ];
   const paletteCommands: Command[] = [
@@ -230,6 +263,63 @@ export function ProtocolSelection() {
               <div className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
                 <span className="font-semibold">Runner-up: {PROTO[runnerUp].label}.</span> Flips to primary if {DRIVER[runnerUp]}.
               </div>
+              <div className="mt-3">
+                <p className="stat-label mb-1">Why not the others</p>
+                <ul className="space-y-1">
+                  {whyNot.map((w) => (
+                    <li key={w.protocol} className="flex items-start gap-1.5 text-[11px] text-slatey-400">
+                      <span className="mt-0.5 inline-block h-2 w-2 shrink-0 rounded-sm" style={{ background: PROTO_COLOR[w.protocol] }} />
+                      <span><span className="font-medium text-slatey-300">vs {PROTO[w.protocol].label}:</span> {PROTO[primary].label} leads on {w.axisLabel}.</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Panel>
+
+            <Panel>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="stat-label">Why this call</p>
+                <button onClick={copyExplanation} className="rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-slatey-400 hover:text-ink">Copy text</button>
+              </div>
+              <ul className="space-y-1.5 text-xs">
+                {explanation.map((l, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${l.kind === "verdict" ? "bg-emerald-500" : l.kind === "flip" ? "bg-amber-500" : l.kind === "robust" ? "bg-teal-500" : "bg-slate-300"}`} />
+                    <span className={l.kind === "verdict" ? "font-semibold text-ink" : "text-slatey-300"}>{l.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+
+            <Panel>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="stat-label">Shareable card</p>
+                <button onClick={exportCard} className="rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-slatey-400 hover:text-ink">Download PNG</button>
+              </div>
+              {(() => {
+                const confColor = card.confidence === "clear" ? "#16a34a" : card.confidence === "close" ? "#d97706" : "#64748b";
+                return (
+                  <svg ref={cardRef} viewBox="0 0 440 250" className="w-full" role="img" aria-label={`Recommendation card: ${card.primaryLabel}, ${card.confidence} call.`}>
+                    <rect x="0" y="0" width="440" height="250" rx="14" fill="#ffffff" stroke="#e4e7eb" />
+                    <rect x="0" y="0" width="440" height="5" fill={PROTO_COLOR[card.primary]} />
+                    <text x="24" y="40" fontSize="10.5" letterSpacing="1.5" fill="#94a3b8">PROTOCOL RECOMMENDATION</text>
+                    <text x="24" y="68" fontSize="23" fontWeight="700" fill="#152433">{card.primaryLabel}</text>
+                    <text x="24" y="90" fontSize="11" fontWeight="600" fill={confColor}>&#9679; {card.confidence} call &middot; +{card.margin.toFixed(1)} over {card.runnerUpLabel}</text>
+                    {card.bars.map((b, i) => {
+                      const y = 112 + i * 29, bw = 240;
+                      return (
+                        <g key={b.key}>
+                          <text x="24" y={y + 11} fontSize="11" fontWeight={b.primary ? 600 : 400} fill={b.primary ? "#152433" : "#64748b"}>{b.label}</text>
+                          <rect x="170" y={y + 2} width={bw} height="12" rx="6" fill="#eef1f4" />
+                          <rect x="170" y={y + 2} width={Math.max(2, (bw * b.pct) / 100)} height="12" rx="6" fill={PROTO_COLOR[b.key]} opacity={b.primary ? 1 : 0.5} />
+                          <text x={170 + bw + 8} y={y + 11} fontSize="10" fill="#94a3b8">{b.pct}%</text>
+                        </g>
+                      );
+                    })}
+                    <text x="24" y="240" fontSize="9" fill="#b6bdc6">Protocol Selection Lab &middot; deterministic scoring over your inputs</text>
+                  </svg>
+                );
+              })()}
             </Panel>
 
             <Panel>
@@ -242,6 +332,41 @@ export function ProtocolSelection() {
                   </div>
                 ))}
               </div>
+            </Panel>
+
+            <Panel>
+              <p className="stat-label mb-2">Protocol shapes <span className="font-normal text-slatey-500">· responsiveness to each decision dimension</span></p>
+              {(() => {
+                const cx = 120, cy = 104, R = 66;
+                const axesPts = radarAxes(AXES.length, R, cx, cy);
+                const labelPts = radarAxes(AXES.length, R + 12, cx, cy);
+                const order: PKey[] = ["mcp", "a2a", "hybrid", "fc"];
+                return (
+                  <svg viewBox="0 0 240 216" className="w-full" role="img" aria-label="Radar comparing how strongly each protocol is favored by each of the six decision dimensions.">
+                    {[0.25, 0.5, 0.75, 1].map((f) => <circle key={f} cx={cx} cy={cy} r={R * f} fill="none" stroke={f === 0.5 ? "#cbd5e1" : "#eceff2"} strokeDasharray={f === 0.5 ? "2 2" : undefined} />)}
+                    {axesPts.map((pt, i) => <line key={i} x1={cx} y1={cy} x2={pt.x} y2={pt.y} stroke="#eceff2" />)}
+                    {order.map((k) => {
+                      const pts = radarVertices(radar[k], R, 100, cx, cy);
+                      const isP = k === primary;
+                      return <polygon key={k} points={pointsToStr(pts)} fill={isP ? `${PROTO_COLOR[k]}22` : "none"} stroke={PROTO_COLOR[k]} strokeWidth={isP ? 2 : 1} strokeOpacity={isP ? 1 : 0.55} strokeDasharray={isP ? undefined : "3 2"} />;
+                    })}
+                    {labelPts.map((pt, i) => (
+                      <text key={i} x={pt.x} y={pt.y} fontSize="7.5" fill="#64748b"
+                        textAnchor={pt.x < cx - 4 ? "end" : pt.x > cx + 4 ? "start" : "middle"}
+                        dominantBaseline={pt.y < cy ? "auto" : "hanging"}>{AXES[i].label}</text>
+                    ))}
+                  </svg>
+                );
+              })()}
+              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slatey-500">
+                {(["fc", "mcp", "a2a", "hybrid"] as PKey[]).map((k) => (
+                  <span key={k} className="inline-flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-sm" style={{ background: PROTO_COLOR[k] }} />
+                    <span className={k === primary ? "font-semibold text-ink" : ""}>{PROTO[k].label}</span>
+                  </span>
+                ))}
+              </div>
+              <p className="mt-1 text-[10px] text-slatey-500">Outer = the dimension favors that protocol; the dashed mid-ring is neutral; inside it the dimension argues against. Moves with your weights.</p>
             </Panel>
 
             <Panel>

@@ -200,3 +200,35 @@ export function deployVerdict(b: Baseline, ops: OpsResult): DeployVerdict {
     return { tone: "watch", headline: "Below the reliability SLO", detail: `${(ops.reliability * 100).toFixed(2)}% vs ${(b.sloReliability * 100).toFixed(1)}% target — error budget ${ops.errorBudgetPct}%.` };
   return { tone: "healthy", headline: "Production-ready at this load", detail: `Within SLO, latency, and budget. Error budget ${ops.errorBudgetPct}% intact.` };
 }
+
+// Cheapest-safe operating point — search the controllable levers (tier × cache × reranker)
+// at the current volume and return the lowest-monthly-cost configuration that still lands in
+// the green zone (meets the reliability + latency SLOs). If nothing is green at this load,
+// fall back to the cheapest non-red config and flag found=false. Uses the same computeOps
+// the envelope and KPIs show, so the recommendation can't disagree with the chart. Pure.
+export interface OperatingPoint {
+  levers: DeployLevers;
+  ops: OpsResult;
+  found: boolean;         // was a green (SLO-meeting) config available at this volume?
+  monthlySavings: number; // vs the current levers, never negative
+}
+export function recommendOperatingPoint(b: Baseline, current: DeployLevers): OperatingPoint {
+  const tiers: ModelTier[] = ["small", "large"];
+  const rerankers = [false, true];
+  const candidates: { levers: DeployLevers; ops: OpsResult }[] = [];
+  for (const tier of tiers) {
+    for (const cachePct of CACHE_STEPS) {
+      for (const reranker of rerankers) {
+        const levers: DeployLevers = { ...current, tier, cachePct, reranker };
+        const ops = computeOps(b, levers);
+        if (ops.zone !== "red") candidates.push({ levers, ops });
+      }
+    }
+  }
+  const curOps = computeOps(b, current);
+  const greens = candidates.filter((c) => c.ops.zone === "green");
+  const pool = greens.length ? greens : candidates;
+  if (pool.length === 0) return { levers: current, ops: curOps, found: false, monthlySavings: 0 };
+  const best = pool.reduce((a, c) => (c.ops.monthlyCost < a.ops.monthlyCost ? c : a));
+  return { levers: best.levers, ops: best.ops, found: greens.length > 0, monthlySavings: Math.max(0, curOps.monthlyCost - best.ops.monthlyCost) };
+}

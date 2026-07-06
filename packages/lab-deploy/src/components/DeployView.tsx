@@ -10,7 +10,7 @@ import {
 } from "@labs/design-system";
 import { useProgramSource } from "@labs/program-core";
 import {
-  deriveBaseline, computeOps, envelopeGrid, ENVELOPE_VOLUMES, ENVELOPE_CACHE, driftSeries, deployVerdict,
+  deriveBaseline, computeOps, envelopeGrid, ENVELOPE_VOLUMES, ENVELOPE_CACHE, driftSeries, deployVerdict, recommendOperatingPoint,
 } from "../engine/model";
 import type { DeployLevers, ModelTier } from "../engine/types";
 import { OperatingEnvelope } from "./OperatingEnvelope";
@@ -47,6 +47,7 @@ export function DeployView() {
   const envelope = useMemo(() => envelopeGrid(baseline, levers), [baseline, levers]);
   const drift = useMemo(() => driftSeries(baseline), [baseline]);
   const verdict = useMemo(() => deployVerdict(baseline, ops), [baseline, ops]);
+  const recommended = useMemo(() => recommendOperatingPoint(baseline, levers), [baseline, levers]);
 
   // Write the deploy slice (computed at the production target volume) for Realize.
   // Demo mode is a standalone sandbox, so it never writes back to the real program.
@@ -211,6 +212,17 @@ export function DeployView() {
               <p className="font-semibold text-ink">{verdict.headline}</p>
               <p className="mt-0.5 leading-relaxed text-slatey-300">{verdict.detail}</p>
             </div>
+            {recommended.monthlySavings > 0 && !isCurrent(recommended.levers) && (
+              <div className="mt-3 rounded-lg border border-teal-500/30 bg-teal-500/[0.06] p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-semibold text-ink">Cheapest safe config</p>
+                  <button onClick={() => applyConfig(recommended.levers)} className="rounded-md bg-teal-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-teal-700">Apply</button>
+                </div>
+                <p className="mt-0.5 leading-relaxed text-slatey-300">
+                  {recommended.found ? "Meets both SLOs" : "Closest to SLO"} at {recommended.levers.tier} tier &middot; {recommended.levers.cachePct}% cache &middot; reranker {recommended.levers.reranker ? "on" : "off"} — saves <span className="font-semibold text-teal-700">${recommended.monthlySavings.toLocaleString()}/mo</span> vs your current mix.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </Panel>

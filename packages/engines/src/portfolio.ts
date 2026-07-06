@@ -190,3 +190,45 @@ export function initiativesFromCsvRows(rows: Record<string, string>[]): CsvImpor
   });
   return { items, skipped };
 }
+
+// Efficient frontier — the capital-allocation view. Rank initiatives by value per dollar
+// (the same ratio the greedy funder uses) and accumulate value against spend: the result is
+// a concave curve where the steep early section is the high-efficiency spend and the flat
+// tail is diminishing returns. The "knee" is where per-item efficiency first drops below the
+// book's overall value-per-dollar — the natural line between the efficient core and the
+// marginal tail. Pure; value() is supplied by the caller so it tracks the current model.
+export interface FrontierPoint {
+  index: number;      // 1-based rank on the frontier
+  cumSpend: number;
+  cumValue: number;
+  itemValue: number;
+  itemSpend: number;
+  efficiency: number; // value per $ for this item
+}
+export interface Frontier {
+  points: FrontierPoint[];
+  totalValue: number;
+  totalSpend: number;
+  /** count of items above the book's average efficiency — the "efficient core". */
+  kneeCount: number;
+  kneeSpend: number;
+  kneeValue: number;
+}
+export function efficientFrontier<T>(items: T[], value: (x: T) => number, cost: (x: T) => number): Frontier {
+  const usable = items.map((x) => ({ v: value(x), c: cost(x) })).filter((o) => o.c > 0 && o.v > 0);
+  const sorted = [...usable].sort((a, b) => b.v / b.c - a.v / a.c);
+  let cumSpend = 0;
+  let cumValue = 0;
+  const points: FrontierPoint[] = sorted.map((o, i) => {
+    cumSpend += o.c;
+    cumValue += o.v;
+    return { index: i + 1, cumSpend, cumValue, itemValue: o.v, itemSpend: o.c, efficiency: o.v / o.c };
+  });
+  const totalValue = cumValue;
+  const totalSpend = cumSpend;
+  const avgEff = totalSpend > 0 ? totalValue / totalSpend : 0;
+  const belowIdx = points.findIndex((p) => p.efficiency < avgEff);
+  const kneeCount = belowIdx === -1 ? points.length : belowIdx;
+  const knee = kneeCount > 0 ? points[kneeCount - 1] : undefined;
+  return { points, totalValue, totalSpend, kneeCount, kneeSpend: knee?.cumSpend ?? 0, kneeValue: knee?.cumValue ?? 0 };
+}
