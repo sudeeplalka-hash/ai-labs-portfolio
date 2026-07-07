@@ -214,7 +214,7 @@ export function RoiBuilder() {
           <OutcomeFrame call="Fund, fund with conditions, or defer based on range, sensitivity, and payback." lift="Improves funding discipline by surfacing the driver that can make or break the case." measure="NPV, IRR, payback, sensitivity driver, adoption progress, realized value vs modeled value." />
           <InsightCard title="Present the range, not the point" tone="info">
             A single NPV invites a fight about the assumption behind it. A tornado shows you already stress-tested it, and
-            names the one driver leadership should actually govern. That&apos;s what moves a case from "interesting" to "funded."
+            names the one driver leadership should actually govern. That&apos;s what moves a case from &ldquo;interesting&rdquo; to &ldquo;funded.&rdquo;
           </InsightCard>
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Present the range, not only the point. Points get challenged. Ranges with clear assumptions get governed."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
@@ -237,7 +237,7 @@ function Slider({ label, value, min, max, step, onChange, fmt }: { label: string
   return (
     <div>
       <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">{label}</label><span className="font-mono text-xs font-semibold text-ink">{fmt(value)}</span></div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-amber-500" />
+      <input type="range" aria-label={label} min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-amber-500" />
     </div>
   );
 }

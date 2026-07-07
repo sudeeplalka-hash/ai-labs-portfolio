@@ -118,7 +118,7 @@ export function BuildBuyEvaluator() {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Monthly volume</label><span className="font-mono text-xs font-semibold text-ink">{(volume / 1e6).toFixed(1)}M calls</span></div>
-              <input type="range" min={100000} max={12000000} step={100000} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full accent-amber-500" />
+              <input type="range" aria-label="Monthly volume" min={100000} max={12000000} step={100000} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full accent-amber-500" />
             </div>
             <Seg label="Data sensitivity" value={dataSens} onChange={setDataSens} opts={["Low", "Medium", "High"]} />
             <Seg label="Differentiation need" value={diffNeed} onChange={setDiffNeed} opts={["Low", "Medium", "High"]} />

@@ -101,6 +101,10 @@ const SUBNAV: Partial<Record<StageKey, Group[]>> = {
     { label: "Traceability dossier", href: "/realize#dossier" },
     { label: "Guide", href: "/realize/guide" },
   ] }],
+  operate: [{ items: [
+    { label: "Day two console", href: "/operate" },
+    { label: "Guide", href: "/operate/guide" },
+  ] }],
 };
 
 function Dot({ status }: { status: StageStatus }) {

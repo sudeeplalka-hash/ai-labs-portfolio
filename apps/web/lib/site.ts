@@ -28,6 +28,8 @@ interface SiteConfig {
   homeTitle: string;
   /** Short attribution used in downloaded-artifact provenance footers. */
   attribution: string;
+  /** Social-share card (1200×630), resolved against metadataBase. */
+  ogImage: string;
 }
 
 export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
@@ -39,6 +41,7 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
       "A working command center for enterprise AI delivery: take one real initiative from a rough idea to a board ready business case, across Frame, Data, Build, Deploy, Govern, Realize, and Operate, with shared state and stage gates.",
     homeTitle: "AI Program Command Center: one initiative, end to end",
     attribution: "AI Program Command Center · ai-labs.sudeeplalka.com",
+    ogImage: "/og-command-center.png",
   },
   portfolio: {
     domain: "https://portfolio.sudeeplalka.com",
@@ -48,6 +51,7 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
       "A working portfolio of enterprise AI and technology strategy artifacts organized around architecture choices, delivery governance, financial impact, risk, operating models, and adoption. Each module maps technical work to the decisions senior leaders make when funding, architecting, governing, scaling, or operating AI programs.",
     homeTitle: "Sudeep Lalka: Enterprise AI and Technology Strategy Portfolio",
     attribution: "Enterprise AI and Technology Strategy Portfolio · portfolio.sudeeplalka.com",
+    ogImage: "/og-portfolio.png",
   },
 };
 

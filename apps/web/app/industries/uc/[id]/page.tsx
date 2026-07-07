@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ALL_USE_CASES, INDUSTRIES, LAB_ROUTES, labHref } from "@labs/kit";
+import { CURRENT_SITE } from "@/lib/site";
 
 export const dynamicParams = false;
 
@@ -27,8 +28,8 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
     title,
     description,
     keywords: [ind.label, uc.labId, prov, "AI delivery", "engagement leadership", "use case"],
-    openGraph: { title: `${title}, AI Labs Portfolio`, description, type: "article" },
-    twitter: { card: "summary", title, description },
+    openGraph: { title: `${title}, AI Labs Portfolio`, description, type: "article", images: [{ url: CURRENT_SITE.ogImage, width: 1200, height: 630 }] },
+    twitter: { card: "summary_large_image", title, description, images: [CURRENT_SITE.ogImage] },
   };
 }
 

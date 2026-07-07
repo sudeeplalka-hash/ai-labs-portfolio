@@ -183,7 +183,7 @@ export function StructuredOutput() {
           <OutcomeFrame call="Place a validation gate before any model output writes to a system of record." lift="Raises system ready output reliability through schema enforcement and corrective retry." measure="Validation pass rate, retry rate, failed write prevention, latency added, escalation rate." />
           <InsightCard title="The retry is the reliability" tone="info">
             The first pass is often almost-right, a string where a number belongs, a missing key. A validation gate with a
-            single corrective retry turns "usually valid" into "always valid or explicitly flagged." That&apos;s the
+            single corrective retry turns &ldquo;usually valid&rdquo; into &ldquo;always valid or explicitly flagged.&rdquo; That&apos;s the
             difference between a demo and production.
           </InsightCard>
           <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "If model output updates a system of record, validation is not optional. It is a reliability control."}</p>

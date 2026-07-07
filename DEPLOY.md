@@ -1,11 +1,18 @@
 # Deploy — AI Labs Portfolio
 
-The product is a **single static-export Next.js app** (`apps/web`) composing every lab,
-plus an **optional** FastAPI service (`services/governance-api`). The live demo runs
-entirely client-side — no backend required — so it can sit on any static host.
+The product is a **single static-export Next.js app** (`apps/web`) composing every lab.
+Everything runs client-side — no backend, no API keys — so it can sit on any static host.
 
-Target: **portfolio.sudeeplalka.com**. For the primary step-by-step (fresh repo → Vercel →
-subdomain), see [`GO-LIVE.md`](./GO-LIVE.md); this file covers alternate hosts.
+**One codebase powers two deploys** via the build-time `NEXT_PUBLIC_SITE` flag
+(see `apps/web/lib/site.ts`):
+
+| Site | Domain | `NEXT_PUBLIC_SITE` |
+|---|---|---|
+| Portfolio (Competency Map landing) | portfolio.sudeeplalka.com | `portfolio` (or unset) |
+| AI Program Command Center | ai-labs.sudeeplalka.com | `command-center` |
+
+One `git push` redeploys both. For the primary step-by-step (fresh repo → Vercel →
+subdomain), see [`GO-LIVE.md`](./GO-LIVE.md); this file covers the build and alternate hosts.
 
 ## Build output
 
@@ -16,18 +23,20 @@ pnpm turbo run test                          # engine vitest suites
 ```
 
 `apps/web/out/` is a fully static site (every route pre-rendered, incl. the dynamic
-`/govern/use-cases/[id]` via `generateStaticParams`).
+routes via `generateStaticParams`).
 
 ## Option A — Vercel (recommended)
 
-`vercel.json` is configured. In the Vercel project:
-- Connect the repo; leave Root Directory at the repo root (the config handles the monorepo).
-- It installs with pnpm (from `packageManager`), builds `@labs/web` via Turbo, serves `apps/web/out`.
-- Add the custom domain **portfolio.sudeeplalka.com** in Project → Settings → Domains.
+`vercel.json` is configured. Two Vercel projects point at the same repo:
+- Both: leave Root Directory at the repo root (the config handles the monorepo);
+  installs with pnpm (from `packageManager`), builds `@labs/web` via Turbo, serves `apps/web/out`.
+- Portfolio project: add domain **portfolio.sudeeplalka.com**; leave `NEXT_PUBLIC_SITE` unset.
+- Command-center project: add domain **ai-labs.sudeeplalka.com**; set env `NEXT_PUBLIC_SITE=command-center`.
 
 ## Option B — Netlify
 
-`netlify.toml` is configured (build → `apps/web/out`). Connect the repo, add the domain.
+`netlify.toml` is configured (build → `apps/web/out`). Connect the repo, add the domain,
+and set `NEXT_PUBLIC_SITE` per site as above.
 
 ## Option C — Cloudflare Pages / GitHub Pages / S3+CloudFront
 
@@ -35,27 +44,7 @@ Build locally or in CI, then publish `apps/web/out/`:
 - Cloudflare Pages: build command `pnpm install && pnpm turbo run build --filter=@labs/web`, output `apps/web/out`.
 - GitHub Pages / S3: upload `apps/web/out/` contents; point the subdomain via CNAME.
 
-## Environment
-
-Copy `apps/web/.env.example`. Default `NEXT_PUBLIC_STATIC_DEMO=1` (client-side governance).
-To use the real backend, set `NEXT_PUBLIC_STATIC_DEMO=0` and `NEXT_PUBLIC_API_URL` to the
-deployed service.
-
-## Optional — governance FastAPI service
-
-Not needed for the demo. To run/host it:
-
-```bash
-cd services/governance-api
-pip install -r requirements.txt
-python -m app.core.seed        # seed the local SQLite demo data
-uvicorn app.main:app --reload  # http://localhost:8000
-```
-
-Host it (Render/Fly/Railway/Docker — see `services/governance-api/Dockerfile`), then
-point `NEXT_PUBLIC_API_URL` at it and set `NEXT_PUBLIC_STATIC_DEMO=0`.
-
 ## Same-origin note
 
-Everything lives under one origin (one app), so the shared `ProgramState`
+Everything lives under one origin per deploy (one app), so the shared `ProgramState`
 (`localStorage`) flows across all stages automatically — no cross-zone setup needed.

@@ -6,7 +6,7 @@ import { SimulationBoundary } from "@/components/reviewer/Reviewer";
 export const metadata: Metadata = { title: "Product Roadmap" };
 
 const CURRENT = [
-  "Six stage AI lifecycle with shared contracts", "Strategy intake, scoring, and recommended build path", "Data readiness handoff",
+  "Seven stage AI lifecycle with shared contracts", "Strategy intake, scoring, and recommended build path", "Data readiness handoff",
   "Build/RAG lab: retrieval modes (BM25, vector, hybrid, rerank)", "Agent and tool calling mechanics (schemas, boundaries, approvals, misuse evals)",
   "Training and fine tuning readiness: decision memo, dataset readiness, overfitting and generalization",
   "Operate / AI Ops / MLOps spine", "Govern live evidence loop and decision engine", "Realize risk adjusted ROI engine",
@@ -15,7 +15,7 @@ const CURRENT = [
 const NEXT = [
   "Real vector retrieval / vector database integration", "Persistent eval run history",
   "Deeper telemetry integration", "Real tool integrations (APIs, workflow/ticketing engines)", "Real labeling tool plus model registry plus training pipeline integration",
-  "FinOps: cost chargeback and unit economics guardrails", "Operating model: staffing and RACI across the six stages",
+  "FinOps: cost chargeback and unit economics guardrails", "Operating model: staffing and RACI across the seven stages",
   "Vendor procurement and third party model risk workflow", "Quarterly benefits tracking (planned vs realized value)",
 ];
 const FUTURE = [

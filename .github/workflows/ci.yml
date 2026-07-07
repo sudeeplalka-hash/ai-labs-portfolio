@@ -30,6 +30,9 @@ jobs:
       - name: Typecheck
         run: pnpm turbo run typecheck
 
+      - name: Lint
+        run: pnpm turbo run lint --filter=@labs/web
+
       - name: Unit tests
         run: pnpm turbo run test
 

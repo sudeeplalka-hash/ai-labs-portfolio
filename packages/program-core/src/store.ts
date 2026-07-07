@@ -241,9 +241,23 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
   }
 }
 
+// Persisted-state schema version. Bump when ProgramState's nested shape changes
+// incompatibly (the shallow merge below can't heal nested objects): returning
+// visitors get a clean slate instead of a subtly broken one. v2 = the seven-stage
+// spine (progress.operate, day-two fields).
+export const STATE_VERSION = 2;
+export const STATE_VERSION_KEY = "apcc_state_version";
+
 export function loadState(): ProgramState {
   if (typeof window === "undefined") return blankState();
   try {
+    const v = window.localStorage.getItem(STATE_VERSION_KEY);
+    if (v !== String(STATE_VERSION)) {
+      // Older (or unversioned) persisted state, discard rather than migrate.
+      window.localStorage.removeItem(STATE_KEY);
+      window.localStorage.setItem(STATE_VERSION_KEY, String(STATE_VERSION));
+      return blankState();
+    }
     const raw = window.localStorage.getItem(STATE_KEY);
     return raw ? { ...blankState(), ...(JSON.parse(raw) as ProgramState) } : blankState();
   } catch {
@@ -253,7 +267,10 @@ export function loadState(): ProgramState {
 
 export function saveState(s: ProgramState) {
   if (typeof window === "undefined") return;
-  try { window.localStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch { /* quota */ }
+  try {
+    window.localStorage.setItem(STATE_KEY, JSON.stringify(s));
+    window.localStorage.setItem(STATE_VERSION_KEY, String(STATE_VERSION));
+  } catch { /* quota */ }
 }
 
 export function loadPortfolio(): PortfolioEntry[] {

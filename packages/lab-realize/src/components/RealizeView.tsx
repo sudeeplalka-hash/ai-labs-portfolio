@@ -54,6 +54,15 @@ export function RealizeView() {
     return "Re-run the workshop with tighter scope to lift risk adjusted return.";
   }, [biggestLeak?.key]);
 
+  // Signature over EVERY input this effect writes (same pattern as the other
+  // stage writers): none of the written objects (outcomes/iteration) appear in
+  // it, so the write can't retrigger its own effect, and no written field can
+  // go stale because its input moved without moving ROI.
+  const outcomeSig = JSON.stringify({
+    roi: roi.roiPct, rav: roi.riskAdjustedValue, npv: roi.npv3yr,
+    adoption: inp.adoption.value, payback: roi.paybackMonths,
+    addr: roi.addressable, real: roi.realized, leak: biggestLeak?.label, next: nextAction,
+  });
   useEffect(() => {
     if (!hydrated || isDemo) return;
     update((d) => {
@@ -78,7 +87,7 @@ export function RealizeView() {
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roi.roiPct, roi.riskAdjustedValue, roi.npv3yr, hydrated, isDemo, nextAction]);
+  }, [outcomeSig, hydrated, isDemo]);
   const captured = roi.addressable > 0 ? Math.round((roi.realized / roi.addressable) * 100) : 0;
   const engine = isDemo ? null : state.rag;
   const shownSens = sens;

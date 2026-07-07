@@ -113,7 +113,7 @@ export function StakeholderCockpit() {
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
             Stakeholder alignment is not a static map. It is a trajectory. This artifact shows how sponsor sentiment moves
-            over time and flags the people who can quietly shift a program's outcome. {activeUc ? activeUc.payload.drivingLine : `Currently, ${flags.length} are drifting, including the sponsor.`}
+            over time and flags the people who can quietly shift a program&apos;s outcome. {activeUc ? activeUc.payload.drivingLine : `Currently, ${flags.length} are drifting, including the sponsor.`}
           </p>
         </div>
 

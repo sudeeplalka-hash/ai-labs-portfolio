@@ -98,7 +98,7 @@ export function VendorMonitor() {
             {CRITERIA.map((c) => (
               <div key={c.key}>
                 <div className="mb-0.5 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">{c.label}</label><span className="font-mono text-xs font-semibold text-ink">{Math.round((w[c.key] / sumW) * 100)}%</span></div>
-                <input type="range" min={0} max={40} step={1} value={w[c.key]} onChange={(e) => setWeight(c.key, Number(e.target.value))} className="w-full accent-amber-500" />
+                <input type="range" aria-label={c.label} min={0} max={40} step={1} value={w[c.key]} onChange={(e) => setWeight(c.key, Number(e.target.value))} className="w-full accent-amber-500" />
               </div>
             ))}
           </Panel>
@@ -147,7 +147,7 @@ export function VendorMonitor() {
 
         <div className="mt-6">
           <InsightCard title={`Top pick: ${top.v.label}, exit cost ${fmt(top.v.exitCost)}`} tone={top.v.exitCost > 300000 ? "warn" : "info"}>
-            Nudge two or three weights and the ranking can flip, a "winner" that survives only one weighting isn&apos;t a
+            Nudge two or three weights and the ranking can flip, a &ldquo;winner&rdquo; that survives only one weighting isn&apos;t a
             decision, it&apos;s a preference. Pair the pick with its concentration and exit cost before you sign.
           </InsightCard>
         </div>

@@ -1,3 +1,0 @@
-/* Governance lab styles = the shared design system. One source of DNA.
-   (Relative import so postcss-import inlines it reliably across the workspace.) */
-@import "../../../packages/design-system/src/styles/globals.css";

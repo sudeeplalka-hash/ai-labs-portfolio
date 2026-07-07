@@ -391,11 +391,11 @@ export function McpPlayground() {
                   <div key={a.name}>
                     <label className="mb-0.5 block text-[11px] font-medium text-slatey-400">{a.name} <span className="text-slatey-500">· {a.type}{a.required ? " · required" : ""}</span></label>
                     {a.type === "enum" ? (
-                      <select value={argVals[a.name] ?? ""} onChange={(e) => setArgVals((v) => ({ ...v, [a.name]: e.target.value }))} className="w-full rounded-md border border-line bg-white px-2.5 py-1.5 text-xs">
+                      <select aria-label={a.name} value={argVals[a.name] ?? ""} onChange={(e) => setArgVals((v) => ({ ...v, [a.name]: e.target.value }))} className="w-full rounded-md border border-line bg-white px-2.5 py-1.5 text-xs">
                         {a.enumVals!.map((o) => <option key={o} value={o}>{o}</option>)}
                       </select>
                     ) : (
-                      <input value={argVals[a.name] ?? ""} onChange={(e) => setArgVals((v) => ({ ...v, [a.name]: e.target.value }))} className="w-full rounded-md border border-line bg-white px-2.5 py-1.5 font-mono text-xs" />
+                      <input aria-label={a.name} value={argVals[a.name] ?? ""} onChange={(e) => setArgVals((v) => ({ ...v, [a.name]: e.target.value }))} className="w-full rounded-md border border-line bg-white px-2.5 py-1.5 font-mono text-xs" />
                     )}
                   </div>
                 ))}
@@ -501,7 +501,7 @@ function Slider({ label, value, min, max, onChange }: { label: string; value: nu
   return (
     <div>
       <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">{label}</label><span className="font-mono text-xs font-semibold text-ink">{value}</span></div>
-      <input type="range" min={min} max={max} step={1} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-teal-600" />
+      <input type="range" aria-label={label} min={min} max={max} step={1} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-teal-600" />
     </div>
   );
 }

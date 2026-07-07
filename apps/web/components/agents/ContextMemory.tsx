@@ -99,7 +99,7 @@ export function ContextMemory() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-[240px] flex-1">
               <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Conversation turns</label><span className="font-mono text-xs font-semibold text-ink">{t}</span></div>
-              <input type="range" min={1} max={10} step={1} value={t} onChange={(e) => setT(Number(e.target.value))} className="w-full accent-teal-600" />
+              <input type="range" aria-label="Conversation turns" min={1} max={10} step={1} value={t} onChange={(e) => setT(Number(e.target.value))} className="w-full accent-teal-600" />
             </div>
             <div className="flex gap-1.5">
               {(["compare", "memory"] as const).map((v) => (

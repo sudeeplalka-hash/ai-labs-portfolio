@@ -265,7 +265,7 @@ function Slider({ label, value, min, max, step, onChange, fmt }: { label: string
         <label className="text-xs font-medium text-slatey-400">{label}</label>
         <span className="font-mono text-xs font-semibold text-ink">{fmt(value)}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-primary" />
+      <input type="range" aria-label={label} min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-primary" />
     </div>
   );
 }

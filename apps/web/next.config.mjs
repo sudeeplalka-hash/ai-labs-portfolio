@@ -4,9 +4,9 @@
 // uses the in-browser engine.)
 const nextConfig = {
   reactStrictMode: true,
-  // TODO: flip to false once `next lint` is verified clean (pre-existing lint
-  // findings, e.g. key-prop warnings, have not been triaged yet).
-  eslint: { ignoreDuringBuilds: true },
+  // `next lint` is clean (eslint-config-next core-web-vitals); lint failures
+  // now fail the build, same as type errors.
+  eslint: { ignoreDuringBuilds: false },
   // Type errors DO fail the build — the monorepo typechecks clean
   // (`pnpm typecheck` is green after the package-boundary deps were declared).
   typescript: { ignoreBuildErrors: false },

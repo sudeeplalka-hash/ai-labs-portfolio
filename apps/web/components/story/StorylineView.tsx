@@ -42,8 +42,8 @@ export function StorylineView() {
         </h1>
         <p className="mt-3 text-base leading-relaxed text-slatey-300">
           {betName
-            ? <>Following <span className="font-medium text-ink">&ldquo;{betName}&rdquo;</span> through all six stages. Each stage answers one question and produces one number the next stage builds on, so the final ROI traces all the way back to the first decision.</>
-            : <>This is the shape of the whole program: six stages, each answering one question and handing one number to the next. Frame a bet (or switch to Demo) to see it told with real numbers.</>}
+            ? <>Following <span className="font-medium text-ink">&ldquo;{betName}&rdquo;</span> through all seven stages. Each stage answers one question and produces one number the next stage builds on, so the final ROI traces all the way back to the first decision.</>
+            : <>This is the shape of the whole program: seven stages, each answering one question and handing one number to the next. Frame a bet (or switch to Demo) to see it told with real numbers.</>}
         </p>
         <div className="mt-4 flex items-center gap-3 text-sm">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-soft px-3 py-1 font-medium text-primary-dark">

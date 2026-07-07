@@ -7,10 +7,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlayCircle, BookOpen, MousePointerClick, ArrowRight } from "lucide-react";
+import { STAGES } from "@labs/program-core";
 import { useSampleProgram } from "@/components/reviewer/SampleProgram";
 
 const WELCOME_KEY = "apcc_welcomed";
-const STAGES_LINE = ["Strategy", "Data", "Build", "Operate", "Govern", "Realize"];
+// Derived from the stage spine so this line can never drift from the real count.
+const STAGES_LINE = STAGES.map((s) => s.label.split(/[·&]/)[0].trim());
 
 export function Welcome() {
   const router = useRouter();
@@ -38,7 +40,7 @@ export function Welcome() {
             Every enterprise has an AI idea.<br className="hidden sm:block" /> This is how one becomes <span className="text-sky-300">real</span>.
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
-            Six labs walk one initiative from a rough ambition to a governed, measurable business case,
+            Seven labs walk one initiative from a rough ambition to a governed, measurable business case,
             with every stage handing a real contract to the next.
           </p>
 
@@ -76,7 +78,7 @@ export function Welcome() {
               <BookOpen className="h-5 w-5 text-slate-300" />
               <span className="mt-2 text-sm font-semibold text-white">Read the story</span>
               <span className="mt-1 flex-1 text-xs leading-relaxed text-slate-300">
-                The whole program in six beats: two minutes, no clicking around.
+                The whole program in seven beats: two minutes, no clicking around.
               </span>
               <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slate-300">
                 Two minute read <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />

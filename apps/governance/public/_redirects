@@ -1,9 +1,0 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# BEFORE uploading to Netlify, replace the URL below with your Render URL.
-# Example: https://ai-governance-api-abc123.onrender.com
-# Deploy backend first (see DEPLOY.md), then edit this line and upload.
-# ─────────────────────────────────────────────────────────────────────────────
-/api/*  https://YOUR_RENDER_URL_HERE/api/:splat  200
-
-# SPA fallback — must be last
-/*  /index.html  200

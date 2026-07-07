@@ -46,9 +46,8 @@ copies another's code:
   gallery, wired to its route, status, and résumé echo.
 
 Collection 1 additionally uses `@labs/program-core` (the deterministic engine spine) and
-a set of `@labs/lab-*` packages. An optional FastAPI service
-(`services/governance-api`) backs the governance lab, but the live demo never needs it —
-everything runs client-side.
+a set of `@labs/lab-*` packages. Everything runs client-side — there is no backend
+service anywhere in the stack.
 
 ```
 ai-labs-portfolio/
@@ -62,8 +61,6 @@ ai-labs-portfolio/
 │   ├── kit/                 ← data spine: model catalog, pricing, protocol stats, registry
 │   ├── program-core/        ← Collection 1 engines (contracts, operate, govern, realize)
 │   └── lab-*/               ← Collection 1 lab packages (framing, data, rag, deploy, …)
-├── services/
-│   └── governance-api/      ← optional FastAPI backend (demo runs client-side)
 └── docs/                    ← build brief, QA report, review notes, roadmap
 ```
 

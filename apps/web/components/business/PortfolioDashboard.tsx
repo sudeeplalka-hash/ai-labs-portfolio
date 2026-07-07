@@ -538,7 +538,7 @@ export function PortfolioDashboard() {
                 <p className="stat-label mb-2">Budget constrained funding <span className="font-normal text-slatey-500">· greedy by risk adjusted return per $</span></p>
                 <div className="mb-3">
                   <div className="mb-1 flex items-center justify-between"><label className="text-xs text-slatey-400">Capital available</label><span className="font-mono text-sm font-semibold text-ink">{fmtM(budgetM)}</span></div>
-                  <input type="range" min={0} max={Math.ceil(totalSpend)} step={0.1} value={Math.min(budgetM, Math.ceil(totalSpend))} onChange={(e) => setBudgetM(Number(e.target.value))} className="w-full accent-primary" />
+                  <input type="range" aria-label="Capital available" min={0} max={Math.ceil(totalSpend)} step={0.1} value={Math.min(budgetM, Math.ceil(totalSpend))} onChange={(e) => setBudgetM(Number(e.target.value))} className="w-full accent-primary" />
                   <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>$0</span><span>full book {fmtM(totalSpend)}</span></div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -758,7 +758,7 @@ function AssumptionRow({
         <label className="text-xs font-medium capitalize text-slatey-400">{label}</label>
         <span className="font-mono text-xs font-semibold text-ink">{fixed !== undefined ? value.toFixed(fixed) : value}{suffix ?? ""}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-primary" />
+      <input type="range" aria-label={label} min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-primary" />
     </div>
   );
 }

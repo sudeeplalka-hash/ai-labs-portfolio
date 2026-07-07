@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { LiveBadge } from "@labs/design-system";
 import {
-  labById, labsByCollection, LABS,
+  labById, labsByCollection, LABS, progress, ALL_USE_CASES,
   type LabEntry, type Collection as Col,
 } from "@labs/kit";
 
@@ -40,9 +40,9 @@ const COLLECTIONS: { c: Col; title: string; tag: string; accent: string; icon: L
 ];
 
 function StatusIcon({ status }: { status: LabEntry["status"] }) {
-  if (status === "shipped") return <CircleCheck className="h-4 w-4 text-emerald-600" aria-label="shipped" />;
-  if (status === "in-build") return <Hammer className="h-4 w-4 text-amber-600" aria-label="in build" />;
-  return <Clock className="h-4 w-4 text-slate-400" aria-label="planned" />;
+  if (status === "shipped") return <CircleCheck role="img" className="h-4 w-4 text-emerald-600" aria-label="shipped" />;
+  if (status === "in-build") return <Hammer role="img" className="h-4 w-4 text-amber-600" aria-label="in build" />;
+  return <Clock role="img" className="h-4 w-4 text-slate-400" aria-label="planned" />;
 }
 const statusLabel = (s: LabEntry["status"]) => (s === "shipped" ? "Shipped" : s === "in-build" ? "In build" : "Planned");
 
@@ -74,8 +74,9 @@ function Tile({ lab }: { lab: LabEntry }) {
       </div>
 
       {/* Hover quick-look, full detail, no truncation (desktop nicety; pointer-events
-          off so the wrapping link still receives the click) */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col bg-white p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          off so the wrapping link still receives the click). Also shown on keyboard
+          focus via the focusable Link wrapper's group class. */}
+      <div className="pointer-events-none absolute inset-0 flex flex-col bg-white p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
         <div className="flex items-center justify-between">
           <span className={`font-mono text-[10px] font-semibold uppercase tracking-wider ${accent.text}`}>{lab.id}</span>
           <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slatey-500"><StatusIcon status={lab.status} />{statusLabel(lab.status)}</span>
@@ -94,7 +95,7 @@ function Tile({ lab }: { lab: LabEntry }) {
   );
 
   return linkable ? (
-    <Link href={lab.href!} className="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">{inner}</Link>
+    <Link href={lab.href!} className="group rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">{inner}</Link>
   ) : (
     <div aria-disabled>{inner}</div>
   );
@@ -234,6 +235,11 @@ export function CompetencyMap() {
               Explore by industry <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
+          {/* Computed from the registry, never asserted: counts update as labs ship. */}
+          <p className="mt-5 font-mono text-[11px] text-slate-400 md:text-xs">
+            {(() => { const p = progress(); return p.shipped === p.total ? `All ${p.total} catalog labs shipped` : `${p.shipped} of ${p.total} catalog labs shipped`; })()}
+            {" · "}{ALL_USE_CASES.length} documented industry use cases · every artifact badged LIVE or SIMULATED
+          </p>
         </div>
       </section>
 
