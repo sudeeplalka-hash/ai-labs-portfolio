@@ -21,7 +21,7 @@ export default function Brief() {
         <div>
           <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Board brief</p>
           <h1 className="text-2xl font-semibold text-slate-900 mt-1">One page for the board</h1>
-          <p className="text-sm text-slate-500 mt-1">Turn the live posture into a screenshot-ready executive summary.</p>
+          <p className="text-sm text-slate-500 mt-1">Turn the live posture into a screenshot ready executive summary.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={generate} className="inline-flex items-center gap-1.5 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:opacity-90">
@@ -38,7 +38,7 @@ export default function Brief() {
       {!m ? (
         <div className="bg-white border border-slate-200 rounded-xl p-12 text-center shadow-card">
           <FileText size={28} className="text-slate-300 mx-auto" />
-          <p className="text-sm text-slate-400 mt-2">Generate the brief to see the board ready one-pager.</p>
+          <p className="text-sm text-slate-400 mt-2">Generate the brief to see the board ready one pager.</p>
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-card space-y-6">
@@ -73,7 +73,7 @@ export default function Brief() {
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">Value &amp; containment</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { l: 'Risky interactions auto-contained', v: `${m.value_metrics.auto_contained_rate}%` },
+                { l: 'Risky interactions auto contained', v: `${m.value_metrics.auto_contained_rate}%` },
                 { l: 'Automated control actions', v: m.value_metrics.automated_actions },
                 { l: 'Routed to human review', v: m.value_metrics.human_escalations },
                 { l: 'Review hours saved / period', v: `~${m.value_metrics.review_hours_saved}h` },

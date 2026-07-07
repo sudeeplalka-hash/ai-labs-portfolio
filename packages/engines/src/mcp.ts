@@ -138,7 +138,7 @@ export function lifecycleFrames(server: LifecycleServer): LifecycleFrame[] {
     {
       seq: 1, dir: "client→server", kind: "request", method: "initialize",
       body: { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: v, capabilities: { tools: {}, resources: {}, prompts: {} }, clientInfo: { name: "ai-labs-playground", version: "1.0.0" } } },
-      note: "The client opens the session by declaring the protocol version and the capabilities it supports, nothing tool-specific yet.",
+      note: "The client opens the session by declaring the protocol version and the capabilities it supports, nothing tool specific yet.",
     },
     {
       seq: 2, dir: "server→client", kind: "response",

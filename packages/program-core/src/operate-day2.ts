@@ -126,9 +126,9 @@ export function detectSignals(series: OpsSeries, governanceTier?: string): OpsSi
   const stale = wk.find((w) => w.indexStaleDays > staleLimit);
   if (stale) out.push({
     key: "staleness-breach", week: stale.week, severity: "high",
-    title: `Index staleness breach (> ${staleLimit} days${staleLimit === 14 ? " · high-tier threshold" : ""})`,
+    title: `Index staleness breach (> ${staleLimit} days${staleLimit === 14 ? " · high tier threshold" : ""})`,
     evidence: `Corpus ${stale.indexStaleDays} days behind the source of truth; retrieval recall ${stale.retrievalRecallPct}%.`,
-    monitorHint: "Corpus age vs source-system watermark; refresh-job success rate.",
+    monitorHint: "Corpus age vs source system watermark; refresh job success rate.",
   });
 
   const first = wk[0].costPerTaskUsd;
@@ -137,15 +137,15 @@ export function detectSignals(series: OpsSeries, governanceTier?: string): OpsSi
     key: "cost-creep", week: creep.week, severity: "med",
     title: "Cost per task creeping (+15% vs week 1)",
     evidence: `$${creep.costPerTaskUsd.toFixed(3)}/task vs $${first.toFixed(3)} at week 1; cache hit ${creep.cacheHitPct}%.`,
-    monitorHint: "Cost/task trend + cache-hit decay + prompt token count per release.",
+    monitorHint: "Cost/task trend + cache hit decay + prompt token count per release.",
   });
 
   const anomaly = wk.find((w) => w.loopAnomalies >= 3 || w.toolErrorRatePct > 1.8);
   if (anomaly) out.push({
     key: "agent-anomaly", week: anomaly.week, severity: "med",
     title: "Agent behavior anomaly",
-    evidence: `${anomaly.loopAnomalies} loop anomalies and tool-error rate ${anomaly.toolErrorRatePct}% in week ${anomaly.week}, action fingerprints shifted.`,
-    monitorHint: "Repeated-action fingerprints, tool-call error rate, iteration-count distribution.",
+    evidence: `${anomaly.loopAnomalies} loop anomalies and tool error rate ${anomaly.toolErrorRatePct}% in week ${anomaly.week}, action fingerprints shifted.`,
+    monitorHint: "Repeated action fingerprints, tool call error rate, iteration count distribution.",
   });
 
   return out.sort((a, b) => a.week - b.week);
@@ -204,21 +204,21 @@ export function deriveDay2Incident(s: ProgramState): Day2Incident {
     timeline: [
       { at: `Week ${INCIDENT_WEEK}, Mon`, what: "Source system ships a schema change; the nightly refresh job starts silently skipping two document types." },
       { at: `Week ${INCIDENT_WEEK}, Wed`, what: "Index staleness passes threshold; canary evals begin sliding, SLO dashboards remain fully green." },
-      { at: `Week ${INCIDENT_WEEK + 1}, Mon`, what: `Staleness + silent-drift detectors fire together. ${name} is answering from an increasingly outdated corpus.` },
+      { at: `Week ${INCIDENT_WEEK + 1}, Mon`, what: `Staleness + silent drift detectors fire together. ${name} is answering from an increasingly outdated corpus.` },
     ],
     blastRadius: "Answer quality on recent document questions; citation accuracy; user trust (adoption follows quality with a lag).",
     options: [
       { key: "reindex", label: "Reindex", costUsd: 35_000, timeWeeks: 2, risk: "low", loopTarget: "build",
         rationale: "Fix the refresh pipeline against the new schema and rebuild the index. Directly addresses the root cause.",
-        tradeoff: "Quality recovers only to the pre-incident trend, the slow pre-week 7 decay still needs a retrain later." },
-      { key: "retrain", label: "Retrain / re-tune", costUsd: 120_000, timeWeeks: 6, risk: "med", loopTarget: "build",
-        rationale: "Refresh the model against current data and re-baseline the golden set. Fixes decay and drift together.",
-        tradeoff: "Six weeks and the eval harness must be re-validated; overkill if the index is the real problem." },
+        tradeoff: "Quality recovers only to the pre incident trend, the slow pre week 7 decay still needs a retrain later." },
+      { key: "retrain", label: "Retrain / re tune", costUsd: 120_000, timeWeeks: 6, risk: "med", loopTarget: "build",
+        rationale: "Refresh the model against current data and re baseline the golden set. Fixes decay and drift together.",
+        tradeoff: "Six weeks and the eval harness must be re validated; overkill if the index is the real problem." },
       { key: "rollback", label: "Rollback / restrict", costUsd: 10_000, timeWeeks: 1, risk: "low", loopTarget: "deploy",
         rationale: "Narrow the assistant to document types the index still covers; honest degraded mode.",
         tradeoff: "Value delivered shrinks immediately, buys time, fixes nothing." },
       { key: "rescope", label: "Rescope", costUsd: 0, timeWeeks: 4, risk: "med", loopTarget: "frame",
-        rationale: "The long tail of document types keeps breaking; re-frame the initiative around the top types that carry the value.",
+        rationale: "The long tail of document types keeps breaking; re frame the initiative around the top types that carry the value.",
         tradeoff: "Admits the original scope was wrong, the bravest and sometimes the right call." },
     ],
   };
@@ -242,12 +242,12 @@ export function buildOperateFeedback(s: ProgramState, option: RemediationOption,
   return {
     decision: option,
     toFrame: option.loopTarget === "frame"
-      ? { title: `Rescope: ${s.initiative?.name ?? "initiative"}, top document types only`, rationale: "Operate evidence: long-tail sources repeatedly break freshness; value concentrates in the head." }
+      ? { title: `Rescope: ${s.initiative?.name ?? "initiative"}, top document types only`, rationale: "Operate evidence: long tail sources repeatedly break freshness; value concentrates in the head." }
       : undefined,
     toBuild: option.loopTarget === "build"
       ? { task: option.key === "reindex" ? "Fix refresh pipeline for new source schema; rebuild index; re-run canary set" : "Retrain against current corpus; re-baseline golden set", evidence }
       : undefined,
-    toDeploy: option.loopTarget === "deploy" ? { action: "Restrict envelope to covered document types; publish degraded-mode notice" } : undefined,
+    toDeploy: option.loopTarget === "deploy" ? { action: "Restrict envelope to covered document types; publish degraded mode notice" } : undefined,
     toRealize: { valueAtRiskUsd: vaR.valueAtRiskUsd, note: `Value at risk while open: $${Math.round(vaR.valueAtRiskUsd / 1000)}k/yr (${vaR.basis}).` },
     toGovern: { evidenceNote: `Day Two incident INC-OP-007 · decision: ${option.label} · ${evidence}` },
     issuedAt: new Date().toISOString().slice(0, 10),

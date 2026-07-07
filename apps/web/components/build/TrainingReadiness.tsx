@@ -26,7 +26,7 @@ const stTone = (s: string): "emerald" | "amber" | "rose" | "slate" =>
 const riskTone = (r: string): "emerald" | "amber" | "rose" => (r === "low" ? "emerald" : r === "medium" ? "amber" : "rose");
 
 const APPROACHES = [
-  { id: "prompting", label: "Prompting", best: "Simple, instruction-following, low risk", risk: "Brittle prompts, weak grounding" },
+  { id: "prompting", label: "Prompting", best: "Simple, instruction following, low risk", risk: "Brittle prompts, weak grounding" },
   { id: "rag", label: "RAG", best: "Current documents, citations, changing knowledge", risk: "Stale sources, weak retrieval" },
   { id: "fine tuning", label: "Fine tuning", best: "Consistent behavior/format, stable task, labeled data", risk: "Overfitting, leakage, harder rollback" },
   { id: "traditional-ml", label: "Traditional ML", best: "Structured prediction/classification with labels", risk: "Bias, imbalance, poor generalization" },
@@ -81,8 +81,8 @@ export function TrainingReadiness() {
             </div>
           </div>
           <div className="space-y-2 text-[12px]">
-            {memo.whyNotPromptOnly.length > 0 && <WhyNot label="Why not prompt-only" items={memo.whyNotPromptOnly} />}
-            {memo.whyNotRagOnly.length > 0 && <WhyNot label="Why not RAG-only" items={memo.whyNotRagOnly} />}
+            {memo.whyNotPromptOnly.length > 0 && <WhyNot label="Why not prompt only" items={memo.whyNotPromptOnly} />}
+            {memo.whyNotRagOnly.length > 0 && <WhyNot label="Why not RAG only" items={memo.whyNotRagOnly} />}
             {memo.whyNotFineTune.length > 0 && <WhyNot label="Why not fine tune" items={memo.whyNotFineTune} />}
           </div>
         </div>
@@ -111,7 +111,7 @@ export function TrainingReadiness() {
               <Stat label="Label quality" value={`${ds.labelQualityScore}/100`} />
               <Stat label="Label consistency" value={`${ds.labelConsistencyScore}/100`} />
               <Stat label="Class balance" value={`${ds.classBalanceScore}/100`} />
-              <Stat label="Edge-case coverage" value={`${ds.edgeCaseCoverageScore}/100`} />
+              <Stat label="Edge case coverage" value={`${ds.edgeCaseCoverageScore}/100`} />
               <Stat label="Representative coverage" value={`${ds.representativeCoverage}/100`} />
               <Stat label="Leakage risk" value={<Badge tone={riskTone(ds.leakageRisk)}>{ds.leakageRisk}</Badge>} />
               <Stat label="Overfitting risk" value={<Badge tone={riskTone(ds.overfittingRisk)}>{ds.overfittingRisk}</Badge>} />
@@ -139,7 +139,7 @@ export function TrainingReadiness() {
               <Badge tone={ds.trainValidationTestSplit === "complete" ? "emerald" : "amber"}>Split: {ds.trainValidationTestSplit}</Badge>
               {!ds.holdoutSetAvailable && <Badge tone="rose">Missing holdout set</Badge>}
               {ds.leakageRisk !== "low" && <Badge tone="amber">Possible leakage</Badge>}
-              {ds.classBalanceScore < 70 && <Badge tone="amber">Weak minority-class coverage</Badge>}
+              {ds.classBalanceScore < 70 && <Badge tone="amber">Weak minority class coverage</Badge>}
               {ds.edgeCaseCoverageScore < 65 && <Badge tone="amber">Too few edge cases</Badge>}
             </div>
           </>
@@ -233,10 +233,10 @@ export function TrainingReadiness() {
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <InsightCard tone="info" title="Fine tune vs RAG decisioning">A memo picks the right approach from the initiative, not a default.</InsightCard>
-          <InsightCard tone="info" title="Labeled-data readiness">Quality, consistency, balance, and coverage are checked before training.</InsightCard>
+          <InsightCard tone="info" title="Labeled data readiness">Quality, consistency, balance, and coverage are checked before training.</InsightCard>
           <InsightCard tone="success" title="Train/validation/test split">Leakage and holdout gaps are surfaced explicitly.</InsightCard>
-          <InsightCard tone="success" title="Overfitting & generalization">Train-vs-test gaps and risk triggers are made visible.</InsightCard>
-          <InsightCard tone="warn" title="Evaluation & monitoring">Holdout eval + drift + class-level monitoring requirements.</InsightCard>
+          <InsightCard tone="success" title="Overfitting & generalization">Train vs test gaps and risk triggers are made visible.</InsightCard>
+          <InsightCard tone="warn" title="Evaluation & monitoring">Holdout eval + drift + class level monitoring requirements.</InsightCard>
           <InsightCard tone="warn" title="Governance handoff">Training risk becomes controls and findings in Govern.</InsightCard>
         </div>
         <div className="mt-4 rounded-lg border border-line bg-slate-50/60 p-3">

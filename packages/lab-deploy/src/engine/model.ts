@@ -198,7 +198,7 @@ export function deployVerdict(b: Baseline, ops: OpsResult): DeployVerdict {
     return { tone: "watch", headline: "Over budget at scale", detail: `$${ops.costPerQuery}/query vs target $${b.targetCostPerQuery.toFixed(3)}, escalation from quality is ${ops.escalationRate}% of cost. Improve the engine or raise caching.` };
   if (ops.reliability < b.sloReliability)
     return { tone: "watch", headline: "Below the reliability SLO", detail: `${(ops.reliability * 100).toFixed(2)}% vs ${(b.sloReliability * 100).toFixed(1)}% target, error budget ${ops.errorBudgetPct}%.` };
-  return { tone: "healthy", headline: "Production-ready at this load", detail: `Within SLO, latency, and budget. Error budget ${ops.errorBudgetPct}% intact.` };
+  return { tone: "healthy", headline: "Production ready at this load", detail: `Within SLO, latency, and budget. Error budget ${ops.errorBudgetPct}% intact.` };
 }
 
 // Cheapest-safe operating point, search the controllable levers (tier × cache × reranker)

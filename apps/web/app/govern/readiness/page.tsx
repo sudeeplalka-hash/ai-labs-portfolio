@@ -10,14 +10,14 @@ interface Area {
   eu: string; nist: string; iso: string;
 }
 const AREAS: Area[] = [
-  { area: 'Data governance & PII', status: 'covered', how: 'PII guardrail detects and redacts sensitive data pre-processing.', eu: 'Art. 10', nist: 'MEASURE 2.10', iso: 'A.7.2 / A.7.4' },
+  { area: 'Data governance & PII', status: 'covered', how: 'PII guardrail detects and redacts sensitive data pre processing.', eu: 'Art. 10', nist: 'MEASURE 2.10', iso: 'A.7.2 / A.7.4' },
   { area: 'Human oversight', status: 'covered', how: 'Escalation routes high risk actions to a review queue with SLAs.', eu: 'Art. 14', nist: 'MANAGE 2.3', iso: 'A.9.2' },
-  { area: 'Robustness & security', status: 'covered', how: 'Prompt-injection guardrail + tamper-evident audit chain.', eu: 'Art. 15', nist: 'MEASURE 2.7', iso: 'A.6.2.6' },
-  { area: 'Bias & fairness', status: 'covered', how: 'Protected-class guardrail blocks discriminatory decisions.', eu: 'Annex III(4)', nist: 'MEASURE 2.11', iso: 'A.7.3' },
-  { area: 'Record-keeping & logging', status: 'covered', how: 'SHA-256 hash-chained audit log, verifiable on demand.', eu: 'Art. 12 / 19', nist: 'MANAGE 4.3', iso: 'A.6.2.8' },
+  { area: 'Robustness & security', status: 'covered', how: 'Prompt injection guardrail + tamper evident audit chain.', eu: 'Art. 15', nist: 'MEASURE 2.7', iso: 'A.6.2.6' },
+  { area: 'Bias & fairness', status: 'covered', how: 'Protected class guardrail blocks discriminatory decisions.', eu: 'Annex III(4)', nist: 'MEASURE 2.11', iso: 'A.7.3' },
+  { area: 'Record keeping & logging', status: 'covered', how: 'SHA-256 hash chained audit log, verifiable on demand.', eu: 'Art. 12 / 19', nist: 'MANAGE 4.3', iso: 'A.6.2.8' },
   { area: 'Risk management', status: 'covered', how: 'Use case risk scoring + tiering drives required controls.', eu: 'Art. 9', nist: 'MAP 1.1', iso: 'A.5.2' },
-  { area: 'Transparency & disclosure', status: 'partial', how: 'Disclaimers + citation checks; end-user notices still manual.', eu: 'Art. 13', nist: 'MEASURE 2.9', iso: 'A.8.2' },
-  { area: 'Post-market monitoring', status: 'partial', how: 'Eval Lab + runtime metrics; continuous drift monitoring is roadmap.', eu: 'Art. 72', nist: 'MANAGE 4.1', iso: 'A.6.2.8' },
+  { area: 'Transparency & disclosure', status: 'partial', how: 'Disclaimers + citation checks; end user notices still manual.', eu: 'Art. 13', nist: 'MEASURE 2.9', iso: 'A.8.2' },
+  { area: 'Post market monitoring', status: 'partial', how: 'Eval Lab + runtime metrics; continuous drift monitoring is roadmap.', eu: 'Art. 72', nist: 'MANAGE 4.1', iso: 'A.6.2.8' },
 ];
 const FRAMEWORKS: { id: Fw; label: string }[] = [
   { id: 'all', label: 'All frameworks' }, { id: 'eu', label: 'EU AI Act' }, { id: 'nist', label: 'NIST AI RMF' }, { id: 'iso', label: 'ISO 42001' },

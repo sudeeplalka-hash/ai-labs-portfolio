@@ -16,7 +16,7 @@ export async function generateLive(prompt: string): Promise<string | null> {
       body: JSON.stringify({
         model: s.model,
         messages: [
-          { role: 'system', content: 'You are an enterprise AI assistant for a financial-services company. Answer concisely and professionally.' },
+          { role: 'system', content: 'You are an enterprise AI assistant for a financial services company. Answer concisely and professionally.' },
           { role: 'user', content: prompt },
         ],
         max_tokens: 220,

@@ -84,7 +84,7 @@ export function deriveVersionLineage(s: ProgramState): LineageRow[] {
     { asset: "Corpus", version: `${base}-corpus-v1.2`, source: "Data handoff", why: "Data changes affect quality and risk." },
     { asset: "Eval set", version: lin.dataset ?? c?.datasetVersion ?? "golden-v1", source: "Build contract", why: "Needed for regression comparison." },
     { asset: "Policy pack", version: meta?.governanceTier ? `policy-controls-${slug(meta.governanceTier)}-v1` : "policy-controls-v1", source: "Govern", why: "Determines release guardrails." },
-    { asset: "Deployment config", version: "balanced-cost and latency-v2", source: "Operate", why: "Determines the runtime cost/latency tradeoff." },
+    { asset: "Deployment config", version: "balanced cost and latency v2", source: "Operate", why: "Determines the runtime cost/latency tradeoff." },
   ];
 }
 
@@ -113,7 +113,7 @@ export function deriveMonitoringCoverage(s: ProgramState): MonitoringCoverage {
     { signal: "Drift signal", status: "monitored", current: drift !== undefined ? `${drift}/100` : "N/A", threshold: "60/100", owner: "AI Ops", action: "Reindex / refresh sources" },
     { signal: "Incident triggers", status: "monitored", current: ev?.incidentStatus ?? "none", threshold: "0 active", owner: "AI Ops", action: "Run incident playbook" },
     { signal: "Retrieval miss rate", status: "gap", current: "N/A", threshold: "8%", owner: "RAG Owner", action: "Add trace instrumentation" },
-    { signal: "Escalation rate", status: "gap", current: "N/A", threshold: "12%", owner: "Product", action: "Instrument handoff-to-human" },
+    { signal: "Escalation rate", status: "gap", current: "N/A", threshold: "12%", owner: "Product", action: "Instrument handoff to human" },
     { signal: "User feedback rate", status: "gap", current: "N/A", threshold: "N/A", owner: "Product", action: "Add feedback capture" },
   ];
   const monitoredCount = signals.filter((x) => x.status === "monitored").length;
@@ -177,7 +177,7 @@ export function deriveIncidents(s: ProgramState): { incidents: OpsIncident[]; ro
     incidents.push({
       id: "INC-CITE-01", severity: "High", trigger: "Citation failures exceed 10% for policy questions",
       affectedUsers: "Policy / support queries", rootCause: "A retired policy source is still retrievable",
-      linkedVersion: indexVer, mitigation: "Disable retired source; enforce citation-required gate",
+      linkedVersion: indexVer, mitigation: "Disable retired source; enforce citation required gate",
       rollback: "Disable source + revert to previous index", owner: "RAG Ops", postmortem: "Required before production promotion",
     });
   }
@@ -191,8 +191,8 @@ export function deriveIncidents(s: ProgramState): { incidents: OpsIncident[]; ro
   }
   incidents.push({
     id: "INC-LAT-03", severity: "Medium", trigger: "p95 latency breaches SLO under peak load",
-    affectedUsers: "Peak-hour users", rootCause: "Queueing as traffic approaches capacity",
-    linkedVersion: "balanced-cost and latency-v2", mitigation: "Raise cache %, scale tier, or add reranker budget",
+    affectedUsers: "Peak hour users", rootCause: "Queueing as traffic approaches capacity",
+    linkedVersion: "balanced cost and latency v2", mitigation: "Raise cache %, scale tier, or add reranker budget",
     rollback: "Switch retrieval mode / pause deployment", owner: "AI Ops", postmortem: "Optional",
   });
   return { incidents, rollbackOptions: ROLLBACK_OPTIONS };
@@ -221,7 +221,7 @@ export function deriveOpsEvidenceEnrichment(s: ProgramState): Partial<OpsEvidenc
     overfittingRiskLevel: tc.generalizationAssessment.overfittingRisk,
     trainingDriftMonitoringRequired: tc.datasetReadiness.driftMonitoringRequired,
     holdoutPerformance: tc.datasetReadiness.holdoutSetAvailable ? tc.generalizationAssessment.testPerformance : undefined,
-    retrainingTrigger: "Drift or class-level regression",
+    retrainingTrigger: "Drift or class level regression",
     classLevelMonitoring: true,
   } : {};
   const risks = [

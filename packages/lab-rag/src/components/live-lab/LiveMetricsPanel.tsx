@@ -43,8 +43,8 @@ export function LiveMetricsPanel({ metrics, previous }: Props) {
       tip: "The average estimated risk that an answer contains unsupported content, where lower is better. It rises as faithfulness and citation accuracy fall. It is the single metric to watch before trusting answers in production." },
     { label: "Human review required", value: String(metrics.humanReviewRequiredCount), raw: metrics.humanReviewRequiredCount, lower: true, meaning: "Answers flagged for human review.",
       tip: "How many answers this session were flagged as needing a human to check them before use. An answer is flagged when its quality gate fails or its risk is too high. It captures how much human oversight the current setup still demands." },
-    { label: "Avg latency", value: `${metrics.averageLatency}ms`, raw: metrics.averageLatency, lower: true, meaning: "Simulated end-to-end response time.",
-      tip: "The average simulated end-to-end time to answer a question, in milliseconds. It sums retrieval, generation, and evaluation time. It is a stand-in for the responsiveness users would feel in production." },
+    { label: "Avg latency", value: `${metrics.averageLatency}ms`, raw: metrics.averageLatency, lower: true, meaning: "Simulated end to end response time.",
+      tip: "The average simulated end to end time to answer a question, in milliseconds. It sums retrieval, generation, and evaluation time. It is a stand in for the responsiveness users would feel in production." },
     { label: "Avg cost / query", value: `$${metrics.averageEstimatedCost.toFixed(5)}`, raw: metrics.averageEstimatedCost, lower: true, meaning: "Estimated using a sample pricing profile.",
       tip: "The average estimated cost to answer one question, using a sample pricing profile. It reflects the tokens used for retrieval and generation. It lets you weigh quality against what each answer would cost at scale." },
   ];

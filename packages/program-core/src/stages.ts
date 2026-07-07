@@ -24,7 +24,7 @@ export const STAGES: StageDef[] = [
     will: "Assess the fuel: profile sources, score readiness, and puncture the framing readiness guess." },
   { key: "build", n: "03", href: "/build", label: "Build · RAG", sub: "engine",
     question: "Does the system work?", raises: "Can we trust it in production?",
-    reason: "Need a scoped bet and ready-enough data before proving the engine.",
+    reason: "Need a scoped bet and ready enough data before proving the engine.",
     will: "Prove the engine: retrieval + generation on a real document, scored for faithfulness and citations." },
   { key: "deploy", n: "04", href: "/deploy", label: "Deploy", sub: "run",
     question: "Does it run reliably at cost?", raises: "Is it safe to run?",
@@ -39,7 +39,7 @@ export const STAGES: StageDef[] = [
     reason: "Govern the system first, then count the value it creates.",
     will: "The payoff: a risk adjusted business case where every number traces back to an upstream decision." },
   { key: "operate", n: "07", href: "/operate", label: "Operate", sub: "loop",
-    question: "Is it still working?", raises: "Re-frame the next cycle.",
+    question: "Is it still working?", raises: "Re frame the next cycle.",
     reason: "Placed after Realize, scoped from Deploy onward, day two begins the moment you ship.",
     will: "The loop: drift and staleness against green SLOs, one day two incident, and the retrain / reindex / rollback / rescope call that feeds the next Frame." },
 ];

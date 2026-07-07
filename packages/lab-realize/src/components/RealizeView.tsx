@@ -132,7 +132,7 @@ export function RealizeView() {
           <KpiCard label="Payback" value={payback !== null ? `${payback}` : "N/A"} suffix="mo" tone={payback !== null && payback <= 12 ? "healthy" : payback !== null && payback <= 24 ? "watch" : "risk"} target="time to recoup the build"
             tooltip="How many months of risk adjusted value it takes to recoup the upfront build investment. Shorter paybacks are easier to fund and lower risk; a dash means the value never covers the cost." />
           <KpiCard label="Value captured" value={`${captured}`} suffix="%" tone={captured >= 55 ? "healthy" : captured >= 35 ? "watch" : "risk"} target="of everything on the table"
-            tooltip="Of the full addressable value (all the time that could be saved), the share you actually keep after adoption and answer-quality losses, before run cost and risk. Higher means less leaks away before it even reaches the bottom line." />
+            tooltip="Of the full addressable value (all the time that could be saved), the share you actually keep after adoption and answer quality losses, before run cost and risk. Higher means less leaks away before it even reaches the bottom line." />
         </div>
       </section>
 
@@ -185,7 +185,7 @@ export function RealizeView() {
           </Panel>
 
           <Panel>
-            <SectionHeader title="Test a scenario" description="Override any assumption to see the whole page move, nothing is hard-coded." icon={SlidersHorizontal}
+            <SectionHeader title="Test a scenario" description="Override any assumption to see the whole page move, nothing is hard coded." icon={SlidersHorizontal}
               action={Object.keys(ov).length > 0 ? <button onClick={() => setOv({})} className="inline-flex items-center gap-1 text-xs font-semibold text-primary"><RotateCcw className="h-3 w-3" /> reset</button> : null} />
             <div className="space-y-4">
               <OvSlider label="Adoption" suffix="%" min={10} max={95} value={Math.round(inp.adoption.value * 100)} src={base.adoption.source} onChange={(v) => setOv((o) => ({ ...o, adoption: v / 100 }))} />
@@ -213,7 +213,7 @@ export function RealizeView() {
                     </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <ScenarioDelta label="Risk-adj. value" a={usd(scenarioA.riskAdjustedValue)} b={usd(roi.riskAdjustedValue)} better={roi.riskAdjustedValue >= scenarioA.riskAdjustedValue} />
+                    <ScenarioDelta label="Risk adj. value" a={usd(scenarioA.riskAdjustedValue)} b={usd(roi.riskAdjustedValue)} better={roi.riskAdjustedValue >= scenarioA.riskAdjustedValue} />
                     <ScenarioDelta label="ROI" a={`${scenarioA.roiPct}%`} b={`${roi.roiPct}%`} better={roi.roiPct >= scenarioA.roiPct} />
                     <ScenarioDelta label="Payback" a={Number.isFinite(scenarioA.paybackMonths) ? `${Math.round(scenarioA.paybackMonths)}mo` : "N/A"} b={Number.isFinite(roi.paybackMonths) ? `${Math.round(roi.paybackMonths)}mo` : "N/A"} better={roi.paybackMonths <= scenarioA.paybackMonths} />
                   </div>

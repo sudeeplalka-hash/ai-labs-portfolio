@@ -84,7 +84,7 @@ export function TechnicalDashboard() {
           </div>
 
           <Panel className="mt-6">
-            <SectionHeader title={showLive ? "Your recent files" : "Recent files"} description="Per-stage status across the last submissions" icon={Table2} />
+            <SectionHeader title={showLive ? "Your recent files" : "Recent files"} description="Per stage status across the last submissions" icon={Table2} />
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-sm">
                 <thead>

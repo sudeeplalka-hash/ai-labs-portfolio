@@ -72,7 +72,7 @@ export function StrategyWorkshop({ w, set }: { w: Workshop; set: Set }) {
         <Text label="Current pain point" value={w.painPoint} onChange={(v) => set({ painPoint: v })} area ph="What's slow, costly, inconsistent, or risky today?" />
         <div className="grid gap-4 sm:grid-cols-2">
           <Text label="Target user group" value={w.targetUsers} onChange={(v) => set({ targetUsers: v })} ph="Who uses the output?" />
-          <Chips label="Internal or customer-facing" options={["Internal", "Customer-facing"]} value={w.facing} onChange={(v) => set({ facing: v as Workshop["facing"] })} />
+          <Chips label="Internal or customer facing" options={["Internal", "Customer-facing"]} value={w.facing} onChange={(v) => set({ facing: v as Workshop["facing"] })} />
         </div>
       </StepCard>
 

@@ -33,10 +33,10 @@ const COLLECTION_ACCENT: Record<number, string> = { 1: "blue", 2: "teal", 3: "am
 const tileAccent = (lab: LabEntry): Accent => ACCENT[COLLECTION_ACCENT[lab.collection] ?? "blue"];
 
 const COLLECTIONS: { c: Col; title: string; tag: string; accent: string; icon: LucideIcon; href?: string }[] = [
-  { c: 1, title: "Enterprise AI Lifecycle", tag: "live · the spine", accent: "blue", icon: Workflow, href: "/lifecycle" },
-  { c: 2, title: "Agent & Protocol Labs", tag: "the toolkit", accent: "teal", icon: Boxes },
-  { c: 3, title: "Business of AI Delivery", tag: "the gallery", accent: "amber", icon: LineChart },
-  { c: 4, title: "Engagement Leadership", tag: "the control room", accent: "violet", icon: Users },
+  { c: 1, title: "Enterprise AI Lifecycle", tag: "working program spine", accent: "blue", icon: Workflow, href: "/lifecycle" },
+  { c: 2, title: "Agent Architecture and Protocol Strategy Artifacts", tag: "architecture and integration decision models", accent: "teal", icon: Boxes },
+  { c: 3, title: "AI Investment Strategy and Portfolio Governance", tag: "investment, economics, and value realization decisions", accent: "amber", icon: LineChart },
+  { c: 4, title: "Operating Model and Transformation Leadership Artifacts", tag: "operating model, adoption, governance, and executive alignment", accent: "violet", icon: Users },
 ];
 
 function StatusIcon({ status }: { status: LabEntry["status"] }) {
@@ -87,7 +87,7 @@ function Tile({ lab }: { lab: LabEntry }) {
           <span className={`font-semibold ${accent.text}`}>Decision:</span> {lab.decision}
         </p>
         <span className={`mt-2 inline-flex items-center gap-1 text-[11px] font-semibold ${linkable ? "text-primary" : "text-slatey-400"}`}>
-          {linkable ? <>Open the lab <ArrowRight className="h-3 w-3" /></> : statusLabel(lab.status)}
+          {linkable ? <>View the artifact <ArrowRight className="h-3 w-3" /></> : statusLabel(lab.status)}
         </span>
       </div>
     </div>
@@ -122,12 +122,32 @@ function Shelf({ title, tag, accent, icon: Icon, labs, href }: {
   );
 }
 
-const HERO_PROOF: Record<string, { proves: string; depth: string }> = {
-  "GAP-01": { proves: "Protocol & integration architecture", depth: "A working MCP client, browse a server's manifest, compose a call, read the JSON-RPC round-trip with honest typed errors, build a custom tool, watch the initialize handshake. The N\u00d7M\u2192N+M case made concrete." },
-  "GAP-03": { proves: "Multiagent orchestration judgment", depth: "Supervisor \u2192 role agents over A2A messages you can inspect frame-by-frame, an agent timeline, and a tested single-vs-multi scorecard \u2014 quality bought with cost and latency." },
-  "GAP-07": { proves: "Architecture decision-making", depth: "Six questions \u2192 function-calling vs MCP vs A2A vs hybrid, with the runner-up, exactly what would flip the call, a four-protocol radar, and a shareable recommendation card." },
-  "C3-1": { proves: "Capital allocation under risk", depth: "Twelve initiatives governed like capital \u2014 risk adjusted ROI, kill/hold/scale, budget-constrained greedy funding, the efficient frontier, and redeploy-the-kills." },
-  "EL-01": { proves: "Change-management rigor", depth: "Six weighted readiness factors \u2192 a scale/hold gate \u2192 the fewest moves to clear it, a sequenced two-week plan, and the projected path to the gate." },
+const HERO_PROOF: Record<string, { proves: string; depth: string; cta: string }> = {
+  "GAP-01": {
+    proves: "Integration strategy and protocol economics",
+    depth: "Whether to standardize AI tool access through MCP or continue building bespoke point to point integrations, and how integration strategy changes as the number of systems and agent consumers grows.",
+    cta: "Review the integration strategy case",
+  },
+  "GAP-03": {
+    proves: "Multiagent architecture economics",
+    depth: "Whether additional agents create enough quality lift to justify higher orchestration cost and execution time, translating an impressive technical pattern into an architecture, economics, and operating model decision.",
+    cta: "Review the orchestration economics case",
+  },
+  "GAP-07": {
+    proves: "Architecture and protocol decision making",
+    depth: "Which protocol best fits a given integration pattern, including the runner up and the condition that would change the recommendation, turning protocol selection into transparent technology strategy rather than a trend driven preference.",
+    cta: "Review the protocol strategy case",
+  },
+  "C3-1": {
+    proves: "Capital allocation under risk",
+    depth: "Which initiatives deserve funding, which should pause, and which should be stopped before they consume more capital, framing AI investment as a governed capital allocation problem, not a list of promising ideas.",
+    cta: "Explore the portfolio strategy dashboard",
+  },
+  "EL-01": {
+    proves: "Adoption and change readiness",
+    depth: "Whether to scale, scale with conditions, or hold until adoption risks are addressed, connecting adoption, trust, workflow fit, sponsorship, training, and incentives to the actual scale decision.",
+    cta: "Review the adoption strategy decision",
+  },
 };
 
 function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
@@ -135,13 +155,15 @@ function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
     <section className="mb-9 mt-8">
       <div className="flex items-baseline justify-between gap-3">
         <div>
-          <p className="eyebrow text-primary">Read these five first</p>
-          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The deep case studies &mdash; each a tested decision tool</h2>
+          <p className="eyebrow text-primary">Executive decision cases</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">Start with the five executive decision cases</h2>
         </div>
         <span className="hidden shrink-0 text-xs text-slatey-500 sm:block">~10 minutes &middot; the other 18 show range</span>
       </div>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-        If you have ten minutes, start here. Each of these five is a pure, unit-tested engine driving a real decision &mdash; the assumptions are labelled, and every one shows <span className="text-ink">what would change the call</span>. The shelves below show range across the same lifecycle.
+        These five artifacts show the portfolio at its strongest: architecture tradeoffs, integration strategy,
+        capital allocation, multiagent economics, and adoption readiness. Each case turns a technical or operating
+        question into a decision a senior leader would need to make before scaling AI work.
       </p>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {labs.map((l) => {
@@ -156,7 +178,7 @@ function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
               <h3 className="mt-1.5 text-base font-semibold text-ink group-hover:text-primary">{l.title}</h3>
               <p className="mt-0.5 text-xs font-medium text-slatey-300">{l.decision}</p>
               <p className="mt-2 text-xs leading-relaxed text-slatey-400">{h.depth}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">Open the case study <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">{h.cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
             </Link>
           );
         })}
@@ -176,7 +198,7 @@ export function CompetencyMap() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 md:px-5">
           <span className="font-semibold text-ink">
             Sudeep Lalka
-            <span className="ml-2 hidden text-xs font-normal text-slatey-500 sm:inline">AI Delivery Leadership</span>
+            <span className="ml-2 hidden text-xs font-normal text-slatey-500 sm:inline">Enterprise AI and Technology Strategy Portfolio</span>
           </span>
           <a href="mailto:sudeeplalka@gmail.com" className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
             <Mail className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Discussing a role?</span><span className="sm:hidden">Contact</span>
@@ -190,20 +212,23 @@ export function CompetencyMap() {
         style={{ background: "radial-gradient(1100px 600px at 72% 30%, #1d3a5c 0%, #152433 55%, #0e1923 100%)" }}
       >
         <div className="mx-auto max-w-6xl px-4 py-14 md:px-5 md:py-24">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-primary md:text-xs">One person · four altitudes</p>
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-primary md:text-xs">Enterprise AI and Technology Strategy Portfolio</p>
           <h1 className="mt-4 max-w-3xl text-[1.75rem] font-bold leading-[1.1] tracking-tight md:mt-5 md:text-5xl">
-            AI delivery leader who works at <span className="italic text-primary">four altitudes</span>.
+            Technology strategy for enterprise AI, made concrete through <span className="italic text-primary">working artifacts</span>.
           </h1>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-slate-300 md:mt-5 md:text-lg">
-            The protocol wire, the program lifecycle, the P&amp;L, and the people, a portfolio of working
-            instruments, each mapped to a decision a VP actually makes.
+            A working portfolio of enterprise AI artifacts organized around the decisions that determine where AI
+            should be applied, how it should be architected, how it should be governed, what it should cost, and
+            what operating model is required to scale it. This portfolio shows how AI work can move from ambition to
+            structured decisions, from technical patterns to executive evidence, and from isolated pilots to
+            governed, measurable execution.
           </p>
           <p className="mt-4 font-mono text-[11px] leading-relaxed text-slate-400 md:text-xs">
-            Engagement Manager, HCLTech @ American Express · STEM MBA (AI &amp; Quant, UT Austin) · PMP · AWS SA
+            Enterprise AI strategy and delivery at HCLTech for American Express · STEM MBA, AI and Quantitative Methods, UT Austin McCombs · PMP · AWS certified
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/storylines" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
-              Follow a program end-to-end <ArrowRight className="h-4 w-4" />
+              Follow the program lifecycle <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/industries" className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
               Explore by industry <ArrowRight className="h-4 w-4" />
@@ -233,15 +258,16 @@ export function CompetencyMap() {
       <footer className="mx-auto max-w-6xl px-4 pb-14 md:px-5">
         <div className="border-t border-line pt-6 text-sm text-slatey-400">
           <p className="max-w-3xl leading-relaxed">
-            Honest by design, every tile shows its true status (shipped, in build, or planned) and the enterprise
-            decision it maps to. Collection 1 is live; Collections 2 to 4 build in public. Nothing here is a demo for its
-            own sake.
+            Honest by design. Every artifact shows its status, assumptions, formulas, and limitations. LIVE modules
+            run as working portfolio artifacts. SIMULATED modules use deterministic logic, visible assumptions, and
+            modeled scenarios. Every artifact exists to clarify a decision, expose a tradeoff, or make technology
+            strategy visible through evidence.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
             <a href="mailto:sudeeplalka@gmail.com" className="inline-flex items-center gap-1.5 font-semibold text-primary hover:underline">
               <Mail className="h-4 w-4" /> Discussing a role? <ArrowRight className="h-4 w-4" />
             </a>
-            <Link href="/storylines" className="text-slatey-500 hover:text-ink hover:underline">Storylines</Link>
+            <Link href="/storylines" className="text-slatey-500 hover:text-ink hover:underline">Program storylines</Link>
             <Link href="/industries" className="text-slatey-500 hover:text-ink hover:underline">Industry Atlas</Link>
             <Link href="/changelog" className="text-slatey-500 hover:text-ink hover:underline">Changelog</Link>
           </div>

@@ -7,7 +7,7 @@ import { toggleSidebar } from '@gov/lib/ui';
 
 const TITLES: { prefix: string; title: string }[] = [
   { prefix: '/live', title: 'See Governance Live' },
-  { prefix: '/arcade', title: 'Red-Team Arcade' },
+  { prefix: '/arcade', title: 'Red Team Arcade' },
   { prefix: '/maturity', title: 'Maturity Index' },
   { prefix: '/readiness', title: 'Regulatory Readiness' },
   { prefix: '/brief', title: 'Board Brief' },

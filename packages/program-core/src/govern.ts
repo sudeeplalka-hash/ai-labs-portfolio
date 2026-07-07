@@ -62,7 +62,7 @@ export function buildAuditEvidencePack(s: ProgramState): EvidenceSection[] {
         { label: "Rollback readiness", value: g.rollbackReadiness ?? "N/A" },
         { label: "Version lineage", value: g.versionLineage ? Object.entries(g.versionLineage).map(([k, v]) => `${k}: ${v}`).join(" · ") : "N/A" },
         { label: "Day Two remediation decision", value: s.operate?.decisionLabel ?? "N/A" },
-        { label: "Day Two loop-back target", value: s.operate?.loopTarget ?? "N/A" },
+        { label: "Day Two loop back target", value: s.operate?.loopTarget ?? "N/A" },
         { label: "Day Two value at risk", value: s.operate?.valueAtRiskUsd !== undefined ? `${fmtUsd(s.operate.valueAtRiskUsd)}/yr` : "N/A" },
         { label: "Day Two evidence", value: s.operate?.evidenceNote ?? "N/A" },
       ],

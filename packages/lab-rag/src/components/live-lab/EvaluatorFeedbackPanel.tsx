@@ -11,7 +11,7 @@ export function EvaluatorFeedbackPanel({ evaluation }: { evaluation: LiveEvaluat
   if (!evaluation) {
     return (
       <Panel className="ring-1 ring-accent/20">
-        <SectionHeader title="Evaluator Feedback" description="Plain-English explanation of what the evaluator did." icon={Brain} />
+        <SectionHeader title="Evaluator Feedback" description="Plain English explanation of what the evaluator did." icon={Brain} />
         <EmptyState message="Ask a question, the evaluator will explain whether the answer can be trusted." />
       </Panel>
     );

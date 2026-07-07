@@ -5,12 +5,12 @@ import { DecisionBadge } from '@gov/components/shared/Badge';
 const POOL = [
   { uc: 'Finance Portfolio Assistant', decision: 'ALLOW', text: 'Variance summary requested' },
   { uc: 'Customer Dispute Assistant', decision: 'REDACT', text: 'PII detected in a dispute note' },
-  { uc: 'Finance Portfolio Assistant', decision: 'ESCALATE', text: 'Credit-line recommendation requested' },
+  { uc: 'Finance Portfolio Assistant', decision: 'ESCALATE', text: 'Credit line recommendation requested' },
   { uc: 'Agentic Workflow Assistant', decision: 'REQUIRE_CONFIRMATION', text: 'External email drafted' },
-  { uc: 'HR Policy Assistant', decision: 'BLOCK', text: 'Protected-class ranking blocked' },
+  { uc: 'HR Policy Assistant', decision: 'BLOCK', text: 'Protected class ranking blocked' },
   { uc: 'RAG Knowledge Assistant', decision: 'ALLOW_WITH_DISCLAIMER', text: 'Unsourced claim disclaimed' },
   { uc: 'Agentic Workflow Assistant', decision: 'ESCALATE', text: 'Bulk data export held for review' },
-  { uc: 'Finance Portfolio Assistant', decision: 'BLOCK', text: 'Prompt-injection attempt blocked' },
+  { uc: 'Finance Portfolio Assistant', decision: 'BLOCK', text: 'Prompt injection attempt blocked' },
 ];
 interface Ev { id: number; uc: string; decision: string; text: string; t: string }
 

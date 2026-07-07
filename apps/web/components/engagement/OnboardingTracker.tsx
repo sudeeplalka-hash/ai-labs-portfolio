@@ -1,9 +1,9 @@
 "use client";
 
 // EL-09 · Resource Onboarding & KT Tracker (Collection 4 · commercial wing).
-// Onboarding as a critical-path problem, access requests are the longest pole.
+// Onboarding as a critical path problem, access requests are the longest pole.
 // 30/60/90 ramps, time-to-productive, blocked-on-access flags, and a pre-provision
-// compression lever. Flip to KT: a departing senior's knowledge mapped to bus-factor
+// compression lever. Flip to KT: a departing senior's knowledge mapped to bus factor
 // with sessions to close single points of failure. SIMULATED.
 
 import { useState } from "react";
@@ -76,21 +76,21 @@ export function OnboardingTracker() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Commercial wing</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Resource Onboarding &amp; KT Tracker</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Onboarding and Knowledge Transfer Tracker</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A resource is a cost from day one and an asset from day forty. Access requests, not training, are the longest
-            pole; compress them and the carrying cost falls. Then guard the other end: a departing senior&apos;s knowledge.
+            A resource can be assigned before they are productive. This artifact treats onboarding as a critical path
+            problem and knowledge transfer as a delivery continuity control.
           </p>
         </div>
 
         <UseCaseRail useCases={EL09_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Why does it take forty days to make a new hire productive?" approach="Map the onboarding critical path and the knowledge-transfer that must be captured before a senior resource rolls off." why="Ramp time is a critical-path problem, and un-captured KT is a standing risk." metric="Time-to-productive; KT items captured before roll-off." tradeoff="Speed of ramp versus the depth of knowledge transfer captured." outcome="The onboarding critical path plus the KT captured before the senior leaves." />
+        <CaseStudy problem="Access delays, unclear ramp expectations, and undocumented senior knowledge create hidden cost. Technology strategy professionals need to know which roles are blocked, what preprovisioning saves, and where knowledge has a single point of failure." approach="The tracker models onboarding timelines, access delays, ramp time, carrying cost, and knowledge transfer coverage. It highlights blocked resources and bus factor risks." why="This connects onboarding to cost, margin, delivery continuity, vendor mobilization, and operational readiness." metric="Time to productive; KT items captured before roll off." tradeoff="Speed of ramp versus the depth of knowledge transfer captured." outcome="The onboarding critical path plus the KT captured before the senior leaves." />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {(["onboard", "kt"] as const).map((v) => (
@@ -101,10 +101,10 @@ export function OnboardingTracker() {
         {view === "onboard" ? (
           <>
             <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-              <KpiCard label="Avg time-to-productive" value={`${avg} d`} tone={avg > 42 ? "risk" : "watch"} interpretation="Access + ramp" />
+              <KpiCard label="Avg time to productive" value={`${avg} d`} tone={avg > 42 ? "risk" : "watch"} interpretation="Access + ramp" />
               <KpiCard label="Blocked on access" value={`${blocked}/${resources.length}`} tone={blocked > 0 ? "critical" : "healthy"} interpretation="Access > 14 days" />
               <KpiCard label="Ramp carrying cost" value={fmt(current)} tone="watch" interpretation="Cost before productive" />
-              <KpiCard label="Compression saves" value={fmt(savings)} tone={savings > 0 ? "healthy" : "neutral"} interpretation="Pre-provision access" />
+              <KpiCard label="Compression saves" value={fmt(savings)} tone={savings > 0 ? "healthy" : "neutral"} interpretation="Pre provision access" />
             </div>
 
             <Panel className="mb-4">
@@ -136,15 +136,15 @@ export function OnboardingTracker() {
 
             <InsightCard title="Access is the pole nobody manages" tone={blocked > 0 ? "warn" : "success"}>
               {blocked > 0
-                ? <>Two offshore hires can&apos;t touch the work for three weeks, not because of training, but because credentials aren&apos;t provisioned. Pre-provisioning access before day one saves <span className="font-semibold">{fmt(savings)}</span> in ramp carrying cost and pulls productivity forward two weeks.</>
-                : <>With access pre-provisioned, ramps start on day one, carrying cost drops to {fmt(current)}. That&apos;s the cheapest margin lever in mobilization.</>}
+                ? <>Two offshore hires can&apos;t touch the work for three weeks, not because of training, but because credentials aren&apos;t provisioned. Pre provisioning access before day one saves <span className="font-semibold">{fmt(savings)}</span> in ramp carrying cost and pulls productivity forward two weeks.</>
+                : <>With access pre provisioned, ramps start on day one, carrying cost drops to {fmt(current)}. That&apos;s the cheapest margin lever in mobilization.</>}
             </InsightCard>
           </>
         ) : (
           <>
             <Panel className="mb-4">
               <p className="stat-label mb-1">{ktRoleLabel}</p>
-              <p className="mb-3 text-xs text-slatey-400">Map their knowledge to bus-factor, then schedule KT to close single points of failure before they leave.</p>
+              <p className="mb-3 text-xs text-slatey-400">Map their knowledge to bus factor, then schedule KT to close single points of failure before they leave.</p>
               <div className="space-y-2">
                 {ktAreas.map((a) => {
                   const on = !!kt[a.area];
@@ -152,7 +152,7 @@ export function OnboardingTracker() {
                   const spof = bus < 2;
                   return (
                     <div key={a.area} className={`flex items-center gap-3 rounded-lg border p-2.5 ${spof ? "border-rose-200 bg-rose-50/50" : "border-line"}`}>
-                      <div className="min-w-0 flex-1"><p className="text-xs font-medium text-ink">{a.area}</p><p className="text-[10px] text-slatey-500">bus-factor {bus}{spof && " · single point of failure"}</p></div>
+                      <div className="min-w-0 flex-1"><p className="text-xs font-medium text-ink">{a.area}</p><p className="text-[10px] text-slatey-500">bus factor {bus}{spof && " · single point of failure"}</p></div>
                       {spof && <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />}
                       <button onClick={() => setKt((c) => ({ ...c, [a.area]: !c[a.area] }))} className={`rounded-md border px-2 py-1 text-[11px] font-semibold transition ${on ? "border-emerald-500 bg-emerald-500 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{on ? "KT scheduled" : "Schedule KT"}</button>
                     </div>
@@ -169,17 +169,17 @@ export function OnboardingTracker() {
         )}
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Compress the onboarding critical path and capture the departing expert's KT before roll-off." lift="Cut time-to-productive and de-risk the senior handoff." measure="Days-to-productive vs baseline; KT items captured vs identified; gaps surfaced after roll-off." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "A resource is a cost from day one and an asset from day forty. Onboarding compression is the cheapest margin lever nobody manages."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, resource-lead reality of the 31-resource AMEX portfolio; onshore/offshore mobilization.</p>}
+          <OutcomeFrame call="Compress onboarding and close KT risks before they become delivery blockers." lift="Reduces carrying cost and protects continuity when senior knowledge leaves the program." measure="Time to productive, blocked resources, preprovisioning savings, KT completion, bus factor risk." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "A resource is a cost from day one and an asset only once productive. Onboarding compression is an operating lever."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, resource lead reality of the 31 resource AMEX portfolio; onshore/offshore mobilization.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Time-to-productive = ramp ({RAMP}d) + access beyond a 7-day norm; blocked if access &gt; 14 days. Carrying cost = time-to-productive × loaded day rate (onshore $1,100 · offshore $700). Pre-provisioning caps access at 5 days.</p>
-              <p>KT view scores each knowledge area by bus-factor; scheduling KT adds a backup (+1). Single point of failure = bus-factor &lt; 2. Stack: Next.js (static) + shared design system; client side.</p>
+              <p>Time to productive = ramp ({RAMP}d) + access beyond a 7-day norm; blocked if access &gt; 14 days. Carrying cost = time-to-productive × loaded day rate (onshore $1,100 · offshore $700). Pre-provisioning caps access at 5 days.</p>
+              <p>KT view scores each knowledge area by bus factor; scheduling KT adds a backup (+1). Single point of failure = bus factor &lt; 2. Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> ramp and rates are illustrative; real onboarding varies by role and client security posture. It exposes the access bottleneck and the KT risk, not a full mobilization plan.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled onboarding and KT tracker. Real use would require access systems data, role plans, training status, manager validation, KT artifacts, and resource calendars.</p>
         </div>
       </main>
     </div>

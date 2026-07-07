@@ -18,14 +18,14 @@ import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type OKey = "api" | "ft" | "buy";
 const OPT: Record<OKey, { label: string; blurb: string }> = {
-  api: { label: "API (usage-based)", blurb: "Pay per call; fastest to value; no control of the model." },
-  ft: { label: "Fine tune / self-host", blurb: "Train + host + maintain; most control and differentiation; needs the team." },
-  buy: { label: "Buy (license)", blurb: "COTS product; fast, but lock-in and little differentiation." },
+  api: { label: "API (usage based)", blurb: "Pay per call; fastest to value; no control of the model." },
+  ft: { label: "Fine tune / self host", blurb: "Train + host + maintain; most control and differentiation; needs the team." },
+  buy: { label: "Buy (license)", blurb: "COTS product; fast, but lock in and little differentiation." },
 };
 const FLIP: Record<OKey, string> = {
   api: "volume falls, or you can't staff a build",
-  ft: "volume roughly triples (self-host amortizes) or differentiation need rises",
-  buy: "speed-to-value trumps control and differentiation is low",
+  ft: "volume roughly triples (self host amortizes) or differentiation need rises",
+  buy: "speed to value trumps control and differentiation is low",
 };
 
 const COST_PER_CALL = 0.004; // $ per call, blended (see how-built)
@@ -97,21 +97,21 @@ export function BuildBuyEvaluator() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Business of AI · Gallery</p>
+          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Build vs Buy vs Fine tune</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Build, Buy, or Fine Tune Decision Evaluator</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Three paths, one 3-year number each, scored on more than cost. The recommendation is the easy part, the flip
-            condition is the one worth remembering, because you&apos;ll re-run this in 18 months.
+            Build, buy, and fine tune decisions should not be made from preference or vendor momentum. This artifact
+            compares the paths through total cost, strategic control, sensitivity, and the condition that would change the recommendation.
           </p>
         </div>
 
         <UseCaseRail useCases={C32_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Build it, buy it, or fine tune it?" approach="Price the three-year total cost of ownership across build, buy, and fine tune, and surface the volume or requirement that flips the answer." why="The decision is TCO plus strategic control over the horizon, not year-one price or preference." metric="Three-year TCO per path; the break-even volume or customization that flips it." tradeoff="Build and fine tune buy control at the cost of speed; buy trades customization for time-to-value." outcome="A defensible build/buy/fine tune call with the condition that would flip it." />
+        <CaseStudy problem="Enterprise AI solution strategy changes as volume, data sensitivity, customization need, latency requirements, and internal skill mature, and a good recommendation today may need to be revisited as usage grows or requirements change." approach="The evaluator estimates three year total cost and scores build, buy, and fine tune paths across cost and strategic criteria. It highlights the leading path, the runner up, and the flip condition." why="This connects solution strategy to investment horizon, time to value, capability ownership, vendor dependency, and operating cost." metric="Three year TCO per path; the break even volume or customization that flips it." tradeoff="Build and fine tune buy control at the cost of speed; buy trades customization for time to value." outcome="A defensible build/buy/fine tune call with the condition that would flip it." />
 
         {/* Inputs */}
         <Panel className="mb-6">
@@ -162,21 +162,21 @@ export function BuildBuyEvaluator() {
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Choose the lowest three-year TCO path that meets the control requirement; note the volume that flips it." lift="Avoid wrong-path rework by pricing all three over the horizon, not just the first year." measure="Actual TCO vs modeled per path; the flip variable (volume/customization) vs assumed." />
+          <OutcomeFrame call="Select the path that best balances cost, speed, control, sensitivity, and differentiation over the decision horizon." lift="Reduces solution risk by making the flip condition visible before the organization commits." measure="Three year TCO, time to value, control score, skill readiness, requirement fit, decision refresh trigger." />
           <InsightCard title="Know the flip, not just the answer" tone="info">
             Cross the volume slider slowly and watch API and fine tune trade places, the crossover is the whole decision.
             Buy wins on speed when differentiation is low; it loses the moment the capability becomes your edge.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "This decision is re-made every 18 months. The evaluator matters less than knowing your flip conditions."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The recommendation matters, but the flip condition matters more. This decision should be revisited when usage, requirements, or strategic control needs change."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>TCO (3 yr): API = integration + volume × 36 × ${COST_PER_CALL}/call. Fine tune = training + eval-harness + hosting (scales with volume) + eval maintenance. Buy = license + integration + a lock-in risk premium.</p>
+              <p>TCO (3 yr): API = integration + volume × 36 × ${COST_PER_CALL}/call. Fine tune = training + eval-harness + hosting (scales with volume) + eval maintenance. Buy = license + integration + a lock in risk premium.</p>
               <p>Score = weighted blend of cost (inverse TCO), speed, control, differentiation, and risk (cost {Math.round(WEIGHTS.cost * 100)}% · diff {Math.round(WEIGHTS.diff * 100)}% · others {Math.round(WEIGHTS.control * 100)}% each). Data sensitivity and latency shift control/risk; differentiation need scales the diff weight; team skill gates fine tune feasibility.</p>
               <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> rates and line items are illustrative defaults; real TCO needs your negotiated pricing and utilization. It frames the decision and its sensitivity, not a procurement quote.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled decision tool. A real sourcing decision would require procurement data, security review, vendor contracts, implementation estimates, legal input, and architecture validation.</p>
         </div>
       </main>
     </div>

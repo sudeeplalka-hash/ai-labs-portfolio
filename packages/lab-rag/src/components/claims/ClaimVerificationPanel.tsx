@@ -15,7 +15,7 @@ export function ClaimVerificationPanel({ claims }: { claims: ClaimVerification[]
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-accent-cyan" />
-          <h3 className="text-sm font-semibold text-ink">Claim-Level Verification</h3>
+          <h3 className="text-sm font-semibold text-ink">Claim Level Verification</h3>
         </div>
         <div className="flex items-center gap-4 text-xs text-slatey-400">
           <span>

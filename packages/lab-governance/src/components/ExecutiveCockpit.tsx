@@ -94,7 +94,7 @@ export default function ExecutiveCockpit() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard label="Active Policies" value={metrics.active_policies} icon={CheckCircle} color="green"
-          tooltip="The number of governance policies currently enabled and enforced at runtime. Each policy is a rule, for example PII redaction or protected-class checks, that the guardrail engine applies to every request. More active policies means broader coverage, though they should be tuned to limit false positives." />
+          tooltip="The number of governance policies currently enabled and enforced at runtime. Each policy is a rule, for example PII redaction or protected class checks, that the guardrail engine applies to every request. More active policies means broader coverage, though they should be tuned to limit false positives." />
         <MetricCard label="Blocked Requests" value={metrics.blocked_events} icon={XCircle} color="red"
           tooltip="How many requests were fully blocked by a guardrail in this period. A block happens when a policy judges the request too risky to answer at all. It captures the hard stops, the clearest evidence the control plane is preventing harm." />
         <MetricCard label="Escalated for Review" value={metrics.escalated_events} icon={Users} color="amber"

@@ -50,7 +50,7 @@ export function LiveCostLatency() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
-          <SectionHeader title="Latency breakdown" description="Per-question retrieve / generate / evaluate time." icon={Gauge} />
+          <SectionHeader title="Latency breakdown" description="Per question retrieve / generate / evaluate time." icon={Gauge} />
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={latencyData} margin={{ top: 8, right: 12, left: -16, bottom: 0 }}>

@@ -2,7 +2,7 @@
 
 // GAP-05 · Context & Memory Engineering (Collection 2 · toolkit).
 // One task, four context strategies side by side, full dump / summarize / compress
-// / sub-agent handoff, on cost, fidelity, and failure risk as the conversation
+// / subagent handoff, on cost, fidelity, and failure risk as the conversation
 // grows, plus a memory view of what survives across turns. Context strategy is a
 // cost-fidelity dial; set it per use case, not per platform. SIMULATED.
 
@@ -22,7 +22,7 @@ const STRATS: { key: SKey; label: string; note: string }[] = [
   { key: "full", label: "Full dump", note: "Send the whole history every call." },
   { key: "sum", label: "Summarize", note: "Rolling summary + last two turns." },
   { key: "comp", label: "Compress", note: "Semantic compression of history." },
-  { key: "handoff", label: "Sub-agent handoff", note: "Only the current sub-task's brief." },
+  { key: "handoff", label: "Subagent handoff", note: "Only the current subtask's brief." },
 ];
 
 function metrics(key: SKey, t: number) {
@@ -79,21 +79,21 @@ export function ContextMemory() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
+          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Context &amp; Memory Engineering</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Context and Memory Strategy Evaluator</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The same multi-turn task, four ways to carry the context. Drag the turns up and watch full-dump&apos;s cost and
-            overflow risk climb while the others trade a little fidelity for a lot of headroom.
+            Long running agent workflows need a deliberate context strategy. This artifact compares how different memory
+            approaches affect cost, fidelity, and overflow risk as the task grows.
           </p>
         </div>
 
         <UseCaseRail useCases={GAP05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Dump, summarize, compress, or hand off, which context strategy?" approach="Compare context strategies on cost versus answer fidelity as the conversation grows, so the dial is set on evidence." why="The cost-fidelity dial is a per-use case decision, not a per-platform default." metric="Tokens and cost per call versus answer fidelity, by strategy." tradeoff="Higher fidelity costs tokens; aggressive compression eventually hurts the answer." outcome="The context strategy to run per use case, with the point where compression starts to hurt." />
+        <CaseStudy problem="A naive full history approach may preserve context but can become expensive and fragile. Summarization, compression, and handoff patterns reduce load but introduce fidelity tradeoffs, and the right answer depends on the business task and the risk of losing detail." approach="The evaluator compares full context, summarization, compression, and subagent handoff across the same growing task. It shows how token load, overflow risk, and fidelity change as conversations lengthen." why="This connects context design to unit economics, reliability, accuracy, user experience, and operating scalability." metric="Tokens and cost per call versus answer fidelity, by strategy." tradeoff="Higher fidelity costs tokens; aggressive compression eventually hurts the answer." outcome="The context strategy to run per use case, with the point where compression starts to hurt." />
 
         <Panel className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -142,25 +142,25 @@ export function ContextMemory() {
                 ))}
               </tbody>
             </table>
-            <p className="mt-2 text-[11px] text-slatey-500">Full dump keeps everything until the window truncates the oldest; summarize/compress trade minor facts for headroom; handoff keeps only what the current sub-task needs.</p>
+            <p className="mt-2 text-[11px] text-slatey-500">Full dump keeps everything until the window truncates the oldest; summarize/compress trade minor facts for headroom; handoff keeps only what the current subtask needs.</p>
           </Panel>
         )}
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Set the context strategy per use case on its cost-fidelity needs, not the platform default." lift="Hold answer fidelity while cutting context token spend on high volume paths." measure="Tokens and $/call by strategy; answer-fidelity eval; where compression began degrading quality." />
+          <OutcomeFrame call="Select context strategy by use case, not by platform default." lift="Reduces runaway token cost and overflow risk while preserving enough fidelity for the task." measure="Token cost per task, overflow events, answer quality, context recall, user rework." />
           <InsightCard title="It's a dial, not a default" tone="info">
             Full dump is right for a short, high-stakes exchange; summarize or compress for a long assistant thread; handoff
-            when specialized sub-agents each need only their slice. The mistake is picking one and calling it the platform standard.
+            when specialized subagents each need only their slice. The mistake is picking one and calling it the platform standard.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Context strategy is a cost-fidelity dial. I set it per use case, not per platform."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Context strategy is a cost and fidelity decision. Set it based on the workflow, not enthusiasm for larger windows."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Per strategy, context/call grows differently with turns (full = linear, summarize = ~flat, compress = log, handoff = flat-small). Cost ≈ context × input price; fidelity and risk are modeled per strategy; overflow triggers when context exceeds a {WINDOW}k working window. Memory retention applies each policy&apos;s eviction rule to a fixed fact set.</p>
+              <p>Per strategy, context/call grows differently with turns (full = linear, summarize = ~flat, compress = log, handoff = flat small). Cost ≈ context × input price; fidelity and risk are modeled per strategy; overflow triggers when context exceeds a {WINDOW}k working window. Memory retention applies each policy&apos;s eviction rule to a fixed fact set.</p>
               <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> token sizes and fidelity are illustrative; real numbers depend on the model, the summarizer, and the task. It shows the trade-offs&apos; shape, not a benchmarked comparison.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled comparison. Production use would require actual conversation traces, task level evaluation, memory policies, privacy controls, and retention rules.</p>
         </div>
       </main>
     </div>

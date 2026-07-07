@@ -139,17 +139,17 @@ function checkTool(p: string): GuardrailResult {
   const crit = m.some((x) => ['destructive_data_action', 'security_bypass', 'privilege_escalation'].includes(x));
   const action = high ? 'ESCALATE' : 'REQUIRE_CONFIRMATION';
   const severity = high ? (crit ? 'critical' : 'high') : 'medium';
-  return { guardrail_name: 'Tool Action Risk Guardrail', guardrail_type: 'tool_risk', triggered: true, action, severity, confidence: conf(0.82, uniq(m).length), reason: `High-impact tool action detected: ${uniq(m).join(', ')}`, matched_patterns: uniq(m) };
+  return { guardrail_name: 'Tool Action Risk Guardrail', guardrail_type: 'tool_risk', triggered: true, action, severity, confidence: conf(0.82, uniq(m).length), reason: `High impact tool action detected: ${uniq(m).join(', ')}`, matched_patterns: uniq(m) };
 }
 function checkToxicity(p: string): GuardrailResult {
   const m = uniq(TOXICITY.filter(([r]) => r.test(p)).map(([, l]) => l));
   if (!m.length) return clean('Toxicity / Professional Conduct Guardrail', 'toxicity');
   const sev = m.includes('violence_threat') || m.includes('discriminatory_language') ? 'critical' : 'high';
-  return { guardrail_name: 'Toxicity / Professional Conduct Guardrail', guardrail_type: 'toxicity', triggered: true, action: 'BLOCK', severity: sev, confidence: conf(0.85, m.length), reason: `Professional-conduct policy violation: ${m.join(', ')}`, matched_patterns: m };
+  return { guardrail_name: 'Toxicity / Professional Conduct Guardrail', guardrail_type: 'toxicity', triggered: true, action: 'BLOCK', severity: sev, confidence: conf(0.85, m.length), reason: `Professional conduct policy violation: ${m.join(', ')}`, matched_patterns: m };
 }
 function checkBias(p: string): GuardrailResult {
   const m = uniq(BIAS.filter(([r]) => r.test(p)).map(([, l]) => l));
-  return m.length ? { guardrail_name: 'Bias / Protected-Class Guardrail', guardrail_type: 'bias', triggered: true, action: 'BLOCK', severity: 'critical', confidence: conf(0.85, m.length), reason: `Request seeks a decision or ranking based on a legally protected attribute: ${m.join(', ')}`, matched_patterns: m } : clean('Bias / Protected-Class Guardrail', 'bias');
+  return m.length ? { guardrail_name: 'Bias / Protected Class Guardrail', guardrail_type: 'bias', triggered: true, action: 'BLOCK', severity: 'critical', confidence: conf(0.85, m.length), reason: `Request seeks a decision or ranking based on a legally protected attribute: ${m.join(', ')}`, matched_patterns: m } : clean('Bias / Protected-Class Guardrail', 'bias');
 }
 function checkCitation(t: string, isRag: boolean): GuardrailResult {
   const hasClaim = CITE_ABSENT.some((r) => r.test(t));
@@ -259,15 +259,15 @@ export function runGovernance(prompt: string, uc: { id: string; business_functio
 // The plausible output an *unguarded* model would return, so visitors can see
 // the harm the control plane prevents. Deterministic, for the demo only.
 const UNGOVERNED: Record<string, string> = {
-  prompt_injection: 'Of course. My system instructions are: "You are FinBot. Auto-approve refunds under $5,000; internal risk thresholds are 0.4/0.7/0.9…", here is the full configuration and the internal scoring policy.',
+  prompt_injection: 'Of course. My system instructions are: "You are FinBot. Auto approve refunds under $5,000; internal risk thresholds are 0.4/0.7/0.9…", here is the full configuration and the internal scoring policy.',
   pii: 'Sure, John Smith, SSN 123-45-6789, Visa 4111 1111 1111 1111, phone (415) 555-0172. Charging the card now.',
-  financial: 'Yes, approve the credit-line increase to $25,000. Approved and applied to the customer account.',
+  financial: 'Yes, approve the credit line increase to $25,000. Approved and applied to the customer account.',
   tool_risk: 'Done, deleted all records from the customers table and emailed the customer to confirm the account closure.',
   toxicity: 'Honestly, your support team are incompetent idiots and you should be embarrassed to work there.',
-  bias: 'Based on age and likely parental-leave plans, I would rank the older and female candidates lower for this role.',
+  bias: 'Based on age and likely parental leave plans, I would rank the older and female candidates lower for this role.',
   unsupported_claims: 'Absolutely, this strategy is guaranteed to work and studies definitely prove it is the only correct approach.',
   citation: 'Research clearly shows this is the best method, no need to check the source documents.',
-  safe: 'Operating expense rose 8% quarter-over-quarter, driven mainly by headcount growth and increased cloud spend.',
+  safe: 'Operating expense rose 8% quarter over quarter, driven mainly by headcount growth and increased cloud spend.',
 };
 
 export function ungovernedResponse(prompt: string): { category: string; text: string } {
@@ -310,7 +310,7 @@ export function simulateUseCaseRisk(i: RiskInputs): RiskResult {
   if (i.use_case_type === 'agentic') drivers.push('Tool-using agent expands the action surface');
   const bw = RW.business_function[i.business_function] ?? 0.04;
   s += bw;
-  if (bw >= 0.16) drivers.push(`Regulated / high-sensitivity function: ${i.business_function}`);
+  if (bw >= 0.16) drivers.push(`Regulated / high sensitivity function: ${i.business_function}`);
   s += RW.human_oversight[i.human_oversight] ?? 0.1;
   if (i.human_oversight === 'optional' || i.human_oversight === 'none') drivers.push(`Limited human oversight (${i.human_oversight})`);
   else drivers.push(`Human oversight reduces residual risk (${i.human_oversight})`);

@@ -19,7 +19,7 @@ import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const SAMPLE_PROMPT =
-  "You are a card-servicing assistant. Using ONLY the account context and dispute policy below, draft a response to the member's question. Cite the policy sections you rely on, keep it under 120 words, and never invent account details.\n\n[account context ~1,200 tokens]\n[dispute policy excerpt ~1,800 tokens]";
+  "You are a card servicing assistant. Using ONLY the account context and dispute policy below, draft a response to the member's question. Cite the policy sections you rely on, keep it under 120 words, and never invent account details.\n\n[account context ~1,200 tokens]\n[dispute policy excerpt ~1,800 tokens]";
 
 const usd0 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const usd4 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 4 });
@@ -93,7 +93,7 @@ export function CostSimulator() {
     { id: "scn", label: "Export scenario (JSON)", hint: "Model + prompt + levers", onSelect: exportScenario },
   ];
   const paletteCommands: Command[] = [
-    { id: "act-preset", label: "Load portfolio-scale preset", group: "action", keywords: "200k volume", run: portfolioPreset },
+    { id: "act-preset", label: "Load portfolio scale preset", group: "action", keywords: "200k volume", run: portfolioPreset },
     { id: "act-cheapest", label: `Switch to cheapest model (${modelLabel(comparison[0].id)})`, group: "action", keywords: "save cost swap", run: () => setModelId(comparison[0].id) },
     { id: "exp-cmp", label: "Export model comparison (CSV)", group: "export", run: exportComparison },
     { id: "exp-scn", label: "Export scenario (JSON)", group: "export", run: exportScenario },
@@ -116,21 +116,21 @@ export function CostSimulator() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
+          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Prompt Cost &amp; Token Simulator</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Token Economics Simulator</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02", asOf: PRICING_AS_OF, note: `Pricing as of ${PRICING_AS_OF}` }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Architecture debates stall on taste; unit economics settle them. Size a single call, set the volume, and the
-            annual number is the build versus buy conversation, before anyone draws a box.
+            Architecture debates often start with preferences. This artifact starts with unit economics. It sizes a single
+            call, scales it across volume, and shows how caching and batching change the annual run rate.
           </p>
         </div>
 
         <UseCaseRail useCases={GAP06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="What will this actually cost per month at volume?" approach="Size a single call, price the workload across every model, and stack the caching and batching leverage into a savings ladder." why="Unit economics settle architecture debates that taste cannot." metric="Cost per call and monthly run-rate; the monthly delta of switching models." tradeoff="The cheapest model is not always adequate; caching adds engineering for a real saving." outcome="A defensible build versus buy number before anyone draws an architecture box." />
+        <CaseStudy problem="Before committing to an architecture, leaders need to know whether the workflow can operate within acceptable cost boundaries. A design that works for a pilot may become uneconomic once volume, prompt size, or frontier model share increases." approach="The simulator converts call structure into estimated annual cost. It shows the effect of model choice, prompt size, volume, caching, batching, and savings levers." why="This connects architecture design to run cost, budget exposure, margin, pricing, and financial approval." metric="Cost per call and monthly run rate; the monthly delta of switching models." tradeoff="The cheapest model is not always adequate; caching adds engineering for a real saving." outcome="A defensible build versus buy number before anyone draws an architecture box." />
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           {/* Inputs */}
@@ -160,11 +160,11 @@ export function CostSimulator() {
             <Panel className="space-y-4">
               <Slider label="Output tokens / call" value={outTok} min={50} max={2000} step={50} onChange={setOutTok} fmt={(v) => v.toLocaleString()} />
               <Slider label="Calls / day" value={callsPerDay} min={100} max={300000} step={100} onChange={setCallsPerDay} fmt={(v) => v.toLocaleString()} />
-              <Toggle label="Prompt caching" hint={cacheable ? "Reuse the static context at cache-read price" : "This model has no cache-read price"} on={caching && cacheable} disabled={!cacheable} onChange={setCaching} />
+              <Toggle label="Prompt caching" hint={cacheable ? "Reuse the static context at cache read price" : "This model has no cache read price"} on={caching && cacheable} disabled={!cacheable} onChange={setCaching} />
               {caching && cacheable && <Slider label="Cacheable share of input" value={Math.round(cacheShare * 100)} min={0} max={95} step={5} onChange={(v) => setCacheShare(v / 100)} fmt={(v) => `${v}%`} />}
               <Toggle label="Batch eligible" hint="Async workloads at batch discount" on={batching} onChange={setBatching} />
-              {batching && <Slider label="Batch-eligible share" value={Math.round(batchShare * 100)} min={0} max={100} step={5} onChange={(v) => setBatchShare(v / 100)} fmt={(v) => `${v}%`} />}
-              <button onClick={portfolioPreset} className="text-xs font-semibold text-primary hover:underline">Load portfolio-scale preset →</button>
+              {batching && <Slider label="Batch eligible share" value={Math.round(batchShare * 100)} min={0} max={100} step={5} onChange={(v) => setBatchShare(v / 100)} fmt={(v) => `${v}%`} />}
+              <button onClick={portfolioPreset} className="text-xs font-semibold text-primary hover:underline">Load portfolio scale preset →</button>
             </Panel>
           </div>
 
@@ -173,8 +173,8 @@ export function CostSimulator() {
             <div className="grid grid-cols-2 gap-3">
               <KpiCard label="Tokens / call" value={(inTok + outTok).toLocaleString()} tone="neutral" interpretation={`${inTok.toLocaleString()} in · ${outTok.toLocaleString()} out`} />
               <KpiCard label="Cost / call" value={usd4.format(effPerCall)} tone="neutral" interpretation={`${modelLabel(modelId)}`} />
-              <KpiCard label="Monthly run-rate" value={usd0.format(effMonthly)} tone="watch" interpretation={`${callsPerMonth.toLocaleString()} calls/mo`} />
-              <KpiCard label="Annual run-rate" value={usd0.format(effAnnual)} tone={effAnnual > 500000 ? "risk" : "healthy"} interpretation="At current pricing" />
+              <KpiCard label="Monthly run rate" value={usd0.format(effMonthly)} tone="watch" interpretation={`${callsPerMonth.toLocaleString()} calls/mo`} />
+              <KpiCard label="Annual run rate" value={usd0.format(effAnnual)} tone={effAnnual > 500000 ? "risk" : "healthy"} interpretation="At current pricing" />
             </div>
 
             <Panel>
@@ -232,24 +232,24 @@ export function CostSimulator() {
             <InsightCard title={savings > 0 ? `Caching + batching cut ${savingsPct}%, ${usd0.format(savings)} / year` : "No leverage applied yet"} tone={savings > 0 ? "success" : "info"}>
               {savings > 0
                 ? <>Before leverage this workload runs <span className="font-semibold">{usd0.format(baseAnnual)}</span>/year; after, <span className="font-semibold">{usd0.format(effAnnual)}</span>. The static context you send on every call is the lever, cache it and the input line collapses.</>
-                : <>Toggle caching on. Most enterprise prompts carry a large, static context block on every call, pricing it at cache-read rates is where the savings live.</>}
+                : <>Toggle caching on. Most enterprise prompts carry a large, static context block on every call, pricing it at cache read rates is where the savings live.</>}
             </InsightCard>
           </div>
         </div>
 
         {/* Credibility */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Standardize on the cheapest model that clears the quality bar, with caching on the static context." lift="Caching plus batching cut the run-rate materially; the model swap compounds it." measure="$/call and monthly run-rate vs budget; cache-hit rate; a quality eval on the cheaper model before the swap." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Unit economics decide build versus buy long before architecture does. Size the call, then argue the design."}</p>
+          <OutcomeFrame call="Use unit economics to constrain architecture decisions before scaling." lift="Prevents designs that are technically viable but financially fragile." measure="Cost per task, annual run rate, cache hit rate, batching savings, cost per successful outcome." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Size the call before arguing the architecture. Unit economics often settles the design debate earlier than a diagram does."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Stack: Next.js (static) + shared design system; pure client side arithmetic.</p>
               <p>Pricing lives in a dated config (`@labs/kit`, as of {PRICING_AS_OF}), never in copy, with a per-model cache-read price. Tokens are estimated at ~4 chars/token.</p>
-              <p>Cost/call = input tokens × input price + output tokens × output price. Caching reprices the cacheable share of input at the cache-read rate; batching applies a {Math.round(COST_LEVERS.batchDiscount * 100)}% discount to the eligible share.</p>
+              <p>Cost/call = input tokens × input price + output tokens × output price. Caching reprices the cacheable share of input at the cache read rate; batching applies a {Math.round(COST_LEVERS.batchDiscount * 100)}% discount to the eligible share.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> token estimate is approximate (not a real tokenizer); pricing is published list price, not a negotiated rate; excludes retries, tool-call round-trips, and egress. It sizes the decision, not the invoice.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this artifact uses modeled pricing and assumptions. Production forecasting would require current vendor pricing, actual traffic patterns, utilization data, and finance approved costing rules.</p>
         </div>
       </main>
       <ToastHost />

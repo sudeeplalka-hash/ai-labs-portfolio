@@ -78,27 +78,27 @@ export function CapacityPlanner() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Capacity &amp; Resourcing Planner</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Capacity and Skills Coverage Planner</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? activeUc.oneLiner : "Thirty people, five short, but only in three skills."} The heatmap shows where the portfolio is over-allocated;
-            the toggles show what hire, contract, or upskill each does to the date and the cost.{!activeUc && " This one is personal, it mirrors a 31-resource intelligence mapping I ran."}
+            {activeUc ? activeUc.oneLiner : "A team can look staffed and still be under capable for the work ahead."} The heatmap shows where the portfolio is overallocated;
+            the toggles show what hire, contract, or upskill each does to the date and the cost.{!activeUc && " This one is personal, it mirrors a 31 resource intelligence mapping I ran."}
           </p>
         </div>
 
         <UseCaseRail useCases={EL03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Do thirty people actually cover this portfolio's skills?" approach="Map the portfolio's skill demand against the team's supply, flagging gaps and overallocation rather than raw headcount." why="Staffing is a skills-coverage problem, not a headcount problem." metric="Utilization versus target; skill-coverage gaps against demand." tradeoff="Hiring is slow and costly; contracting is fast but thin; upskilling is sticky but takes time." outcome="A hire/contract/upskill call per gap, with the date and cost impact." />
+        <CaseStudy problem="AI portfolios require the right mix of ML engineering, data engineering, platform, delivery, domain, and evaluation capacity. A raw headcount view hides the bottlenecks that delay delivery." approach="The planner maps demand and capacity by skill pool, highlights overallocation, and models the effect of hire, contract, and upskill actions on cost and schedule." why="This connects AI delivery plans to workforce strategy, capacity planning, budget, schedule confidence, and execution risk." metric="Utilization versus target; skill coverage gaps against demand." tradeoff="Hiring is slow and costly; contracting is fast but thin; upskilling is sticky but takes time." outcome="A hire/contract/upskill call per gap, with the date and cost impact." />
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Team" value={teamLabel} tone="neutral" interpretation={`${totalGap} FTE short in skills`} />
           <KpiCard label="Delivery" value={`~${deliveryWeeks} wk`} tone={slip > 6 ? "risk" : slip > 0 ? "watch" : "healthy"} interpretation={slip > 0 ? `+${slip} wk vs plan` : "on plan"} />
           <KpiCard label="Monthly cost" value={`$${monthly}k`} tone={addedCost > 0 ? "watch" : "neutral"} interpretation={addedCost > 0 ? `+$${addedCost}k added` : "base team"} />
-          <KpiCard label="Unresolved gaps" value={`${unresolved}/${gapRows.length}`} tone={unresolved > 0 ? "critical" : "healthy"} interpretation="Over-allocated skills" />
+          <KpiCard label="Unresolved gaps" value={`${unresolved}/${gapRows.length}`} tone={unresolved > 0 ? "critical" : "healthy"} interpretation="Over allocated skills" />
         </div>
 
         {/* Heatmap */}
@@ -134,20 +134,20 @@ export function CapacityPlanner() {
               );
             })}
           </div>
-          <p className="mt-3 text-[11px] text-slatey-500">Tick mark = current capacity line. Bars past it are over-allocated. Hire = +6 wk / $18k·FTE · Contract = +1 wk / $28k · Upskill = +4 wk / $8k (draws on slack).</p>
+          <p className="mt-3 text-[11px] text-slatey-500">Tick mark = current capacity line. Bars past it are over allocated. Hire = +6 wk / $18k·FTE · Contract = +1 wk / $28k · Upskill = +4 wk / $8k (draws on slack).</p>
         </Panel>
 
         <div className="mt-6">
           <InsightCard title={bottleneck ? `Bottleneck: ${bottleneck.label}` : "No bottleneck"} tone={unresolved > 0 ? "danger" : "success"}>
             {unresolved > 0
               ? <>The plan doesn&apos;t fail on headcount, it fails in {gapRows.map((g) => g.label).join(", ")}. Contract is fastest to the date, upskill is cheapest but leans on the slack in Delivery and SME, hiring is permanent but adds six weeks. Pick per constraint, not per habit.</>
-              : <>Every gap is resolved. Delivery lands at ~{deliveryWeeks} weeks for +${addedCost}k/month, now decide whether the pulled-in date is worth the run-rate.</>}
+              : <>Every gap is resolved. Delivery lands at ~{deliveryWeeks} weeks for +${addedCost}k/month, now decide whether the pulled-in date is worth the run rate.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Close each skill gap with the cheapest adequate lever that still hits the need-by date." lift="Coverage on the critical skills without over-hiring, with the schedule impact explicit." measure="Skill-coverage % vs demand; utilization vs target; slippage traced to an unfilled gap." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Capacity plans fail on skills, not headcount. Thirty people ≠ thirty people."}</p>
+          <OutcomeFrame call="Resolve capacity gaps by skill, not by generic headcount." lift="Improves delivery confidence by matching the work to the actual capabilities required." measure="Skill utilization, open gaps, delivery date impact, monthly cost, time to productive capacity." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Thirty people do not equal thirty usable delivery units. Capacity fails by skill, not by headcount."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, a direct mirror of the 31-resource AMEX intelligence mapping; the most personal instrument on the site.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
@@ -156,7 +156,7 @@ export function CapacityPlanner() {
               <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> skills are aggregated pools, not named individuals; upskill assumes the slack is transferable. It exposes the skill-shaped bottleneck and the trade, not a resource-levelled schedule.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a deterministic planner. Real capacity planning would require availability data, role definitions, location constraints, ramp time, vendor constraints, and delivery priorities.</p>
         </div>
       </main>
     </div>

@@ -116,7 +116,7 @@ export function scoreUseCase(d: Record<string, string>): { score: number; tier: 
   if (ut === 'rag') drivers.push('Retrieval grounding introduces source-quality risk');
   if (ut === 'agentic') drivers.push('Tool-using agent expands the action surface');
   const bf = d.business_function || 'Operations'; const bw = SW.business_function[bf] ?? 0.04; s += bw;
-  if (bw >= 0.16) drivers.push(`Regulated / high-sensitivity function: ${bf}`);
+  if (bw >= 0.16) drivers.push(`Regulated / high sensitivity function: ${bf}`);
   const ov = d.human_oversight || 'optional'; s += SW.human_oversight[ov] ?? 0.1;
   if (ov === 'optional' || ov === 'none') drivers.push(`Limited human oversight (${ov})`);
   else drivers.push(`Human oversight reduces residual risk (${ov})`);

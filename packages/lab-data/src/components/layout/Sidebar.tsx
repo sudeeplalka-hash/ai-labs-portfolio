@@ -70,7 +70,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         {/* GROUP: build (live tools) */}
         <div className="px-2 pb-1 pt-5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Build</p>
-          <p className="text-[10px] text-slate-500/80">Live · multi-file</p>
+          <p className="text-[10px] text-slate-500/80">Live · multi file</p>
         </div>
         {(() => {
           const active = pathname.startsWith("/corpus");
@@ -142,7 +142,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-white/10 px-5 py-4">
         <div className="rounded-lg bg-white/[0.06] p-3">
           <p className="text-[11px] font-medium uppercase tracking-wider text-slate-400">Pipeline status</p>
-          <p className="mt-1 text-sm font-semibold text-white">71% ingestion-ready</p>
+          <p className="mt-1 text-sm font-semibold text-white">71% ingestion ready</p>
           <p className="mt-1 text-[11px] text-slate-400">Hands off to: RAG Evaluator</p>
         </div>
       </div>

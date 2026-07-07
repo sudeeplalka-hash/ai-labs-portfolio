@@ -23,7 +23,7 @@ function ExecutiveOverviewDemo() {
       <ReadThisDashboard />
 
       <div>
-        <SectionHeader title="Headline Metrics" description="Current run: compliance-guardrail-v6" icon={Activity} />
+        <SectionHeader title="Headline Metrics" description="Current run: compliance guardrail v6" icon={Activity} />
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-3">
           {kpis.map((k) => (
             <KpiCard key={k.id} kpi={k} />

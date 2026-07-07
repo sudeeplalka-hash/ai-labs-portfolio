@@ -336,13 +336,13 @@ export function DataLabView() {
 
             {/* Editable thresholds */}
             <Panel>
-              <SectionHeader title="Rule thresholds" description="Tune the org policy and re-score the file live" icon={SlidersHorizontal} />
+              <SectionHeader title="Rule thresholds" description="Tune the org policy and re score the file live" icon={SlidersHorizontal} />
               <ThresholdControls config={config} onChange={changeConfig} />
             </Panel>
 
             {/* Consequence simulator */}
             <Panel>
-              <SectionHeader title="What would the AI answer?" description="The same file ingested as-is vs prepared, the failure prep prevents" icon={MessageSquareText} />
+              <SectionHeader title="What would the AI answer?" description="The same file ingested as is vs prepared, the failure prep prevents" icon={MessageSquareText} />
               <ConsequenceSimulator report={report} sampleId={sampleId} cleared={cleared} />
             </Panel>
 
@@ -427,7 +427,7 @@ export function DataLabView() {
             {/* Chunk readiness */}
             <Panel>
               <SectionHeader
-                title="Chunk-readiness preview"
+                title="Chunk readiness preview"
                 description="Can this be cleanly segmented for embedding? (Drag to explore, not retrieval tuning)"
                 icon={Scissors}
               />
@@ -768,7 +768,7 @@ function Handoff({
           {handed ? <ArrowRightCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
           {handed ? "Handed off to RAG Evaluator" : "Send to RAG Evaluator"}
         </button>
-        {!canSend && <span className="text-xs text-slatey-400">Clear the gate first, resolve blockers and at-risk items.</span>}
+        {!canSend && <span className="text-xs text-slatey-400">Clear the gate first, resolve blockers and at risk items.</span>}
       </div>
       {handed && (
         <div className="mt-3">

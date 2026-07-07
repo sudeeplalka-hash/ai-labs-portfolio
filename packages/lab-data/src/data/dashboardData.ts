@@ -30,8 +30,8 @@ export const EXEC_KPIS = [
     target: "per file · was 3.6",
     trend: "−33%",
     trendGood: true,
-    interpretation: "Automated profiling cut hands-on cleanup time.",
-    tooltip: "The average number of analyst hours spent preparing one file before it is approved. It is total hands-on prep time divided by files processed. It captures the human cost of data prep, the number automation is trying to drive down.",
+    interpretation: "Automated profiling cut hands on cleanup time.",
+    tooltip: "The average number of analyst hours spent preparing one file before it is approved. It is total hands on prep time divided by files processed. It captures the human cost of data prep, the number automation is trying to drive down.",
   },
   {
     label: "Blocked / rejected",
@@ -40,7 +40,7 @@ export const EXEC_KPIS = [
     target: "10% of intake",
     trend: "−4%",
     trendGood: true,
-    interpretation: "Mostly sensitive-data and licensing holds.",
+    interpretation: "Mostly sensitive data and licensing holds.",
     tooltip: "The number of files held or rejected at the ingestion gate this quarter, shown as a share of intake. A file is blocked when it fails a policy check, most often unredacted PII or unverified provenance. It captures the data you cannot safely use yet, and why.",
   },
 ];
@@ -48,7 +48,7 @@ export const EXEC_KPIS = [
 export const FUNNEL = [
   { name: "Received", value: 2140, color: "#1f6fc4", desc: "Raw files submitted from all sources" },
   { name: "Profiled", value: 2086, color: "#0891b2", desc: "Readable & structure detected" },
-  { name: "Cleaned", value: 1842, color: "#0d9488", desc: "Dedup, missing-value & format fixes" },
+  { name: "Cleaned", value: 1842, color: "#0d9488", desc: "Dedup, missing value & format fixes" },
   { name: "Guideline-cleared", value: 1597, color: "#16a34a", desc: "PII, provenance & metadata resolved" },
   { name: "Approved", value: 1521, color: "#15508c", desc: "Passed the ingestion gate" },
   { name: "Handed to RAG", value: 1521, color: "#7c3aed", desc: "Embedded into the vector database" },
@@ -85,7 +85,7 @@ export const EXEC_NARRATIVE = [
   {
     tone: "info" as const,
     title: "Recommended focus",
-    body: "Standardize redaction and pre-clear common source licenses to lift first-pass approval above target, which means fewer conflicting answers downstream in the RAG Evaluator.",
+    body: "Standardize redaction and pre clear common source licenses to lift first pass approval above target, which means fewer conflicting answers downstream in the RAG Evaluator.",
   },
 ];
 
@@ -100,10 +100,10 @@ export interface Stage {
 export const STAGES: Stage[] = [
   { name: "Ingest & decode", inn: 2140, out: 2086, yield: 97.5, desc: "54 files unreadable (corrupt / wrong encoding) → quarantined" },
   { name: "Profile structure", inn: 2086, out: 2086, yield: 100, desc: "Schema, types & cardinality inferred for every file" },
-  { name: "Clean & normalize", inn: 2086, out: 1842, yield: 88.3, desc: "Dedup, trim, missing-value & date-format passes" },
+  { name: "Clean & normalize", inn: 2086, out: 1842, yield: 88.3, desc: "Dedup, trim, missing value & date format passes" },
   { name: "Apply org guidelines", inn: 1842, out: 1680, yield: 91.2, desc: "Freshness, provenance & metadata rules enforced" },
   { name: "PII scan & redact", inn: 1680, out: 1597, yield: 95.1, desc: "83 files needed redaction or manual sign off" },
-  { name: "Chunk & embed-prep", inn: 1597, out: 1521, yield: 95.2, desc: "Semantic split at ~512 tokens; 76 over-length re-split" },
+  { name: "Chunk & embed prep", inn: 1597, out: 1521, yield: 95.2, desc: "Semantic split at ~512 tokens; 76 over length re split" },
 ];
 
 export const QUALITY_DIMS = [

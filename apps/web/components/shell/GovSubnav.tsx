@@ -28,8 +28,8 @@ const GROUPS: { label: string; items: { href: string; label: string }[] }[] = [
     label: "Experiences",
     items: [
       { href: "/govern/live", label: "See it live" },
-      { href: "/govern/arcade", label: "Red-team arcade" },
-      { href: "/govern/value", label: "What-if calc" },
+      { href: "/govern/arcade", label: "Red team arcade" },
+      { href: "/govern/value", label: "What if calc" },
       { href: "/govern/maturity", label: "Maturity" },
     ],
   },

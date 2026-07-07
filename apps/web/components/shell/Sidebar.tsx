@@ -77,8 +77,8 @@ const SUBNAV: Partial<Record<StageKey, Group[]>> = {
     ] },
     { label: "Experiences", items: [
       { label: "See it live", href: "/govern/live" },
-      { label: "Red-team arcade", href: "/govern/arcade" },
-      { label: "What-if calc", href: "/govern/value" },
+      { label: "Red team arcade", href: "/govern/arcade" },
+      { label: "What if calc", href: "/govern/value" },
       { label: "Maturity", href: "/govern/maturity" },
     ] },
     { label: "Assurance", items: [

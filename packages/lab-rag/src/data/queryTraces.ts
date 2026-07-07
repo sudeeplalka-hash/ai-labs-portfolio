@@ -9,7 +9,7 @@ function timeline(
     { step: "Query received", durationMs: 4, status: "Completed", notes: "User question accepted." },
     { step: "Query rewritten", durationMs: 180, status: "Completed", notes: "Expanded with domain synonyms." },
     { step: "Retriever called", durationMs: 540, status: "Completed", notes: "Hybrid dense + BM25 search." },
-    { step: "Documents ranked", durationMs: 720, status: "Completed", notes: "Cross-encoder reranking applied." },
+    { step: "Documents ranked", durationMs: 720, status: "Completed", notes: "Cross encoder reranking applied." },
     { step: "Context packed", durationMs: 60, status: "Completed", notes: "Top chunks assembled into context." },
     { step: "LLM response generated", durationMs: 980, status: "Completed", notes: "Answer drafted from context." },
     { step: "Citations attached", durationMs: 120, status: "Completed", notes: "Citations mapped to claims." },
@@ -64,7 +64,7 @@ export const queryTraces: QueryTrace[] = [
         id: "c2", sourceDocument: "Global Expense Reimbursement Guide", documentVersion: "v2.8",
         chunkId: "EXP-4.3", rank: 2, relevanceScore: 0.81, usedInAnswer: false, citationMatched: false,
         freshnessStatus: "Current",
-        text: "Regional exceptions for high-cost cities are listed in Appendix C and require manager pre-approval.",
+        text: "Regional exceptions for high cost cities are listed in Appendix C and require manager pre approval.",
       },
     ],
     claimVerifications: [
@@ -125,7 +125,7 @@ export const queryTraces: QueryTrace[] = [
     generatedAnswer:
       "Manager approval is required before booking any trip expected to exceed $2,500, and for any single expense over $500.",
     expectedAnswer:
-      "Pre-trip manager approval is required for trips expected to exceed $2,500; individual expenses above $500 also require manager sign off (Employee Travel Policy v3.2).",
+      "Pre trip manager approval is required for trips expected to exceed $2,500; individual expenses above $500 also require manager sign off (Employee Travel Policy v3.2).",
     retrievedChunks: [
       { id: "c1", sourceDocument: "Employee Travel Policy", documentVersion: "v3.2", chunkId: "TRV-3.1", rank: 1, relevanceScore: 0.9, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Trips with an expected total cost above $2,500 require manager approval prior to booking." },
       { id: "c2", sourceDocument: "Employee Travel Policy", documentVersion: "v3.2", chunkId: "TRV-3.4", rank: 2, relevanceScore: 0.84, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Any single expense exceeding $500 requires manager sign off regardless of trip total." },
@@ -176,17 +176,17 @@ export const queryTraces: QueryTrace[] = [
     riskLevel: "Critical",
     expectedSource: "Information Security Exception Policy v1.9",
     generatedAnswer:
-      "Security exceptions must be reviewed by the Information Security Risk Committee before approval, and exceptions cannot be granted by an individual engineering manager. Any exception extending beyond 90 days requires re-review.",
+      "Security exceptions must be reviewed by the Information Security Risk Committee before approval, and exceptions cannot be granted by an individual engineering manager. Any exception extending beyond 90 days requires re review.",
     expectedAnswer:
-      "All security control exceptions must be reviewed and approved by the Information Security Risk Committee; individual managers cannot grant them. Exceptions are time-bound and re-reviewed at least every 90 days (Information Security Exception Policy v1.9).",
+      "All security control exceptions must be reviewed and approved by the Information Security Risk Committee; individual managers cannot grant them. Exceptions are time bound and re reviewed at least every 90 days (Information Security Exception Policy v1.9).",
     retrievedChunks: [
       { id: "c1", sourceDocument: "Information Security Exception Policy", documentVersion: "v1.9", chunkId: "SEC-2.1", rank: 1, relevanceScore: 0.93, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "All exceptions to security controls require review and approval by the Information Security Risk Committee. Exceptions may not be granted by individual managers." },
-      { id: "c2", sourceDocument: "Information Security Exception Policy", documentVersion: "v1.9", chunkId: "SEC-2.4", rank: 2, relevanceScore: 0.87, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Exceptions are time-bound and must be re-reviewed at intervals not exceeding 90 days." },
+      { id: "c2", sourceDocument: "Information Security Exception Policy", documentVersion: "v1.9", chunkId: "SEC-2.4", rank: 2, relevanceScore: 0.87, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Exceptions are time bound and must be re reviewed at intervals not exceeding 90 days." },
     ],
     claimVerifications: [
       { id: "cl1", claim: "Security exceptions require review by the Information Security Risk Committee.", supportStatus: "Supported", confidence: 0.96, sourceDocument: "Information Security Exception Policy v1.9", citationId: "SEC-2.1", evidenceSnippet: "All exceptions to security controls require review and approval by the Information Security Risk Committee." },
       { id: "cl2", claim: "Exceptions cannot be granted by an individual engineering manager.", supportStatus: "Supported", confidence: 0.94, sourceDocument: "Information Security Exception Policy v1.9", citationId: "SEC-2.1", evidenceSnippet: "Exceptions may not be granted by individual managers." },
-      { id: "cl3", claim: "Exceptions extending beyond 90 days require re-review.", supportStatus: "Partially Supported", confidence: 0.71, sourceDocument: "Information Security Exception Policy v1.9", citationId: "SEC-2.4", evidenceSnippet: "Exceptions are time-bound and must be re-reviewed at intervals not exceeding 90 days.", reviewerNote: "Source requires re-review at least every 90 days, not only when exceeding 90 days. Minor paraphrase drift." },
+      { id: "cl3", claim: "Exceptions extending beyond 90 days require re review.", supportStatus: "Partially Supported", confidence: 0.71, sourceDocument: "Information Security Exception Policy v1.9", citationId: "SEC-2.4", evidenceSnippet: "Exceptions are time bound and must be re reviewed at intervals not exceeding 90 days.", reviewerNote: "Source requires re review at least every 90 days, not only when exceeding 90 days. Minor paraphrase drift." },
     ],
     scores: scores({ contextRelevance: 92, retrievalCompleteness: 88, faithfulness: 88, completeness: 86, citationAccuracy: 89, claimSupport: 83, hallucinationRisk: 8, complianceRisk: 30 }),
     failureReasons: ["Human review required (critical domain)"],
@@ -204,22 +204,22 @@ export const queryTraces: QueryTrace[] = [
     riskLevel: "High",
     expectedSource: "AI Usage Governance Standard v1.3",
     generatedAnswer:
-      "AI use cases involving customer data, automated decisions affecting individuals, or generation of external-facing content require governance review. All other use cases are pre-approved.",
+      "AI use cases involving customer data, automated decisions affecting individuals, or generation of external facing content require governance review. All other use cases are pre approved.",
     expectedAnswer:
-      "Use cases involving personal or customer data, automated decisions affecting individuals, regulated domains, or external-facing generated content require governance review (AI Usage Governance Standard v1.3). The standard does not pre-approve all other use cases.",
+      "Use cases involving personal or customer data, automated decisions affecting individuals, regulated domains, or external facing generated content require governance review (AI Usage Governance Standard v1.3). The standard does not pre approve all other use cases.",
     retrievedChunks: [
-      { id: "c1", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-3.2", rank: 1, relevanceScore: 0.82, usedInAnswer: true, citationMatched: true, freshnessStatus: "Stale", text: "Governance review is required for AI use cases that process personal or customer data, make or materially influence decisions about individuals, operate in regulated domains, or produce external-facing content." },
+      { id: "c1", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-3.2", rank: 1, relevanceScore: 0.82, usedInAnswer: true, citationMatched: true, freshnessStatus: "Stale", text: "Governance review is required for AI use cases that process personal or customer data, make or materially influence decisions about individuals, operate in regulated domains, or produce external facing content." },
       { id: "c2", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-3.5", rank: 2, relevanceScore: 0.68, usedInAnswer: false, citationMatched: false, freshnessStatus: "Stale", text: "Use cases not listed must still complete a lightweight risk screening; they are not automatically approved." },
     ],
     claimVerifications: [
       { id: "cl1", claim: "Use cases involving customer data require governance review.", supportStatus: "Supported", confidence: 0.9, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-3.2", evidenceSnippet: "Governance review is required for AI use cases that process personal or customer data..." },
-      { id: "cl2", claim: "All other use cases are pre-approved.", supportStatus: "Contradicted", confidence: 0.85, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-3.5", evidenceSnippet: "Use cases not listed must still complete a lightweight risk screening; they are not automatically approved.", reviewerNote: "Overgeneralization. The standard requires screening even for unlisted use cases." },
+      { id: "cl2", claim: "All other use cases are pre approved.", supportStatus: "Contradicted", confidence: 0.85, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-3.5", evidenceSnippet: "Use cases not listed must still complete a lightweight risk screening; they are not automatically approved.", reviewerNote: "Overgeneralization. The standard requires screening even for unlisted use cases." },
     ],
     scores: scores({ contextRelevance: 80, retrievalCompleteness: 72, faithfulness: 68, completeness: 70, citationAccuracy: 66, claimSupport: 50, hallucinationRisk: 20, complianceRisk: 48 }),
     failureReasons: ["Prompt overgeneralization", "Stale source", "Unsupported claim"],
     humanReviewRequired: true,
     evaluationStatus: "Failed",
-    timeline: timeline(2450, { 5: { status: "Warning", notes: "Model added an unsupported generalization." }, 7: { status: "Failed", notes: "Contradiction on pre-approval scope." } }),
+    timeline: timeline(2450, { 5: { status: "Warning", notes: "Model added an unsupported generalization." }, 7: { status: "Failed", notes: "Contradiction on pre approval scope." } }),
   },
   {
     id: "trace-07",
@@ -257,14 +257,14 @@ export const queryTraces: QueryTrace[] = [
     riskLevel: "Medium",
     expectedSource: "Customer Escalation Playbook v5.0",
     generatedAnswer:
-      "A critical (Sev-1) customer issue is escalated immediately to the on-call duty manager and the account executive, with an initial response committed within 30 minutes and hourly updates thereafter.",
+      "A critical (Sev-1) customer issue is escalated immediately to the on call duty manager and the account executive, with an initial response committed within 30 minutes and hourly updates thereafter.",
     expectedAnswer:
-      "Sev-1 issues escalate immediately to the on-call duty manager and account executive; initial response is within 30 minutes with hourly status updates until resolution (Customer Escalation Playbook v5.0).",
+      "Sev-1 issues escalate immediately to the on call duty manager and account executive; initial response is within 30 minutes with hourly status updates until resolution (Customer Escalation Playbook v5.0).",
     retrievedChunks: [
-      { id: "c1", sourceDocument: "Customer Escalation Playbook", documentVersion: "v5.0", chunkId: "ESC-1.3", rank: 1, relevanceScore: 0.92, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Severity-1 issues are escalated immediately to the on-call duty manager and the account executive. Initial response is committed within 30 minutes, with hourly updates until resolution." },
+      { id: "c1", sourceDocument: "Customer Escalation Playbook", documentVersion: "v5.0", chunkId: "ESC-1.3", rank: 1, relevanceScore: 0.92, usedInAnswer: true, citationMatched: true, freshnessStatus: "Current", text: "Severity-1 issues are escalated immediately to the on call duty manager and the account executive. Initial response is committed within 30 minutes, with hourly updates until resolution." },
     ],
     claimVerifications: [
-      { id: "cl1", claim: "Sev-1 issues escalate to the on-call duty manager and account executive.", supportStatus: "Supported", confidence: 0.95, sourceDocument: "Customer Escalation Playbook v5.0", citationId: "ESC-1.3", evidenceSnippet: "escalated immediately to the on-call duty manager and the account executive" },
+      { id: "cl1", claim: "Sev-1 issues escalate to the on call duty manager and account executive.", supportStatus: "Supported", confidence: 0.95, sourceDocument: "Customer Escalation Playbook v5.0", citationId: "ESC-1.3", evidenceSnippet: "escalated immediately to the on call duty manager and the account executive" },
       { id: "cl2", claim: "Initial response is committed within 30 minutes.", supportStatus: "Supported", confidence: 0.93, sourceDocument: "Customer Escalation Playbook v5.0", citationId: "ESC-1.3", evidenceSnippet: "Initial response is committed within 30 minutes, with hourly updates until resolution." },
     ],
     scores: scores({ contextRelevance: 92, retrievalCompleteness: 90, faithfulness: 93, completeness: 91, citationAccuracy: 94, claimSupport: 96, hallucinationRisk: 4 }),
@@ -325,7 +325,7 @@ export const queryTraces: QueryTrace[] = [
     failureReasons: ["Incorrect citation", "Partial context"],
     humanReviewRequired: false,
     evaluationStatus: "Needs Review",
-    timeline: timeline(2400, { 6: { status: "Warning", notes: "Citation mapped to a topically related but non-supporting span." } }),
+    timeline: timeline(2400, { 6: { status: "Warning", notes: "Citation mapped to a topically related but non supporting span." } }),
   },
   {
     id: "trace-11",
@@ -359,7 +359,7 @@ export const queryTraces: QueryTrace[] = [
     originalQuery: "reimbursement without receipt allowed",
     rewrittenQuery: "is expense reimbursement allowed without a receipt and under what limit",
     category: "Finance Policy",
-    queryType: "Low-risk FAQ",
+    queryType: "Low risk FAQ",
     riskLevel: "Low",
     expectedSource: "Global Expense Reimbursement Guide v2.8",
     generatedAnswer:
@@ -383,7 +383,7 @@ export const queryTraces: QueryTrace[] = [
     id: "trace-13",
     question: "What is the policy for using external AI tools with customer data?",
     originalQuery: "external AI tools customer data policy",
-    rewrittenQuery: "policy on using third-party external AI tools with customer or personal data",
+    rewrittenQuery: "policy on using third party external AI tools with customer or personal data",
     category: "Compliance",
     queryType: "High risk policy",
     riskLevel: "Critical",
@@ -393,16 +393,16 @@ export const queryTraces: QueryTrace[] = [
     expectedAnswer:
       "Customer or personal data may not be sent to external AI tools unless the tool is on the approved list, covered by a data processing agreement, and the use case has passed governance review (AI Usage Governance Standard v1.3). A DPA alone is insufficient.",
     retrievedChunks: [
-      { id: "c1", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-5.1", rank: 1, relevanceScore: 0.83, usedInAnswer: true, citationMatched: false, freshnessStatus: "Stale", text: "Customer or personal data may only be processed by external AI tools that appear on the approved tools list, are covered by a data processing agreement, and support an approved, governance-reviewed use case." },
+      { id: "c1", sourceDocument: "AI Usage Governance Standard", documentVersion: "v1.3", chunkId: "AIG-5.1", rank: 1, relevanceScore: 0.83, usedInAnswer: true, citationMatched: false, freshnessStatus: "Stale", text: "Customer or personal data may only be processed by external AI tools that appear on the approved tools list, are covered by a data processing agreement, and support an approved, governance reviewed use case." },
     ],
     claimVerifications: [
-      { id: "cl1", claim: "Customer data may be used with external AI tools if a DPA is signed.", supportStatus: "Unsupported", confidence: 0.82, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-5.1", evidenceSnippet: "may only be processed by external AI tools that appear on the approved tools list, are covered by a data processing agreement, and support an approved, governance-reviewed use case.", reviewerNote: "Answer reduces three required conditions to one (DPA). Dangerous oversimplification of a critical control." },
+      { id: "cl1", claim: "Customer data may be used with external AI tools if a DPA is signed.", supportStatus: "Unsupported", confidence: 0.82, sourceDocument: "AI Usage Governance Standard v1.3", citationId: "AIG-5.1", evidenceSnippet: "may only be processed by external AI tools that appear on the approved tools list, are covered by a data processing agreement, and support an approved, governance reviewed use case.", reviewerNote: "Answer reduces three required conditions to one (DPA). Dangerous oversimplification of a critical control." },
     ],
     scores: scores({ contextRelevance: 80, retrievalCompleteness: 70, faithfulness: 52, completeness: 58, citationAccuracy: 44, claimSupport: 0, hallucinationRisk: 30, complianceRisk: 68 }),
     failureReasons: ["Unsupported claim", "Stale source", "Prompt overgeneralization", "Human review required"],
     humanReviewRequired: true,
     evaluationStatus: "Failed",
-    timeline: timeline(2500, { 5: { status: "Warning", notes: "Model dropped two of three required conditions." }, 7: { status: "Failed", notes: "Unsupported claim on critical data-handling control." } }),
+    timeline: timeline(2500, { 5: { status: "Warning", notes: "Model dropped two of three required conditions." }, 7: { status: "Failed", notes: "Unsupported claim on critical data handling control." } }),
   },
   {
     id: "trace-14",

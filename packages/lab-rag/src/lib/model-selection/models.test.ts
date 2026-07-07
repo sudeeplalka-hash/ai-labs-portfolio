@@ -21,7 +21,7 @@ describe("model-selection scoring", () => {
   it("favors a self-hosted/open option for a sovereign scenario", () => {
     const ranked = rankModels(byId("sovereign"));
     expect(ranked[0].model.openWeights).toBe(true);
-    expect(ranked[0].model.deployment).toContain("Self-hosted");
+    expect(ranked[0].model.deployment).toContain("Self hosted");
   });
 
   it("shifts the winner when the scenario changes", () => {

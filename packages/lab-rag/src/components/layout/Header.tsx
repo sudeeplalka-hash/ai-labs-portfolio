@@ -8,7 +8,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   "/overview": { title: "Executive Overview", subtitle: "RAG health, production readiness, and release recommendation at a glance." },
   "/live-rag-lab": { title: "Live RAG Evaluator Lab", subtitle: "Upload a document, ask questions, and watch the evaluator score the answer live." },
   "/evaluations": { title: "Evaluation Runs", subtitle: "Compare model, retriever, and prompt versions and detect regressions." },
-  "/traces": { title: "Query Trace Explorer", subtitle: "Inspect retrieval, generation, citations, and claim-level verification." },
+  "/traces": { title: "Query Trace Explorer", subtitle: "Inspect retrieval, generation, citations, and claim level verification." },
   "/dataset": { title: "Golden Dataset", subtitle: "The evaluation test suite across domains, difficulty, and risk." },
   "/failures": { title: "Failure Analysis", subtitle: "Turn failure patterns into root causes and recommended fixes." },
   "/retrieval": { title: "Retrieval Quality", subtitle: "Precision, recall, ranking quality, and strategy experiments." },

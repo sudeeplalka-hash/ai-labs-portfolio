@@ -10,7 +10,7 @@ export type Role = 'analyst' | 'reviewer' | 'auditor' | 'admin';
 
 export const ROLES: { id: Role; label: string; blurb: string }[] = [
   { id: 'admin', label: 'Administrator', blurb: 'Full access across all functions.' },
-  { id: 'analyst', label: 'AI Analyst', blurb: 'Registers use cases and runs the Playground; read-only on governance.' },
+  { id: 'analyst', label: 'AI Analyst', blurb: 'Registers use cases and runs the Playground; read only on governance.' },
   { id: 'reviewer', label: 'Governance Reviewer', blurb: 'Actions the Human Review Queue (approve / reject / escalate).' },
   { id: 'auditor', label: 'Risk & Audit', blurb: 'Verifies the audit chain and generates evidence; cannot alter reviews.' },
 ];

@@ -11,7 +11,7 @@ export const evaluationRuns: EvaluationRun[] = [
     retrieverStrategy: "Semantic (dense) only",
     rerankerEnabled: false,
     promptVersion: "prompt-v1",
-    datasetVersion: "golden-v1 (38 cases)",
+    datasetVersion: "golden v1 (38 cases)",
     testCaseCount: 38,
     metrics: {
       overallScore: 64,
@@ -28,7 +28,7 @@ export const evaluationRuns: EvaluationRun[] = [
     },
     regressionStatus: "No Regression",
     releaseRecommendation: "Block",
-    notes: "Baseline. Weak retrieval on multi-hop queries and high hallucination risk on policy questions.",
+    notes: "Baseline. Weak retrieval on multi hop queries and high hallucination risk on policy questions.",
   },
   {
     id: "run-v2",
@@ -39,7 +39,7 @@ export const evaluationRuns: EvaluationRun[] = [
     retrieverStrategy: "Semantic + query rewriting",
     rerankerEnabled: false,
     promptVersion: "prompt-v2",
-    datasetVersion: "golden-v2 (44 cases)",
+    datasetVersion: "golden v2 (44 cases)",
     testCaseCount: 44,
     metrics: {
       overallScore: 69,
@@ -56,7 +56,7 @@ export const evaluationRuns: EvaluationRun[] = [
     },
     regressionStatus: "No Regression",
     releaseRecommendation: "Hold",
-    notes: "Query rewriting improved ambiguous and multi-hop questions. Citations still unreliable.",
+    notes: "Query rewriting improved ambiguous and multi hop questions. Citations still unreliable.",
   },
   {
     id: "run-v3",
@@ -67,7 +67,7 @@ export const evaluationRuns: EvaluationRun[] = [
     retrieverStrategy: "Hybrid (dense + BM25)",
     rerankerEnabled: false,
     promptVersion: "prompt-v2",
-    datasetVersion: "golden-v3 (48 cases)",
+    datasetVersion: "golden v3 (48 cases)",
     testCaseCount: 48,
     metrics: {
       overallScore: 73,
@@ -84,7 +84,7 @@ export const evaluationRuns: EvaluationRun[] = [
     },
     regressionStatus: "No Regression",
     releaseRecommendation: "Hold",
-    notes: "Hybrid search materially improved retrieval quality and recall on keyword-heavy policy lookups.",
+    notes: "Hybrid search materially improved retrieval quality and recall on keyword heavy policy lookups.",
   },
   {
     id: "run-v4",
@@ -92,10 +92,10 @@ export const evaluationRuns: EvaluationRun[] = [
     runDate: "2026-04-11",
     modelVersion: "gpt-class-4o",
     embeddingModel: "text-embed-3-large",
-    retrieverStrategy: "Hybrid + cross-encoder reranker",
+    retrieverStrategy: "Hybrid + cross encoder reranker",
     rerankerEnabled: true,
     promptVersion: "prompt-v3",
-    datasetVersion: "golden-v3 (48 cases)",
+    datasetVersion: "golden v3 (48 cases)",
     testCaseCount: 48,
     metrics: {
       overallScore: 76,
@@ -122,8 +122,8 @@ export const evaluationRuns: EvaluationRun[] = [
     embeddingModel: "text-embed-3-large",
     retrieverStrategy: "Hybrid + reranker",
     rerankerEnabled: true,
-    promptVersion: "prompt-v4 (citation-grounded)",
-    datasetVersion: "golden-v4 (50 cases)",
+    promptVersion: "prompt v4 (citation grounded)",
+    datasetVersion: "golden v4 (50 cases)",
     testCaseCount: 50,
     metrics: {
       overallScore: 76,
@@ -151,8 +151,8 @@ export const evaluationRuns: EvaluationRun[] = [
     embeddingModel: "text-embed-3-large",
     retrieverStrategy: "Hybrid + reranker + metadata filter",
     rerankerEnabled: true,
-    promptVersion: "prompt-v5 (guardrail + escalation)",
-    datasetVersion: "golden-v4 (50 cases)",
+    promptVersion: "prompt v5 (guardrail + escalation)",
+    datasetVersion: "golden v4 (50 cases)",
     testCaseCount: 50,
     metrics: {
       overallScore: 78,

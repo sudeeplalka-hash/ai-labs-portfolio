@@ -16,7 +16,7 @@ export default function Page() {
         { icon: GitBranch, title: "Subtract the leaks", body: "Take out what's lost to low adoption, imperfect answer quality, run cost, and a risk discount.", why: "Gross value is fantasy, the leaks are where the real return lands, and they're visible in the Value River." },
         { icon: Banknote, title: "Trace every number", body: "Each input is inherited from an upstream lab: readiness from Data, quality from Build, run cost from AI Ops, risk tier from Govern.", why: "A business case you can defend is one where every figure has a source, not a guess." },
         { icon: SlidersHorizontal, title: "Test the assumptions", body: "Override adoption, answer quality, minutes saved, or investment and watch the sensitivity bars react.", why: "Know which lever moves ROI the most before you commit a budget to it." },
-        { icon: TrendingUp, title: "Read the verdict", body: "Risk adjusted value per year, ROI, payback period, and three-year NPV.", why: "This is the single read on whether the initiative is worth funding." },
+        { icon: TrendingUp, title: "Read the verdict", body: "Risk adjusted value per year, ROI, payback period, and three year NPV.", why: "This is the single read on whether the initiative is worth funding." },
         { icon: FileText, title: "The initiative dossier", body: "The whole program on one page, every number linked to the stage it came from, ready to hand a stakeholder.", why: "It's the artifact that turns analysis into an actual decision." },
       ]}
       closing="Realize answers the only question that ultimately matters: is it worth it?"

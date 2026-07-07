@@ -1,8 +1,8 @@
 "use client";
 
 // EL-06 · Talent & Upskilling Pathway Planner (Collection 4 · control room).
-// Team coverage vs the agentic-era target per capability → gap heatmap → build /
-// hire / partner per gap with a time-to-ready. The stack went agentic in 18 months;
+// Team coverage vs the agentic era target per capability → gap heatmap → build /
+// hire / partner per gap with a time to ready. The stack went agentic in 18 months;
 // teams take 24. Start the people plan before the platform plan. SIMULATED.
 
 import { useState } from "react";
@@ -68,21 +68,21 @@ export function TalentPlanner() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Talent &amp; Upskilling Pathway Planner</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Talent and Upskilling Pathway Planner</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? activeUc.oneLiner : "The capabilities that ran the last stack aren't the ones the agentic stack needs."} Map the gap, then choose
-            how to close each one, build is cheap but slow, hire is permanent but pricey, partner is fast but rented.
+            {activeUc ? activeUc.oneLiner : "AI platforms can evolve faster than enterprise teams. This artifact compares current capability coverage against target needs and maps the pathway to readiness."} Build is cheap but slow, hire is
+            permanent but pricey, and partner is fast but rented.
           </p>
         </div>
 
         <UseCaseRail useCases={EL06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="How do we get the team to agentic-era skills in time?" approach="Assess the skill gap per role and lay out a build, hire, or partner pathway with a time-to-productive for each." why="Capability is a pathway with a timeline, not a one-off training event." metric="Skill gap per role; time-to-productive per pathway." tradeoff="Building is slow but sticky; hiring is fast but costly; partnering is quick but external." outcome="The build/hire/partner pathway per role, with time-to-productive." />
+        <CaseStudy problem="Agentic and enterprise AI work requires new combinations of context engineering, orchestration, evaluation, LLMOps, governance, and domain translation. Training alone does not close every gap, and some gaps require hiring or partnership." approach="The planner assesses current and target capability coverage, exposes gaps, and models build, hire, or partner pathways with time to ready implications." why="This connects AI strategy to workforce planning, capability maturity, delivery risk, budget, and operating model change." metric="Skill gap per role; time to productive per pathway." tradeoff="Building is slow but sticky; hiring is fast but costly; partnering is quick but external." outcome="The build/hire/partner pathway per role, with time to productive." />
 
         <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Readiness now" value={`${readyNow}%`} tone={readyNow >= 70 ? "watch" : "risk"} interpretation="Avg coverage vs target" />
@@ -140,23 +140,23 @@ export function TalentPlanner() {
         <div className="mt-6">
           <InsightCard title={openGaps > 0 ? `${openGaps} capability gaps have no plan` : teamMonths !== null && teamMonths <= stackMonths ? "Team keeps pace with the stack" : "Plan set, but slower than the stack"} tone={openGaps > 0 ? "danger" : teamMonths !== null && teamMonths <= stackMonths ? "success" : "warn"}>
             {openGaps > 0
-              ? <>Orchestration and eval are the widest gaps and the newest skills, build-only there takes eight months. Mix in partner for speed on the critical path and build for what must live in-house.</>
+              ? <>Orchestration and eval are the widest gaps and the newest skills, build only there takes eight months. Mix in partner for speed on the critical path and build for what must live in house.</>
               : <>Partner buys speed where you can&apos;t wait; build owns what becomes your edge. The mix, not the method, is the plan.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="For each role, pick the build/hire/partner path that reaches productive capability by the need-by date." lift="The team reaches agentic-era capability on a defensible timeline, not on hope." measure="Skills assessed pre/post; time-to-productive vs plan; roles still gapped at the milestone." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The stack went agentic in 18 months. Teams take 24. Start the people plan before the platform plan."}</p>
+          <OutcomeFrame call="Build, hire, or partner for each capability gap based on urgency, permanence, and cost." lift="Aligns team readiness with the pace of the AI platform roadmap." measure="Capability coverage, time to ready, open gaps, pathway cost, productive capacity." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The AI stack may change in 18 months. Teams often take longer. Start the people plan before the platform plan becomes urgent."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, team capability building across delivery portfolios.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Each capability has current coverage vs an agentic-era target; gap = target − current. A pathway (build 8mo / hire 4mo / partner 2mo) closes it; team time-to-ready = the slowest chosen pathway, compared against the {stackMonths}-month stack shift.</p>
+              <p>Each capability has current coverage vs an agentic era target; gap = target − current. A pathway (build 8mo / hire 4mo / partner 2mo) closes it; team time to ready = the slowest chosen pathway, compared against the {stackMonths}-month stack shift.</p>
               <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> coverage scores and pathway durations are illustrative; real plans weigh individual aptitude and market supply. It frames the build/hire/partner mix and its timeline, not an L&amp;D program.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled capability planner. Real workforce planning would require role inventory, skills assessment, hiring market data, vendor strategy, budget, and manager validation.</p>
         </div>
       </main>
     </div>

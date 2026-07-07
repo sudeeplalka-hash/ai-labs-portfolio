@@ -27,14 +27,14 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
     industry: "healthcare",
     provenance: studied,
     title: "Wrap an EHR (FHIR R4) for a care agent",
-    oneLiner: "Read clinical data freely; propose orders, never auto-write.",
+    oneLiner: "Read clinical data freely; propose orders, never auto write.",
     context:
-      "A care-coordination agent needs an EHR. The MCP server exposes read tools over encounters, labs, and meds, but the only mutation is a propose_order that returns pending clinician approval, PHI stays behind the server and nothing writes to the chart autonomously.",
+      "A care coordination agent needs an EHR. The MCP server exposes read tools over encounters, labs, and meds, but the only mutation is a propose_order that returns pending clinician approval, PHI stays behind the server and nothing writes to the chart autonomously.",
     theDecision:
-      "The design decision is which resources to expose and where the write-approval boundary sits: reads are broad, the single write is a proposal a human ratifies.",
+      "The design decision is which resources to expose and where the write approval boundary sits: reads are broad, the single write is a proposal a human ratifies.",
     whatMostMiss:
-      "Teams expose a write_order tool 'for convenience' and quietly hand an agent chart-write authority. The boundary is the whole safety design, not a feature flag.",
-    stakes: "An autonomous chart write is a patient-safety and liability event; a proposal queued for a clinician is not.",
+      "Teams expose a write_order tool 'for convenience' and quietly hand an agent chart write authority. The boundary is the whole safety design, not a feature flag.",
+    stakes: "An autonomous chart write is a patient safety and liability event; a proposal queued for a clinician is not.",
     takeaway: "Expose reads broadly; make every write a proposal a human ratifies.",
     sources: [
       "HL7 FHIR R4 resource model (encounters, observations, medications)",
@@ -43,7 +43,7 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
     lastVerified: "2026-07-03",
     payload: {
       label: "EHR (FHIR R4)",
-      blurb: "Hospital record, read clinical data; propose orders, never auto-write.",
+      blurb: "Hospital record, read clinical data; propose orders, never auto write.",
       tools: [
         {
           name: "get_encounter",
@@ -77,15 +77,15 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
     industry: "retail",
     provenance: studied,
     title: "Order management + returns as tools",
-    oneLiner: "Mutations are idempotent and rate-limited so a retrying agent can't double-refund.",
+    oneLiner: "Mutations are idempotent and rate limited so a retrying agent can't double refund.",
     context:
-      "An order-management system is exposed to a service agent. Reads are open; the one mutation, cancel_order, requires an idempotency key and is rate-limited, so a retrying or looping agent can't issue two refunds for one order.",
+      "An order management system is exposed to a service agent. Reads are open; the one mutation, cancel_order, requires an idempotency key and is rate limited, so a retrying or looping agent can't issue two refunds for one order.",
     theDecision:
-      "Which mutations need idempotency keys and human confirmation: any money-moving or irreversible action gets an idempotency key so retries are safe.",
+      "Which mutations need idempotency keys and human confirmation: any money moving or irreversible action gets an idempotency key so retries are safe.",
     whatMostMiss:
       "Everyone tests the happy path. The failure that matters is the agent that retries on a timeout, without idempotency that's a double refund, and it's the server's job to prevent it.",
-    stakes: "A double-refund bug at scale is direct margin loss and a reconciliation nightmare.",
-    takeaway: "Any money-moving mutation gets an idempotency key, retries must be safe by design.",
+    stakes: "A double refund bug at scale is direct margin loss and a reconciliation nightmare.",
+    takeaway: "Any money moving mutation gets an idempotency key, retries must be safe by design.",
     sources: [
       "Order-management / payments API idempotency patterns",
       "Agent retry / at-least-once delivery failure modes",
@@ -93,7 +93,7 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
     lastVerified: "2026-07-03",
     payload: {
       label: "Order Management API",
-      blurb: "OMS + returns, mutations are idempotent and rate-limited.",
+      blurb: "OMS + returns, mutations are idempotent and rate limited.",
       tools: [
         {
           name: "get_order",
@@ -108,7 +108,7 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
             { name: "order_id", type: "string", required: true, example: "ORD-55210" },
             { name: "idempotency_key", type: "string", required: true, example: "idem-7f3a91" },
           ],
-          result: (a) => ({ order_id: a.order_id, status: "cancelled", idempotency_key: a.idempotency_key, note: "idempotent, a retry with the same key is a no-op" }),
+          result: (a) => ({ order_id: a.order_id, status: "cancelled", idempotency_key: a.idempotency_key, note: "idempotent, a retry with the same key is a no op" }),
         },
       ],
       resources: [
@@ -125,15 +125,15 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
     labId: "GAP-01",
     industry: "manufacturing",
     provenance: studied,
-    title: "MES / historian, read-only across OT/IT",
-    oneLiner: "Everything is read-only, the agent can observe the plant, never actuate it.",
+    title: "MES / historian, read only across OT/IT",
+    oneLiner: "Everything is read only, the agent can observe the plant, never actuate it.",
     context:
-      "A plant-ops copilot sits on the IT side of the OT/IT boundary. The MES/historian server exposes only read tools, machine status, OEE, tag history. There is no write tool at all, so nothing the agent does can actuate equipment.",
+      "A plant ops copilot sits on the IT side of the OT/IT boundary. The MES/historian server exposes only read tools, machine status, OEE, tag history. There is no write tool at all, so nothing the agent does can actuate equipment.",
     theDecision:
-      "Read-only resource design is the OT safety guarantee: the absence of any write tool, not a permission setting, is what makes the copilot safe on the plant floor.",
+      "Read only resource design is the OT safety guarantee: the absence of any write tool, not a permission setting, is what makes the copilot safe on the plant floor.",
     whatMostMiss:
       "People add a 'set_setpoint' tool behind an approval and think they're safe. On OT the guarantee people trust is the one that's structurally impossible, no write tool exists.",
-    stakes: "A single actuation path from an IT-side agent onto OT equipment is a safety-of-life risk, not an incident ticket.",
+    stakes: "A single actuation path from an IT side agent onto OT equipment is a safety of life risk, not an incident ticket.",
     takeaway: "On the OT boundary, safety is a manifest with no write tools, structural, not configured.",
     sources: [
       "OT/IT segmentation (Purdue model) and read-only integration patterns",
@@ -141,18 +141,18 @@ export const GAP01_USE_CASES: UseCase<Gap01Payload>[] = assertUseCases<Gap01Payl
     ],
     lastVerified: "2026-07-03",
     payload: {
-      label: "MES / Historian (read-only)",
-      blurb: "Plant systems exposed READ-ONLY across the OT/IT line, no write tools exist.",
+      label: "MES / Historian (read only)",
+      blurb: "Plant systems exposed READ ONLY across the OT/IT line, no write tools exist.",
       tools: [
         {
           name: "get_machine_status",
-          description: "Read a machine's current state and OEE (read-only).",
+          description: "Read a machine's current state and OEE (read only).",
           args: [{ name: "machine_id", type: "string", required: true, example: "MC-0417" }],
           result: (a) => ({ machine_id: a.machine_id, state: "running", oee: 0.82, alarms: 0 }),
         },
         {
           name: "get_oee",
-          description: "Read line-level OEE and its components (read-only).",
+          description: "Read line level OEE and its components (read only).",
           args: [{ name: "line_id", type: "string", required: true, example: "LINE-3" }],
           result: (a) => ({ line_id: a.line_id, oee: 0.79, availability: 0.9, performance: 0.94, quality: 0.93 }),
         },

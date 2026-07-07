@@ -86,7 +86,7 @@ export default function BusinessCase() {
           <Slider label="Live AI use cases" value={useCases} set={setUseCases} min={1} max={50} step={1} fmt={(n) => `${n}`} />
           <Slider label="Prompts / use case / day" value={promptsPerDay} set={setPromptsPerDay} min={50} max={5000} step={50} fmt={compact} />
           <Slider label="Share that are risky" value={riskyPct} set={setRiskyPct} min={1} max={30} step={1} fmt={(n) => `${n}%`} />
-          <Slider label="Auto-containment rate" value={containment} set={setContainment} min={40} max={95} step={1} fmt={(n) => `${n}%`} />
+          <Slider label="Auto containment rate" value={containment} set={setContainment} min={40} max={95} step={1} fmt={(n) => `${n}%`} />
           <Slider label="Analyst cost / hour" value={analystCost} set={setAnalystCost} min={40} max={200} step={5} fmt={usd} />
           <Slider label="Manual review time / item" value={minutesPerReview} set={setMinutesPerReview} min={5} max={60} step={1} fmt={(n) => `${n} min`} />
           <Slider label="Weeks saved to safe launch" value={weeksSaved} set={setWeeksSaved} min={0} max={26} step={1} fmt={(n) => `${n}`} />
@@ -97,7 +97,7 @@ export default function BusinessCase() {
           <p className="text-xs text-slate-500">{compact(riskyMonthly)} risky interactions / month, of which {containPct}% are contained automatically.</p>
           <div className="space-y-3 pt-1">
             <div>
-              <div className="flex justify-between text-xs mb-1"><span className="text-emerald-700">Auto-contained</span><span className="font-semibold">{compact(containedMonthly)}/mo</span></div>
+              <div className="flex justify-between text-xs mb-1"><span className="text-emerald-700">Auto contained</span><span className="font-semibold">{compact(containedMonthly)}/mo</span></div>
               <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden"><div className="h-2.5 bg-emerald-500" style={{ width: `${containPct}%` }} /></div>
             </div>
             <div>

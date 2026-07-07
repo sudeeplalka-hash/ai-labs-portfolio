@@ -1,7 +1,7 @@
 // ============================================================================
 // Inbound handoff from the AI Program Command Center (Strategy & Framing lab).
-// Reads the framed initiative from a `?initiative=` URL payload (cross-origin /
-// cross dev-port) or from same-origin localStorage `apcc_state`. Additive only:
+// Reads the framed initiative from a `?initiative=` URL payload (cross origin /
+// cross dev port) or from same origin localStorage `apcc_state`. Additive only:
 // nothing here mutates this lab's own state.
 // ============================================================================
 export interface FramingHandoff {

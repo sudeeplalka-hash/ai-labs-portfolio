@@ -127,7 +127,7 @@ export function LiveLabView() {
     const chunkMs = Math.max(8, Math.round(performance.now() - t0));
     await sleep(210);
     setChunks(created);
-    updateStep(2, { status: "Complete", durationMs: chunkMs, explanation: `Split into ${created.length} chunks.`, technicalDetail: "Sentence-aware chunking, 700-char target, 120 overlap." });
+    updateStep(2, { status: "Complete", durationMs: chunkMs, explanation: `Split into ${created.length} chunks.`, technicalDetail: "Sentence aware chunking, 700 char target, 120 overlap." });
 
     updateStep(3, { status: "Running" });
     await sleep(150);

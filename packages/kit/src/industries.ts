@@ -42,7 +42,7 @@ export const INDUSTRIES: Record<IndustryKey, IndustryMeta> = {
   consulting: { label: "Consulting & prof. services", emoji: "🧑‍💼", accent: "#4f46e5" },
   healthcare: { label: "Healthcare", emoji: "🏥", accent: "#e11d6f" },
   manufacturing: { label: "Manufacturing", emoji: "🏭", accent: "#b45309" },
-  retail: { label: "Retail & e-commerce", emoji: "🛒", accent: "#ea580c" },
+  retail: { label: "Retail & e commerce", emoji: "🛒", accent: "#ea580c" },
   insurance: { label: "Insurance", emoji: "🛡️", accent: "#0369a1" },
   pharma: { label: "Pharma & life sciences", emoji: "🧬", accent: "#059669" },
   legal: { label: "Legal", emoji: "⚖️", accent: "#525252" },

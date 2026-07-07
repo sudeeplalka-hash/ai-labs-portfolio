@@ -56,15 +56,15 @@ export function deriveAdoptionPlan(inp: AdoptionPlanInputs): AdoptionInterventio
     },
     {
       id: "training",
-      label: "Role-based training + office hours",
-      detail: "Short, task-specific sessions (\"how to get your answer in 30 seconds\") beat generic demos. Weekly office hours catch the long tail.",
+      label: "Role based training + office hours",
+      detail: "Short, task specific sessions (\"how to get your answer in 30 seconds\") beat generic demos. Weekly office hours catch the long tail.",
       upliftPts: 5, owner: "Enablement / L&D", horizon: "launch",
       recommended: internal,
     },
     {
       id: "feedback",
       label: "Feedback button with a visible fix loop",
-      detail: "One-tap feedback, and, critically, visible fixes (\"you flagged it, we fixed it\"). Nothing builds usage like being heard.",
+      detail: "One tap feedback, and, critically, visible fixes (\"you flagged it, we fixed it\"). Nothing builds usage like being heard.",
       upliftPts: 4, owner: "AI Ops", horizon: "first 90 days",
       recommended: true,
     },

@@ -197,7 +197,7 @@ export function CorpusView() {
 
         {report && (
           <Panel>
-            <SectionHeader title="Compliance profile" description="Re-scores the whole corpus" icon={SlidersHorizontal} />
+            <SectionHeader title="Compliance profile" description="Re scores the whole corpus" icon={SlidersHorizontal} />
             <RuleProfileSelector value={profileId} onChange={changeProfile} />
             <p className="mt-2 font-mono text-[11px] text-slatey-400">Active: {getProfile(profileId).name}</p>
           </Panel>
@@ -220,7 +220,7 @@ export function CorpusView() {
               </Panel>
 
               <Panel>
-                <SectionHeader title="Conflicts & duplicates" description="Cross-file issues that single-file checks can't catch" icon={Copy} />
+                <SectionHeader title="Conflicts & duplicates" description="Cross file issues that single file checks can't catch" icon={Copy} />
                 {report.pairs.length === 0 ? (
                   <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3 text-sm text-emerald-700">
                     No duplicate or conflicting documents detected across the corpus.

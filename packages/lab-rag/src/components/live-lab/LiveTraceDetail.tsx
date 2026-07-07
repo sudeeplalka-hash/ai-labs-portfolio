@@ -34,7 +34,7 @@ export function LiveTraceDetail({ trace }: { trace: LiveRagLabTrace }) {
           <div className="rounded-lg border border-slate-100 bg-navy-850/50 p-3">
             <p className="mb-1 flex items-center gap-1.5 stat-label"><Target className="h-3 w-3" /> Latency & cost</p>
             <div className="grid grid-cols-2 gap-2">
-              <div><p className="text-lg font-semibold text-ink">{trace.latencyMs}ms</p><p className="text-[11px] text-slatey-500">end-to-end</p></div>
+              <div><p className="text-lg font-semibold text-ink">{trace.latencyMs}ms</p><p className="text-[11px] text-slatey-500">end to end</p></div>
               <div><p className="text-lg font-semibold text-ink">${trace.estimatedCost.toFixed(5)}</p><p className="text-[11px] text-slatey-500">estimated cost</p></div>
             </div>
           </div>

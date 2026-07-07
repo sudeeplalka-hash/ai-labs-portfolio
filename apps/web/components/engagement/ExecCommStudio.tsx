@@ -1,8 +1,8 @@
 "use client";
 
-// EL-10 · Executive Communication Studio (Collection 4 · control room).
+// EL-10 · Executive Communication Decision Studio (Collection 4 · control room).
 // Consumes EL-04's delivery data (shared portfolioData) and produces a steering
-// pre-read / weekly update / QBR outline, disciplined into Status → Decisions →
+// pre read / weekly update / QBR outline, disciplined into Status → Decisions →
 // Risks & mitigations → Asks, reordered and reframed per audience, with a talk
 // track per section. The senior-EM tell: every artifact forces a decision.
 // SIMULATED; the per-section talk track can be generated LIVE via LIVE_MODEL.
@@ -24,7 +24,7 @@ type AudKey = "cio" | "sponsor" | "procurement";
 
 const ARTIFACTS: { key: ArtKey; label: string; blurb: string; sections: string[] }[] = [
   { key: "weekly", label: "Weekly leadership update", blurb: "Tight status + the asks", sections: ["status", "decisions", "risks", "asks"] },
-  { key: "steering", label: "Steering pre-read", blurb: "Decisions to make in the room", sections: ["status", "decisions", "risks", "asks"] },
+  { key: "steering", label: "Steering pre read", blurb: "Decisions to make in the room", sections: ["status", "decisions", "risks", "asks"] },
   { key: "qbr", label: "QBR outline", blurb: "Quarter in review + forward asks", sections: ["status", "outcomes", "decisions", "risks", "asks"] },
 ];
 
@@ -196,21 +196,21 @@ export function ExecCommStudio() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Executive Communication Studio</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Executive Communication Decision Studio</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The same delivery data, turned into the artifact the moment needs, and reframed for who&apos;s in the room.
-            Juniors report status; seniors force decisions. Every draft here ends in an <span className="font-semibold text-ink">ask</span>.
+            Executive communication should not only report status. It should clarify what changed, what decision is needed,
+            what risk is being managed, and what action is being requested. Every draft here ends in an <span className="font-semibold text-ink">ask</span>.
           </p>
         </div>
 
         <UseCaseRail useCases={EL10_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Does this exec update force a decision, or just report status?" approach="Shape the update around the specific decision to force this week, framed for the audience in the room." why="An update that forces a decision beats one that reports status." metric="Whether a decision is actually asked; audience-fit of the framing." tradeoff="A comfortable status update versus forcing an uncomfortable but necessary decision." outcome="The decision to force this week, framed per audience." />
+        <CaseStudy problem="Different stakeholders need the same delivery facts framed differently. A CIO may need risk and strategic implication, a sponsor may need adoption and value, and procurement may need commercial and vendor exposure." approach="The studio consumes shared delivery data and generates executive artifacts such as weekly updates, steering pre reads, and QBR outlines, each organized around status, decisions, risks, mitigations, and asks." why="This connects delivery communication to decision speed, sponsor confidence, stakeholder alignment, risk escalation, and executive operating rhythm." metric="Whether a decision is actually asked; audience fit of the framing." tradeoff="A comfortable status update versus forcing an uncomfortable but necessary decision." outcome="The decision to force this week, framed per audience." />
 
         {/* Controls */}
         <div className="mb-4 grid gap-3 md:grid-cols-3">
@@ -251,7 +251,7 @@ export function ExecCommStudio() {
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{artifact.label} · {scenario.label}</p>
               <p className="mt-0.5 text-sm text-slatey-400"><span className="font-medium text-ink">For {audience.label}.</span> {audience.frame}</p>
             </div>
-            <ArtifactButton label="Generate the pre-read" onClick={onGenerate} title="Download this pre-read as Markdown" />
+            <ArtifactButton label="Generate the pre read" onClick={onGenerate} title="Download this pre read as Markdown" />
           </div>
           <div className="divide-y divide-line">
             {orderedKeys.map((k) => {
@@ -269,9 +269,9 @@ export function ExecCommStudio() {
 
         {/* Credibility block */}
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Lead the update with the specific decision you need this week, framed for the audience in the room." lift="Decisions get made in the meeting instead of deferred to the next one." measure="Decisions requested vs made per update; cycle time from raise to decision; status-only updates eliminated." />
+          <OutcomeFrame call="Send executive updates that end in decisions, asks, and accountable next steps." lift="Improves leadership alignment by converting delivery data into decision ready communication." measure="Decisions requested, decisions made, risk acceptance, action closure, stakeholder response time." />
           <p className="text-sm leading-relaxed text-ink">
-            <span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "An exec update that contains no decision request is a diary entry. Every pre-read I send asks for something."}
+            <span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "An executive update with no decision request is a diary entry. Every pre read should ask for something."}
           </p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, weekly leadership updates and QBRs across multiple AMEX portfolios.</p>}
 
@@ -281,12 +281,12 @@ export function ExecCommStudio() {
               <p>Stack: Next.js (static) + the shared design system; client side state only.</p>
               <p>Input: the same authored portfolio data EL-04 reads (RAID + trend + adoption + burn), a single source, so this genuinely consumes the delivery instrument rather than restating it.</p>
               <p>Generation: deterministic. Decisions are extracted from each workstream&apos;s ask; risks pull the high severity items and pair each with the mitigation already in motion; the status headline and section order rewrite by audience.</p>
-              <p>The per-section talk track is templated here; a LIVE variant can generate it via LIVE_MODEL without changing the Status → Decisions → Risks → Asks discipline.</p>
+              <p>The per section talk track is templated here; a LIVE variant can generate it via LIVE_MODEL without changing the Status → Decisions → Risks → Asks discipline.</p>
             </div>
           </details>
 
           <p className="text-xs text-slatey-500">
-            <span className="font-semibold text-slatey-400">Limitations:</span> sample data is illustrative, not a live feed; audience reframing changes emphasis and ordering, not the underlying facts. In production this reads from the delivery tracker, adoption telemetry, and the financials.
+            <span className="font-semibold text-slatey-400">Limitations:</span> this artifact uses modeled portfolio data and generated framing. Real executive communication requires current facts, stakeholder context, political judgment, and review by the accountable delivery lead.
           </p>
         </div>
       </main>

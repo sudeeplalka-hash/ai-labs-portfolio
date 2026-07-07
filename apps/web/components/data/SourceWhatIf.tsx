@@ -61,7 +61,7 @@ export function SourceWhatIf() {
 
   return (
     <Panel>
-      <SectionHeader eyebrow="What-if experiment" title="Block a source, feel the wiring" icon={FlaskConical}
+      <SectionHeader eyebrow="What if experiment" title="Block a source, feel the wiring" icon={FlaskConical}
         description="Pick a source from the retrieval corpus and watch the exclusion ripple downstream: rerank drops its evidence, governance opens a finding, and the decision can flip. Nothing is saved, it's a pure simulation over the same engines."
         action={simSource ? <button onClick={() => setSimSource(null)} className="text-xs font-semibold text-primary">clear</button> : null} />
 

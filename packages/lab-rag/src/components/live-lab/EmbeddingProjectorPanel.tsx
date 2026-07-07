@@ -125,7 +125,7 @@ export function EmbeddingProjectorPanel({ chunks, trace }: { chunks: DocumentChu
           <>
             <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full ring-2 ring-ink" /> in your question</span>
             <span className="inline-flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-white ring-1 ring-ink" /> your question</span>
-            <span className="text-slatey-500">Top keywords by frequency · positioned by co-occurrence.</span>
+            <span className="text-slatey-500">Top keywords by frequency · positioned by co occurrence.</span>
           </>
         ) : (
           <>

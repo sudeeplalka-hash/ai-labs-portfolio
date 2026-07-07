@@ -6,7 +6,7 @@ export const GUARDRAIL_LINKS: Record<string, { policy: string; policyName: strin
   financial: { policy: 'financial-advice-escalation', policyName: 'Financial Advice Escalation Policy', evalCat: 'financial' },
   tool_risk: { policy: 'agentic-scope-restriction', policyName: 'Agentic Scope Restriction Policy', evalCat: 'tool_risk' },
   toxicity: { policy: 'toxicity-blocking', policyName: 'Toxicity & Professional Conduct Policy', evalCat: 'hr' },
-  bias: { policy: 'protected-class-nondiscrimination', policyName: 'Protected-Class Anti-Discrimination Policy', evalCat: 'hr' },
+  bias: { policy: 'protected-class-nondiscrimination', policyName: 'Protected Class Anti Discrimination Policy', evalCat: 'hr' },
   unsupported_claims: { policy: 'overconfidence-disclaimer', policyName: 'Overconfidence Disclaimer Policy', evalCat: 'overconfidence' },
   citation: { policy: 'rag-citation-requirement', policyName: 'RAG Citation Requirement Policy', evalCat: 'citation' },
 };

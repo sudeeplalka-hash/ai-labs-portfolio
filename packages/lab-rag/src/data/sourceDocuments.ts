@@ -11,7 +11,7 @@ export const sourceDocuments: SourceDocument[] = [
     freshnessStatus: "Current",
     riskLevel: "Medium",
     description:
-      "Approved travel booking, advance-approval thresholds, and per-diem rules for domestic and international travel.",
+      "Approved travel booking, advance approval thresholds, and per diem rules for domestic and international travel.",
   },
   {
     id: "doc-travel-old",
@@ -35,7 +35,7 @@ export const sourceDocuments: SourceDocument[] = [
     freshnessStatus: "Current",
     riskLevel: "Medium",
     description:
-      "Reimbursable categories, per-diem caps, receipt requirements, and submission deadlines.",
+      "Reimbursable categories, per diem caps, receipt requirements, and submission deadlines.",
   },
   {
     id: "doc-vendor",
@@ -46,7 +46,7 @@ export const sourceDocuments: SourceDocument[] = [
     lastUpdated: "2026-02-11",
     freshnessStatus: "Current",
     riskLevel: "Medium",
-    description: "Due-diligence, security review, and documentation steps required before vendor activation.",
+    description: "Due diligence, security review, and documentation steps required before vendor activation.",
   },
   {
     id: "doc-secexc",
@@ -58,7 +58,7 @@ export const sourceDocuments: SourceDocument[] = [
     freshnessStatus: "Current",
     riskLevel: "Critical",
     description:
-      "Process and approval authority for granting time-bound exceptions to security controls.",
+      "Process and approval authority for granting time bound exceptions to security controls.",
   },
   {
     id: "doc-escal",
@@ -69,7 +69,7 @@ export const sourceDocuments: SourceDocument[] = [
     lastUpdated: "2026-05-06",
     freshnessStatus: "Current",
     riskLevel: "Medium",
-    description: "Severity definitions, escalation paths, and response-time commitments for customer issues.",
+    description: "Severity definitions, escalation paths, and response time commitments for customer issues.",
   },
   {
     id: "doc-aigov",
@@ -114,7 +114,7 @@ export const sourceDocuments: SourceDocument[] = [
     lastUpdated: "2026-05-19",
     freshnessStatus: "Current",
     riskLevel: "Low",
-    description: "How-to articles, troubleshooting steps, and configuration guidance for the product.",
+    description: "How to articles, troubleshooting steps, and configuration guidance for the product.",
   },
   {
     id: "doc-contract",
@@ -136,7 +136,7 @@ export const sourceDocuments: SourceDocument[] = [
     lastUpdated: "2026-03-15",
     freshnessStatus: "Current",
     riskLevel: "High",
-    description: "Provisioning, least-privilege, and periodic access review requirements.",
+    description: "Provisioning, least privilege, and periodic access review requirements.",
   },
   {
     id: "doc-finmatrix",

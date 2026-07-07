@@ -205,7 +205,7 @@ export function scoreWorkshop(w: Workshop): Scored {
   if (!gatesPassed) nextAction = `Resolve required gates: ${missingGates.slice(0, 2).join(", ")}${missingGates.length > 2 ? "…" : ""}`;
   else if (band === "go") nextAction = "Confirm data ownership and PII handling, then hand off to the Data Lab.";
   else if (band === "refine") nextAction = `Strengthen ${weakest.label.toLowerCase()}, it's the weakest link at ${weakest.score}/100.`;
-  else if (band === "redesign") nextAction = "Rework the value case and de-risk the highest-impact assumptions before piloting.";
+  else if (band === "redesign") nextAction = "Rework the value case and de risk the highest impact assumptions before piloting.";
   else nextAction = "Reframe the use case, the value or feasibility isn't there yet.";
 
   return { overall, categories, gates, gatesPassed, missingGates, band, recommendation, risks: topRisks(w), nextAction };
@@ -450,7 +450,7 @@ const PATTERN_TAGS: Record<string, string[]> = {
   "Agentic workflow": ["Agentic workflow", "Tool calling", "RAG", "Governance"],
 };
 const PATTERN_BUILD_PATH: Record<string, BuildPathRecommendation> = {
-  "Search / knowledge assistant": { path: "RAG knowledge assistant with governed retrieval and citation validation", why: "The use case depends on knowledge-base content, needs current source grounding, and has high risk if stale or unsupported answers are returned.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern audit evidence", "Realize ROI"] },
+  "Search / knowledge assistant": { path: "RAG knowledge assistant with governed retrieval and citation validation", why: "The use case depends on knowledge base content, needs current source grounding, and has high risk if stale or unsupported answers are returned.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern audit evidence", "Realize ROI"] },
   "Summarization": { path: "Prompted summarization workflow with human review", why: "Summaries compress source material and must stay faithful; a review step catches drift and omission.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern review", "Realize ROI"] },
   "Classification": { path: "Classification / routing model with labeled data and evaluation", why: "A repeatable, high volume decision benefits from a trained classifier with a measured accuracy bar.", requiredStages: ["Training-data readiness", "Build evaluation", "Operate drift monitoring", "Govern review", "Realize ROI"] },
   "Recommendation": { path: "RAG decision-support assistant with evidence and human approval", why: "Recommendations influence outcomes and need traceable evidence plus a human decision point.", requiredStages: ["Data readiness", "Build/RAG evaluation", "Operate monitoring", "Govern approval", "Realize ROI"] },

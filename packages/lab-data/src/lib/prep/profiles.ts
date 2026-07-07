@@ -30,13 +30,13 @@ export const PROFILES: RuleProfile[] = [
   {
     id: "finance",
     name: "Finance · SOX",
-    blurb: "Provenance sign off and single-source-of-truth are enforced strictly.",
+    blurb: "Provenance sign off and single source of truth are enforced strictly.",
     escalate: { provenance: "risk", dedup: "risk", freshness: "risk" },
   },
   {
     id: "gdpr",
     name: "Privacy · GDPR",
-    blurb: "Personal data is treated as sensitive; lawful-basis provenance and retention (right to erasure) are enforced.",
+    blurb: "Personal data is treated as sensitive; lawful basis provenance and retention (right to erasure) are enforced.",
     escalate: { privacy: "critical", provenance: "risk", freshness: "risk" },
   },
   {

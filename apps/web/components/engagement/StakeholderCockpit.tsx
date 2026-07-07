@@ -28,19 +28,19 @@ const SENT_HEX = ["#e24b4a", "#ea580c", "#d97706", "#1f6fc4", "#16a34a"];
 
 const STAKEHOLDERS: SH[] = [
   { key: "cio", name: "Exec sponsor (CIO)", role: "Manage closely", power: 0.9, interest: 0.85, traj: [4, 4, 3, 3, 2, 2],
-    brief: { why: "Two quiet weeks, no win shared since the pilot demo, and a peer flagged cost. Champion energy is cooling to neutral.", who: "You, in a 1:1 before the steering, not during it.", message: "Bring one concrete win (containment +5 pts) and the single decision you need; re-anchor the why.", before: "48 hours before the pre-read goes out." } },
+    brief: { why: "Two quiet weeks, no win shared since the pilot demo, and a peer flagged cost. Champion energy is cooling to neutral.", who: "You, in a 1:1 before the steering, not during it.", message: "Bring one concrete win (containment +5 pts) and the single decision you need; re anchor the why.", before: "48 hours before the pre read goes out." } },
   { key: "vp", name: "Business owner (VP Servicing)", role: "Manage closely", power: 0.8, interest: 0.9, traj: [3, 3, 3, 3, 3, 3],
-    brief: { why: "Steady supporter; owns the outcome and the floor.", who: "Delivery lead, weekly.", message: "Keep sharing adoption numbers; ask them to co-present the win at steering.", before: "In the normal weekly." } },
+    brief: { why: "Steady supporter; owns the outcome and the floor.", who: "Delivery lead, weekly.", message: "Keep sharing adoption numbers; ask them to co present the win at steering.", before: "In the normal weekly." } },
   { key: "risk", name: "Head of Risk", role: "Keep satisfied", power: 0.85, interest: 0.5, traj: [2, 1, 1, 1, 1, 1],
-    brief: { why: "Skeptical since the autonomy question went unanswered; can block at gate.", who: "You + delivery lead, ahead of steering.", message: "Walk the risk-tiering and human-oversight design; convert the objection into a control they own.", before: "This week, before the gate review." } },
+    brief: { why: "Skeptical since the autonomy question went unanswered; can block at gate.", who: "You + delivery lead, ahead of steering.", message: "Walk the risk tiering and human oversight design; convert the objection into a control they own.", before: "This week, before the gate review." } },
   { key: "fin", name: "Finance partner", role: "Keep informed", power: 0.6, interest: 0.8, traj: [2, 2, 2, 2, 2, 2],
-    brief: { why: "Neutral, cost-focused; wants the run-rate story.", who: "You, with the ROI range.", message: "Share the NPV range and the caching savings; pre-empt the cost question.", before: "With the pre-read." } },
+    brief: { why: "Neutral, cost focused; wants the run rate story.", who: "You, with the ROI range.", message: "Share the NPV range and the caching savings; preempt the cost question.", before: "With the pre read." } },
   { key: "del", name: "Delivery lead", role: "Keep informed", power: 0.55, interest: 0.9, traj: [4, 4, 4, 4, 4, 4],
-    brief: { why: "Champion and closest to the work.", who: "Peer-to-peer.", message: "Use them to co-present and to reach Risk and Security.", before: "Ongoing." } },
+    brief: { why: "Champion and closest to the work.", who: "Peer-to-peer.", message: "Use them to co present and to reach Risk and Security.", before: "Ongoing." } },
   { key: "floor", name: "Floor manager", role: "Keep informed", power: 0.3, interest: 0.85, traj: [3, 3, 2, 3, 3, 3],
-    brief: { why: "Supportive but anxious about the team; a mid-program wobble.", who: "Change lead, on the floor.", message: "Reassure on the champion model and the feedback loop; surface a floor win.", before: "This week." } },
+    brief: { why: "Supportive but anxious about the team; a mid program wobble.", who: "Change lead, on the floor.", message: "Reassure on the champion model and the feedback loop; surface a floor win.", before: "This week." } },
   { key: "sec", name: "Security lead", role: "Keep satisfied", power: 0.6, interest: 0.55, traj: [2, 2, 2, 1, 1, 1],
-    brief: { why: "Drifting to skeptic after the data-flow review raised questions.", who: "You + delivery lead.", message: "Bring the data-handling and logging design; close the two open items in writing.", before: "Before the gate." } },
+    brief: { why: "Drifting to skeptic after the data flow review raised questions.", who: "You + delivery lead.", message: "Bring the data handling and logging design; close the two open items in writing.", before: "Before the gate." } },
   { key: "comms", name: "Change / comms lead", role: "Keep informed", power: 0.35, interest: 0.8, traj: [3, 4, 4, 4, 4, 4],
     brief: { why: "Rising champion; driving the adoption narrative.", who: "Peer.", message: "Equip them with the wins to broadcast; point them at the floor manager.", before: "Ongoing." } },
 ];
@@ -105,21 +105,21 @@ export function StakeholderCockpit() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Stakeholder &amp; Sponsor Alignment Cockpit</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Stakeholder and Sponsor Alignment Cockpit</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A snapshot lies; a trajectory tells the truth. The grid places each stakeholder by power and interest, the
-            sparklines show where sentiment is heading, {activeUc ? activeUc.payload.drivingLine : `and ${flags.length} are drifting, including the sponsor.`}
+            Stakeholder alignment is not a static map. It is a trajectory. This artifact shows how sponsor sentiment moves
+            over time and flags the people who can quietly shift a program's outcome. {activeUc ? activeUc.payload.drivingLine : `Currently, ${flags.length} are drifting, including the sponsor.`}
           </p>
         </div>
 
         <UseCaseRail useCases={EL02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Which sponsor is quietly drifting before the next steering?" approach="Map stakeholders on influence and alignment, and flag the high-influence sponsor whose support is slipping before the meeting." why="Misalignment surfaces publicly at steering unless you catch it privately first." metric="Alignment gap per stakeholder; who is drifting and how much influence they hold." tradeoff="Time spent aligning ahead of the meeting versus a blindside inside it." outcome="Who needs to hear what, from whom, before the meeting." />
+        <CaseStudy problem="Programs rarely lose executive support all at once. Support erodes when concerns go unaddressed between meetings. A useful alignment view shows influence, interest, sentiment, drift, and the next conversation required." approach="The cockpit maps stakeholders by power and interest, tracks sentiment over six weeks, flags downward drift, and generates a pre steering briefing for the selected stakeholder." why="This connects stakeholder governance to program momentum, decision speed, escalation prevention, and sponsor confidence." metric="Alignment gap per stakeholder; who is drifting and how much influence they hold." tradeoff="Time spent aligning ahead of the meeting versus a blindside inside it." outcome="Who needs to hear what, from whom, before the meeting." />
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Grid */}
@@ -172,11 +172,11 @@ export function StakeholderCockpit() {
         {/* Briefing */}
         <Panel className="mt-4">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <p className="stat-label">Pre-steering briefing</p>
+            <p className="stat-label">Pre steering briefing</p>
             <span className="text-sm font-semibold text-ink">{s.name}</span>
             <Badge tone={SENT_TONE[last(s.traj)]}>{SENT[last(s.traj)]}</Badge>
             {drifting(s.traj) && <Badge tone="rose">drifting</Badge>}
-            <span className="ml-auto"><ArtifactButton label="Download the briefing" onClick={onGenerate} title="Download the pre-steering briefing as Markdown" /></span>
+            <span className="ml-auto"><ArtifactButton label="Download the briefing" onClick={onGenerate} title="Download the pre steering briefing as Markdown" /></span>
           </div>
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             <Field k="Why now" v={s.brief.why} />
@@ -187,21 +187,21 @@ export function StakeholderCockpit() {
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Brief the drifting high-influence sponsor one-on-one before the steering, not during it." lift="Turn a public misalignment into a private, pre-resolved one." measure="Sponsor alignment pre/post; decisions stalled at steering by misalignment; surprises raised in the room." />
+          <OutcomeFrame call="Intervene with the right stakeholder before support loss becomes visible in steering." lift="Reduces avoidable escalations and protects decision momentum." measure="Alignment score, drift flags, sponsor sentiment, decision delays, escalation frequency." />
           <InsightCard title={`${flags.length} stakeholders drifting`} tone="warn">
             Sentiment moves between meetings, not in them. The sponsor cooling from champion to neutral is invisible on a
             status report and obvious on a trajectory, and it&apos;s recoverable with one well-aimed 1:1 before the room.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Programs don't lose sponsors in meetings; they lose them in the silence between meetings."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, multi-stakeholder consulting delivery (Deloitte/Verizon, Genpact/Morgan Stanley).</p>}
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Programs do not lose sponsors in the meeting. They lose them in the silence before the meeting."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, multi stakeholder consulting delivery (Deloitte/Verizon, Genpact/Morgan Stanley).</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Each stakeholder carries a power/interest coordinate (grid placement) and a six-week sentiment trajectory (Blocker→Champion). Drift = latest sentiment below the starting point; the briefing is authored per stakeholder around who, what, from whom, and by when.</p>
+              <p>Each stakeholder carries a power/interest coordinate (grid placement) and a six week sentiment trajectory (Blocker→Champion). Drift = latest sentiment below the starting point; the briefing is authored per stakeholder around who, what, from whom, and by when.</p>
               <p>Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> sentiment is a judgment read, not instrumented; archetypes are illustrative. It structures the alignment work between meetings, not a CRM.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a simulated stakeholder model. Real use would require stakeholder interviews, relationship context, meeting history, sentiment inputs, and judgment from the delivery lead.</p>
         </div>
       </main>
     </div>

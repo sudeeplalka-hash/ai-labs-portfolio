@@ -9,7 +9,7 @@ export function TokenKpiStrip({ analysis }: { analysis: TokenAnalysis }) {
     { label: "Output tokens", value: analysis.outputTokens.toLocaleString(), hint: "Tokens in the generated answer." },
     { label: "Context window", value: analysis.contextTokens.toLocaleString(), hint: "Tokens of retrieved evidence packed into the prompt." },
     { label: "Compression", value: `${analysis.compression}%`, hint: "Context tokens as a share of the whole document, retrieval keeps the prompt small." },
-    { label: "Est. cost", value: `$${analysis.estCost.toFixed(5)}`, hint: "Estimated with a sample model pricing profile (GPT-4o-mini-class)." },
+    { label: "Est. cost", value: `$${analysis.estCost.toFixed(5)}`, hint: "Estimated with a sample model pricing profile (GPT-4o-mini class)." },
   ];
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">

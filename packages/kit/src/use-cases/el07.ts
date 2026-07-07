@@ -21,16 +21,16 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     labId: "EL-07",
     industry: "public-sector",
     provenance: studied,
-    title: "Benefits-eligibility AI platform bid",
-    oneLiner: "A biddable win, but only if you close the ATO and past-performance gates first.",
+    title: "Benefits eligibility AI platform bid",
+    oneLiner: "A biddable win, but only if you close the ATO and past performance gates first.",
     context:
-      "A government RFP for an AI-assisted benefits-eligibility triage platform. Strong fit, but two public-sector gates, a security authorization (ATO) pathway and direct government past-performance, sit as partials that must be closed before the bid is credible.",
+      "A government RFP for an AI assisted benefits eligibility triage platform. Strong fit, but two public sector gates, a security authorization (ATO) pathway and direct government past performance, sit as partials that must be closed before the bid is credible.",
     theDecision:
-      "Bid, but gate-first: the pursuit clears the threshold, so the real work is converting the ATO and past-performance partials to met before submission, in gov, an unclosed mandatory gate is a disqualification, not a deduction.",
+      "Bid, but gate first: the pursuit clears the threshold, so the real work is converting the ATO and past performance partials to met before submission, in gov, an unclosed mandatory gate is a disqualification, not a deduction.",
     whatMostMiss:
       "Bidders treat gov mandatory requirements (ATO, 508, past performance) as scored line items. They're pass/fail gates, a single unmet mandatory zeroes the whole bid regardless of technical score.",
     stakes: "Leave the ATO partial unclosed and a technically winning bid is thrown out on a compliance gate.",
-    takeaway: "In public-sector bids, mandatory gates are pass/fail, close the ATO and past-performance partials or don't bid.",
+    takeaway: "In public sector bids, mandatory gates are pass/fail, close the ATO and past performance partials or don't bid.",
     sources: [
       "Public-sector proposal / capture practice (studied)",
       "Government mandatory-requirement (ATO, Section 508, past-performance) gating",
@@ -39,13 +39,13 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     payload: {
       rfp: {
         key: "gov-benefits",
-        label: "Benefits-eligibility AI platform (public sector)",
-        excerpt: "Agency seeks an AI-assisted benefits-eligibility triage platform. Mandatory: accessibility (Section 508 / WCAG 2.2 AA), in-country data residency with an authorization-to-operate (ATO) pathway, bias & equity-of-access testing, and direct government past performance. 30-week fixed price with milestone acceptance; price weighted.",
+        label: "Benefits eligibility AI platform (public sector)",
+        excerpt: "Agency seeks an AI assisted benefits eligibility triage platform. Mandatory: accessibility (Section 508 / WCAG 2.2 AA), in country data residency with an authorization to operate (ATO) pathway, bias & equity of access testing, and direct government past performance. 30 week fixed price with milestone acceptance; price weighted.",
         requirements: [
-          { text: "Accessibility (Section 508 / WCAG 2.2 AA)", owner: "Delivery lead", evidence: "Accessible-UI patterns + audit", status: "met" },
+          { text: "Accessibility (Section 508 / WCAG 2.2 AA)", owner: "Delivery lead", evidence: "Accessible UI patterns + audit", status: "met" },
           { text: "Data residency + ATO pathway", owner: "Security", evidence: "ATO plan (in progress)", status: "partial" },
-          { text: "Named EM with public-sector delivery", owner: "Staffing", evidence: "EM profile + gov references", status: "met" },
-          { text: "Bias & equity-of-access testing", owner: "Governance", evidence: "Equity-testing framework", status: "met" },
+          { text: "Named EM with public sector delivery", owner: "Staffing", evidence: "EM profile + gov references", status: "met" },
+          { text: "Bias & equity of access testing", owner: "Governance", evidence: "Equity testing framework", status: "met" },
           { text: "Direct government past performance (2+ refs)", owner: "Capture", evidence: "One direct, one adjacent", status: "partial" },
         ],
         criteria: [
@@ -65,16 +65,16 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     labId: "EL-07",
     industry: "cybersecurity",
     provenance: studied,
-    title: "Autonomous SOC triage, the disciplined no-bid",
-    oneLiner: "Attractive scope, un-survivable terms, the senior move is to decline and say why.",
+    title: "Autonomous SOC triage, the disciplined no bid",
+    oneLiner: "Attractive scope, un survivable terms, the senior move is to decline and say why.",
     context:
       "An MSSP RFP for an autonomous SOC triage agent. The scope is appealing, but the commercial terms are the story: a guarantee of zero missed critical alerts and uncapped breach liability are red lines no responsible bidder accepts.",
     theDecision:
-      "No-bid, on terms, not capability: a 'zero missed criticals' guarantee is technically impossible and uncapped indemnity is a bet-the-firm liability, so decline regardless of how good the fit looks.",
+      "No bid, on terms, not capability: a 'zero missed criticals' guarantee is technically impossible and uncapped indemnity is a bet the firm liability, so decline regardless of how good the fit looks.",
     whatMostMiss:
-      "Teams engage on the exciting technical scope and only hit the commercial red lines after burning capture time. Read the terms first, some RFPs are un-winnable by construction, not by competition.",
+      "Teams engage on the exciting technical scope and only hit the commercial red lines after burning capture time. Read the terms first, some RFPs are un winnable by construction, not by competition.",
     stakes: "Accept 'zero missed criticals' and uncapped liability and one inevitable miss is an existential claim.",
-    takeaway: "Some RFPs are no-bids on terms alone, an impossible guarantee and uncapped liability end it before fit matters.",
+    takeaway: "Some RFPs are no bids on terms alone, an impossible guarantee and uncapped liability end it before fit matters.",
     sources: [
       "Cybersecurity services capture / risk review (studied)",
       "Commercial red-line discipline (guarantees, liability caps, indemnity)",
@@ -89,7 +89,7 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
           { text: "Guarantee zero missed critical alerts", owner: "Delivery", evidence: ", undeliverable guarantee", status: "gap" },
           { text: "Accept uncapped breach liability", owner: "Commercial", evidence: ", commercial red line", status: "gap" },
           { text: "10-week fixed price with penalties", owner: "Commercial", evidence: "N/A", status: "gap" },
-          { text: "Deliver with threat data withheld to week 3", owner: "Data", evidence: "critical-path risk", status: "gap" },
+          { text: "Deliver with threat data withheld to week 3", owner: "Data", evidence: "critical path risk", status: "gap" },
           { text: "Displace incumbent SIEM integration", owner: "Sales", evidence: "adjacent only", status: "partial" },
         ],
         criteria: [
@@ -109,12 +109,12 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     labId: "EL-07",
     industry: "retail",
     provenance: studied,
-    title: "Peak-season personalization bid",
+    title: "Peak season personalization bid",
     oneLiner: "Strong fit and a hard date, win on measurable lift, not lowest price.",
     context:
-      "A national retailer's RFP for AI personalization and search relevance ahead of peak season. Value and speed are weighted over lowest price, which plays to a differentiated, measurement-led response with a hard Black-Friday deadline.",
+      "A national retailer's RFP for AI personalization and search relevance ahead of peak season. Value and speed are weighted over lowest price, which plays to a differentiated, measurement led response with a hard Black Friday deadline.",
     theDecision:
-      "Bid to win on lift, not price: fit and win themes are strong and the buyer weights value over cost, so lead with measurable lift and peak-load resilience, and be honest that the 16-week date is the real risk.",
+      "Bid to win on lift, not price: fit and win themes are strong and the buyer weights value over cost, so lead with measurable lift and peak load resilience, and be honest that the 16 week date is the real risk.",
     whatMostMiss:
       "Teams race to the lowest price on retail bids the buyer explicitly scores on value. When speed and lift are weighted, discounting signals weakness, differentiate on measurable outcome instead.",
     stakes: "The 16-week hard date before peak is the binding constraint, miss it and the whole engagement misses its window.",
@@ -127,14 +127,14 @@ export const EL07_USE_CASES: UseCase<El07Payload>[] = assertUseCases<El07Payload
     payload: {
       rfp: {
         key: "retail-peak",
-        label: "Peak-season personalization (retail)",
-        excerpt: "National retailer seeks AI personalization and search relevance for peak season. 16-week delivery before Black Friday; proven e-commerce scale, A/B measurement with lift attribution, and brand-safe generation required. Value and speed weighted over lowest price.",
+        label: "Peak season personalization (retail)",
+        excerpt: "National retailer seeks AI personalization and search relevance for peak season. 16 week delivery before Black Friday; proven e commerce scale, A/B measurement with lift attribution, and brand safe generation required. Value and speed weighted over lowest price.",
         requirements: [
-          { text: "Proven personalization at e-commerce scale", owner: "Delivery lead", evidence: "Retail personalization case study", status: "met" },
+          { text: "Proven personalization at e commerce scale", owner: "Delivery lead", evidence: "Retail personalization case study", status: "met" },
           { text: "16-week delivery before peak", owner: "Delivery", evidence: "PERT plan (aggressive but feasible)", status: "partial" },
           { text: "A/B measurement & lift attribution", owner: "Analytics", evidence: "Experimentation framework", status: "met" },
-          { text: "Brand-safe content generation", owner: "Governance", evidence: "Brand-safety guardrails", status: "met" },
-          { text: "Peak-load resilience / SRE", owner: "Platform", evidence: "Load plan (draft)", status: "partial" },
+          { text: "Brand safe content generation", owner: "Governance", evidence: "Brand safety guardrails", status: "met" },
+          { text: "Peak load resilience / SRE", owner: "Platform", evidence: "Load plan (draft)", status: "partial" },
         ],
         criteria: [
           { name: "Technical approach", weight: 0.30, score: 84 },

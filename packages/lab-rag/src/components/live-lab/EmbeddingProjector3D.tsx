@@ -174,7 +174,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
     };
 
     const label = (text: string, sx: number, sy: number, color = INK, bold = true) => {
-      ctx.font = `${bold ? "600 " : ""}12px "Public Sans", system-ui, sans-serif`;
+      ctx.font = `${bold ? "600 " : ""}12px "Public Sans", system ui, sans serif`;
       ctx.textBaseline = "middle";
       ctx.lineWidth = 3;
       ctx.strokeStyle = "rgba(248,248,246,0.9)";

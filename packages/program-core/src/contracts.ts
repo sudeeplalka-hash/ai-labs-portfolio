@@ -369,7 +369,7 @@ export function deriveOpenFindings(s: ProgramState): GovFinding[] {
   // Phase 5, agent / tool calling findings.
   const at = s.rag?.agentTooling;
   if (at?.enabled) {
-    if (at.misuseEvals.some((e) => e.result === "fail")) out.push({ severity: "High", finding: "Agent tool-misuse evaluation failing", evidenceSource: "Build/Agents", impact: "Unsafe or unapproved tool use could reach production", requiredAction: "Resolve failing misuse evals before enabling the agent", owner: "RAG Owner", dueStage: "Build", status: "Open" });
+    if (at.misuseEvals.some((e) => e.result === "fail")) out.push({ severity: "High", finding: "Agent tool misuse evaluation failing", evidenceSource: "Build/Agents", impact: "Unsafe or unapproved tool use could reach production", requiredAction: "Resolve failing misuse evals before enabling the agent", owner: "RAG Owner", dueStage: "Build", status: "Open" });
     if (at.toolSchemas.some((t) => t.riskLevel === "high" && t.approvalMode === "none")) out.push({ severity: "High", finding: "High risk tool missing an approval path", evidenceSource: "Build/Agents", impact: "Risky action could execute without human oversight", requiredAction: "Add an approval gate to all high risk tools", owner: "Governance", dueStage: "Govern", status: "Open" });
   }
   // Phase 6, training / generalization findings.
@@ -378,7 +378,7 @@ export function deriveOpenFindings(s: ProgramState): GovFinding[] {
     const gen = tc.generalizationAssessment;
     if (gen.overfittingRisk === "high" || gen.overfittingRisk === "critical") out.push({ severity: "High", finding: "Overfitting risk is high", evidenceSource: "Build/Training", impact: "Model may look strong in testing but fail on real cases", requiredAction: "Add holdout set, edge cases, and dedupe before release", owner: "RAG Owner", dueStage: "Build", status: "Open" });
     if (!tc.datasetReadiness.holdoutSetAvailable) out.push({ severity: "Medium", finding: "Training dataset lacks a clean holdout set", evidenceSource: "Build/Training", impact: "Generalization cannot be verified before release", requiredAction: "Create a clean holdout evaluation set", owner: "Data Owner", dueStage: "Data", status: "Open" });
-    if (tc.datasetReadiness.classBalanceScore < 70) out.push({ severity: "Medium", finding: "Class imbalance may affect minority cases", evidenceSource: "Build/Training", impact: "Underrepresented classes may perform poorly", requiredAction: "Rebalance and report class-level performance", owner: "RAG Owner", dueStage: "Build", status: "In review" });
+    if (tc.datasetReadiness.classBalanceScore < 70) out.push({ severity: "Medium", finding: "Class imbalance may affect minority cases", evidenceSource: "Build/Training", impact: "Underrepresented classes may perform poorly", requiredAction: "Rebalance and report class level performance", owner: "RAG Owner", dueStage: "Build", status: "In review" });
   }
   return out;
 }

@@ -71,7 +71,7 @@ export function AnswerEngineSettings({ open, engine, config, onClose, onSave, on
               <Sparkles className={cn("mt-0.5 h-4 w-4 shrink-0", mode === "simulated" ? "text-primary" : "text-slatey-400")} />
               <span>
                 <span className="block text-sm font-medium text-ink">Simulated</span>
-                <span className="block text-xs text-slatey-400">Deterministic, in-browser. No key.</span>
+                <span className="block text-xs text-slatey-400">Deterministic, in browser. No key.</span>
               </span>
             </button>
             <button

@@ -1,7 +1,7 @@
 "use client";
 
 // EL-08 · Estimation & Scoping Studio (Collection 4 · control room).
-// Estimate three ways (bottom-up / analogous / three-point PERT), watch them
+// Estimate three ways (bottom up / analogous / three point PERT), watch them
 // disagree, staff the chosen number, then push a scope change through change
 // control and watch schedule, staffing, and MARGIN move. AI estimates blow up in
 // data discovery and evaluation, those are explicit line items here. SIMULATED.
@@ -42,7 +42,7 @@ const USE_CASES: UseCase[] = [
       { phase: "Discovery & requirements", weeks: 3 },
       { phase: "Data readiness discovery", weeks: 5, ai: true },
       { phase: "Retrieval + build", weeks: 8 },
-      { phase: "Eval-harness build", weeks: 4, ai: true },
+      { phase: "Eval harness build", weeks: 4, ai: true },
       { phase: "Model iteration loops", weeks: 4, ai: true },
       { phase: "Systems integration", weeks: 5 },
       { phase: "Hardening & UAT", weeks: 4 },
@@ -52,19 +52,19 @@ const USE_CASES: UseCase[] = [
     change: { label: "Add 2 dispute categories + a new data source", add: [{ phase: "Data readiness (new source)", weeks: 4, ai: true }, { phase: "Eval expansion", weeks: 3, ai: true }, { phase: "Build + iteration", weeks: 3 }, { phase: "Regression", weeks: 2 }] },
   },
   {
-    key: "netops", label: "Network-ops copilot (telecom)",
+    key: "netops", label: "Network ops copilot (telecom)",
     wbs: [
       { phase: "Discovery & requirements", weeks: 2 },
       { phase: "Data readiness discovery", weeks: 4, ai: true },
       { phase: "Copilot build", weeks: 7 },
-      { phase: "Eval-harness build", weeks: 3, ai: true },
+      { phase: "Eval harness build", weeks: 3, ai: true },
       { phase: "Model iteration loops", weeks: 3, ai: true },
       { phase: "Systems integration", weeks: 6 },
       { phase: "Hardening & UAT", weeks: 3 },
     ],
     analogous: { baseWeeks: 24, factor: 1.2 },
     three: { o: 22, m: 29, p: 44 },
-    change: { label: "Add new alarm taxonomy + second-fab imaging", add: [{ phase: "Taxonomy + data", weeks: 4, ai: true }, { phase: "Eval expansion", weeks: 3, ai: true }, { phase: "Domain adaptation", weeks: 2 }, { phase: "Regression", weeks: 1 }] },
+    change: { label: "Add new alarm taxonomy + second fab imaging", add: [{ phase: "Taxonomy + data", weeks: 4, ai: true }, { phase: "Eval expansion", weeks: 3, ai: true }, { phase: "Domain adaptation", weeks: 2 }, { phase: "Regression", weeks: 1 }] },
   },
 ];
 
@@ -109,7 +109,7 @@ export function EstimationStudio() {
       "# Change order, draft",
       "",
       `**Engagement:** ${uc.label}`,
-      `**Estimation basis:** ${method === "pert" ? "PERT (three-point)" : method} · base effort ${baseEffort} person-weeks`,
+      `**Estimation basis:** ${method === "pert" ? "PERT (three point)" : method} · base effort ${baseEffort} person-weeks`,
       "",
       "## Scope change",
       "",
@@ -150,8 +150,8 @@ export function EstimationStudio() {
     { id: "json", label: "Export scenario (JSON)", hint: "Use case + method", onSelect: exportScenario },
   ];
   const paletteCommands: Command[] = [
-    { id: "m-pert", label: "Method: three-point (PERT)", group: "action", run: () => setMethod("pert") },
-    { id: "m-bu", label: "Method: bottom-up", group: "action", run: () => setMethod("bottomup") },
+    { id: "m-pert", label: "Method: three point (PERT)", group: "action", run: () => setMethod("pert") },
+    { id: "m-bu", label: "Method: bottom up", group: "action", run: () => setMethod("bottomup") },
     { id: "m-an", label: "Method: analogous", group: "action", run: () => setMethod("analogous") },
     { id: "act-scope", label: scopeOn ? "Revert scope change" : "Apply scope change", group: "action", keywords: "change control", run: () => setScopeOn((v) => !v) },
     { id: "exp-csv", label: "Export estimate (CSV)", group: "export", run: exportEstimate },
@@ -173,21 +173,21 @@ export function EstimationStudio() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Estimation &amp; Scoping Studio</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Estimation and Scope Control Studio</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Estimate the same engagement three ways, watch them disagree, and price the unknowns as line items, because
-            AI work blows up in data discovery and evaluation, not modeling.
+            AI estimates often fail where uncertainty is highest: data discovery, evaluation, integration, and change
+            control. This artifact compares estimation methods and shows how scope movement affects margin and schedule.
           </p>
         </div>
 
         <UseCaseRail useCases={EL08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="What is the real estimate, and what happens when scope moves?" approach="Estimate the same engagement three ways (bottom-up, analogous, PERT), watch them disagree, commit at P80, then push a scope change through change control and watch margin move." why="Present a range and commit at P80, not the point estimate everyone quotes." metric="The P80 commit; gross margin under a scope change." tradeoff="Absorbing scope silently protects the relationship but drops margin; a change order holds margin but is a harder conversation." outcome="A defensible committed estimate plus the change-control impact of moving scope." />
+        <CaseStudy problem="A single point estimate can create false confidence. Senior delivery requires a range, a confidence level, a clear commitment point, and a disciplined approach to scope change." approach="The studio compares bottom up, analogous, and PERT estimates, then models staffing, schedule, confidence levels, and change control impact." why="This connects estimation to delivery confidence, margin protection, client expectation management, and commercial governance." metric="The P80 commit; gross margin under a scope change." tradeoff="Absorbing scope silently protects the relationship but drops margin; a change order holds margin but is a harder conversation." outcome="A defensible committed estimate plus the change control impact of moving scope." />
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -213,13 +213,13 @@ export function EstimationStudio() {
           <MethodCard on={method === "analogous"} onClick={() => setMethod("analogous")} title="Analogous" weeks={analogous}>
             <p className="mt-2 text-[11px] text-slatey-400">Past similar engagement {uc.analogous.baseWeeks}w × complexity {uc.analogous.factor.toFixed(2)}. Fast, but blind to what&apos;s new about this one.</p>
           </MethodCard>
-          <MethodCard on={method === "pert"} onClick={() => setMethod("pert")} title="Three-point (PERT)" weeks={pert} range={`${pert - pertStd} to ${pert + pertStd}w`}>
+          <MethodCard on={method === "pert"} onClick={() => setMethod("pert")} title="Three point (PERT)" weeks={pert} range={`${pert - pertStd} to ${pert + pertStd}w`}>
             <p className="mt-2 text-[11px] text-slatey-400">O {uc.three.o} · M {uc.three.m} · P {uc.three.p}. PERT = (O+4M+P)/6; ±1σ = {pertStd}w. Present the range, not the point &mdash; <span className="font-semibold text-ink">commit at P80 = {pertP80}w</span> (P90 {pertP90}w).</p>
           </MethodCard>
         </div>
 
         <InsightCard title={`The three disagree by ${spread} weeks`} tone="warn">
-          That spread is the conversation. The analogous number is cheapest and most wrong; bottom-up misses the unknowns it hasn&apos;t imagined; PERT&apos;s range is the honest answer, <span className="font-semibold">{pert - pertStd} to {pert + pertStd} weeks</span>.
+          That spread is the conversation. The analogous number is cheapest and most wrong; bottom up misses the unknowns it hasn&apos;t imagined; PERT&apos;s range is the honest answer, <span className="font-semibold">{pert - pertStd} to {pert + pertStd} weeks</span>.
         </InsightCard>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -227,7 +227,7 @@ export function EstimationStudio() {
           <span className="rounded-md border border-line px-2 py-1 font-mono text-xs">P50 {pert}w</span>
           <span className="rounded-md border border-primary/40 bg-primary/5 px-2 py-1 font-mono text-xs font-semibold text-primary">P80 {pertP80}w &middot; commit</span>
           <span className="rounded-md border border-line px-2 py-1 font-mono text-xs">P90 {pertP90}w</span>
-          <span className="text-[11px] text-slatey-500">The mean is a coin-flip; a defensible commit carries contingency to P80.</span>
+          <span className="text-[11px] text-slatey-500">The mean is a coin flip; a defensible commit carries contingency to P80.</span>
         </div>
 
         <div className="mt-4 grid gap-6 lg:grid-cols-2">
@@ -274,18 +274,18 @@ export function EstimationStudio() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Commit at P80 rather than the mean, and process scope as a change order instead of absorbing it." lift="A committed number that holds about eighty percent of the time and protects margin when scope moves." measure="Actuals vs the P80 commit; margin held vs absorbed; change-orders raised vs scope events." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "AI estimates blow up in data discovery and evaluation, not modeling. Price the unknowns as line items or eat them later."}</p>
+          <OutcomeFrame call="Commit to a confidence backed estimate and route material scope change through explicit control." lift="Reduces margin leakage and delivery surprises by pricing uncertainty instead of hiding it." measure="P80 estimate, schedule variance, margin impact, change order value, scope movement." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "AI estimates often break in data discovery and evaluation. Price those unknowns as line items or absorb them later."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, consulting delivery estimation across HCLTech/Genpact/Deloitte.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Bottom-up = sum of a WBS with AI-specific line items flagged. Analogous = past baseline × complexity factor. PERT = (O + 4M + P)/6 with ±(P−O)/6 as the range.</p>
+              <p>Bottom up = sum of a WBS with AI specific line items flagged. Analogous = past baseline × complexity factor. PERT = (O + 4M + P)/6 with ±(P−O)/6 as the range.</p>
               <p>Duration = effort ÷ effective team capacity ({CAPACITY} FTE-weeks/week); margin = (revenue − cost)/revenue at ${RATE.bill}k bill / ${RATE.cost}k cost per person-week. A scope change absorbed silently drops margin; a change order re-prices it.</p>
               <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> WBS and rates are illustrative; capacity ignores ramp and dependency stalls. It frames the estimate and the change-control discipline, not a full resource-levelled plan.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a portfolio estimation model. Real estimation would require delivery history, client scope, technical discovery, staffing rates, vendor constraints, and commercial review.</p>
         </div>
       </main>
       <ToastHost />

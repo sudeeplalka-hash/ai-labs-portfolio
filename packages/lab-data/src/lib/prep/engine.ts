@@ -293,7 +293,7 @@ export function runChecks(
     parsed.hasReplacement
       ? "Replacement characters found, file is not clean UTF-8."
       : "Decoded cleanly as UTF-8.",
-    parsed.hasReplacement ? { id: "encoding", label: "Re-encode as UTF-8", delta: 8 } : undefined,
+    parsed.hasReplacement ? { id: "encoding", label: "Re encode as UTF-8", delta: 8 } : undefined,
   );
   if (parsed.kind === "text" && !parsed.jsonOk) {
     add("jsonvalid", "format", "JSON validity", "critical", "Could not parse as JSON, treated as text.");
@@ -467,14 +467,14 @@ export function computeGate(score: number, blocker: boolean): GateVerdict {
       verdict: "Needs review",
       color: "amber",
       gate: "Conditional",
-      summary: "Usable after a light cleanup pass. Apply the watch-level fixes, then it clears the gate.",
+      summary: "Usable after a light cleanup pass. Apply the watch level fixes, then it clears the gate.",
     };
   return {
     score,
     verdict: "Not ready",
     color: "orange",
     gate: "Hold",
-    summary: "Several issues would degrade retrieval or leak unwanted content. Clear the at-risk items before resubmitting.",
+    summary: "Several issues would degrade retrieval or leak unwanted content. Clear the at risk items before resubmitting.",
   };
 }
 

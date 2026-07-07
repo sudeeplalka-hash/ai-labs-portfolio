@@ -92,22 +92,21 @@ export function RaidRadar() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Delivery Health &amp; RAID Radar</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Delivery Health and RAID Radar</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A steering board should report <span className="font-semibold text-ink">trajectory, not snapshots</span>.
-            Each workstream pairs its reported RAG with the health it actually has once the trend is priced in, so the
-            one that <span className="font-semibold text-ink">reads green but is sinking</span> can&apos;t hide.
+            A steering board should not only report where workstreams stand. It should show where they are heading. This
+            artifact compares reported status against actual health and trajectory so the one that <span className="font-semibold text-ink">reads green but is sinking</span> cannot hide.
           </p>
         </div>
 
         <UseCaseRail useCases={EL04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Which 'green' workstream is actually trending into trouble?" approach="Pair each workstream's reported RAG with its actual health and trend, and flag the ones that read green but are sinking." why="A steering board should report trajectory, not a milestone snapshot." metric="Portfolio health index; reported-vs-actual gaps; the sinking-green flags." tradeoff="A comfortable reported status versus the honest trajectory underneath it." outcome="The workstream that reads green but is sinking, surfaced before the next steering." />
+        <CaseStudy problem="Traditional RAG reporting can hide deterioration when teams report a comfortable snapshot. Technology strategy professionals need a trajectory view that prices in risks, issues, assumptions, dependencies, and trend direction." approach="The radar pairs reported status with actual health, trend, and RAID detail. It calculates a portfolio health index and highlights workstreams that appear green while declining." why="This connects delivery governance to transparency, escalation discipline, risk management, and executive decision quality." metric="Portfolio health index; reported vs actual gaps; the sinking green flags." tradeoff="A comfortable reported status versus the honest trajectory underneath it." outcome="The workstream that reads green but is sinking, surfaced before the next steering." />
 
         <div className="mb-4 flex justify-end">
           <ArtifactButton label="Export RAID register (CSV)" onClick={onGenerateCsv} title="Download the RAID register as CSV" />
@@ -129,7 +128,7 @@ export function RaidRadar() {
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Portfolio health" value={idx} suffix="/100" tone={idxTone} interpretation="Actual health, trend priced in" />
           <KpiCard label="Workstreams at risk" value={`${atRisk}/${scenario.workstreams.length}`} tone={atRisk >= 2 ? "risk" : "watch"} interpretation="Actual amber or red" />
-          <KpiCard label="Reported-vs-actual gaps" value={gaps} tone={gaps >= 1 ? "critical" : "healthy"} interpretation="Green on paper, worse in reality" />
+          <KpiCard label="Reported vs actual gaps" value={gaps} tone={gaps >= 1 ? "critical" : "healthy"} interpretation="Green on paper, worse in reality" />
           <KpiCard label="This period" value="Week 6" tone="neutral" interpretation="Trend window: last 3 weeks" />
         </div>
 
@@ -233,7 +232,7 @@ export function RaidRadar() {
             </Panel>
 
             <Panel>
-              <p className="stat-label mb-2">Auto-drafted leadership status</p>
+              <p className="stat-label mb-2">Auto drafted leadership status</p>
               <div className="space-y-2 text-sm leading-relaxed text-slatey-300">
                 <p><span className="font-semibold text-ink">Status.</span> {selected.name} is {statusWord(selected.actual)} ({HEALTH_LABEL[selected.reported].toLowerCase()} as reported, {HEALTH_LABEL[selected.actual].toLowerCase()} on trajectory, {trendWord(selected.trend)}).</p>
                 <p><span className="font-semibold text-ink">What changed.</span> {selected.brief.whatChanged}</p>
@@ -245,7 +244,7 @@ export function RaidRadar() {
         </div>
 
         <div className="mt-6">
-          <InsightCard title="The reported-vs-actual gap" tone={gaps >= 1 ? "danger" : "success"}>
+          <InsightCard title="The reported vs actual gap" tone={gaps >= 1 ? "danger" : "success"}>
             {gaps >= 1
               ? `${gaps} workstream${gaps > 1 ? "s report" : " reports"} healthier than reality. A green status with a downward arrow is a yellow that hasn't surfaced yet, the milestone view rewards "on schedule" and stays silent on quality and adoption.`
               : "No reported-vs-actual gaps this period, reported status matches trajectory."}
@@ -253,24 +252,24 @@ export function RaidRadar() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Escalate the workstreams that read green but are sinking, before the next steering." lift="Catch the trajectory problem weeks earlier than a RAG snapshot would." measure="Lead time from actual-decline to escalation; reported-vs-actual gap trend; workstreams that recovered after an early flag." />
+          <OutcomeFrame call="Escalate the workstream whose trajectory is worse than its reported status." lift="Reduces delivery surprises by surfacing declining health before it becomes a missed milestone." measure="Reported vs actual gap, portfolio health index, issue aging, dependency closure, steering decision cycle time." />
           <p className="text-sm leading-relaxed text-ink">
-            <span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Green with a downward arrow is yellow. Report trajectory or get surprised."}
+            <span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Green with a downward trend is not green. Report trajectory or prepare to be surprised."}
           </p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, the weekly reality of multi-portfolio EM work at AMEX.</p>}
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, the weekly reality of multi portfolio EM work at AMEX.</p>}
 
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>Stack: Next.js (static) + the shared design system; client side state only.</p>
               <p>Data: authored sample portfolios (finserv + telecom), each workstream carrying reported vs actual RAG, a 3-week trend, and RAID items, shared with EL-10.</p>
-              <p>Health index = mean of actual-health scores (green 100 / amber 60 / red 25); the radar plots actual-health × trend with reported status as dot color, so a green dot in the deteriorating-but-looks-better corner is the trap.</p>
+              <p>Health index = mean of actual health scores (green 100 / amber 60 / red 25); the radar plots actual health × trend with reported status as dot color, so a green dot in the deteriorating but looks better corner is the trap.</p>
               <p>Narrative: deterministic template over the workstream&apos;s authored brief, disciplined into Status → What changed → Watch → Ask. A LIVE variant can generate the prose via LIVE_MODEL without changing the structure.</p>
             </div>
           </details>
 
           <p className="text-xs text-slatey-500">
-            <span className="font-semibold text-slatey-400">Limitations:</span> sample data is illustrative, not a live feed; the reported-vs-actual gap is engineered into the data to teach the pattern. In production this reads from the delivery tracker and the eval/adoption telemetry.
+            <span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled delivery governance artifact. Real use would require current plan data, workstream updates, RAID ownership, dependency status, and leadership review cadence.
           </p>
         </div>
       </main>

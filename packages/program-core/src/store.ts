@@ -41,11 +41,11 @@ export const DEMO_ARCHETYPE_KEY = "apcc_demo_archetype";
 
 export const DEMO_ARCHETYPES: { id: DemoArchetype; label: string; blurb: string }[] = [
   { id: "knowledge-assistant", label: "Knowledge assistant", blurb: "Customer answers from your own knowledge base, the clean, fundable RAG story." },
-  { id: "summarization", label: "Summarization", blurb: "Meeting & case summarization, prompting-first, with a citation gate failing." },
+  { id: "summarization", label: "Summarization", blurb: "Meeting & case summarization, prompting first, with a citation gate failing." },
   { id: "classification", label: "Classification", blurb: "Claims intake routing, labeled data, training readiness, and generalization risk." },
-  { id: "decision-support", label: "Decision support", blurb: "High-stakes recommendations, human review, audit evidence, blocked sources." },
-  { id: "agentic-workflow", label: "Agentic workflow", blurb: "Tool-calling support agent, approvals, permission boundaries, blocked actions." },
-  { id: "at-risk", label: "At-risk initiative", blurb: "What bad looks like: weak data, failing gates, and a business case that doesn't clear." },
+  { id: "decision-support", label: "Decision support", blurb: "High stakes recommendations, human review, audit evidence, blocked sources." },
+  { id: "agentic-workflow", label: "Agentic workflow", blurb: "Tool calling support agent, approvals, permission boundaries, blocked actions." },
+  { id: "at-risk", label: "At risk initiative", blurb: "What bad looks like: weak data, failing gates, and a business case that doesn't clear." },
 ];
 
 export function demoState(archetype: DemoArchetype = "knowledge-assistant"): ProgramState {
@@ -60,13 +60,13 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
       scope: 0.4,
       successMetric: { shape: "Reduce time", baseline: "8 hrs", target: "under 2 hrs", coverage: "60% of customer requests" },
       scores: { value: 78, feasibility: 74, dataReadiness: 72 },
-      valueHypothesis: "Faster, consistent answers lift self-service and cut handle time.",
+      valueHypothesis: "Faster, consistent answers lift self service and cut handle time.",
       createdAt: "2026-01-01T00:00:00.000Z",
       meta: {
         primaryAiPattern: "Search / knowledge assistant",
         capabilityTags: ["Retrieval", "Citations"],
         governanceTier: "Low",
-        governanceTierRationale: "Read-only answers over public product knowledge; low blast radius.",
+        governanceTierRationale: "Read only answers over public product knowledge; low blast radius.",
         operationalCriticality: "Medium",
         humanReviewRequired: false,
         auditEvidenceRequired: false,
@@ -101,7 +101,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
           selectedUseCase: { id: 1, title: "Meeting summaries for account teams", bucket: "Wins", value: 66, effort: 30 },
           successMetric: { shape: "Reduce time", baseline: "45 min", target: "under 5 min", coverage: "80% of account meetings" },
           scores: { value: 70, feasibility: 80, dataReadiness: 76 },
-          valueHypothesis: "Consistent summaries free selling time and stop follow-ups falling through.",
+          valueHypothesis: "Consistent summaries free selling time and stop follow ups falling through.",
           meta: {
             primaryAiPattern: "Summarization",
             capabilityTags: ["Summarization", "Prompting"],
@@ -129,7 +129,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
           selectedUseCase: { id: 2, title: "Automatic claims routing", bucket: "Core", value: 72, effort: 48 },
           successMetric: { shape: "Reduce errors", baseline: "18% misrouted", target: "under 6%", coverage: "all inbound claims" },
           scores: { value: 76, feasibility: 70, dataReadiness: 78 },
-          valueHypothesis: "Right-first-time routing cuts rework and shortens claim cycle time.",
+          valueHypothesis: "Right first time routing cuts rework and shortens claim cycle time.",
           meta: {
             primaryAiPattern: "Classification",
             capabilityTags: ["Classification", "Training data"],
@@ -154,10 +154,10 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
           rawAmbition: "Help case managers pick the right care pathway with evidence in front of them.",
           sharpenedProblem: "Recommend a care pathway with cited policy evidence for every case, decided by a human. Prove it with one number: percent of recommendations accepted without rework.",
           params: { user: "Frontline staff", job: "Decide", pain: "Inconsistent", posture: "Scattered", risk: "Conservative" },
-          selectedUseCase: { id: 3, title: "Evidence-backed pathway recommendations", bucket: "Differentiators", value: 82, effort: 60 },
+          selectedUseCase: { id: 3, title: "Evidence backed pathway recommendations", bucket: "Differentiators", value: 82, effort: 60 },
           successMetric: { shape: "Reduce errors", baseline: "22% rework", target: "under 10%", coverage: "all managed cases" },
           scores: { value: 84, feasibility: 62, dataReadiness: 64 },
-          valueHypothesis: "Consistent, evidence-backed decisions reduce rework and escalations.",
+          valueHypothesis: "Consistent, evidence backed decisions reduce rework and escalations.",
           meta: {
             primaryAiPattern: "Decision support",
             capabilityTags: ["Retrieval", "Decision support"],
@@ -182,17 +182,17 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
           ...base.initiative,
           name: "Support operations agent",
           rawAmbition: "Let an agent handle the routine support workflow end to end, safely.",
-          sharpenedProblem: "Run the eligibility-check-and-draft workflow with tools, where every risky action needs approval and nothing external executes unreviewed. Prove it with one number: minutes of handling time per resolved case.",
+          sharpenedProblem: "Run the eligibility check and draft workflow with tools, where every risky action needs approval and nothing external executes unreviewed. Prove it with one number: minutes of handling time per resolved case.",
           params: { user: "Employees", job: "Orchestrate", pain: "Hard to scale", posture: "Rich & ready", risk: "Balanced" },
           selectedUseCase: { id: 4, title: "Governed support workflow agent", bucket: "Differentiators", value: 80, effort: 65 },
           successMetric: { shape: "Reduce time", baseline: "22 min/case", target: "under 8 min", coverage: "70% of routine cases" },
           scores: { value: 80, feasibility: 64, dataReadiness: 70 },
-          valueHypothesis: "Tool-using automation absorbs routine volume while approvals keep risk bounded.",
+          valueHypothesis: "Tool using automation absorbs routine volume while approvals keep risk bounded.",
           meta: {
             primaryAiPattern: "Agentic workflow",
             capabilityTags: ["Agentic workflow", "Tool calling", "Retrieval"],
             governanceTier: "High",
-            governanceTierRationale: "The agent proposes real actions, permission boundaries and approval gates are load-bearing.",
+            governanceTierRationale: "The agent proposes real actions, permission boundaries and approval gates are load bearing.",
             operationalCriticality: "High",
             humanReviewRequired: true,
             auditEvidenceRequired: true,

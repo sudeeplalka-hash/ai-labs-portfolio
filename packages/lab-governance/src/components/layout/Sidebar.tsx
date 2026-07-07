@@ -16,7 +16,7 @@ const GROUPS: { label: string; hint: string; items: { href: string; label: strin
   {
     label: 'Experiences', hint: 'Interactive demos',
     items: [
-      { href: '/arcade', label: 'Red-Team Arcade', icon: Swords },
+      { href: '/arcade', label: 'Red Team Arcade', icon: Swords },
       { href: '/value', label: 'Business Case', icon: Wallet },
       { href: '/maturity', label: 'Maturity Index', icon: Gauge },
     ],

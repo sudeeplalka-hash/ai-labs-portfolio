@@ -50,11 +50,11 @@ const SAMPLES: Sample[] = [
     ],
     attempt1: { intent: "status", amount_usd: "around 50", sentiment: "negative", priority: "med", summary: "Member reports possible unrecognized charges around $50." },
     errors: ["account_id: required key missing", "amount_usd: expected number|null, got string \"around 50\"", "needs_followup: required key missing"],
-    retryNote: "Re-prompt with the schema + the three errors: null unknown numerics, include every required key, and flag missing identifiers for human follow-up.",
-    final: { intent: "status", account_id: null, amount_usd: null, sentiment: "negative", priority: "med", needs_followup: true, summary: "Member reports possible unrecognized charges (~$50, unconfirmed); no account number provided, route to follow-up." },
+    retryNote: "Re prompt with the schema + the three errors: null unknown numerics, include every required key, and flag missing identifiers for human follow up.",
+    final: { intent: "status", account_id: null, amount_usd: null, sentiment: "negative", priority: "med", needs_followup: true, summary: "Member reports possible unrecognized charges (~$50, unconfirmed); no account number provided, route to follow up." },
   },
   {
-    key: "timeoff", label: "Time-off request", hard: false,
+    key: "timeoff", label: "Time off request", hard: false,
     raw: "Hey, I'd like to take next Mon to Fri (Aug 4 to 8) off for a family trip, that's 5 days. My ID is EMP-3391. Can my manager get a heads up? Thanks!",
     schema: [
       { name: "employee_id", type: "string", required: true },
@@ -100,21 +100,21 @@ export function StructuredOutput() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
+          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Tool use &amp; Structured Output</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Structured Output Reliability Gate</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02", note: "Authored illustrative extraction" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Getting JSON out of a model is easy. Getting <span className="font-semibold text-ink">valid</span> JSON, every
-            time, into a system of record is reliability engineering, schema, validation, and a corrective retry.
+            Getting JSON from a model is not the same as producing system ready output. This artifact shows the
+            validation gate required when model output flows into systems of record, workflow engines, or operational decisions.
           </p>
         </div>
 
         <UseCaseRail useCases={GAP04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="How do messy inputs become schema-valid outputs, reliably?" approach="Run messy inputs through a validation gate, schema check, repair/retry, honest typed errors, and watch what gets caught before it moves on." why="The gate belongs before outputs hit systems of record, not after." metric="Schema-valid rate at the gate; repair success rate; escapes downstream." tradeoff="A strict gate adds retries and latency; a loose one lets bad data write to systems of record." outcome="A clear answer on where to place the validation gate and how strict to make it." />
+        <CaseStudy problem="Enterprise systems cannot absorb malformed writes because a model response looked plausible. Structured output requires schema validation, error handling, corrective retry, and a clear decision about when to stop automation and escalate." approach="The artifact runs representative tasks through a schema validation workflow. It shows where raw model output fails, how a corrective retry repairs it, and what tradeoff the retry introduces." why="This connects model behavior to operational reliability, auditability, downstream system integrity, and the cost of failed automation." metric="Schema valid rate at the gate; repair success rate; escapes downstream." tradeoff="A strict gate adds retries and latency; a loose one lets bad data write to systems of record." outcome="A clear answer on where to place the validation gate and how strict to make it." />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {!activeUc && SAMPLES.map((x) => (
@@ -180,22 +180,22 @@ export function StructuredOutput() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Put a schema-validation and repair gate before any output writes to a system of record." lift="Near-zero malformed writes downstream, at a bounded retry cost." measure="Schema-valid rate at the gate; repair success rate; malformed records reaching systems of record." />
+          <OutcomeFrame call="Place a validation gate before any model output writes to a system of record." lift="Raises system ready output reliability through schema enforcement and corrective retry." measure="Validation pass rate, retry rate, failed write prevention, latency added, escalation rate." />
           <InsightCard title="The retry is the reliability" tone="info">
             The first pass is often almost-right, a string where a number belongs, a missing key. A validation gate with a
             single corrective retry turns "usually valid" into "always valid or explicitly flagged." That&apos;s the
             difference between a demo and production.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Where outputs feed systems of record, the validation gate is not optional. I place it between the model and the write."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "If model output updates a system of record, validation is not optional. It is a reliability control."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Each sample targets a JSON schema (typed, nullable, required keys). The output is validated key-by-key; on failure the errors are fed back in a corrective retry and re-validated.</p>
-              <p>Extractions are authored and deterministic (not live model output); the hard sample&apos;s first attempt is constructed to fail schema validation so the corrective retry is visible. A live-model variant is designed for but not wired today, so the badge stays SIMULATED.</p>
+              <p>Each sample targets a JSON schema (typed, nullable, required keys). The output is validated key by key; on failure the errors are fed back in a corrective retry and re validated.</p>
+              <p>Extractions are authored and deterministic (not live model output); the hard sample&apos;s first attempt is constructed to fail schema validation so the corrective retry is visible. A live model variant is designed for but not wired today, so the badge stays SIMULATED.</p>
               <p>Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> the extractions are authored illustrations, not live model output; custom text needs a live model (roadmap). Real deployments add a max-retry cap and a dead-letter path for repeated failures.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this model demonstrates validation behavior with authored tasks. Production use would require real schema contracts, logging, retry policies, exception handling, and system integration.</p>
         </div>
       </main>
     </div>

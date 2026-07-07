@@ -110,7 +110,7 @@ export function TraceExplorer() {
               <p className="text-lg font-semibold text-ink">
                 {(trace.timeline.reduce((a, s) => a + s.durationMs, 0) / 1000).toFixed(2)}s
               </p>
-              <p className="text-[11px] text-slatey-500">End-to-end across {trace.timeline.length} steps</p>
+              <p className="text-[11px] text-slatey-500">End to end across {trace.timeline.length} steps</p>
             </div>
           </div>
 

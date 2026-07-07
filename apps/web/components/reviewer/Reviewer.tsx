@@ -122,7 +122,7 @@ export function ContractLoop({ live, bare }: { live?: Partial<Record<string, str
     <div>
       {!bare && (
         <>
-          <p className="eyebrow">Contract-driven</p>
+          <p className="eyebrow">Contract driven</p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">The program loop is contract driven</h2>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">
             The stages aren&rsquo;t just visually connected. Each one emits a structured contract the next consumes through shared state.

@@ -26,8 +26,8 @@ const FACTORS: { key: FactorKey; label: string; weight: number; hint: string }[]
   { key: "sponsorship", label: "Sponsorship strength", weight: 0.25, hint: "Is a visible leader actively backing this?" },
   { key: "trust", label: "Trust in output", weight: 0.20, hint: "Do users believe the assist, and can they override?" },
   { key: "workflow", label: "Workflow fit", weight: 0.15, hint: "Does it live in the tool they already use?" },
-  { key: "training", label: "Training coverage", weight: 0.15, hint: "Role-based, or one all-hands and hope?" },
-  { key: "comms", label: "Comms quality", weight: 0.15, hint: "Two-way and fast, or broadcast-only?" },
+  { key: "training", label: "Training coverage", weight: 0.15, hint: "Role based, or one all hands and hope?" },
+  { key: "comms", label: "Comms quality", weight: 0.15, hint: "Two way and fast, or broadcast only?" },
   { key: "incentives", label: "Incentive alignment", weight: 0.10, hint: "Does the scorecard reward using it?" },
 ];
 
@@ -41,17 +41,17 @@ const POPULATIONS: { key: string; label: string; factors: Factors }[] = [
 ];
 
 const ACTION: Record<FactorKey, string> = {
-  sponsorship: "Lock a visible executive sponsor and a leader-led kickoff; a 5-minute sponsor message every week.",
-  trust: "Publish an accuracy scorecard and a one-click override; run a 'show your work' session with the loudest skeptics.",
-  workflow: "Redesign the two highest-friction steps and embed the assist in the existing tool, no new tab.",
-  training: "Role-based training waves, not an all-hands; certify floor champions first.",
-  comms: "Switch from broadcast to two-way: weekly office hours, a visible changelog, fixes shipped within days.",
-  incentives: "Fix the scorecard, reward assisted-handle quality, not raw handle time; drop the metric that punishes usage.",
+  sponsorship: "Lock a visible executive sponsor and a leader led kickoff; a 5 minute sponsor message every week.",
+  trust: "Publish an accuracy scorecard and a one click override; run a 'show your work' session with the loudest skeptics.",
+  workflow: "Redesign the two highest friction steps and embed the assist in the existing tool, no new tab.",
+  training: "Role based training waves, not an all hands; certify floor champions first.",
+  comms: "Switch from broadcast to two way: weekly office hours, a visible changelog, fixes shipped within days.",
+  incentives: "Fix the scorecard, reward assisted handle quality, not raw handle time; drop the metric that punishes usage.",
 };
 
 const SCENARIOS: { key: string; label: string; people: number; defaults: Factors }[] = [
   { key: "servicing", label: "AI assist · 900 servicing agents", people: 900, defaults: { sponsorship: 78, trust: 52, workflow: 64, training: 60, comms: 66, incentives: 45 } },
-  { key: "noc", label: "Network-ops copilot · 300 NOC engineers", people: 300, defaults: { sponsorship: 70, trust: 48, workflow: 58, training: 55, comms: 60, incentives: 50 } },
+  { key: "noc", label: "Network ops copilot · 300 NOC engineers", people: 300, defaults: { sponsorship: 70, trust: 48, workflow: 58, training: 55, comms: 60, incentives: 50 } },
 ];
 
 const FACTOR_KEYS = FACTORS.map((x) => x.key);
@@ -212,7 +212,7 @@ export function AdoptionReadiness() {
   };
   const exportActions: ExportAction[] = [
     { id: "csv", label: "Factor scores as CSV", hint: "Six factors + weights", onSelect: exportCsv },
-    { id: "json", label: "Export scenario (JSON)", hint: "Factors + assumptions, re-importable", onSelect: exportScenario },
+    { id: "json", label: "Export scenario (JSON)", hint: "Factors + assumptions, re importable", onSelect: exportScenario },
     { id: "import", label: "Import scenario (JSON)…", hint: "Load a saved .json", onSelect: importScenario },
     { id: "memo", label: "Readiness memo (Markdown)", hint: "The full memo", onSelect: onGenerate },
   ];
@@ -240,21 +240,21 @@ export function AdoptionReadiness() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Adoption &amp; Change Readiness</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Adoption Readiness Decision Instrument</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A pilot that works technically still dies if the people don&apos;t adopt it. Score the six factors that
-            decide adoption and the gate tells you whether to scale, and the plan tells you what to fix first.
+            A technically successful pilot can still fail when the people expected to use it do not trust it, understand
+            it, or see how it fits their work. This artifact turns adoption readiness into a measurable scale decision.
           </p>
         </div>
 
         <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Enterprise AI rarely fails on the model; it fails on the people who have to trust and use it. Scaling an unready rollout is the expensive mistake." approach="Six weighted readiness factors roll up to a normalized composite that drives a Scale / conditions / Hold gate, with a two-week plan that rewrites as the weakest factors move." why="A single adoption number hides the levers. Weighting the factors and exposing the gate cutoffs turns readiness into a decision, not a vibe." metric="The composite against the Scale cutoff, and the fewest factor-point moves required to clear it, highest-leverage factors first." tradeoff="Broad slow change-management vs minimal targeted moves; the flip-the-gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold-or-scale decision with a dated, sequenced plan to reach the gate, and an honest read on whether the rollout is ready at all." />
+        <CaseStudy problem="Enterprise AI adoption depends on more than model performance. Sponsors must remain aligned, users must trust the output, workflows must absorb the change, and managers must know what to reinforce. Scaling without readiness creates expensive resistance." approach="The instrument scores six adoption factors, weights them, compares the composite against gate thresholds, and generates the smallest set of moves required to reach scale readiness." why="This connects AI rollout decisions to adoption, trust, behavior change, productivity, support load, and realized value." metric="The composite against the Scale cutoff, and the fewest factor point moves required to clear it, highest leverage factors first." tradeoff="Broad slow change management vs minimal targeted moves; the flip the gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold or scale decision with a dated, sequenced plan to reach the gate, and an honest read on whether the rollout is ready at all." />
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's weights and gate cutoffs">
@@ -418,7 +418,7 @@ export function AdoptionReadiness() {
                         </li>
                       ))}
                     </ol>
-                    <p className="mt-2 text-[11px] text-slatey-500">The fewest total points to clear the gate &mdash; highest-leverage (highest-weight) factors first. Lands the composite at ~{gatePlan.projected}.</p>
+                    <p className="mt-2 text-[11px] text-slatey-500">The fewest total points to clear the gate &mdash; highest leverage (highest weight) factors first. Lands the composite at ~{gatePlan.projected}.</p>
                     <div className="mt-3">
                       <p className="stat-label mb-1">Projected path to Scale <span className="font-normal text-slatey-500">· as the moves land on the 2-week schedule</span></p>
                       {(() => {
@@ -457,7 +457,7 @@ export function AdoptionReadiness() {
             )}
 
             <Panel>
-              <p className="stat-label mb-2">Two-week adoption plan <span className="font-normal text-slatey-500">· sequenced</span></p>
+              <p className="stat-label mb-2">Two week adoption plan <span className="font-normal text-slatey-500">· sequenced</span></p>
               {planSpans.length > 0 && (
                 <div className="mb-3">
                   <div className="relative mb-1 h-3 text-[9px] text-slatey-500" style={{ marginLeft: 92 }}>
@@ -506,8 +506,8 @@ export function AdoptionReadiness() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Hold or scale per the readiness gate, and spend the two weeks on the fewest, highest-leverage factor moves." lift="Clears the Scale cutoff via the minimal point moves instead of a broad slow push, and avoids the expensive failure of scaling an unready rollout." measure="Actual adoption percent vs target; re-survey the six factors at 2 and 6 weeks; time-to-Scale; support and override rates as trust proxies." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : `The model was never the risk. The ${people} people who have to trust it were.`}</p>
+          <OutcomeFrame call="Scale, scale with conditions, or hold based on the adoption gate." lift="Improves rollout success by focusing on the few readiness levers that move the gate fastest." measure="Adoption rate, support volume, override rate, trust score, time to scale, readiness reassessment at 2 and 6 weeks." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : `The model may be ready before the organization is. Scale decisions need adoption evidence, not only technical confidence.`}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, Gen AI rollouts at AMEX; the adoption half of the 4.5× scale story.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
@@ -517,7 +517,7 @@ export function AdoptionReadiness() {
               <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> weights are defensible defaults, not calibrated against outcome data; scoring is judgment-based. The instrument structures the readiness conversation, it doesn&apos;t replace it.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled adoption instrument. Real rollout decisions would require user research, change analytics, operational data, manager feedback, and post launch measurement.</p>
         </div>
 
         <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Model assumptions">

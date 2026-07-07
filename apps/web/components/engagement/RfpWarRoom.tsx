@@ -1,9 +1,9 @@
 "use client";
 
-// EL-07 · RFP/RFI Response War Room (Collection 4 · control room · commercial wing).
+// EL-07 · RFP and Bid Decision War Room (Collection 4 · control room · commercial wing).
 // Decompose an RFP into a compliance matrix, set win themes, red-team the draft
-// against the RFP's own criteria, and land a bid / no-bid call from fit × win-prob
-// × capacity × margin floor. One sample is a deliberate no-bid, declining bad work
+// against the RFP's own criteria, and land a bid / no bid call from fit × win probability
+// × capacity × margin floor. One sample is a deliberate no bid, declining bad work
 // is senior judgment. SIMULATED.
 
 import { useState } from "react";
@@ -32,11 +32,11 @@ const STATUS_W: Record<Status, number> = { met: 1, partial: 0.5, gap: 0 };
 const RFPS: Rfp[] = [
   {
     key: "disputes", label: "Disputes automation program (finserv)",
-    excerpt: "Seeking a partner to deliver an AI-assisted disputes automation capability in a regulated environment. Must demonstrate proven RAG delivery, a named engagement manager, an AI governance framework, and a blended onshore/offshore model. 24-week fixed-price delivery with milestone acceptance.",
+    excerpt: "Seeking a partner to deliver an AI assisted disputes automation capability in a regulated environment. Must demonstrate proven RAG delivery, a named engagement manager, an AI governance framework, and a blended onshore/offshore model. 24 week fixed price delivery with milestone acceptance.",
     requirements: [
       { text: "Proven RAG delivery in regulated finserv", owner: "Delivery lead", evidence: "Disputes RAG case study", status: "met" },
-      { text: "Named EM, 4+ yrs client-facing delivery", owner: "Staffing", evidence: "EM profile + references", status: "met" },
-      { text: "Data & AI governance framework", owner: "Governance", evidence: "Risk-tiering + guardrails lab", status: "met" },
+      { text: "Named EM, 4+ yrs client facing delivery", owner: "Staffing", evidence: "EM profile + references", status: "met" },
+      { text: "Data & AI governance framework", owner: "Governance", evidence: "Risk tiering + guardrails lab", status: "met" },
       { text: "Blended onshore/offshore model", owner: "Resourcing", evidence: "Mobilization plan (draft)", status: "partial" },
       { text: "24-week fixed price with milestones", owner: "Commercial", evidence: "PERT estimate + change control", status: "partial" },
     ],
@@ -52,13 +52,13 @@ const RFPS: Rfp[] = [
   },
   {
     key: "greenfield", label: "Greenfield agentic platform (new domain)",
-    excerpt: "Fixed-price build of a production multiagent platform in a domain new to the bidder, delivered in 12 weeks with slip penalties. Client data available from week 4. Strong incumbent relationship in place. Lowest price weighted heavily.",
+    excerpt: "Fixed price build of a production multiagent platform in a domain new to the bidder, delivered in 12 weeks with slip penalties. Client data available from week 4. Strong incumbent relationship in place. Lowest price weighted heavily.",
     requirements: [
       { text: "Production multiagent platform in 12 weeks", owner: "Delivery", evidence: "N/A", status: "gap" },
       { text: "Fixed price with slip penalties", owner: "Commercial", evidence: "N/A", status: "gap" },
-      { text: "Deliver with data withheld until week 4", owner: "Data", evidence: "critical-path risk", status: "gap" },
+      { text: "Deliver with data withheld until week 4", owner: "Data", evidence: "critical path risk", status: "gap" },
       { text: "Displace a strong incumbent", owner: "Sales", evidence: "N/A", status: "gap" },
-      { text: "Domain expertise (net-new to us)", owner: "Delivery", evidence: "adjacent only", status: "partial" },
+      { text: "Domain expertise (net new to us)", owner: "Delivery", evidence: "adjacent only", status: "partial" },
     ],
     criteria: [
       { name: "Technical approach", weight: 0.30, score: 60 },
@@ -136,21 +136,21 @@ export function RfpWarRoom() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Commercial wing</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">RFP/RFI Response War Room</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">RFP and Bid Decision War Room</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Decompose the ask, red-team the response against the RFP&apos;s own scoring, and make the call. The RFPs you
-            decline fund the ones you win, bid/no-bid is a portfolio decision, not a reflex.
+            A strong pursuit discipline is not measured only by the opportunities a team chases. It is also measured by
+            the opportunities it declines. This artifact turns RFP response work into a structured bid or no bid decision.
           </p>
         </div>
 
         <UseCaseRail useCases={EL07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Should we even bid this, and where is the response weak?" approach="Score the opportunity on fit, win-probability, capacity, and margin, and find the weakest sections of the draft response." why="Bid/no-bid is a portfolio decision, not an enthusiasm decision." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no-bid call plus where to strengthen the response if you bid." />
+        <CaseStudy problem="Pursuing weak fit work consumes senior capacity, compresses delivery teams, and creates margin pressure. A disciplined bid decision weighs fit, win probability, capacity, margin, requirement coverage, and the quality of the story." approach="The war room decomposes an RFP into a compliance matrix, evaluates response strength, applies bid criteria, and produces a bid or no bid memo." why="This connects commercial strategy to delivery capacity, margin protection, proposal quality, and opportunity selection." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no bid call plus where to strengthen the response if you bid." />
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -188,11 +188,11 @@ export function RfpWarRoom() {
             </table>
           </Panel>
 
-          {/* Bid/no-bid */}
+          {/* Bid/no bid */}
           <div className="space-y-4">
             <Panel>
               <div className="flex items-center justify-between">
-                <p className="stat-label">Bid / no-bid</p>
+                <p className="stat-label">Bid / no bid</p>
                 <Badge tone={bid ? "emerald" : "rose"}>{bid ? "Bid" : "No-bid"}</Badge>
               </div>
               <div className="mt-3 space-y-2 text-xs">
@@ -211,7 +211,7 @@ export function RfpWarRoom() {
             </Panel>
 
             <Panel>
-              <p className="stat-label mb-2">Red-team scorecard <span className="font-normal text-slatey-500">· {redTeam}/100</span></p>
+              <p className="stat-label mb-2">Red team scorecard <span className="font-normal text-slatey-500">· {redTeam}/100</span></p>
               <div className="space-y-2">
                 {rfp.criteria.map((c) => (
                   <div key={c.name}>
@@ -230,22 +230,22 @@ export function RfpWarRoom() {
               ? <>Coverage {coverage}%, red-team {redTeam}/100, margin above floor. Pursue it and thread the win themes through every section the RFP scores.</>
               : <>Margin {rfp.marginPct}% sits below the {rfp.marginFloor}% floor and the pursuit score is {portfolio}. Chasing it burns senior time you owe the bids you can win. Decline, and say why in one paragraph.</>}
           </InsightCard>
-          <div className="mt-3"><ArtifactButton label={bid ? "Download the bid memo" : "Download the no-bid memo"} onClick={onGenerate} title="Download this bid/no-bid memo as Markdown" /></div>
+          <div className="mt-3"><ArtifactButton label={bid ? "Download the bid memo" : "Download the no bid memo"} onClick={onGenerate} title="Download this bid/no bid memo as Markdown" /></div>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Bid only where fit times win-probability times margin clears the bar and capacity exists; else no-bid." lift="Win-rate and margin improve by not chasing low-probability, low-fit bids." measure="Win rate on bids above the bar; margin on won work; capacity freed by no-bidding." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The RFPs you decline fund the ones you win. Bid/no-bid is a portfolio decision, not a reflex."}</p>
+          <OutcomeFrame call="Bid only when fit, win probability, capacity, and margin clear the threshold." lift="Protects delivery capacity and improves pursuit quality by avoiding weak fit work." measure="Pursuit score, requirement coverage, margin fit, win rate, proposal effort, capacity consumed." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The pursuits you decline create room for the pursuits you can win and deliver well."}</p>
           {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, $9M pipeline, the instrument of how a pipeline gets built, one qualified pursuit at a time.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Coverage = mean of requirement status (met 1 · partial 0.5 · gap 0). Red-team = Σ(criterion weight × score) against the RFP&apos;s own evaluation scheme.</p>
-              <p>Bid rule: margin ≥ floor AND pursuit score (fit × win-prob × capacity) ≥ 35. The second sample is engineered to fail both, the honest answer is no-bid.</p>
+              <p>Coverage = mean of requirement status (met 1 · partial 0.5 · gap 0). Red team = Σ(criterion weight × score) against the RFP&apos;s own evaluation scheme.</p>
+              <p>Bid rule: margin ≥ floor AND pursuit score (fit × win probability × capacity) ≥ 35. The second sample is engineered to fail both, the honest answer is no bid.</p>
               <p>Stack: Next.js (static) + shared design system; client side only.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> fit/win-prob/capacity are judgment inputs, not a CRM model; scoring is illustrative. It disciplines the qualify-and-decline decision, not the full proposal build.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled pursuit artifact. Real bid decisions would require client context, competitive intelligence, delivery estimates, pricing review, legal input, and executive judgment.</p>
         </div>
       </main>
     </div>

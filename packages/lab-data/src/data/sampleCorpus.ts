@@ -32,7 +32,7 @@ Expenses over $500 require manager approval.
 Expenses over $500 require manager approval.
 
 NOTE: This version was replaced by v3.1. Do not distribute.
-Contact travel-admin@example.com for the current policy.`;
+Contact travel admin@example.com for the current policy.`;
 
 const KB = `# Vendor Onboarding Knowledge Base
 
@@ -45,7 +45,7 @@ All vendors handling customer data complete a security questionnaire.
 Escalate exceptions to security@example.com.
 
 ## Payment terms
-Standard terms are Net 30. Early-payment discounts are negotiated case by case.`;
+Standard terms are Net 30. Early payment discounts are negotiated case by case.`;
 
 const CLEAN = `# Quarterly Engineering Update
 
@@ -53,7 +53,7 @@ Our retrieval quality improved meaningfully this quarter. We shipped hybrid
 search and a reranker, which together raised answer faithfulness.
 
 The main remaining risk is latency under peak load. We are evaluating a
-smaller reranker model to bring P95 back under the service-level target.
+smaller reranker model to bring P95 back under the service level target.
 
 Next quarter we will focus on citation accuracy and on reducing the number
 of stale documents that reach the index.`;
@@ -66,13 +66,13 @@ Patient: J. Doe    DOB: 1984-07-12
 MRN: 0048213
 Visit date: 2026-05-14
 
-Chief complaint: follow-up for type 2 diabetes.
+Chief complaint: follow up for type 2 diabetes.
 Assessment: ICD-10 E11.9 (type 2 diabetes mellitus without complications).
 Plan: continue metformin 500mg; recheck A1c in 3 months.
 
 Ordering provider: Dr. A. Smith, NPI 1234567890
-Controlled-substance authority: DEA AB1234563
-Billing contact: billing@riverside-health.example`;
+Controlled substance authority: DEA AB1234563
+Billing contact: billing@riverside health.example`;
 
 // A payments remittance with bank + card identifiers. Pairs well with the
 // Payments · PCI DSS and Finance profiles.
@@ -87,18 +87,18 @@ Invoice INV-4471 .... $12,400.00  paid 2026-04-02
 Invoice INV-4490 .... $ 3,150.00  paid 2026-04-18
 Card on file for expedited fees: 4111 1111 1111 1111
 
-Questions: ap@acme-supplies.example`;
+Questions: ap@acme supplies.example`;
 
 // A leaked .env config, secrets that should never reach an index.
 const SECRETS = `# deploy.env  (DO NOT COMMIT)
 # Pasted into the wiki by mistake, a sample of what NOT to ingest.
 
-AWS_ACCESS_KEY_ID=<redacted-fake-sample-not-a-real-key>
-STRIPE_SECRET_KEY=<redacted-fake-sample-not-a-real-key>
-GITHUB_TOKEN=<redacted-fake-sample-not-a-real-key>
-SLACK_BOT_TOKEN=<redacted-fake-sample-not-a-real-key>
+AWS_ACCESS_KEY_ID=<redacted fake sample not a real key>
+STRIPE_SECRET_KEY=<redacted fake sample not a real key>
+GITHUB_TOKEN=<redacted fake sample not a real key>
+SLACK_BOT_TOKEN=<redacted fake sample not a real key>
 
-DB_HOST=prod-db.internal
+DB_HOST=prod db.internal
 DB_USER=app
 # Reminder: rotate all of these before the next release.`;
 
@@ -109,7 +109,7 @@ export const SAMPLE_CORPUS: SampleFile[] = [
   { id: "secrets", name: "deploy.env", label: "Leaked config dump", blurb: "Live API keys & tokens that must never be ingested.", content: SECRETS },
   { id: "stale", name: "travel_policy_v2.7_legacy.txt", label: "Stale policy version", blurb: "Superseded version with repeated boilerplate.", content: STALE_POLICY },
   { id: "kb", name: "vendor_onboarding_kb.md", label: "Mixed knowledge base", blurb: "Mostly clean; needs metadata & sign off.", content: KB },
-  { id: "clean", name: "eng_update_q2.md", label: "Clean reference doc", blurb: "Well-formed, should clear the gate.", content: CLEAN },
+  { id: "clean", name: "eng_update_q2.md", label: "Clean reference doc", blurb: "Well formed, should clear the gate.", content: CLEAN },
 ];
 
 // The current version of the travel policy, a near-duplicate of the stale v2.7
@@ -125,7 +125,7 @@ Air travel must be booked in economy class for flights under 6 hours.
 Expenses over $500 require manager approval.
 
 This is the current, authoritative travel policy.
-Contact travel-admin@example.com for questions.`;
+Contact travel admin@example.com for questions.`;
 
 // A second copy of the CRM data under a different name, an exact DUPLICATE that
 // should never be embedded twice.

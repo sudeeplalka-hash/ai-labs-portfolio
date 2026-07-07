@@ -157,7 +157,7 @@ export function DocumentIntakePanel({
                 autoFocus
                 value={pasteText}
                 onChange={(e) => setPasteText(e.target.value)}
-                placeholder="Paste a policy, SOP, guide, or knowledge-base article…"
+                placeholder="Paste a policy, SOP, guide, or knowledge base article…"
                 rows={4}
                 className="w-full resize-y rounded-lg border border-line bg-navy-950/60 p-3 text-sm text-ink placeholder:text-slatey-600 focus:border-accent/50 focus:outline-none"
               />

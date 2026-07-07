@@ -26,7 +26,7 @@ export const RULEBOOK: Record<GuidelineId, Guideline> = {
   dedup: {
     id: "dedup",
     name: "De-duplication",
-    rule: "One authoritative copy per fact; near-duplicates are flagged.",
+    rule: "One authoritative copy per fact; near duplicates are flagged.",
     downstream: "Duplicates inflate retrieval frequency and bias the AI toward repeated content.",
   },
   freshness: {
@@ -39,7 +39,7 @@ export const RULEBOOK: Record<GuidelineId, Guideline> = {
     id: "privacy",
     name: "Privacy & PII",
     rule: "PII must be redacted or explicitly approved before embedding.",
-    downstream: "Anything embedded becomes retrievable, a privacy-gate failure in governance.",
+    downstream: "Anything embedded becomes retrievable, a privacy gate failure in governance.",
   },
   provenance: {
     id: "provenance",
@@ -57,7 +57,7 @@ export const RULEBOOK: Record<GuidelineId, Guideline> = {
     id: "chunk",
     name: "Chunk-readiness",
     rule: "Content segments cleanly within the embedding target band.",
-    downstream: "Oversized or boilerplate-heavy chunks degrade retrieval precision.",
+    downstream: "Oversized or boilerplate heavy chunks degrade retrieval precision.",
   },
 };
 

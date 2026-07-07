@@ -59,12 +59,12 @@ function AnswersDemo() {
       </Panel>
 
       <Panel>
-        <SectionHeader title="Claim-Level Verification (Example)" description={claimTrace.question} icon={ShieldCheck} />
+        <SectionHeader title="Claim Level Verification (Example)" description={claimTrace.question} icon={ShieldCheck} />
         <ClaimVerificationPanel claims={claimTrace.claimVerifications} />
       </Panel>
 
       <Panel>
-        <SectionHeader title="Answer Failure Examples" description="Subtle failures that answer-level scoring alone would miss." icon={AlertTriangle} />
+        <SectionHeader title="Answer Failure Examples" description="Subtle failures that answer level scoring alone would miss." icon={AlertTriangle} />
         <div className="grid gap-4 lg:grid-cols-2">
           {answerFailureExamples.map((ex) => (
             <div key={ex.id} className="rounded-lg border border-line bg-navy-850/50 p-4">

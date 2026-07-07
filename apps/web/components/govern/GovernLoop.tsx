@@ -86,7 +86,7 @@ export function GovernLoop() {
       ) : (
         <div className="rounded-xl border border-dashed border-line bg-slate-50/60 p-5">
           <p className="text-sm font-semibold text-ink">No live initiative loaded</p>
-          <p className="mt-1 text-sm text-slatey-400">Govern is showing sample governance data. Create or load an initiative in Strategy &amp; Planning to activate live, evidence-based governance for your initiative.</p>
+          <p className="mt-1 text-sm text-slatey-400">Govern is showing sample governance data. Create or load an initiative in Strategy &amp; Planning to activate live, evidence based governance for your initiative.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link href="/frame" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark"><ArrowRight className="h-4 w-4" /> Go to Strategy &amp; Planning</Link>
             <span className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-sm text-slatey-400">Continue with sample governance data below</span>

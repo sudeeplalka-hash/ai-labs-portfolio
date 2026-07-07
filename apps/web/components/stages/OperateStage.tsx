@@ -244,7 +244,7 @@ export function OperateStage() {
         <div className="space-y-4">
           {/* what you're looking at + the color key */}
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-slatey-400">Four dashboards a real on-call would watch. Hover any <span className="font-semibold text-slatey-300">i</span> for what it means and why it matters.</p>
+            <p className="text-xs text-slatey-400">Four dashboards a real on call would watch. Hover any <span className="font-semibold text-slatey-300">i</span> for what it means and why it matters.</p>
             <div className="flex flex-wrap items-center gap-3 text-[11px] text-slatey-500">
               <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" />healthy</span>
               <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" />watch</span>
@@ -418,7 +418,7 @@ export function OperateStage() {
           <Panel>
             <p className="stat-label mb-1">Where you are in the program</p>
             <div className="overflow-x-auto"><LifecycleLoop /></div>
-            <p className="text-[11px] text-slatey-500">Operate is the 7th stage, not the last: the evidence it gathers becomes the input to the next Frame. That bend-back is what turns a one-off project into a program.</p>
+            <p className="text-[11px] text-slatey-500">Operate is the 7th stage, not the last: the evidence it gathers becomes the input to the next Frame. That bend back is what turns a one off project into a program.</p>
           </Panel>
           {!feedback ? (
             <Panel>
@@ -503,7 +503,7 @@ export function OperateStage() {
           <div className="mt-2 space-y-1 text-xs leading-relaxed">
             <p>Series: seeded deterministic 12 week history (`deriveOpsSeries`), same initiative, same operations story. The canary baseline traces to Build&apos;s golden set faithfulness; SLOs are engineered to stay green while canary evals decay, because that divergence is the lesson.</p>
             <p>Detection: threshold + trend detectors (`detectSignals`) with the real world monitor named per signal; the staleness threshold tightens for high governance tiers.</p>
-            <p>The loop: a chosen remediation builds a typed feedback contract (`buildOperateFeedback`) routing to Frame / Build / Deploy, with value at risk computed for Realize and an evidence note for Govern. Engine is tested in `program-core` (determinism, detector logic, routing).</p>
+            <p>The loop: a chosen remediation builds a typed feedback contract (`buildOperateFeedback`) routing to Frame / Build / Deploy, with value at risk computed for Realize and an evidence note for Govern. Engine is tested in `program core` (determinism, detector logic, routing).</p>
           </div>
         </details>
         <p className="text-xs text-slatey-500">

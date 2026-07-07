@@ -1,7 +1,7 @@
 "use client";
 
-// C3-3 · Inference Cost Forecaster (Collection 3 · gallery).
-// Portfolio-level run-rate over 24 months: API (grows with volume) vs self-host
+// C3-3 · Inference Run Rate Forecaster (Collection 3 · gallery).
+// Portfolio-level run rate over 24 months: API (grows with volume) vs self-host
 // (fixed capacity that steps up), with the crossover CLIFF marked. Self-host cost =
 // hardware amortization + utilization + ops headcount, all visible. Distinct
 // altitude from GAP-06 (portfolio vs per-call). SIMULATED, stated formulas.
@@ -70,7 +70,7 @@ export function InferenceForecaster() {
     toast("Scenario exported as JSON");
   };
   const exportActions: ExportAction[] = [
-    { id: "csv", label: "24-month forecast (CSV)", hint: "API vs self-host per month", onSelect: exportForecast },
+    { id: "csv", label: "24-month forecast (CSV)", hint: "API vs self host per month", onSelect: exportForecast },
     { id: "scn", label: "Export scenario (JSON)", hint: "All assumptions", onSelect: exportScenario },
   ];
   const paletteCommands: Command[] = [
@@ -93,22 +93,22 @@ export function InferenceForecaster() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Business of AI · Gallery</p>
+          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Inference Cost Forecaster</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Inference Run Rate Forecaster</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Portfolio-level, 24 months out. API scales linearly with volume; self-host is fixed capacity that steps up.
-            Where they cross is the cliff, and utilization decides where it lands. (Per-call economics live in{" "}
+            Inference strategy is a run rate decision. This artifact compares API based usage and self hosted capacity
+            over time, then identifies where the economics cross and which assumption moves the crossover most. (Per-call economics live in{" "}
             <Link href="/agents/cost-simulator" className="font-medium text-primary hover:underline">GAP-06</Link>.)
           </p>
         </div>
 
         <UseCaseRail useCases={C33_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="When does self-hosting actually undercut API spend?" approach="Project API versus self-host run-rate over 24 months, mark the crossover, and test which single assumption pulls it forward." why="Utilization decides the crossover, not the sticker price a vendor quotes." metric="The crossover month; 24-month cumulative cost each way." tradeoff="API is flexible pay-per-use; self-host is fixed capacity that only amortizes past the crossover." outcome="The crossover month with the assumption that moves it most made explicit." />
+        <CaseStudy problem="API usage offers flexibility, but cost scales with volume. Self hosting can reduce marginal cost after utilization reaches the right level, but it introduces fixed capacity, operations, infrastructure, and talent requirements, and the decision depends on utilization more than sticker price." approach="The forecaster projects API and self hosted costs across 24 months. It marks the crossover point and shows how growth, token volume, frontier model share, utilization, and staffing assumptions move the decision." why="This connects AI operating strategy to budget planning, unit economics, platform investment, infrastructure commitments, and cost governance." metric="The crossover month; 24-month cumulative cost each way." tradeoff="API is flexible pay per use; self host is fixed capacity that only amortizes past the crossover." outcome="The crossover month with the assumption that moves it most made explicit." />
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Inputs */}
@@ -117,7 +117,7 @@ export function InferenceForecaster() {
             <Slider label="Monthly growth" value={growth} min={0} max={20} step={1} onChange={setGrowth} fmt={(v) => `${v}%`} accent="amber" />
             <Slider label="Tokens / call" value={tokensPerCall} min={500} max={8000} step={100} onChange={setTokensPerCall} fmt={(v) => v.toLocaleString()} accent="amber" />
             <Slider label="Share on frontier model" value={frontierShare} min={0} max={100} step={5} onChange={setFrontierShare} fmt={(v) => `${v}%`} accent="amber" />
-            <Slider label="Self-host utilization" value={util} min={20} max={95} step={5} onChange={setUtil} fmt={(v) => `${v}%`} accent="teal" />
+            <Slider label="Self host utilization" value={util} min={20} max={95} step={5} onChange={setUtil} fmt={(v) => `${v}%`} accent="teal" />
             <Slider label="Ops headcount (FTE)" value={opsFte} min={0.5} max={5} step={0.5} onChange={setOpsFte} fmt={(v) => `${v}`} accent="teal" />
           </Panel>
 
@@ -125,14 +125,14 @@ export function InferenceForecaster() {
           <div className="space-y-4">
             <Panel>
               <div className="mb-2 flex items-center justify-between">
-                <p className="stat-label">Monthly run-rate · 24 months</p>
+                <p className="stat-label">Monthly run rate · 24 months</p>
                 <div className="flex gap-3 text-[11px]">
                   <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-rose-500" /> API</span>
-                  <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-teal-600" /> Self-host</span>
+                  <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-teal-600" /> Self host</span>
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[520px]" role="img" aria-label="API vs self-host monthly run-rate over 24 months">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[520px]" role="img" aria-label="API vs self-host monthly run rate over 24 months">
                   <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#e4e7eb" />
                   <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#e4e7eb" />
                   {cliff > 0 && (
@@ -155,11 +155,11 @@ export function InferenceForecaster() {
             <div className="grid grid-cols-3 gap-3">
               <KpiCard label="The cliff" value={cliff > 0 ? `Mo ${cliff + 1}` : "N/A"} tone={cliff > 0 ? "watch" : "healthy"} interpretation={cliff > 0 ? "Self-host undercuts API" : "Beyond 24 mo"} />
               <KpiCard label="API · 24-mo total" value={fmt(apiCum)} tone="neutral" interpretation="Cumulative" />
-              <KpiCard label="Self-host · 24-mo total" value={fmt(selfCum)} tone="neutral" interpretation="Cumulative" />
+              <KpiCard label="Self host · 24 mo total" value={fmt(selfCum)} tone="neutral" interpretation="Cumulative" />
             </div>
 
             <Panel>
-              <p className="stat-label mb-2">What pulls the break-even forward <span className="font-normal text-slatey-500">· crossover under each single move</span></p>
+              <p className="stat-label mb-2">What pulls the break even forward <span className="font-normal text-slatey-500">· crossover under each single move</span></p>
               <ul className="space-y-1.5">
                 {sensitivity.map((lv) => (
                   <li key={lv.key} className="flex items-center justify-between gap-2 rounded-md border border-line px-2.5 py-1.5 text-xs">
@@ -172,7 +172,7 @@ export function InferenceForecaster() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed &mdash; earlier (green) means self-host pays off sooner.</p>
+              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed &mdash; earlier (green) means self host pays off sooner.</p>
             </Panel>
           </div>
         </div>
@@ -181,22 +181,22 @@ export function InferenceForecaster() {
           <InsightCard title={cliff > 0 ? `The cliff is at month ${cliff + 1}` : "No cliff inside 24 months"} tone={cliff > 0 ? "warn" : "success"}>
             {cliff > 0
               ? <>Below month {cliff + 1}, API&apos;s pay-per-use wins; above it, fixed capacity amortizes. Now drop utilization, the cliff slides right. Idle GPUs are the cost vendors leave out of the pitch.</>
-              : <>At these assumptions API stays cheaper for all 24 months. Raise growth or lower the frontier-model share to bring a cliff into view, or accept that self-host doesn&apos;t pay yet.</>}
+              : <>At these assumptions API stays cheaper for all 24 months. Raise growth or lower the frontier model share to bring a cliff into view, or accept that self host doesn&apos;t pay yet.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Stay on API until the crossover, then revisit self-host, and track utilization, the lever that decides it." lift="Avoid premature capex; capture the self-host saving only after the crossover is real." measure="Actual $/mo vs the projection; utilization vs assumed; the crossover re-computed monthly." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The cliff is real but further out than vendors say, utilization assumptions decide it, not sticker price."}</p>
+          <OutcomeFrame call="Revisit inference strategy when volume and utilization make the run rate materially different from the pilot economics." lift="Avoids both premature self hosting and uncontrolled API spend." measure="Monthly run rate, cumulative 24 month cost, utilization, cost per task, crossover month." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The crossover is not decided by vendor claims. It is decided by utilization, growth, and the share of workloads that truly need higher cost models."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built &amp; assumptions</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
               <p>API/mo = volume × tokens/call × blended price (${CHEAP_PRICE} to ${FRONTIER_PRICE}/1M tokens by frontier share). Volume compounds at the monthly growth rate.</p>
-              <p>Self-host/mo = ⌈tokens ÷ (cluster capacity {(CLUSTER_CAP_TOKENS / 1e9).toFixed(1)}B × utilization)⌉ × ${(CLUSTER_COST / 1000)}k amortized + ops FTE × ${(OPS_COST_PER_FTE / 1000)}k. The cliff is the first month self-host &lt; API.</p>
+              <p>Self host/mo = ⌈tokens ÷ (cluster capacity {(CLUSTER_CAP_TOKENS / 1e9).toFixed(1)}B × utilization)⌉ × ${(CLUSTER_COST / 1000)}k amortized + ops FTE × ${(OPS_COST_PER_FTE / 1000)}k. The cliff is the first month self-host &lt; API.</p>
               <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> cluster capacity, amortization, and ops load are illustrative defaults; real forecasts need your hardware, contracts, and utilization telemetry. It finds the crossover&apos;s shape, not the exact date.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this model uses simplified cost assumptions. Production forecasting would require current pricing, workload profiles, infrastructure benchmarks, reliability requirements, and finance approved cost allocation.</p>
         </div>
       </main>
       <ToastHost />

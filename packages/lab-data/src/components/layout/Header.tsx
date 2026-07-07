@@ -18,7 +18,7 @@ const TITLES: Record<string, { title: string; subtitle: string }> = {
   },
   "/pipeline": {
     title: "Technical Pipeline",
-    subtitle: "Stage-by-stage detail of the preparation engine and the latest batch.",
+    subtitle: "Stage by stage detail of the preparation engine and the latest batch.",
   },
   "/guide": {
     title: "Prep & Guidelines Guide",

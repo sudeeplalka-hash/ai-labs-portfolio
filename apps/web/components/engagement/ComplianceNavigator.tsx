@@ -2,7 +2,7 @@
 
 // EL-05 · AI Compliance Readiness Navigator (Collection 4 · control room).
 // Describe an initiative → EU AI Act risk tier (+ finserv overlay) → required
-// controls, gap-highlighted → audit-readiness checklist. Compliance isn't an end
+// controls, gap highlighted → audit readiness checklist. Compliance isn't an end
 // gate; it's a design input, retrofit costs 10×. SIMULATED · illustrative, not
 // legal advice · classification logic as of July 2026 (obligations phasing in).
 
@@ -25,7 +25,7 @@ const TIER_TONE: Record<Tier, BadgeTone> = { prohibited: "rose", high: "orange",
 const FUNCTIONS: { key: string; label: string; base: Tier }[] = [
   { key: "credit", label: "Credit / eligibility decisioning", base: "high" },
   { key: "fraud", label: "Fraud / risk scoring", base: "high" },
-  { key: "assist_ext", label: "Customer-facing assistant", base: "limited" },
+  { key: "assist_ext", label: "Customer facing assistant", base: "limited" },
   { key: "content", label: "Content generation", base: "limited" },
   { key: "assist_int", label: "Internal employee assist", base: "minimal" },
   { key: "biometric", label: "Biometric / social scoring", base: "prohibited" },
@@ -42,14 +42,14 @@ function controlsFor(tier: Tier, finserv: boolean, content: boolean): Control[] 
       { label: "Risk management system (documented, iterative)", met: false },
       { label: "Data governance & quality controls", met: true },
       { label: "Technical documentation", met: false },
-      { label: "Record-keeping / event logging", met: true },
+      { label: "Record keeping / event logging", met: true },
       { label: "Human oversight design", met: true },
       { label: "Accuracy, robustness & cybersecurity", met: false },
       { label: "Transparency to affected users", met: true },
       { label: "Conformity assessment", met: false },
-      { label: "Post-market monitoring", met: false },
+      { label: "Post market monitoring", met: false },
     ];
-    if (finserv) base.push({ label: "Model risk management (SR 11-7 style)", met: false }, { label: "Fair-lending / bias testing", met: true });
+    if (finserv) base.push({ label: "Model risk management (SR 11-7 style)", met: false }, { label: "Fair lending / bias testing", met: true });
     return base;
   }
   if (tier === "limited") {
@@ -58,8 +58,8 @@ function controlsFor(tier: Tier, finserv: boolean, content: boolean): Control[] 
       { label: "Interaction logging", met: true },
       { label: "Lightweight human oversight / escalation", met: false },
     ];
-    if (content) base.push({ label: "Label AI-generated content", met: false });
-    if (finserv) base.push({ label: "Fair-treatment / bias check", met: true });
+    if (content) base.push({ label: "Label AI generated content", met: false });
+    if (finserv) base.push({ label: "Fair treatment / bias check", met: true });
     return base;
   }
   return [
@@ -109,7 +109,7 @@ export function ComplianceNavigator() {
     const fnLabel = activeUc ? activeUc.payload.fnLabel : (FUNCTIONS.find((f) => f.key === fn)?.label ?? fn);
     const gapsList = controls.filter((c) => !c.met);
     return [
-      "# AI Compliance, audit-readiness packet",
+      "# AI Compliance, audit readiness packet",
       "",
       `**Function:** ${fnLabel}`,
       `**Classification:** ${TIER_LABEL[tier]}`,
@@ -135,7 +135,7 @@ export function ComplianceNavigator() {
     ].join("\n");
   };
   const onGenerate = () =>
-    downloadMarkdown(`audit-readiness-${activeUc ? activeUc.id : fn}`, buildAuditPacket(), {
+    downloadMarkdown(`audit readiness-${activeUc ? activeUc.id : fn}`, buildAuditPacket(), {
       scenario: `${activeUc ? activeUc.payload.fnLabel : (FUNCTIONS.find((f) => f.key === fn)?.label ?? fn)} · ${TIER_LABEL[tier]}`,
       note: "Illustrative simplified compliance model as of July 2026, not legal advice.",
     });
@@ -151,22 +151,22 @@ export function ComplianceNavigator() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Engagement Leadership · Control room</p>
+          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight text-ink">AI Compliance Readiness Navigator</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02", asOf: "2026-07", note: "EU AI Act obligations phasing in" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Classify the initiative, see the controls its tier demands, and measure how ready you are, because compliance
-            found at the end costs ten times what it costs as a design input. Bridges the{" "}
+            AI compliance is most expensive when it is discovered late. This artifact shows how risk tiering, autonomy,
+            data sensitivity, rights impact, and industry context can shape required controls before delivery proceeds too far. Bridges the{" "}
             <Link href="/govern" className="font-medium text-primary hover:underline">Govern stage</Link>.
           </p>
         </div>
 
         <UseCaseRail useCases={EL05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="What tier is this AI, and what controls does it owe?" approach="Classify the system's risk tier under the EU AI Act plus finserv overlays, then map the required controls and the coverage gap." why="The controls owed follow the tier, not the team's enthusiasm." metric="Risk tier; control coverage versus what the tier requires." tradeoff="Control burden and time-to-market versus regulatory and reputational exposure." outcome="A risk-tier and required-controls map with the gap to close before go-live." />
+        <CaseStudy problem="AI initiatives need control requirements early enough to influence scope, data handling, review design, documentation, and release planning. Treating compliance as an end gate creates avoidable rework and risk." approach="The navigator classifies representative AI functions into simplified risk tiers, applies selected overlays, maps required controls, identifies gaps, and produces an audit readiness view." why="This connects AI delivery to regulatory exposure, auditability, control design, release readiness, and risk ownership." metric="Risk tier; control coverage versus what the tier requires." tradeoff="Control burden and time to market versus regulatory and reputational exposure." outcome="A risk tier and required controls map with the gap to close before go live." />
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Inputs */}
@@ -219,8 +219,8 @@ export function ComplianceNavigator() {
               </ul>
               {tier !== "prohibited" && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <ArtifactButton label="Download the audit packet" onClick={onGenerate} title="Download this audit-readiness packet as Markdown" />
-                  <span className="text-[11px] text-slatey-500">or print this page (⌘/Ctrl-P) for a PDF.</span>
+                  <ArtifactButton label="Download the audit packet" onClick={onGenerate} title="Download this audit readiness packet as Markdown" />
+                  <span className="text-[11px] text-slatey-500">or print this page (⌘/Ctrl P) for a PDF.</span>
                 </div>
               )}
             </Panel>
@@ -231,22 +231,22 @@ export function ComplianceNavigator() {
           <InsightCard title={tier === "prohibited" ? "Stop, prohibited practice" : `${controls.filter((c) => !c.met).length} controls still open`} tone={tier === "prohibited" || readiness < 50 ? "danger" : readiness < 80 ? "warn" : "success"}>
             {tier === "prohibited"
               ? "This class of use isn't a compliance project, it's a no-go. Rescope the function before anything else."
-              : <>Every open control here is cheaper to design in now than to retrofit after launch. Sequence the gaps into the build plan, not a pre-launch scramble.</>}
+              : <>Every open control here is cheaper to design in now than to retrofit after launch. Sequence the gaps into the build plan, not a pre launch scramble.</>}
           </InsightCard>
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Classify the system's tier and close the required-control gaps before go-live." lift="Enter production with tier-appropriate controls in place, not a post-audit scramble." measure="Control coverage vs the tier's requirement; audit findings; time-to-close on gaps." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Compliance isn't a gate at the end; it's a design input at the start. Retrofit costs 10×."}</p>
-          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, regulated-industry delivery across AMEX, Morgan Stanley, and S&P/CRISIL.</p>}
+          <OutcomeFrame call="Identify the risk tier and required controls before delivery commits to a release path." lift="Reduces late compliance rework by embedding control thinking into solution design." measure="Control coverage, unresolved gaps, audit readiness, time to compliance review, release blockers." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Compliance is not a gate at the end. It is a design input at the start."}</p>
+          {!activeUc && <p className="text-xs italic text-slatey-500">Resume echo, regulated industry delivery across AMEX, Morgan Stanley, and S&P/CRISIL.</p>}
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Tier = the function&apos;s base class, escalated by rights-affecting impact and by sensitive-data + autonomy. Controls are the tier&apos;s obligations (EU AI Act structure) plus a finserv overlay when data is sensitive; readiness = controls in place ÷ required.</p>
+              <p>Tier = the function&apos;s base class, escalated by rights affecting impact and by sensitive data + autonomy. Controls are the tier&apos;s obligations (EU AI Act structure) plus a finserv overlay when data is sensitive; readiness = controls in place ÷ required.</p>
               <p>Classification logic dated July 2026 as obligations phase in. Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"><span className="font-semibold">Illustrative, not legal advice.</span> Tiers and controls are a simplified model as of July 2026; confirm classification and obligations with counsel for any real deployment.</p>
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"><span className="font-semibold">Illustrative, not legal advice.</span> The tiering and controls are simplified for portfolio demonstration and should be validated with counsel, risk, compliance, and policy owners for any real deployment.</p>
         </div>
       </main>
     </div>

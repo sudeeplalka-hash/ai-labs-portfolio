@@ -16,7 +16,7 @@ function FailuresDemo() {
     <div className="space-y-6">
             <div className="grid gap-6 lg:grid-cols-2">
         <Panel>
-          <SectionHeader title="Failures by Category" description="Colored by severity. Citation and stale-source errors dominate." icon={AlertTriangle} />
+          <SectionHeader title="Failures by Category" description="Colored by severity. Citation and stale source errors dominate." icon={AlertTriangle} />
           <FailureCategoryChart />
         </Panel>
         <Panel>
@@ -34,7 +34,7 @@ function FailuresDemo() {
       </div>
 
       <Panel>
-        <SectionHeader title="Root Cause Insights" description="The three highest-volume failure patterns and how to resolve them." icon={Wrench} />
+        <SectionHeader title="Root Cause Insights" description="The three highest volume failure patterns and how to resolve them." icon={Wrench} />
         <div className="grid gap-4 md:grid-cols-3">
           {topRootCauses.map((c) => (
             <div key={c.id} className="rounded-lg border border-line bg-navy-850/50 p-4">

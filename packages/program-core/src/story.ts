@@ -210,7 +210,7 @@ export const STORY_SPINE: StoryBeat[] = [
       const roi = num(s.outcomes?.roi);
       const pay = num(s.outcomes?.paybackMonths);
       const out: StoryHeadline[] = [];
-      out.push({ label: "Risk-adj. value", value: rav !== null ? `${usd(rav)}/yr` : DASH, tone: rav !== null ? (rav > 0 ? "healthy" : "risk") : "neutral" });
+      out.push({ label: "Risk adj. value", value: rav !== null ? `${usd(rav)}/yr` : DASH, tone: rav !== null ? (rav > 0 ? "healthy" : "risk") : "neutral" });
       if (roi !== null) out.push({ label: "ROI", value: `${Math.round(roi)}%`, tone: roi > 50 ? "healthy" : roi > 0 ? "watch" : "risk" });
       if (pay !== null && isFinite(pay)) out.push({ label: "Payback", value: `${pay}mo`, tone: pay <= 12 ? "healthy" : pay <= 24 ? "watch" : "risk" });
       return out;

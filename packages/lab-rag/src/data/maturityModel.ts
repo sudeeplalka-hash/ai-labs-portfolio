@@ -57,7 +57,7 @@ export const maturityLevels: MaturityLevel[] = [
   {
     level: 5,
     name: "Enterprise Scale",
-    description: "The system is audit-ready, policy-driven, continuously monitored, and connected to business outcomes across multiple domains.",
+    description: "The system is audit ready, policy driven, continuously monitored, and connected to business outcomes across multiple domains.",
     capabilities: ["Automated quality gates in CI/CD", "Audit-ready evidence packages", "Business KPI linkage", "Policy-driven controls", "Cross-domain governance", "Automated drift detection", "Continuous improvement flywheel"],
   },
 ];
@@ -65,15 +65,15 @@ export const maturityLevels: MaturityLevel[] = [
 export const productionReadinessChecklist: ChecklistItem[] = [
   { id: "pr-1", item: "Golden dataset covering high risk and critical domains", status: "Complete", notes: "50 cases across 8 domains with risk and difficulty labels." },
   { id: "pr-2", item: "Automated evaluation with regression detection", status: "Complete", notes: "Six runs compared; regression rules applied automatically." },
-  { id: "pr-3", item: "Claim-level verification of answers", status: "Complete", notes: "Claims scored as supported, unsupported, or contradicted." },
+  { id: "pr-3", item: "Claim level verification of answers", status: "Complete", notes: "Claims scored as supported, unsupported, or contradicted." },
   { id: "pr-4", item: "Quality gates wired into the release decision", status: "Complete", notes: "Eight gates evaluated; release recommendation derived from gate status." },
-  { id: "pr-5", item: "Citation accuracy at or above 85%", status: "In Progress", notes: "Currently 82%. Claim-to-evidence overlap check in development." },
+  { id: "pr-5", item: "Citation accuracy at or above 85%", status: "In Progress", notes: "Currently 82%. Claim to evidence overlap check in development." },
   { id: "pr-6", item: "Zero critical hallucination failures", status: "In Progress", notes: "One critical compliance failure remains open." },
   { id: "pr-7", item: "P95 latency within the 4s SLA", status: "In Progress", notes: "Currently 4.25s after reranker rollout; optimization planned." },
   { id: "pr-8", item: "Continuous monitoring on live traffic", status: "Not Started", notes: "Requires trace collector and metrics store integration." },
-  { id: "pr-9", item: "CI/CD-integrated regression gates", status: "Not Started", notes: "Gates defined but not yet enforced in the pipeline." },
+  { id: "pr-9", item: "CI/CD integrated regression gates", status: "Not Started", notes: "Gates defined but not yet enforced in the pipeline." },
   { id: "pr-10", item: "Operational human review workflow", status: "Not Started", notes: "Review is simulated in v1; queue and SLAs not yet operational." },
-  { id: "pr-11", item: "Audit-ready governance evidence package", status: "Not Started", notes: "Evidence is viewable in-app but not exportable for audit." },
+  { id: "pr-11", item: "Audit ready governance evidence package", status: "Not Started", notes: "Evidence is viewable in app but not exportable for audit." },
 ];
 
 export const nextInvestments = [

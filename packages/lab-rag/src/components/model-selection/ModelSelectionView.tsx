@@ -22,7 +22,7 @@ const CHOICE_KEY = "apcc_model_choice";
 const DEPLOY_ICON: Record<Deployment, React.ComponentType<{ className?: string }>> = {
   "Hosted API": Cloud,
   "Regional hosted": Globe,
-  "Self-hosted (VPC / on-prem)": Server,
+  "Self hosted (VPC / on prem)": Server,
 };
 
 function fitColor(fit: number) {
@@ -127,7 +127,7 @@ export function ModelSelectionView() {
         <SectionHeader
           icon={SlidersHorizontal}
           title="What matters most for this initiative?"
-          description="Pick a priority profile, the ranking re-weights live. There's no universally best model, only the best fit for your constraints. Fine tune the criterion weights below, or inspect the full matrix at the bottom."
+          description="Pick a priority profile, the ranking re weights live. There's no universally best model, only the best fit for your constraints. Fine tune the criterion weights below, or inspect the full matrix at the bottom."
         />
 
         <div className="flex flex-wrap gap-2">

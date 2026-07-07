@@ -26,6 +26,6 @@ export const qualityTradeoffs = [
 
 export const opsRecommendations = [
   { id: "or-1", title: "Bring P95 latency under the 4s SLA", severity: "High", detail: "Reranking added ~700ms and pushed P95 to 4.25s. Cache reranker scores for repeat queries and reduce rerank candidate count from 50 to 30." },
-  { id: "or-2", title: "Raise cache hit rate", severity: "Medium", detail: "Cache hit rate climbed to 46% but most policy lookups are repetitive. A normalized-query cache could push this above 60% and cut both latency and cost." },
-  { id: "or-3", title: "Hold cost per query under target", severity: "Low", detail: "At $0.042 the system is under the $0.045 target, but adding more evaluation passes will erode the margin. Sample evaluation on low-risk traffic." },
+  { id: "or-2", title: "Raise cache hit rate", severity: "Medium", detail: "Cache hit rate climbed to 46% but most policy lookups are repetitive. A normalized query cache could push this above 60% and cut both latency and cost." },
+  { id: "or-3", title: "Hold cost per query under target", severity: "Low", detail: "At $0.042 the system is under the $0.045 target, but adding more evaluation passes will erode the margin. Sample evaluation on low risk traffic." },
 ];

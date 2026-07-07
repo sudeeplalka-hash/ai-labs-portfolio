@@ -76,7 +76,7 @@ const FAILS: Record<string, Step[]> = {
   halluc: [
     { role: "failure", label: "Hallucinated args", detail: "open_dispute(account_id=\"UNKNOWN\", amount=\"around 50\")" },
     { role: "detect", label: "Detection signal", detail: "Monitor: argument schema validation failed / unknown entity" },
-    { role: "recover", label: "Recovery policy", detail: "Reject at the gate, re-ask with the schema (see GAP-04 Structured Output)" },
+    { role: "recover", label: "Recovery policy", detail: "Reject at the gate, re ask with the schema (see GAP-04 Structured Output)" },
   ],
   overflow: [
     { role: "failure", label: "Context overflow", detail: "assembled context 142k tokens > 128k window" },
@@ -130,20 +130,20 @@ export function LoopInspector() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Agent &amp; Protocol · Toolkit</p>
+          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Agent Loop &amp; Failure Inspector</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Agent Failure and Recovery Inspector</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? `${activeUc.payload.taskLine} Step the loop and watch the characteristic failure, its detection signal, and the recovery policy fire.` : "Task: resolve a card dispute end-to-end. Step the loop, restructure it by architecture, then inject a failure, the failure, its detection signal, and the recovery policy are the part you actually budget for."}
+            {activeUc ? `${activeUc.payload.taskLine} Step the loop and watch the characteristic failure, its detection signal, and the recovery policy fire.` : "An agent is not only a reasoning loop. It is a system that can fail through tool errors, loops, malformed arguments, missing context, and overloaded memory. This artifact shows how those failures appear and what must exist around the agent to catch and recover from them."}
           </p>
         </div>
 
         <UseCaseRail useCases={GAP02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="How do agents fail, and what actually catches it?" approach="Step through an agent loop and surface the failure taxonomy, looping, wrong tool, hallucinated arguments, never-stopping, and where an observability harness catches each." why="You budget observability against how agents actually fail, not against a generic checklist." metric="Failure classes caught vs escaped; harness coverage of the taxonomy." tradeoff="A richer harness costs money and latency; an un-instrumented failure reaches a system of record." outcome="A defensible observability-harness budget tied to the failure modes that actually occur." />
+        <CaseStudy problem="Enterprise teams often discuss agents as if autonomy is the main decision. The more important decision is whether the organization has the harness required to observe, interrupt, retry, escalate, or roll back agent behavior when it drifts." approach="The inspector steps through single agent, orchestrator worker, and evaluator optimizer patterns. For each architecture, it shows how specific failures are detected, what recovery policy applies, and what latency or operational overhead the control introduces." why="This connects agent architecture to reliability, control cost, incident exposure, and the support model required to operate autonomous workflows safely." metric="Failure classes caught vs escaped; harness coverage of the taxonomy." tradeoff="A richer harness costs money and latency; an un instrumented failure reaches a system of record." outcome="A defensible observability harness budget tied to the failure modes that actually occur." />
 
         {!activeUc && (
         <div className="mb-4 grid gap-3 md:grid-cols-2">
@@ -207,12 +207,12 @@ export function LoopInspector() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Budget the observability harness to the failure classes this agent actually exhibits." lift="Catch the majority of agent failures before they reach a system of record." measure="Failure-class coverage; mean time to detect; incidents traced to an un-instrumented failure mode." />
+          <OutcomeFrame call="Size the observability and recovery harness to the actual failure modes of the chosen architecture." lift="Reduces uncontrolled agent behavior by pairing each failure mode with a detection signal and recovery policy." measure="Failure detection time, recovery success rate, escalation rate, repeat failure rate, incident cost." />
           <InsightCard title="Failure injection is the whole point" tone="info">
             A happy-path demo tells you nothing about production. The four failures above are what actually happen, and
             each is cheap to catch with the right signal and expensive to miss. That gap is the observability budget.
           </InsightCard>
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "You don't budget for agents; you budget for agents plus the harness that catches these four failures."}</p>
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "Do not budget for agents alone. Budget for agents plus the operating harness that detects failures, recovers safely, and knows when to involve a human."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
@@ -220,7 +220,7 @@ export function LoopInspector() {
               <p>Stack: Next.js (static) + shared design system; deterministic client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> traces are illustrative constructions, not captured from a live agent; real detection needs instrumentation (traces, token meters, action fingerprints). It shows the failure taxonomy and response pattern, not a monitoring stack.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this artifact models representative failure paths. A production environment would require live traces, tool telemetry, policy enforcement, alert routing, and incident management integration.</p>
         </div>
       </main>
     </div>

@@ -143,10 +143,10 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
       const pctTxt = `${Math.round(sim * 100)}% overlap`;
       if (sim >= 0.97) {
         kind = "duplicate";
-        note = `Near-identical (${pctTxt}). Keep one authoritative copy; embedding both biases retrieval.`;
+        note = `Near identical (${pctTxt}). Keep one authoritative copy; embedding both biases retrieval.`;
       } else if (versioned && sim >= 0.5) {
         kind = "stale-version";
-        note = `Looks like a version pair (${pctTxt}) that differs. Quarantine the older copy, this is the conflicting-answer risk the RAG Evaluator would otherwise surface.`;
+        note = `Looks like a version pair (${pctTxt}) that differs. Quarantine the older copy, this is the conflicting answer risk the RAG Evaluator would otherwise surface.`;
       } else {
         kind = "near-duplicate";
         note = `Overlaps by ${pctTxt}. Review for redundancy before ingestion.`;

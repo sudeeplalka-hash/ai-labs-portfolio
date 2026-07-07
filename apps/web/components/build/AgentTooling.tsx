@@ -289,7 +289,7 @@ export function AgentTooling() {
           <div>
             <p className="stat-label mb-1">→ Operate (tool telemetry)</p>
             <ul className="space-y-0.5 text-[12px] text-slatey-400">
-              <li>· avg tool-call latency {contract.operationalSignals.toolCallLatencyMs} ms</li>
+              <li>· avg tool call latency {contract.operationalSignals.toolCallLatencyMs} ms</li>
               <li>· tool failure rate {contract.operationalSignals.toolFailureRate}%</li>
               <li>· approvals pending {pendingApprovals}</li>
               <li>· blocked actions {contract.operationalSignals.blockedActionCount} · rollback events {contract.operationalSignals.rollbackEvents}</li>

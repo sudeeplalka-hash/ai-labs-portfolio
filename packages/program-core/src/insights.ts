@@ -95,17 +95,17 @@ export interface GateFix {
 const FIX_MAP: Record<string, { stage: StageKey; target: string; action: string }> = {
   "Strategy initiative approved": { stage: "frame", target: "Initiative framed with a governance tier", action: "Frame the initiative in Strategy & Planning, the workshop derives the tier." },
   "Data readiness handoff exists": { stage: "data", target: "Handoff produced", action: "Run the Data lab so it emits the readiness handoff to Build." },
-  "Blocked data excluded": { stage: "data", target: "0 blocked sources pending", action: "Keep blocked sources excluded; complete redaction and access controls before re-inclusion." },
+  "Blocked data excluded": { stage: "data", target: "0 blocked sources pending", action: "Keep blocked sources excluded; complete redaction and access controls before re inclusion." },
   "Build quality gates passed": { stage: "build", target: "All gates passing", action: "Open Quality Gates to see which gate fails, then improve retrieval or add an abstention path." },
   "Evaluation run available": { stage: "build", target: "Eval run recorded", action: "Run the Live Evaluator so an eval run id lands in the Build contract." },
   "Citation accuracy": { stage: "build", target: "≥ 88%", action: "Switch to governed rerank and require citation metadata on approved sources." },
   "Faithfulness": { stage: "build", target: "≥ 85%", action: "Tighten retrieval scope and abstain when evidence is weak instead of answering." },
   "Hallucination risk": { stage: "build", target: "≤ 10%", action: "Constrain the prompt to retrieved evidence and penalize uncited claims." },
   "Governance tier assigned": { stage: "frame", target: "Tier assigned", action: "Complete the Strategy workshop, tier derives from pattern, criticality, and data sensitivity." },
-  "Human review decided": { stage: "frame", target: "Decision recorded", action: "Set the human-review requirement on the initiative in Strategy." },
-  "Monitoring plan defined": { stage: "deploy", target: "≥ 80% coverage", action: "Add retrieval-miss and user-feedback instrumentation to close the monitoring gaps." },
+  "Human review decided": { stage: "frame", target: "Decision recorded", action: "Set the human review requirement on the initiative in Strategy." },
+  "Monitoring plan defined": { stage: "deploy", target: "≥ 80% coverage", action: "Add retrieval miss and user feedback instrumentation to close the monitoring gaps." },
   "Rollback path defined": { stage: "deploy", target: "Rollback validated", action: "Pick and validate a rollback option in Incident & Rollback." },
-  "Owner & runbook assigned": { stage: "deploy", target: "Owner + runbook final", action: "Assign the on-call owner and finish the operational runbook." },
+  "Owner & runbook assigned": { stage: "deploy", target: "Owner + runbook final", action: "Assign the on call owner and finish the operational runbook." },
 };
 
 // ---- Phase I · regulatory mapping ---------------------------------------------
@@ -134,13 +134,13 @@ export function deriveRegulatoryMapping(s: ProgramState): RegulatoryMapping {
   let rationale: string;
   if (highStakes && (highTier || highCrit)) {
     riskClass = "High risk";
-    rationale = `${pattern} outputs influence decisions about individuals (tier ${meta?.governanceTier ?? "N/A"}, criticality ${meta?.operationalCriticality ?? "N/A"}), an Annex III-style high risk profile.`;
+    rationale = `${pattern} outputs influence decisions about individuals (tier ${meta?.governanceTier ?? "N/A"}, criticality ${meta?.operationalCriticality ?? "N/A"}), an Annex III style high risk profile.`;
   } else if (meta?.operationalCriticality === "Low" && !highTier) {
     riskClass = "Minimal risk";
-    rationale = `Internal ${pattern.toLowerCase()} with low criticality and human authorship of final outputs, minimal-risk profile with voluntary best practice.`;
+    rationale = `Internal ${pattern.toLowerCase()} with low criticality and human authorship of final outputs, minimal risk profile with voluntary best practice.`;
   } else {
     riskClass = "Limited risk";
-    rationale = `A user-facing ${pattern.toLowerCase()} that informs rather than decides, transparency obligations apply (users must know they are interacting with AI).`;
+    rationale = `A user facing ${pattern.toLowerCase()} that informs rather than decides, transparency obligations apply (users must know they are interacting with AI).`;
   }
 
   const obligations =

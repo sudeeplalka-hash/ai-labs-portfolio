@@ -39,10 +39,10 @@ const CANNED: Record<string, Consequence> = {
     asIs: {
       answer: "Katherine Johnson's card on file is 4111 1111 1111 1111.",
       verdict: "risky",
-      note: "Un-redacted card and SSN data was embedded, so the AI will happily retrieve and reveal it.",
+      note: "Un redacted card and SSN data was embedded, so the AI will happily retrieve and reveal it.",
     },
     prepared: {
-      answer: "I don't have access to payment-card details for that customer.",
+      answer: "I don't have access to payment card details for that customer.",
       verdict: "ok",
       note: "PII was redacted before embedding, so it is no longer retrievable.",
     },
@@ -53,7 +53,7 @@ const CANNED: Record<string, Consequence> = {
     asIs: {
       answer: "Standard terms are Net 30.",
       verdict: "risky",
-      note: "The answer is correct but uncitable, no owner, source, or effective date was attached, so it can't be trusted or access-controlled.",
+      note: "The answer is correct but uncitable, no owner, source, or effective date was attached, so it can't be trusted or access controlled.",
     },
     prepared: {
       answer: "Standard terms are Net 30 [Vendor Onboarding KB · owner: Procurement · effective 2024-04].",
@@ -67,7 +67,7 @@ const CANNED: Record<string, Consequence> = {
     asIs: {
       answer: "The main remaining risk is latency under peak load.",
       verdict: "ok",
-      note: "This file was already clean, so as-is and prepared answers are essentially the same.",
+      note: "This file was already clean, so as is and prepared answers are essentially the same.",
     },
     prepared: {
       answer: "The main remaining risk is latency under peak load [Eng Update Q2].",
@@ -95,7 +95,7 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
       asIs: {
         answer: `It could retrieve and reveal ${kind} embedded from this file.`,
         verdict: "risky",
-        note: "Anything embedded becomes retrievable, un-redacted PII leaks straight into answers.",
+        note: "Anything embedded becomes retrievable, un redacted PII leaks straight into answers.",
       },
       prepared: {
         answer: "It declines, because the sensitive values were redacted before embedding.",
@@ -109,7 +109,7 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
     return {
       question: "If the AI were asked about a fact that appears multiple times here…",
       asIs: {
-        answer: "It over-weights the duplicated rows and biases toward that repeated content.",
+        answer: "It over weights the duplicated rows and biases toward that repeated content.",
         verdict: "risky",
         note: `${dups} duplicate row(s) inflate retrieval frequency.`,
       },
@@ -118,7 +118,7 @@ export function getConsequence(report: PrepReport, sampleId?: string): Consequen
         verdict: "ok",
         note: "Duplicates were removed before ingestion.",
       },
-      fixedBy: "De-duplication, repeated rows were collapsed to one authoritative copy.",
+      fixedBy: "De duplication, repeated rows were collapsed to one authoritative copy.",
     };
   }
   if (stale) {

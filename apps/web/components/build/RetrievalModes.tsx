@@ -88,7 +88,7 @@ export function RetrievalModes() {
 
       {/* Phase F, rank slopegraph: the story of reranking, drawn */}
       <Panel>
-        <SectionHeader eyebrow="Rank movement" title="How each mode re-orders the evidence" icon={GitCompare}
+        <SectionHeader eyebrow="Rank movement" title="How each mode re orders the evidence" icon={GitCompare}
           description="Follow a source across the four modes. Rising lines gain authority under governed rerank; falling lines lose it; blocked sources drop to the exclusion gutter." />
         <RankSlopegraph traces={traces} />
       </Panel>
@@ -164,7 +164,7 @@ export function RetrievalModes() {
           <InsightCard tone="info" title="Lexical baseline">BM25 as an explainable floor, and a clear view of where it fails.</InsightCard>
           <InsightCard tone="info" title="Semantic retrieval">Local vector similarity handles wording variation the baseline misses.</InsightCard>
           <InsightCard tone="success" title="Hybrid search">Lexical + vector fusion balances precision and recall.</InsightCard>
-          <InsightCard tone="success" title="Governance-aware rerank">Authority, freshness, metadata, citations, and Data handoff exclusions reorder evidence.</InsightCard>
+          <InsightCard tone="success" title="Governance aware rerank">Authority, freshness, metadata, citations, and Data handoff exclusions reorder evidence.</InsightCard>
           <InsightCard tone="warn" title="Traceable quality impact">Every mode shows its effect on citation quality, faithfulness, risk, latency, and cost.</InsightCard>
         </div>
       </Panel>

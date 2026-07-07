@@ -8,7 +8,7 @@
 export type RetrievalMode = "lexical" | "simulated-vector" | "hybrid" | "hybrid rerank";
 
 export const RETRIEVAL_MODES: { id: RetrievalMode; label: string; desc: string }[] = [
-  { id: "lexical", label: "Lexical BM25", desc: "Term-overlap ranking. Fast and explainable, but misses semantically similar evidence when wording differs." },
+  { id: "lexical", label: "Lexical BM25", desc: "Term overlap ranking. Fast and explainable, but misses semantically similar evidence when wording differs." },
   { id: "simulated-vector", label: "Simulated vector retrieval", desc: "Deterministic local embeddings + cosine similarity, illustrates semantic retrieval without a hosted vector DB." },
   { id: "hybrid", label: "Hybrid lexical + vector", desc: "Blends BM25 and vector scores (0.55 / 0.45) for balanced evidence. Strongest general option." },
   { id: "hybrid rerank", label: "Hybrid + rerank", desc: "Reorders hybrid evidence using source authority, freshness, metadata, citation readiness, and Data handoff exclusions." },
@@ -31,7 +31,7 @@ export const SAMPLE_CHUNKS: SampleChunk[] = [
   { id: "c3", source: "Expense Policy v1.0 (archived)", text: "Older guidance suggested a 60-day window for submitting expense reimbursements.", authority: 0.5, fresh: false, citationReady: true, metadataComplete: false },
   { id: "c4", source: "Approval Matrix v1.2", text: "Manager approval is required for any expense over $500 before reimbursement.", authority: 0.85, fresh: true, citationReady: true, metadataComplete: true },
   { id: "c5", source: "Intranet FAQ", text: "For questions about expenses, contact the finance help desk.", authority: 0.4, fresh: true, citationReady: false, metadataComplete: false },
-  { id: "c6", source: "Raw customer PII export", text: "Personal credit-card statements attached to claims may contain sensitive cardholder data.", authority: 0.7, fresh: true, citationReady: false, metadataComplete: true },
+  { id: "c6", source: "Raw customer PII export", text: "Personal credit card statements attached to claims may contain sensitive cardholder data.", authority: 0.7, fresh: true, citationReady: false, metadataComplete: true },
 ];
 
 const tok = (s: string): string[] => (s.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter((w) => w.length > 1);
@@ -155,10 +155,10 @@ export function vectorIndexReadiness(opts: { dataReadinessScore?: number; blocke
     { label: "Vector store target", status: "Missing" },
     { label: "Similarity metric (cosine)", status: "Ready" },
     { label: "Metadata filters available", status: p(ready) },
-    { label: "Access-control filters", status: opts.blockedCount ? "Partial" : "Missing" },
+    { label: "Access control filters", status: opts.blockedCount ? "Partial" : "Missing" },
     { label: "Stable chunk IDs", status: opts.hasHandoff ? "Ready" : "Partial" },
     { label: "Source versioning", status: p(ready) },
-    { label: "Re-indexing strategy", status: "Missing" },
+    { label: "Re indexing strategy", status: "Missing" },
     { label: "Deletion / update strategy", status: "Missing" },
     { label: "Source exclusion rules", status: opts.blockedCount ? "Ready" : "Partial" },
     { label: "Hybrid search enabled", status: "Ready" },

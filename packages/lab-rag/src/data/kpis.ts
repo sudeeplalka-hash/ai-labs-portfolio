@@ -38,7 +38,7 @@ export const kpis: KpiMetric[] = [
     trendDirection: "up",
     status: "Watch",
     interpretation:
-      "Answers are mostly grounded in retrieved evidence, but a few responses still over-generalize beyond the source.",
+      "Answers are mostly grounded in retrieved evidence, but a few responses still over generalize beyond the source.",
     description: "Share of answer content directly supported by retrieved evidence.",
   },
   {
@@ -64,7 +64,7 @@ export const kpis: KpiMetric[] = [
     trendDirection: "down",
     status: "Watch",
     interpretation:
-      "Down 4 points after the citation validator, but still above the 8% target. Remaining risk concentrates in policy-exception queries.",
+      "Down 4 points after the citation validator, but still above the 8% target. Remaining risk concentrates in policy exception queries.",
     description: "Estimated rate of unsupported or fabricated claims across evaluated answers.",
   },
   {
@@ -78,7 +78,7 @@ export const kpis: KpiMetric[] = [
     status: "At Risk",
     interpretation:
       "One critical compliance query still fails. Critical failures must reach zero before promotion to production.",
-    description: "Share of critical-risk queries that failed evaluation or required escalation.",
+    description: "Share of critical risk queries that failed evaluation or required escalation.",
   },
   {
     id: "high risk-pass",
@@ -91,7 +91,7 @@ export const kpis: KpiMetric[] = [
     status: "At Risk",
     interpretation:
       "Improving but below the 90% bar. Finance and compliance queries remain the weakest segment.",
-    description: "Pass rate on high and critical-risk evaluation cases.",
+    description: "Pass rate on high and critical risk evaluation cases.",
   },
   {
     id: "latency",
@@ -104,7 +104,7 @@ export const kpis: KpiMetric[] = [
     status: "Healthy",
     interpretation:
       "Average latency is within target, though reranking pushed P95 latency above the 4s SLA.",
-    description: "Mean end-to-end response time across evaluated queries.",
+    description: "Mean end to end response time across evaluated queries.",
   },
   {
     id: "cost",
@@ -117,6 +117,6 @@ export const kpis: KpiMetric[] = [
     status: "Healthy",
     interpretation:
       "Cost rose with reranking and validation steps but remains under the $0.045 target.",
-    description: "Average fully-loaded inference and retrieval cost per query.",
+    description: "Average fully loaded inference and retrieval cost per query.",
   },
 ];

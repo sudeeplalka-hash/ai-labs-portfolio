@@ -22,8 +22,8 @@ const STEPS = [
   { n: "2", icon: ScanLine, title: "Profile the structure", body: "Detect rows/columns or document blocks, infer column types, count distinct values and nulls. This is the map the rest of the pipeline navigates by.", why: "You can't clean what you haven't measured." },
   { n: "3", icon: Wand2, title: "Clean & normalize", body: "Drop empty and duplicate rows, fix inconsistent dates and casing, resolve missing values, and strip dead columns and boilerplate.", why: "Duplicates skew retrieval; boilerplate wastes tokens; inconsistency confuses the model." },
   { n: "4", icon: ShieldCheck, title: "Apply org guidelines", body: "Enforce the rulebook: admissibility, freshness/versioning, provenance and licensing, and required taxonomy/metadata tags.", why: "This is where a stale Policy v2.7 gets quarantined before it can contradict v3.1 in answers." },
-  { n: "5", icon: ShieldAlert, title: "Clear sensitive data", body: "Scan for emails, phones, SSNs, cards and IPs. Redact, mask, or escalate for sign off before anything is embedded.", why: "Anything embedded becomes retrievable, PII leaks are a one-way door." },
-  { n: "6", icon: Scissors, title: "Chunk-readiness & gate", body: "Confirm the content segments cleanly within the embedding band, then roll everything into a readiness score and an explicit gate. A human owner signs off.", why: "An honest gate keeps the knowledge base, and every answer built on it, trustworthy." },
+  { n: "5", icon: ShieldAlert, title: "Clear sensitive data", body: "Scan for emails, phones, SSNs, cards and IPs. Redact, mask, or escalate for sign off before anything is embedded.", why: "Anything embedded becomes retrievable, PII leaks are a one way door." },
+  { n: "6", icon: Scissors, title: "Chunk readiness & gate", body: "Confirm the content segments cleanly within the embedding band, then roll everything into a readiness score and an explicit gate. A human owner signs off.", why: "An honest gate keeps the knowledge base, and every answer built on it, trustworthy." },
 ];
 
 const GATE = [

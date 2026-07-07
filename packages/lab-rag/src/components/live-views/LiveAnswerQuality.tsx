@@ -18,7 +18,7 @@ export function LiveAnswerQuality() {
   const evals = useMemo(() => traces.map((t) => t.evaluation), [traces]);
 
   if (!mounted) return <div className="h-40 animate-pulse rounded-xl border border-line bg-white" />;
-  if (traces.length === 0) return <LiveEmptyState what="Answer-quality metrics" />;
+  if (traces.length === 0) return <LiveEmptyState what="Answer quality metrics" />;
 
   const metrics = [
     { label: "Faithfulness", value: avg(evals.map((e) => e.faithfulness)), target: 85, lower: false },

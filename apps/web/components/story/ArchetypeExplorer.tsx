@@ -26,7 +26,7 @@ export function ArchetypeExplorer() {
       <h2 className="mt-1 text-lg font-semibold tracking-tight text-ink">Shuffle the story, same loop, six very different programs</h2>
       <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slatey-400">
         Pick an archetype and every stage retells itself: the numbers, the risks, the governance decision, the business case.
-        The <b className="text-slatey-300">at-risk</b> one shows what failure looks like.
+        The <b className="text-slatey-300">at risk</b> one shows what failure looks like.
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {DEMO_ARCHETYPES.map((a) => {

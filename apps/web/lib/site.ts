@@ -42,12 +42,12 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
   },
   portfolio: {
     domain: "https://portfolio.sudeeplalka.com",
-    titleDefault: "Sudeep Lalka: AI Delivery Leadership Portfolio",
+    titleDefault: "Sudeep Lalka: Enterprise AI and Technology Strategy Portfolio",
     titleTemplate: "%s · Sudeep Lalka",
     description:
-      "One AI delivery leader at four altitudes: the protocol wire, the program lifecycle, the P&L, and the people. A portfolio of working instruments, each mapped to a real enterprise decision.",
-    homeTitle: "Sudeep Lalka: AI Delivery Leadership Portfolio",
-    attribution: "AI Labs Portfolio · portfolio.sudeeplalka.com",
+      "A working portfolio of enterprise AI and technology strategy artifacts organized around architecture choices, delivery governance, financial impact, risk, operating models, and adoption. Each module maps technical work to the decisions senior leaders make when funding, architecting, governing, scaling, or operating AI programs.",
+    homeTitle: "Sudeep Lalka: Enterprise AI and Technology Strategy Portfolio",
+    attribution: "Enterprise AI and Technology Strategy Portfolio · portfolio.sudeeplalka.com",
   },
 };
 

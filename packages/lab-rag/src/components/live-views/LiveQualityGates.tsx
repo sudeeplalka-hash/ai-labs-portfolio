@@ -30,7 +30,7 @@ export function LiveQualityGates() {
       { id: "g-cite", name: "Citation Accuracy", description: "Citations directly support the claims.", threshold: ">= 80%", currentValue: `${cite}%`, status: hi(cite >= 80, cite >= 70), severity: "High" as RiskLevel, remediation: "Ask more specific questions; rely on cited passages." },
       { id: "g-halluc", name: "Hallucination Risk", description: "Unsupported content in answers.", threshold: "<= 20%", currentValue: `${halluc}%`, status: hi(halluc <= 20, halluc <= 35), severity: "Critical" as RiskLevel, remediation: "Low coverage drives this, try documents that cover the topic." },
       { id: "g-faith", name: "Faithfulness", description: "Answers grounded in retrieved evidence.", threshold: ">= 70%", currentValue: `${faith}%`, status: hi(faith >= 70, faith >= 60), severity: "High" as RiskLevel, remediation: "Prefer questions the document directly answers." },
-      { id: "g-review", name: "Human Review", description: "Answers flagged for human review.", threshold: "= 0", currentValue: String(review), status: hi(review === 0, review <= 1), severity: "Critical" as RiskLevel, remediation: "High risk or weakly-grounded answers were escalated." },
+      { id: "g-review", name: "Human Review", description: "Answers flagged for human review.", threshold: "= 0", currentValue: String(review), status: hi(review === 0, review <= 1), severity: "Critical" as RiskLevel, remediation: "High risk or weakly grounded answers were escalated." },
     ];
   }, [traces]);
 

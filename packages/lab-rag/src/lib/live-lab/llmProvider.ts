@@ -29,7 +29,7 @@ export const PROVIDERS: ProviderMeta[] = [
   { id: "openai", label: "OpenAI", defaultModel: PROVIDER_DEFAULT_MODEL.openai, needsBaseUrl: false, keyHint: "sk-…", docs: "platform.openai.com/api-keys" },
   { id: "anthropic", label: "Anthropic (Claude)", defaultModel: PROVIDER_DEFAULT_MODEL.anthropic, needsBaseUrl: false, keyHint: "sk-ant-…", docs: "console.anthropic.com" },
   { id: "gemini", label: "Google Gemini", defaultModel: PROVIDER_DEFAULT_MODEL.gemini, needsBaseUrl: false, keyHint: "AIza…", docs: "aistudio.google.com/apikey" },
-  { id: "openai-compatible", label: "OpenAI-compatible (Groq, OpenRouter, local…)", defaultModel: PROVIDER_DEFAULT_MODEL["openai-compatible"], needsBaseUrl: true, keyHint: "your key", docs: "" },
+  { id: "openai-compatible", label: "OpenAI compatible (Groq, OpenRouter, local…)", defaultModel: PROVIDER_DEFAULT_MODEL["openai-compatible"], needsBaseUrl: true, keyHint: "your key", docs: "" },
 ];
 
 export function providerMeta(id: LlmProviderId): ProviderMeta {
@@ -39,7 +39,7 @@ export function providerMeta(id: LlmProviderId): ProviderMeta {
 export class LlmError extends Error {}
 
 const SYSTEM =
-  "You are a careful retrieval-augmented assistant. Answer the user's question using ONLY the numbered context passages provided. " +
+  "You are a careful retrieval augmented assistant. Answer the user's question using ONLY the numbered context passages provided. " +
   "Cite the passages you rely on inline using their labels, like [C1] or [C2]. Keep the answer concise (2 to 4 sentences). " +
   "If the passages do not contain the answer, say you couldn't find it in the document, do not use outside knowledge.";
 

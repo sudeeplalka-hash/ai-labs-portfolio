@@ -19,13 +19,13 @@ import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 type CKey = "capability" | "security" | "roadmap" | "lockin" | "support" | "price";
 const CRITERIA: { key: CKey; label: string }[] = [
   { key: "capability", label: "Capability" }, { key: "security", label: "Security" }, { key: "roadmap", label: "Roadmap" },
-  { key: "lockin", label: "Low lock-in" }, { key: "support", label: "Support" }, { key: "price", label: "Price / value" },
+  { key: "lockin", label: "Low lock in" }, { key: "support", label: "Support" }, { key: "price", label: "Price / value" },
 ];
 
 interface Vendor { key: string; label: string; blurb: string; scores: Record<CKey, number>; exitCost: number; renewal: number; concentration: number }
 const VENDORS: Vendor[] = [
-  { key: "hyper", label: "Hyperscaler", blurb: "Broad platform, deep integration, real lock-in.", scores: { capability: 85, security: 88, roadmap: 82, lockin: 45, support: 78, price: 60 }, exitCost: 480000, renewal: 14, concentration: 75 },
-  { key: "spec", label: "Specialist", blurb: "Best-in-class capability, narrower surface.", scores: { capability: 90, security: 80, roadmap: 88, lockin: 60, support: 85, price: 55 }, exitCost: 240000, renewal: 9, concentration: 55 },
+  { key: "hyper", label: "Hyperscaler", blurb: "Broad platform, deep integration, real lock in.", scores: { capability: 85, security: 88, roadmap: 82, lockin: 45, support: 78, price: 60 }, exitCost: 480000, renewal: 14, concentration: 75 },
+  { key: "spec", label: "Specialist", blurb: "Best in class capability, narrower surface.", scores: { capability: 90, security: 80, roadmap: 88, lockin: 60, support: 85, price: 55 }, exitCost: 240000, renewal: 9, concentration: 55 },
   { key: "oss", label: "Open-source-backed", blurb: "Portable, cheaper, thinner support.", scores: { capability: 78, security: 75, roadmap: 80, lockin: 85, support: 65, price: 82 }, exitCost: 90000, renewal: 20, concentration: 45 },
 ];
 
@@ -68,21 +68,21 @@ export function VendorMonitor() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
         <div className="mb-5">
-          <p className="eyebrow mb-1">Business of AI · Gallery</p>
+          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Vendor Evaluation &amp; Risk Monitor</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-ink">Vendor Selection and Concentration Risk Monitor</h1>
             <LiveBadge mode="SIMULATED" />
             <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
           </div>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            The scorecard picks a winner, but move the weights and watch it change. That fragility is why the risk view
-            matters: concentration and exit cost tell you what it costs to be wrong.
+            A vendor scorecard can identify the best fit, but it does not tell the full story. This artifact pairs weighted
+            selection criteria with concentration, renewal timing, and exit cost exposure.
           </p>
         </div>
 
         <UseCaseRail useCases={C34_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Which vendor, and what does concentration cost if we are wrong?" approach="Score vendors on a weighted rubric, then price the concentration and exit-cost exposure the pick creates." why="A vendor selection is also a concentration bet that has to be priced." metric="Weighted vendor score; switching/exit-cost exposure if the relationship sours." tradeoff="The best-fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit-cost exposure named up front." />
+        <CaseStudy problem="The best scoring vendor may also introduce lock in, concentration, or renewal exposure. Executive decisions need both views: which vendor fits the need and what it costs if the relationship, roadmap, or pricing changes." approach="The monitor compares vendor archetypes across capability, security, roadmap, lock in, support, and price. It then adds a risk view that shows concentration, renewal exposure, and estimated exit cost." why="This connects AI sourcing to procurement, third party risk, resiliency, cost exposure, roadmap dependency, and negotiating leverage." metric="Weighted vendor score; switching/exit cost exposure if the relationship sours." tradeoff="The best fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit cost exposure named up front." />
 
         <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Weights */}
@@ -139,7 +139,7 @@ export function VendorMonitor() {
                     ))}
                   </tbody>
                 </table>
-                <p className="mt-2 text-[11px] text-slatey-500">Concentration = share of AI spend on that vendor if chosen primary. Exit cost tracks lock-in.</p>
+                <p className="mt-2 text-[11px] text-slatey-500">Concentration = share of AI spend on that vendor if chosen primary. Exit cost tracks lock in.</p>
               </Panel>
             )}
           </div>
@@ -153,16 +153,16 @@ export function VendorMonitor() {
         </div>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
-          <OutcomeFrame call="Select the highest weighted-fit vendor, but cap concentration and pre-price the exit." lift="A defensible pick that also bounds the downside if the vendor relationship fails." measure="Vendor score vs realized performance; switching cost if triggered; % of spend concentrated in one vendor." />
-          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The scorecard picks the vendor; the concentration view tells you what it costs to be wrong."}</p>
+          <OutcomeFrame call="Choose the vendor with both fit and exit exposure visible." lift="Reduces hidden concentration risk by treating vendor choice as an operating dependency, not just a feature comparison." measure="Weighted score, concentration exposure, exit cost, renewal timing, switching feasibility." />
+          <p className="text-sm leading-relaxed text-ink"><span className="font-semibold">Steering committee takeaway:</span> {activeUc ? activeUc.takeaway : "The scorecard tells you who wins. The risk view tells you what it costs if the winner becomes wrong."}</p>
           <details className="rounded-lg border border-line bg-white p-4 text-sm text-slatey-300">
             <summary className="cursor-pointer font-semibold text-ink">How this is built</summary>
             <div className="mt-2 space-y-1 text-xs leading-relaxed">
-              <p>Weighted score = Σ(weight × criterion score) ÷ Σ(weights), so weights are relative and always normalize to 100%. Lock-in and price are scored so higher = better (less lock-in, better value).</p>
-              <p>Risk view pairs each vendor with concentration (spend share if primary), renewal window, and exit cost (tracks lock-in). Stack: Next.js (static) + shared design system; client side.</p>
+              <p>Weighted score = Σ(weight × criterion score) ÷ Σ(weights), so weights are relative and always normalize to 100%. Lock in and price are scored so higher = better (less lock in, better value).</p>
+              <p>Risk view pairs each vendor with concentration (spend share if primary), renewal window, and exit cost (tracks lock in). Stack: Next.js (static) + shared design system; client side.</p>
             </div>
           </details>
-          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> vendor scores are archetype illustrations, not a live evaluation; real scoring needs POCs and reference checks. It exposes ranking fragility and exit exposure, not a procurement verdict.</p>
+          <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a simplified vendor model. Real vendor selection would require procurement terms, security review, architecture fit, legal review, financial analysis, and operational due diligence.</p>
         </div>
       </main>
     </div>
