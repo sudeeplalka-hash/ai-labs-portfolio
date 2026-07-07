@@ -124,11 +124,6 @@ function Shelf({ title, tag, accent, icon: Icon, labs, href }: {
 }
 
 const HERO_PROOF: Record<string, { proves: string; depth: string; cta: string }> = {
-  "GAP-01": {
-    proves: "Integration strategy and protocol economics",
-    depth: "Whether to standardize AI tool access through MCP or continue building bespoke point to point integrations, and how integration strategy changes as the number of systems and agent consumers grows.",
-    cta: "Review the integration strategy case",
-  },
   "GAP-03": {
     proves: "Multiagent architecture economics",
     depth: "Whether additional agents create enough quality lift to justify higher orchestration cost and execution time, translating an impressive technical pattern into an architecture, economics, and operating model decision.",
@@ -138,6 +133,11 @@ const HERO_PROOF: Record<string, { proves: string; depth: string; cta: string }>
     proves: "Architecture and protocol decision making",
     depth: "Which protocol best fits a given integration pattern, including the runner up and the condition that would change the recommendation, turning protocol selection into transparent technology strategy rather than a trend driven preference.",
     cta: "Review the protocol strategy case",
+  },
+  "C3-5": {
+    proves: "Business case rigor",
+    depth: "Whether a single initiative should be funded, deferred, or reshaped, built on an NPV range instead of a point estimate, with payback, sensitivity analysis showing which assumption the case actually hinges on, and a steering ready verdict.",
+    cta: "Review the funding decision case",
   },
   "C3-1": {
     proves: "Capital allocation under risk",
@@ -162,9 +162,9 @@ function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
         <span className="hidden shrink-0 text-xs text-slatey-500 sm:block">~10 minutes &middot; the other 18 show range</span>
       </div>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-        These five artifacts show the portfolio at its strongest: architecture tradeoffs, integration strategy,
-        capital allocation, multiagent economics, and adoption readiness. Each case turns a technical or operating
-        question into a decision a senior leader would need to make before scaling AI work.
+        These five artifacts show the portfolio at its strongest: multiagent economics, architecture and protocol
+        strategy, capital allocation, business case rigor, and adoption readiness. Each case turns a technical or
+        operating question into a decision a senior leader would need to make before scaling AI work.
       </p>
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         {labs.map((l) => {

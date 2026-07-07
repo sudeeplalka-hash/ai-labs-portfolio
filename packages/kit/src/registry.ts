@@ -70,7 +70,7 @@ export const LABS: LabEntry[] = [
 
   // Collection 2, Agent & Protocol Labs (toolkit)
   {
-    id: "GAP-01", collection: 2, title: "MCP Server Contract Workbench", status: "shipped", live: "SIMULATED", priority: "P0", flagship: true,
+    id: "GAP-01", collection: 2, title: "MCP Server Contract Workbench", status: "shipped", live: "SIMULATED", priority: "P0",
     problem: "What actually goes over the wire when an agent calls a tool?",
     decision: "Expose N internal systems via MCP vs bespoke integrations, the crossover.",
     href: "/agents/mcp-playground",
@@ -144,7 +144,7 @@ export const LABS: LabEntry[] = [
     href: "/business/vendor-monitor",
   },
   {
-    id: "C3-5", collection: 3, title: "AI Business Case and ROI Builder", status: "shipped", live: "SIMULATED",
+    id: "C3-5", collection: 3, title: "AI Business Case and ROI Builder", status: "shipped", live: "SIMULATED", flagship: true,
     problem: "What's the payback, and how fragile is it?",
     decision: "Fund/defer on an NPV range, not a single point.",
     href: "/business/roi-builder",
