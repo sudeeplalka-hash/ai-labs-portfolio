@@ -370,8 +370,14 @@ export function runChecks(
       );
   }
 
-  // Freshness, heuristic on filename/version markers
-  if (/v\d|version|draft|old|legacy|archive|backup|\bcopy\b/i.test(fileName)) {
+  // Freshness, heuristic on filename/version markers. Tabular exports are
+  // routinely versioned by convention (crm_export_v2.csv), so a bare version
+  // number only counts as a staleness hint for prose documents; explicit
+  // stale markers (legacy/old/superseded/...) count everywhere.
+  const staleMarker = /(?:^|[^a-z])(?:old|copy)(?:[^a-z]|$)|legacy|superseded|draft|backup|archive|deprecated/i.test(fileName);
+  const bareVersion = /v\d|version/i.test(fileName);
+  const isTabularName = /\.(csv|tsv|xlsx?)$/i.test(fileName);
+  if (staleMarker || (bareVersion && !isTabularName)) {
     add(
       "freshness",
       "freshness",

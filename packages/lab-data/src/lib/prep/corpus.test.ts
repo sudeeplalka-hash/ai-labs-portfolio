@@ -118,3 +118,23 @@ describe("PCA projection (Corpus Atlas, Phase 3)", () => {
     }
   });
 });
+
+describe("freshness heuristic (UX pass)", () => {
+  it("a versioned tabular export (crm_export_v2.csv) is NOT flagged as stale", () => {
+    const r = analyzeCorpus(inputs);
+    const f = r.files.find((x) => x.name === "crm_export_v2.csv")!;
+    expect(f.report.checks.some((c) => c.guideline === "freshness" && c.level !== "healthy")).toBe(false);
+  });
+
+  it("an explicitly stale-marked prose file still gets the freshness flag", () => {
+    const r = analyzeCorpus(inputs);
+    const f = r.files.find((x) => x.name === "travel_policy_v2.7_legacy.txt")!;
+    expect(f.report.checks.some((c) => c.guideline === "freshness" && c.level !== "healthy")).toBe(true);
+  });
+
+  it("a bare version number on a prose file still hints (v3.1 current)", () => {
+    const r = analyzeCorpus(inputs);
+    const f = r.files.find((x) => x.name === "travel_policy_v3.1_current.txt")!;
+    expect(f.report.checks.some((c) => c.guideline === "freshness")).toBe(true);
+  });
+});

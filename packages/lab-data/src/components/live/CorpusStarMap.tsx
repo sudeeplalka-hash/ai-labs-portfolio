@@ -204,23 +204,8 @@ export function CorpusStarMap({
       </div>
 
       {/* grounding caption */}
-      <p className="mx-auto mt-2 max-w-[460px] text-center text-[11px] leading-relaxed text-slatey-400">
-        Each dot is a document. The closer two dots sit, the more similar their content, tight clusters are usually duplicates or versions of the same doc. Lines flag exact duplicates and stale versions.
-      </p>
 
-      {/* legend */}
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-slatey-400">
-        <span className="flex items-center gap-1"><Dot c="#10b981" /> Approved</span>
-        <span className="flex items-center gap-1"><Dot c="#f59e0b" /> Conditional</span>
-        <span className="flex items-center gap-1"><Dot c="#f97316" /> Hold</span>
-        <span className="flex items-center gap-1"><Dot c="#f43f5e" /> Rejected</span>
-        <span className="flex items-center gap-1"><span className="inline-block h-0 w-4 border-t-2 border-rose-400" /> duplicate</span>
-        <span className="flex items-center gap-1"><span className="inline-block h-0 w-4 border-t-2 border-dashed border-amber-400" /> stale version</span>
-      </div>
     </div>
   );
 }
 
-function Dot({ c }: { c: string }) {
-  return <span className="inline-block h-2 w-2 rounded-full" style={{ background: c }} />;
-}

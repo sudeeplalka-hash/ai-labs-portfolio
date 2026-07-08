@@ -407,29 +407,48 @@ export function CorpusView() {
             {/* Guided corpus pass (Phase 5): the three-beat path through the lab. */}
             <ol className="flex flex-wrap items-center gap-2 text-[11px]" aria-label="Guided corpus pass">
               {[
-                { n: 1, label: "Profile the corpus", done: stepProfile },
-                { n: 2, label: "Resolve duplicates & versions", done: stepResolve },
-                { n: 3, label: "Clear criticals & hand off", done: stepHandoff },
+                { n: 1, label: "Profile the corpus", done: stepProfile, href: "#corpus-board" },
+                { n: 2, label: "Resolve duplicates & versions", done: stepResolve, href: "#corpus-resolution" },
+                { n: 3, label: "Clear criticals & hand off", done: stepHandoff, href: "#corpus-board" },
               ].map((st) => (
-                <li key={st.n} className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium",
-                  st.done ? "border-emerald-200 bg-emerald-50/70 text-emerald-700" : "border-line bg-white text-slatey-400",
-                )}>
-                  <span className={cn("grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold", st.done ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600")}>
-                    {st.done ? "\u2713" : st.n}
-                  </span>
-                  {st.label}
+                <li key={st.n}>
+                  <a
+                    href={st.href}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium transition-colors hover:border-primary/40",
+                      st.done ? "border-emerald-200 bg-emerald-50/70 text-emerald-700" : "border-line bg-white text-slatey-400 hover:text-ink",
+                    )}
+                  >
+                    <span className={cn("grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold", st.done ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600")}>
+                      {st.done ? "\u2713" : st.n}
+                    </span>
+                    {st.label}
+                  </a>
                 </li>
               ))}
-              <li className="text-slatey-500">then the handoff on the <span className="font-medium">Data</span> page carries it to Build.</li>
+              {stepHandoff ? (
+                <li>
+                  <button onClick={downloadDossier} className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/5 px-2.5 py-1 font-semibold text-primary hover:bg-primary/10">
+                    <FileDown className="h-3 w-3" /> Download the readiness dossier
+                  </button>
+                </li>
+              ) : (
+                <li className="text-slatey-500">then the handoff on the <span className="font-medium">Data</span> page carries it to Build.</li>
+              )}
             </ol>
 
+            <div id="corpus-board" className="scroll-mt-24" />
             <ReadinessBoard
               files={adjusted.files}
               findings={adjusted.findings}
               rollups={adjusted.rollups}
               selectedId={selectedId}
               onSelectFile={setSelectedId}
+            />
+
+            <RemediationBacklog
+              findings={adjusted.findings}
+              onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
             />
 
             <div className="grid gap-6 lg:grid-cols-2">
@@ -483,7 +502,8 @@ export function CorpusView() {
                 )}
               </Panel>
 
-              <DuplicateResolution
+              <div id="corpus-resolution" className="scroll-mt-24" />
+            <DuplicateResolution
                 sets={sets}
                 resolutions={resolutions}
                 focusSetId={focusSetId}
@@ -510,6 +530,7 @@ export function CorpusView() {
               })}
             />
 
+            <div id="corpus-proof" className="scroll-mt-24" />
             <CleaningProof
               files={(inputs ?? []).map((f) => ({ name: f.name, text: f.text }))}
               excludedNames={excludedNames}
@@ -519,10 +540,6 @@ export function CorpusView() {
               onResult={(r, preview) => setLastProof({ r, preview })}
             />
 
-            <RemediationBacklog
-              findings={adjusted.findings}
-              onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
-            />
 
             {/* File tray */}
             <Panel>
@@ -559,7 +576,7 @@ export function CorpusView() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-mono text-[12px] text-slatey-100">{f.name}</span>
-                      {f.excluded ? <Badge color="slate">excluded</Badge> : <Badge color={f.gate.color}>{f.score}</Badge>}
+                      {f.excluded ? <Badge color="slate">excluded</Badge> : <Badge color={f.gate.color}>{`score ${f.score}`}</Badge>}
                     </div>
                     <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slatey-400">
                       {f.gate.gate === "Approved" ? (
@@ -611,7 +628,7 @@ function CorpusHealth({ report }: { report: CorpusReport }) {
   ];
   const metrics: { label: string; value: string; color: BadgeColor }[] = [
     { label: "Corpus ready", value: `${h.readyPct}%`, color: h.readyPct >= 70 ? "emerald" : h.readyPct >= 40 ? "amber" : "orange" },
-    { label: "Avg score", value: String(h.avgScore), color: "blue" },
+    { label: "Avg file score", value: String(h.avgScore), color: "blue" },
     { label: "Files", value: String(h.total), color: "blue" },
     { label: "Duplicates", value: String(h.duplicates), color: h.duplicates ? "rose" : "emerald" },
     { label: "Conflicts", value: String(h.conflicts), color: h.conflicts ? "amber" : "emerald" },
@@ -626,7 +643,7 @@ function CorpusHealth({ report }: { report: CorpusReport }) {
             <div className="mt-1 text-2xl font-semibold tracking-tight text-ink">{m.value}</div>
             <div className="mt-1">
               <Badge color={m.color}>
-                {m.label === "Corpus ready" ? "approved / total" : m.label === "Conflicts" ? "stale versions" : "across corpus"}
+                {m.label === "Corpus ready" ? "approved / active files" : m.label === "Conflicts" ? "stale versions" : m.label === "Avg file score" ? "mean of file gates" : "across corpus"}
               </Badge>
             </div>
           </div>

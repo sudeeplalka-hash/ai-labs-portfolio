@@ -276,11 +276,19 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
     conflicts: pairs.filter((p) => p.kind === "stale-version").length,
   };
 
+  // Topics, like language, are a PROSE property: tabular exports cluster on
+  // column noise (names, domains), so they sit out of topic grouping. The
+  // topic space also gets its OWN vocabulary built from prose files only,
+  // otherwise CSV token noise crowds real topical terms out of the 48 slots.
+  const proseIdx = files.map((_, i) => i).filter((i) => proseLike[i]);
+  const proseTokenLists = proseIdx.map((i) => tokenLists[i]);
+  const proseVocab = buildVocab(proseTokenLists);
+  const proseVectors = proseTokenLists.map((t) => tfVector(t, proseVocab));
   const topics = deriveTopicGroups(
-    files.map((f) => f.id),
-    files.map((f) => f.name),
-    vectors,
-    vocab,
+    proseIdx.map((i) => files[i].id),
+    proseIdx.map((i) => files[i].name),
+    proseVectors,
+    proseVocab,
   );
   const languages = [...langCounts.entries()]
     .map(([label, n2]) => ({ label, files: n2 }))

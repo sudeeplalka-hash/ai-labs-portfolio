@@ -21,6 +21,19 @@ const LEVEL_TONE: Record<Level, string> = {
   critical: "bg-status-critical/15 text-status-critical",
 };
 
+const SHORT: Partial<Record<GuidelineId, string>> = {
+  admissibility: "Admiss.",
+  format: "Format",
+  dedup: "Dedup",
+  freshness: "Freshness",
+  privacy: "Privacy",
+  provenance: "Provenance",
+  taxonomy: "Taxonomy",
+  chunk: "Chunk",
+  concentration: "Concentr.",
+  cohesion: "Cohesion",
+};
+
 const cellTone = (score: number, hasOpen: boolean): string => {
   if (!hasOpen && score === 100) return "bg-status-healthy/10 text-status-healthy";
   if (score >= 85) return "bg-status-healthy/15 text-status-healthy";
@@ -99,8 +112,8 @@ export function ReadinessBoard({
             <tr>
               <th className="sticky left-0 bg-white pb-1.5 pr-3 text-[11px] font-semibold uppercase tracking-wide text-slatey-400">File</th>
               {rollups.map((r) => (
-                <th key={r.guideline} className="px-1 pb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slatey-500" title={r.definition}>
-                  {r.name.split(" ")[0]}
+                <th key={r.guideline} className="px-1 pb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slatey-500" title={`${r.name}: ${r.definition}`}>
+                  {SHORT[r.guideline] ?? r.name.split(" ")[0]}
                 </th>
               ))}
             </tr>

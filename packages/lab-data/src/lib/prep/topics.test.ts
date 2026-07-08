@@ -6,7 +6,7 @@ import { CORPUS_SAMPLES } from "@data/data/sampleCorpus";
 const inputs = CORPUS_SAMPLES.map((s) => ({ name: s.name, text: s.content, size: s.content.length }));
 
 describe("topic groups (Phase 4)", () => {
-  it("partitions the corpus: every file in exactly one group", () => {
+  it("partitions the prose corpus: every prose file in exactly one group, tabular files sit out", () => {
     const r = analyzeCorpus(inputs);
     expect(r.topics.length).toBeGreaterThanOrEqual(2);
     const seen = new Set<string>();
@@ -15,8 +15,10 @@ describe("topic groups (Phase 4)", () => {
         expect(seen.has(id)).toBe(false);
         seen.add(id);
       }
+      for (const n of t.memberNames) expect(/\.csv$/i.test(n)).toBe(false);
     }
-    expect(seen.size).toBe(r.files.length);
+    const proseCount = inputs.filter((f) => !/\.(csv|tsv)$/i.test(f.name)).length;
+    expect(seen.size).toBe(proseCount);
   });
 
   it("confident groups carry term-derived suggested labels; thin groups say Unsure", () => {

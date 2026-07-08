@@ -30,6 +30,21 @@ export function deriveTopicGroups(
   const k = Math.min(4, Math.max(2, Math.round(n / 3)));
   const assign = kmeans(vectors, k);
 
+  // Label-term hygiene: labels must be DISCRIMINATIVE and human-meaningful.
+  // Drop domain fragments, bare years, generic verbs (junk like "example ·
+  // com"), and any term present in most of the corpus (carries no topical
+  // signal even if frequent).
+  const JUNK = /^(com|net|org|www|http|https|example|must|shall|under|per|via|etc|also)$/;
+  const YEAR = /^(19|20)\d{2}$/;
+  const fileDf = new Array(vocab.length).fill(0);
+  for (const v of vectors) for (let j = 0; j < vocab.length; j++) if (v[j] > 0) fileDf[j]++;
+  // Discriminative cap scales with corpus size: on a tiny corpus a term in
+  // 3 of 4 documents is still meaningful, only corpus-universal terms are
+  // noise; on larger corpora, tighten to genuinely distinctive vocabulary.
+  const dfCap = n <= 5 ? (n - 0.5) / n : 0.7;
+  const labelable = (j: number) =>
+    !JUNK.test(vocab[j]) && !YEAR.test(vocab[j]) && fileDf[j] / n <= dfCap;
+
   const groups: TopicGroup[] = [];
   for (let c = 0; c < k; c++) {
     const idx = assign.map((a, i) => (a === c ? i : -1)).filter((i) => i >= 0);
@@ -40,7 +55,7 @@ export function deriveTopicGroups(
     const ranked = sum
       .map((w, j) => [w, j] as [number, number])
       .sort((a, b) => b[0] - a[0])
-      .filter(([w]) => w > 0)
+      .filter(([w, j]) => w > 0 && labelable(j))
       .slice(0, 4)
       .map(([, j]) => vocab[j]);
 
