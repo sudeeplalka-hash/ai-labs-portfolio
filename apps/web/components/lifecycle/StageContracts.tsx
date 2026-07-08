@@ -49,7 +49,13 @@ const Stat = ({ label, value }: { label: string; value: React.ReactNode }) => (
 // ---- Data → Build ----------------------------------------------------------
 export function DataHandoffCard() {
   const { state, update, hydrated, isDemo, src } = useProgramSource();
-  const sig = JSON.stringify({ n: state.initiative?.name, m: state.initiative?.meta, r: state.data?.readinessScore });
+  const sig = JSON.stringify({
+    n: state.initiative?.name, m: state.initiative?.meta, r: state.data?.readinessScore,
+    // Input only (written by DataSliceWriter, never by this card), so the
+    // handoff refreshes when the live corpus backlog changes without any
+    // self-retrigger risk.
+    cb: state.data?.corpusBacklog?.map((e) => e.finding + e.status),
+  });
   useEffect(() => {
     if (!hydrated || isDemo || !state.initiative?.name) return;
     update((d) => { d.data = { ...(d.data ?? {}), handoff: buildDataReadinessHandoff(d) }; });

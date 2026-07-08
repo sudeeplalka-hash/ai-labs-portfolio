@@ -11,7 +11,11 @@ export type GuidelineId =
   | "privacy"
   | "provenance"
   | "taxonomy"
-  | "chunk";
+  | "chunk"
+  // Corpus-level guidelines (Corpus Intelligence Phase 1): computed across the
+  // whole corpus in analyzeCorpus, not by the single-file engine.
+  | "concentration"
+  | "cohesion";
 
 export type FileKind = "tabular" | "text";
 

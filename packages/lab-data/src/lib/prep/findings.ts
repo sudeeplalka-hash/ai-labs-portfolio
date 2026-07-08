@@ -125,3 +125,64 @@ export function rollupCategories(
     };
   });
 }
+
+// ---------------------------------------------------------------------------
+// Live re-scoring (Phase 1): apply Backlog statuses back through the SAME
+// engine scoring path the file view uses, so the Board, the gate segments,
+// and per-file scores all move together when a fix lands.
+// ---------------------------------------------------------------------------
+
+import { scoreWithFixes, computeGate, hasUnclearedBlocker } from "./engine";
+import type { CorpusReport, CorpusHealth } from "./corpus";
+
+export interface RecomputedCorpus {
+  files: CorpusFile[];
+  findings: CorpusFinding[];
+  rollups: CategoryRollup[];
+  health: CorpusHealth;
+}
+
+/** Re-derive files, findings, rollups, and health from a corpus report plus a
+ * status map (key -> status). "fixed" applies the finding's fix through
+ * scoreWithFixes (same math as the single-file lab); "accepted-risk" keeps the
+ * score impact but leaves the open queue. Pure: same inputs, same outputs. */
+export function recomputeCorpus(
+  report: CorpusReport,
+  statuses: Record<string, FindingStatus>,
+): RecomputedCorpus {
+  const baseFindings = deriveCorpusFindings(report.files);
+  const findings = baseFindings.map((f) => ({ ...f, status: statuses[f.key] ?? "open" }));
+
+  const appliedByFile = new Map<string, Set<string>>();
+  for (const f of findings) {
+    if (f.status === "fixed" && f.fixId) {
+      const set = appliedByFile.get(f.fileId) ?? new Set<string>();
+      set.add(f.fixId);
+      appliedByFile.set(f.fileId, set);
+    }
+  }
+
+  const files = report.files.map((f) => {
+    const applied = appliedByFile.get(f.id) ?? new Set<string>();
+    const score = scoreWithFixes(f.report.checks, applied);
+    const gate = computeGate(score, hasUnclearedBlocker(f.report.checks, applied));
+    return { ...f, score, gate };
+  });
+
+  const rollups = rollupCategories(files, findings);
+
+  const counts = { Approved: 0, Conditional: 0, Hold: 0, Rejected: 0 } as Record<string, number>;
+  for (const f of files) counts[f.gate.gate]++;
+  const total = files.length;
+  const health: CorpusHealth = {
+    ...report.health,
+    approved: counts.Approved,
+    conditional: counts.Conditional,
+    hold: counts.Hold,
+    rejected: counts.Rejected,
+    readyPct: total ? Math.round((counts.Approved / total) * 100) : 0,
+    avgScore: total ? Math.round(files.reduce((a, f) => a + f.score, 0) / total) : 0,
+  };
+
+  return { files, findings, rollups, health };
+}

@@ -59,6 +59,18 @@ export const RULEBOOK: Record<GuidelineId, Guideline> = {
     rule: "Content segments cleanly within the embedding target band.",
     downstream: "Oversized or boilerplate heavy chunks degrade retrieval precision.",
   },
+  concentration: {
+    id: "concentration",
+    name: "Content Concentration",
+    rule: "Documents must carry substantive content; repeated passages and template boilerplate stay below threshold.",
+    downstream: "Repetitive text crowds the retrieval window with low-information chunks and inflates token spend.",
+  },
+  cohesion: {
+    id: "cohesion",
+    name: "Topical Cohesion",
+    rule: "Documents should share the knowledge base's topical center; off-topic outliers are flagged for review.",
+    downstream: "Off-topic documents surface as irrelevant evidence and dilute retrieval relevance.",
+  },
 };
 
 export const RULEBOOK_LIST: Guideline[] = [
@@ -70,4 +82,6 @@ export const RULEBOOK_LIST: Guideline[] = [
   RULEBOOK.provenance,
   RULEBOOK.taxonomy,
   RULEBOOK.chunk,
+  RULEBOOK.concentration,
+  RULEBOOK.cohesion,
 ];

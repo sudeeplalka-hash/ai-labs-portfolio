@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useProgram } from "@labs/program-core";
-import { getSessions } from "@data/lib/live/session";
+import { getSessions, getCorpusBacklog } from "@data/lib/live/session";
 
 // Writes the real Data lab result into ProgramState.data so Realize/Deploy can
 // read it. Reuses the Data lab's own session store, no duplicated logic.
@@ -19,12 +19,13 @@ export function DataSliceWriter() {
       // SessionGate values are capitalized ("Approved" | "Conditional" | "Hold" | "Rejected").
       const gaps = ss.filter((s) => s.gate !== "Approved" && s.gate !== "Conditional").length;
       const status = readiness >= 70 ? "healthy" : readiness >= 40 ? "watch" : "at-risk";
-      const sig = JSON.stringify({ readiness, gaps });
+      const backlog = getCorpusBacklog();
+      const sig = JSON.stringify({ readiness, gaps, b: backlog.map((e) => e.finding + e.status) });
       if (sig === last.current) return;
       last.current = sig;
       // Merge, never replace, so derived fields on the data slice (e.g. the
       // Data Readiness Handoff written by DataHandoffCard) survive this sync.
-      update((d) => { d.data = { ...(d.data ?? {}), readinessScore: readiness, gaps, status }; });
+      update((d) => { d.data = { ...(d.data ?? {}), readinessScore: readiness, gaps, status, corpusBacklog: backlog }; });
     };
     sync();
     const id = setInterval(sync, 3000);

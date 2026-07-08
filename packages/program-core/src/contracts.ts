@@ -6,6 +6,7 @@
 // ============================================================================
 import type {
   ProgramState, GovernanceTier, GovernanceDecision, DataReadinessHandoff, BuildOutputContract,
+ RemediationEntry,
 } from "./types";
 import { isAgenticInitiative, TOOL_REGISTRY, MISUSE_EVALS } from "./agents";
 import { deriveFineTuneMemo, deriveDatasetReadiness, deriveGeneralizationAssessment } from "./training";
@@ -46,6 +47,20 @@ export function buildDataReadinessHandoff(s: ProgramState): DataReadinessHandoff
   if (readiness < 75) backlog.push("Fill top coverage gaps in the knowledge base");
   backlog.push("Stamp source + version metadata on every document");
 
+  // Structured entries (Phase 1): prefer the live corpus backlog bridged from
+  // the Data lab session; otherwise synthesize from the template backlog so
+  // demo archetypes and threaded initiatives carry the same shape.
+  const liveBacklog = s.data?.corpusBacklog;
+  const remediationEntries: RemediationEntry[] = liveBacklog?.length
+    ? liveBacklog.slice(0, 8)
+    : backlog.map((b): RemediationEntry => ({
+        finding: b,
+        guideline: /PII|redaction/i.test(b) ? "privacy" : /coverage/i.test(b) ? "taxonomy" : "provenance",
+        severity: /PII|redaction/i.test(b) ? "risk" : "watch",
+        recommendation: b,
+        status: "open",
+      }));
+
   const band = readiness >= 75 ? "Proceed to Build with standard retrieval controls."
     : readiness >= 60 ? "Proceed to Build with conditional sources flagged and citations enforced."
     : "Remediate coverage and provenance gaps before Build.";
@@ -64,6 +79,7 @@ export function buildDataReadinessHandoff(s: ProgramState): DataReadinessHandoff
     evalDatasetReadiness: clamp(readiness - 15),
     knownDataRisks: risks,
     remediationBacklog: backlog,
+    remediationEntries,
     recommendation: band,
     createdAt: new Date().toISOString(),
   };
@@ -208,6 +224,7 @@ export interface GovernInputs {
   dataReadinessScore?: number;
   knownDataRisks?: string[];
   remediationBacklog?: string[];
+  remediationEntries?: RemediationEntry[];
   dataRecommendation?: string;
   // Build
   selectedModel?: string;
@@ -270,6 +287,7 @@ export function selectGovernInputs(s: ProgramState): GovernInputs {
     dataReadinessScore: handoff?.dataReadinessScore ?? s.data?.readinessScore,
     knownDataRisks: handoff?.knownDataRisks,
     remediationBacklog: handoff?.remediationBacklog,
+    remediationEntries: handoff?.remediationEntries,
     dataRecommendation: handoff?.recommendation,
     selectedModel: c?.selectedModel ?? s.rag?.model,
     retrievalMode: c?.retrievalModeLabel ?? c?.retrievalMode,
@@ -362,6 +380,19 @@ export function deriveOpenFindings(s: ProgramState): GovFinding[] {
   if ((g.citationAccuracy ?? 100) < 88) out.push({ severity: "High", finding: "Citation accuracy below pilot threshold", evidenceSource: "Build/RAG contract", impact: "Unsupported or incorrect answers may reach users", requiredAction: "Improve retrieval/citation quality before pilot", owner: "RAG Owner", dueStage: "Build", status: "Open" });
   if ((g.hallucinationRisk ?? 0) > 10) out.push({ severity: (g.hallucinationRisk ?? 0) >= 25 ? "Critical" : "High", finding: "Hallucination risk above target", evidenceSource: "Build/RAG contract", impact: "Fabricated content risk in answers", requiredAction: "Constrain prompt/retrieval; add abstention path", owner: "RAG Owner", dueStage: "Build", status: "Open" });
   (g.blockedSources ?? []).forEach((src) => out.push({ severity: "High", finding: `Blocked source: ${src}`, evidenceSource: "Data handoff", impact: "Source cannot be indexed or retrieved", requiredAction: "Keep excluded until redaction and access controls complete", owner: "Data Owner", dueStage: "Data", status: "Open" }));
+  (g.remediationEntries ?? [])
+    .filter((e) => e.status === "open" && (e.severity === "critical" || e.severity === "risk"))
+    .slice(0, 4)
+    .forEach((e) => out.push({
+      severity: e.severity === "critical" ? "High" : "Medium",
+      finding: `Data remediation open: ${e.finding}${e.file ? ` (${e.file})` : ""}`,
+      evidenceSource: "Data handoff backlog",
+      impact: "Unremediated data quality issue carries into retrieval and answers",
+      requiredAction: e.recommendation ?? "Complete the remediation or accept the risk in the Data lab",
+      owner: "Data Owner",
+      dueStage: "Data",
+      status: "Open",
+    }));
   if ((g.monitoringCoverageScore ?? 100) < 80) out.push({ severity: "Medium", finding: "Monitoring coverage gap", evidenceSource: "Operate", impact: "Retrieval misses and user feedback not fully monitored", requiredAction: "Add instrumentation before production", owner: "AI Ops", dueStage: "Operate", status: "In review" });
   if (g.regressionStatus === "Block release") out.push({ severity: "High", finding: "Evaluation regression blocker", evidenceSource: "Operate", impact: "Quality worsened vs prior run", requiredAction: "Investigate and fix before release", owner: "RAG Owner", dueStage: "Build", status: "Open" });
   if ((g.driftRisk ?? 0) >= 60) out.push({ severity: "Medium", finding: "High operational drift risk", evidenceSource: "Operate", impact: "Answers may go stale as sources change", requiredAction: "Reindex and add drift monitoring", owner: "AI Ops", dueStage: "Operate", status: "In review" });

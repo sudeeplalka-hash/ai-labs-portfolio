@@ -57,6 +57,38 @@ describe("stage-writer chain reaches a fixed point", () => {
     });
   }
 
+  it("handoff carries structured remediation entries (synthesized for demo archetypes)", () => {
+    const s1 = applyWriterChain(demoState("decision-support"));
+    const entries = s1.data?.handoff?.remediationEntries ?? [];
+    expect(entries.length).toBeGreaterThan(0);
+    for (const e of entries) {
+      expect(e.finding.length).toBeGreaterThan(0);
+      expect(["watch", "risk", "critical"]).toContain(e.severity);
+      expect(["open", "fixed", "accepted-risk"]).toContain(e.status);
+    }
+    // Sensitive archetype synthesizes a privacy-tagged item.
+    expect(entries.some((e) => e.guideline === "privacy")).toBe(true);
+  });
+
+  it("a live corpus backlog takes precedence over synthesis and still converges", () => {
+    const s0 = demoState("knowledge-assistant");
+    s0.data = {
+      ...(s0.data ?? {}),
+      corpusBacklog: [
+        { finding: "Topical outlier: recipe.txt", guideline: "cohesion", severity: "risk", file: "recipe.txt", status: "open" },
+        { finding: "Repeated boilerplate", guideline: "concentration", severity: "watch", file: "template.txt", recommendation: "Deduplicate repeated passages", status: "accepted-risk" },
+      ],
+    };
+    const s1 = applyWriterChain(s0);
+    const s2 = applyWriterChain(s1);
+    const entries = s1.data?.handoff?.remediationEntries ?? [];
+    expect(entries.map((e) => e.finding)).toContain("Topical outlier: recipe.txt");
+    expect(stripVolatile(s2)).toEqual(stripVolatile(s1));
+    // The open risk-severity item must surface in Govern's open findings.
+    const findings = s1.governance?.decision?.openFindings ?? [];
+    expect(JSON.stringify(findings)).toContain("Topical outlier");
+  });
+
   it("derivations are deterministic for identical input state", () => {
     const s = applyWriterChain(demoState("knowledge-assistant"));
     const a = stripVolatile(applyWriterChain(s));

@@ -80,6 +80,19 @@ export interface Initiative {
 // so labs degrade gracefully when an upstream stage hasn't run.
 
 /** Data → Build/RAG. What data can be trusted, and under what restrictions. */
+/** Structured remediation item (Corpus Intelligence Phase 1). Live sessions
+ * populate these from the Data lab's Remediation Backlog; demo/threaded
+ * initiatives synthesize them from the pattern template. Additive + optional:
+ * older persisted states simply lack the field. */
+export interface RemediationEntry {
+  finding: string;
+  guideline: string;
+  severity: "watch" | "risk" | "critical";
+  file?: string;
+  recommendation?: string;
+  status: "open" | "fixed" | "accepted-risk";
+}
+
 export interface DataReadinessHandoff {
   initiativeName?: string | null;
   dataReadinessScore?: number;      // 0..100 (broader readiness)
@@ -94,6 +107,7 @@ export interface DataReadinessHandoff {
   evalDatasetReadiness?: number;    // 0..100
   knownDataRisks?: string[];
   remediationBacklog?: string[];
+  remediationEntries?: RemediationEntry[];
   recommendation?: string;
   createdAt?: string;
 }
@@ -350,7 +364,11 @@ export interface TrainingReadinessContract {
 
 // Per-stage outputs each lab writes back. Optional: a stage fills its slice when
 // the visitor completes it; downstream labs read what's there and degrade gracefully.
-export interface DataSlice { readinessScore?: number; gaps?: number; status?: string; handoff?: DataReadinessHandoff }
+export interface DataSlice {
+  readinessScore?: number; gaps?: number; status?: string; handoff?: DataReadinessHandoff;
+  /** Live corpus backlog bridged from the Data lab session (DataSliceWriter). */
+  corpusBacklog?: RemediationEntry[];
+}
 export interface RagSlice {
   faithfulness?: number; citationAccuracy?: number; hallucination?: number; costPerAnswer?: number; status?: string;
   // Engine chosen in Build · RAG → Model Fit. Carried so Deploy and Realize can

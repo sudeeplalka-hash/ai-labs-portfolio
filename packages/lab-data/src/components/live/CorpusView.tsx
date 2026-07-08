@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Boxes,
   UploadCloud,
@@ -16,9 +16,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { analyzeCorpus, type CorpusReport, type DupPair } from "@data/lib/prep/corpus";
+import { recomputeCorpus, type FindingStatus } from "@data/lib/prep/findings";
+import { ReadinessBoard } from "./ReadinessBoard";
+import { RemediationBacklog } from "./RemediationBacklog";
 import { getProfile, type ProfileId } from "@data/lib/prep/profiles";
 import { extractTextFromFile, CORPUS_UPLOAD_ACCEPT, FileExtractionError } from "@data/lib/prep/fileExtraction";
-import { recordSessions } from "@data/lib/live/session";
+import { recordSessions, recordCorpusBacklog } from "@data/lib/live/session";
 import { CORPUS_SAMPLES } from "@data/data/sampleCorpus";
 import { Panel } from "@data/components/common/Panel";
 import { SectionHeader } from "@data/components/common/SectionHeader";
@@ -54,11 +57,15 @@ export function CorpusView() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [parseErrors, setParseErrors] = useState<string[]>([]);
+  // Backlog statuses (Phase 1): keyed by finding key, applied through the same
+  // engine scoring path as the file view, so Board + gates re-score together.
+  const [statuses, setStatuses] = useState<Record<string, FindingStatus>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   const analyze = useCallback((ins: Input[], pid: ProfileId) => {
     setRunning(true);
     setInputs(ins);
+    setStatuses({});
     // brief async so the loading state paints
     setTimeout(() => {
       const rep = analyzeCorpus(ins, pid);
@@ -119,6 +126,7 @@ export function CorpusView() {
 
   const changeProfile = (id: ProfileId) => {
     setProfileId(id);
+    setStatuses({});
     if (inputs) setReport(analyzeCorpus(inputs, id));
   };
 
@@ -127,10 +135,31 @@ export function CorpusView() {
     setReport(null);
     setSelectedId(null);
     setParseErrors([]);
+    setStatuses({});
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const selected = report && selectedId ? report.files.find((f) => f.id === selectedId) : undefined;
+  // Live view of the corpus with backlog statuses applied (pure derivation).
+  const adjusted = report ? recomputeCorpus(report, statuses) : null;
+
+  // Bridge the backlog to the lifecycle (Phase 1): DataSliceWriter reads this
+  // snapshot and carries it into ProgramState, where the Data Readiness
+  // Handoff turns it into structured remediation entries for Govern.
+  useEffect(() => {
+    if (!adjusted) return;
+    recordCorpusBacklog(
+      adjusted.findings.map((f) => ({
+        finding: f.name,
+        guideline: f.guideline,
+        severity: f.level,
+        file: f.fileName,
+        recommendation: f.fixLabel,
+        status: f.status,
+      })),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [report, statuses]);
+  const selected = adjusted && selectedId ? adjusted.files.find((f) => f.id === selectedId) : undefined;
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -209,14 +238,22 @@ export function CorpusView() {
         {!report && !running && <EmptyCorpus onLoad={loadSampleCorpus} />}
         {running && <div className="panel p-10 text-center text-sm text-slatey-300">Analyzing corpus…</div>}
 
-        {report && (
+        {report && adjusted && (
           <>
-            <CorpusHealth report={report} />
+            <CorpusHealth report={{ ...report, health: adjusted.health }} />
+
+            <ReadinessBoard
+              files={adjusted.files}
+              findings={adjusted.findings}
+              rollups={adjusted.rollups}
+              selectedId={selectedId}
+              onSelectFile={setSelectedId}
+            />
 
             <div className="grid gap-6 lg:grid-cols-2">
               <Panel>
                 <SectionHeader title="Corpus map" description="Clusters of similar, duplicate & stale documents" icon={Boxes} />
-                <CorpusStarMap files={report.files} pairs={report.pairs} selectedId={selectedId} onSelect={setSelectedId} />
+                <CorpusStarMap files={adjusted.files} pairs={report.pairs} selectedId={selectedId} onSelect={setSelectedId} />
               </Panel>
 
               <Panel>
@@ -248,6 +285,11 @@ export function CorpusView() {
               </Panel>
             </div>
 
+            <RemediationBacklog
+              findings={adjusted.findings}
+              onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
+            />
+
             {/* File tray */}
             <Panel>
               <SectionHeader title="Files in this corpus" description="Click a file to inspect its gate and issues" icon={Layers} />
@@ -272,7 +314,7 @@ export function CorpusView() {
                 </div>
               )}
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {report.files.map((f) => (
+                {adjusted.files.map((f) => (
                   <button
                     key={f.id}
                     onClick={() => setSelectedId(f.id)}

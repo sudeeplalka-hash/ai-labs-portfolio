@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { analyzeCorpus } from "./corpus";
-import { deriveCorpusFindings, rollupCategories, FINDING_WEIGHT } from "./findings";
+import { deriveCorpusFindings, rollupCategories, recomputeCorpus, FINDING_WEIGHT } from "./findings";
 import { RULEBOOK_LIST } from "./rulebook";
 
 // Real engine output in, findings spine out — no mocked checks.
@@ -88,5 +88,52 @@ describe("corpus findings spine", () => {
 
   it("weights are the documented visible math", () => {
     expect(FINDING_WEIGHT).toEqual({ watch: 10, risk: 25, critical: 45 });
+  });
+});
+
+describe("recomputeCorpus (live Backlog re-scoring)", () => {
+  const spam = { name: "template-spam.txt", text: ("This document is confidential and proprietary to the company. ").repeat(40) };
+  const base = () => analyzeCorpus([clean(0), clean(1), spam]);
+
+  it("fixing a finding raises the file score, its rollup, and corpus health together", () => {
+    const report = base();
+    const before = recomputeCorpus(report, {});
+    const target = before.findings.find((f) => f.guideline === "concentration" && f.fixId)!;
+    const after = recomputeCorpus(report, { [target.key]: "fixed" });
+
+    const fileBefore = before.files.find((f) => f.id === target.fileId)!;
+    const fileAfter = after.files.find((f) => f.id === target.fileId)!;
+    expect(fileAfter.score).toBeGreaterThan(fileBefore.score);
+
+    const rollBefore = before.rollups.find((r) => r.guideline === "concentration")!;
+    const rollAfter = after.rollups.find((r) => r.guideline === "concentration")!;
+    expect(rollAfter.score).toBeGreaterThanOrEqual(rollBefore.score);
+    expect(rollAfter.findingCount).toBe(rollBefore.findingCount - 1);
+
+    expect(after.health.avgScore).toBeGreaterThanOrEqual(before.health.avgScore);
+  });
+
+  it("accepting a risk leaves scores unchanged but empties the open queue entry", () => {
+    const report = base();
+    const before = recomputeCorpus(report, {});
+    const target = before.findings.find((f) => f.guideline === "concentration")!;
+    const after = recomputeCorpus(report, { [target.key]: "accepted-risk" });
+
+    expect(after.files.find((f) => f.id === target.fileId)!.score)
+      .toBe(before.files.find((f) => f.id === target.fileId)!.score);
+    const roll = after.rollups.find((r) => r.guideline === "concentration")!;
+    expect(roll.findingCount).toBe(before.rollups.find((r) => r.guideline === "concentration")!.findingCount - 1);
+  });
+
+  it("is pure: same report + statuses give identical output; empty statuses reproduce base scores", () => {
+    const report = base();
+    const a = recomputeCorpus(report, {});
+    const b = recomputeCorpus(report, {});
+    expect(a).toEqual(b);
+    for (const f of a.files) {
+      const orig = report.files.find((x) => x.id === f.id)!;
+      expect(f.score).toBe(orig.score);
+      expect(f.gate.gate).toBe(orig.gate.gate);
+    }
   });
 });

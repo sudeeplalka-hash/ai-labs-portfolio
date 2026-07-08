@@ -7,6 +7,9 @@ import type { ProfileId } from "./profiles";
 // the dedup / conflict / coverage lens, a different question than the RAG lab's
 // query-relative embedding view.
 
+import { contentConcentration, topicalCohesion } from "./signals";
+import type { CheckResult } from "./types";
+
 export interface CorpusFile {
   id: string;
   name: string;
@@ -124,8 +127,48 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
   const vectors = tokenLists.map((t) => tfVector(t, vocab));
   const coords = project(vectors, vocab.length);
 
+  // Corpus-level guideline checks (Phase 1): concentration is per-document,
+  // cohesion is relative to the whole corpus, so both live here rather than in
+  // the single-file engine. Visible math in ./signals.ts.
+  const cohesion = inputs.length >= 3 ? topicalCohesion(vectors) : null;
+
   const files: CorpusFile[] = inputs.map((f, i) => {
     const report = buildReport(f.name, f.text, f.size, profileId);
+
+    const conc = contentConcentration(tokenLists[i]);
+    const concLevel = conc.score >= 85 ? "healthy" : conc.score >= 65 ? "watch" : conc.score >= 40 ? "risk" : "critical";
+    const concCheck: CheckResult = {
+      id: "concentration",
+      guideline: "concentration",
+      name: "Content concentration",
+      level: concLevel,
+      detail:
+        concLevel === "healthy"
+          ? `Distinct content: ${conc.score}/100 of 3-gram phrases are unique.`
+          : `${Math.round(conc.repeatedShare * 100)}% of phrasing repeats${conc.topRepeats[0] ? ` (top: \u201c${conc.topRepeats[0]}\u201d)` : ""}.`,
+      downstream: "Repeated passages crowd the retrieval window with low-information chunks and inflate token spend.",
+      fix: concLevel === "healthy" ? undefined : { id: "concentration", label: "Deduplicate repeated passages", delta: 6 },
+    };
+    report.checks.push(concCheck);
+
+    if (cohesion) {
+      const cos = cohesion.perDoc[i];
+      const cohLevel = cos >= 0.45 ? "healthy" : cos >= 0.3 ? "watch" : "risk";
+      report.checks.push({
+        id: "cohesion",
+        guideline: "cohesion",
+        name: "Topical cohesion",
+        level: cohLevel,
+        detail:
+          cohLevel === "healthy"
+            ? `On-topic: cosine ${cos.toFixed(2)} to the corpus centroid.`
+            : `Topical outlier: cosine ${cos.toFixed(2)} to the corpus centroid, review whether this belongs in the knowledge base.`,
+        downstream: "Off-topic documents surface as irrelevant evidence and dilute retrieval relevance.",
+        // No in-lab fix: the honest remediations are exclusion or corpus rescope
+        // (Resolution workflow, Phase 2). Until then it can only be accepted.
+      });
+    }
+
     const score = scoreWithFixes(report.checks, new Set());
     const gate = computeGate(score, hasUnclearedBlocker(report.checks, new Set()));
     return { id: `f${i}`, name: f.name, report, score, gate, tokens: tokenLists[i].length, x: coords[i].x, y: coords[i].y };

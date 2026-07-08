@@ -75,3 +75,49 @@ export function clearSessions(): void {
     /* ignore */
   }
 }
+
+// ---------------------------------------------------------------------------
+// Corpus backlog bridge (Phase 1): a compact snapshot of the Remediation
+// Backlog for the current corpus session, read by DataSliceWriter so the
+// Data Readiness Handoff can carry structured remediation entries.
+// ---------------------------------------------------------------------------
+
+export interface CorpusBacklogEntry {
+  finding: string;
+  guideline: string;
+  severity: "watch" | "risk" | "critical";
+  file?: string;
+  recommendation?: string;
+  status: "open" | "fixed" | "accepted-risk";
+}
+
+const BACKLOG_KEY = "datalab.corpusbacklog.v1";
+const BACKLOG_CAP = 12;
+
+export function getCorpusBacklog(): CorpusBacklogEntry[] {
+  if (!canUse()) return [];
+  try {
+    const raw = window.localStorage.getItem(BACKLOG_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as CorpusBacklogEntry[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordCorpusBacklog(entries: CorpusBacklogEntry[]): void {
+  if (!canUse()) return;
+  try {
+    // Open items first (severity descending), then accepted risks; fixed items
+    // don't travel, they're done.
+    const rank = { critical: 0, risk: 1, watch: 2 } as const;
+    const keep = entries
+      .filter((e) => e.status !== "fixed")
+      .sort((a, b) => (a.status === b.status ? rank[a.severity] - rank[b.severity] : a.status === "open" ? -1 : 1))
+      .slice(0, BACKLOG_CAP);
+    window.localStorage.setItem(BACKLOG_KEY, JSON.stringify(keep));
+  } catch {
+    /* ignore quota / serialization errors */
+  }
+}
