@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { contentConcentration, topicalCohesion } from "./signals";
+import { contentConcentration, topicalCohesion, parsabilityProfile, languageProfile } from "./signals";
 import { l2normalize } from "@labs/kit";
 
 const words = (s: string) => s.toLowerCase().split(/\s+/).filter(Boolean);
@@ -58,5 +58,61 @@ describe("topicalCohesion", () => {
   it("edge cases: empty, single, zero-dim", () => {
     expect(topicalCohesion([])).toEqual({ score: 100, perDoc: [] });
     expect(topicalCohesion([[3, 4]])).toEqual({ score: 100, perDoc: [1] });
+  });
+});
+
+describe("parsabilityProfile", () => {
+  it("clean prose in a text file is healthy", () => {
+    const text = "Adjusters review coverage terms and document their decisions.\nAppeals go to the review board within five business days.\n";
+    const r = parsabilityProfile(text, text.length);
+    expect(r.level).toBe("healthy");
+    expect(r.reasons).toEqual([]);
+    expect(r.extractionYield).toBeCloseTo(1, 5);
+  });
+
+  it("a large binary file with almost no extracted text is critical (scanned/image-heavy)", () => {
+    const r = parsabilityProfile("Cover page", 500_000);
+    expect(r.level).toBe("critical");
+    expect(r.reasons.join(" ")).toMatch(/scanned or image-heavy/);
+  });
+
+  it("replacement characters raise the encoding reason", () => {
+    const text = ("normal text " + "\uFFFD").repeat(200);
+    const r = parsabilityProfile(text, text.length);
+    expect(["risk", "critical"]).toContain(r.level);
+    expect(r.reasons.join(" ")).toMatch(/replacement/i);
+  });
+
+  it("repeated header/footer lines raise the boilerplate reason", () => {
+    const body = Array.from({ length: 30 }, (_, i) => `CONFIDENTIAL - ACME CORP - PAGE HEADER\nUnique paragraph line number ${i} with content.`).join("\n");
+    const r = parsabilityProfile(body, body.length);
+    expect(r.boilerplateLineShare).toBeGreaterThan(0.3);
+    expect(r.reasons.join(" ")).toMatch(/repeat verbatim/);
+  });
+});
+
+describe("languageProfile (heuristic)", () => {
+  it("detects English with high confidence on ordinary prose", () => {
+    const r = languageProfile("The adjusters review the coverage terms and document the decisions that are made for the claims in the system.");
+    expect(r.primary).toBe("English");
+    expect(r.confidence).toBe("high");
+    expect(r.scriptMix[0].script).toBe("Latin");
+  });
+
+  it("detects Spanish over English on Spanish prose", () => {
+    const r = languageProfile("Los ajustadores revisan los términos de la cobertura y documentan las decisiones que se toman para los reclamos en el sistema con una política clara para el cliente.");
+    expect(r.primary).toBe("Spanish");
+  });
+
+  it("reports non-Latin scripts by script name", () => {
+    const r = languageProfile("Политика рассмотрения претензий и споров по покрытию для клиентов компании.");
+    expect(r.primary).toBe("Cyrillic script");
+    expect(r.confidence).toBe("high");
+  });
+
+  it("empty/whitespace input is Unknown, and results are deterministic", () => {
+    expect(languageProfile("   ").primary).toBe("Unknown");
+    const text = "The quick brown fox jumps over the lazy dog and the horse.";
+    expect(languageProfile(text)).toEqual(languageProfile(text));
   });
 });

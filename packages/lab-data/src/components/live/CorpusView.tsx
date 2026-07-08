@@ -20,11 +20,17 @@ import { recomputeCorpus, type FindingStatus } from "@data/lib/prep/findings";
 import { deriveDuplicateSets, setIdForPair } from "@data/lib/prep/resolution";
 import { DuplicateResolution, type SetResolution } from "./DuplicateResolution";
 import { CorpusAtlas3D } from "./CorpusAtlas3D";
+import { TopicGroups } from "./TopicGroups";
+import { CleaningProof } from "./CleaningProof";
+import type { ProofResult } from "@data/lib/prep/proof";
+import { RULEBOOK } from "@data/lib/prep/rulebook";
+import { FileDown } from "lucide-react";
+import type { AtlasHull } from "./CorpusStarMap";
 import { ReadinessBoard } from "./ReadinessBoard";
 import { RemediationBacklog } from "./RemediationBacklog";
 import { getProfile, type ProfileId } from "@data/lib/prep/profiles";
 import { extractTextFromFile, CORPUS_UPLOAD_ACCEPT, FileExtractionError } from "@data/lib/prep/fileExtraction";
-import { recordSessions, recordCorpusBacklog, recordCorpusExclusions } from "@data/lib/live/session";
+import { recordSessions, recordCorpusBacklog, recordCorpusExclusions, recordCorpusTopics } from "@data/lib/live/session";
 import { CORPUS_SAMPLES } from "@data/data/sampleCorpus";
 import { Panel } from "@data/components/common/Panel";
 import { SectionHeader } from "@data/components/common/SectionHeader";
@@ -67,6 +73,9 @@ export function CorpusView() {
   const [resolutions, setResolutions] = useState<Record<string, SetResolution>>({});
   const [focusSetId, setFocusSetId] = useState<string | null>(null);
   const [atlasMode, setAtlasMode] = useState<"2d" | "3d">("2d");
+  // Confirmed topic labels (Phase 4): topicId -> human-approved label.
+  const [topicLabels, setTopicLabels] = useState<Record<string, string>>({});
+  const [lastProof, setLastProof] = useState<{ r: ProofResult; preview: boolean } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const analyze = useCallback((ins: Input[], pid: ProfileId) => {
@@ -74,6 +83,8 @@ export function CorpusView() {
     setInputs(ins);
     setStatuses({});
     setResolutions({});
+    setTopicLabels({});
+    setLastProof(null);
     setFocusSetId(null);
     // brief async so the loading state paints
     setTimeout(() => {
@@ -137,6 +148,7 @@ export function CorpusView() {
     setProfileId(id);
     setStatuses({});
     setResolutions({});
+    setTopicLabels({});
     if (inputs) setReport(analyzeCorpus(inputs, id));
   };
 
@@ -147,6 +159,8 @@ export function CorpusView() {
     setParseErrors([]);
     setStatuses({});
     setResolutions({});
+    setTopicLabels({});
+    setLastProof(null);
     setFocusSetId(null);
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -165,6 +179,35 @@ export function CorpusView() {
 
   // Live view of the corpus with backlog statuses + exclusions applied.
   const adjusted = report ? recomputeCorpus(report, statuses, exclusions) : null;
+
+  // Guided pass state (Phase 5): profile → resolve → hand off.
+  const stepProfile = !!report;
+  const stepResolve = stepProfile && sets.every((s2) => s2.id in resolutions);
+  const stepHandoff = stepResolve && !!adjusted && !adjusted.findings.some((f) => f.status === "open" && f.level === "critical");
+
+  // Proof inputs (Phase 5).
+  const excludedNames = new Set(
+    Object.keys(exclusions).map((id) => report?.files.find((f) => f.id === id)?.name ?? id),
+  );
+  const previewExclusions = new Set(
+    sets.flatMap((s2) => s2.recommendation.dropIds.map((id) => report?.files.find((f) => f.id === id)?.name ?? id)),
+  );
+  const topicsByFile = new Map<string, string[]>();
+  for (const t of report?.topics ?? []) {
+    const label = topicLabels[t.id];
+    if (label === undefined) continue;
+    for (const n of t.memberNames) topicsByFile.set(n, [...(topicsByFile.get(n) ?? []), label]);
+  }
+
+  // Confirmed topics → Atlas hulls (soft palette, deterministic order).
+  const HULL_COLORS = ["#0d9488", "#7c3aed", "#b45309", "#0369a1"];
+  const hulls: AtlasHull[] = (report?.topics ?? [])
+    .filter((t) => topicLabels[t.id] !== undefined)
+    .map((t, i) => ({
+      label: topicLabels[t.id],
+      memberIds: t.memberIds.filter((id) => !(id in exclusions)),
+      color: HULL_COLORS[i % HULL_COLORS.length],
+    }));
 
   // Bridge the backlog to the lifecycle (Phase 1): DataSliceWriter reads this
   // snapshot and carries it into ProgramState, where the Data Readiness
@@ -197,9 +240,83 @@ export function CorpusView() {
         reason,
       })),
     );
+    recordCorpusTopics(
+      (report?.topics ?? [])
+        .filter((t) => topicLabels[t.id] !== undefined)
+        .map((t) => ({
+          label: topicLabels[t.id],
+          files: t.memberNames.filter((_, i2) => !(t.memberIds[i2] in exclusions)),
+        })),
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [report, statuses, resolutions]);
+  }, [report, statuses, resolutions, topicLabels]);
   const selected = adjusted && selectedId ? adjusted.files.find((f) => f.id === selectedId) : undefined;
+
+  // Readiness dossier (Phase 5): a downloadable markdown record of everything
+  // this session decided, provenance-footed, built from the same derived state
+  // the panels render (no separate bookkeeping to drift).
+  const downloadDossier = () => {
+    if (!report || !adjusted) return;
+    const lines: string[] = [];
+    const push = (x = "") => lines.push(x);
+    push("# Corpus Readiness Dossier");
+    push();
+    push(`Generated ${new Date().toISOString().slice(0, 10)} \u00b7 ${adjusted.activeFiles.length} active file(s), ${adjusted.health.excluded ?? 0} excluded \u00b7 profile: ${profileId}`);
+    push();
+    push("## Health");
+    push(`Average readiness ${adjusted.health.avgScore}/100 \u00b7 ready ${adjusted.health.readyPct}% \u00b7 approved ${adjusted.health.approved} / conditional ${adjusted.health.conditional} / hold ${adjusted.health.hold} / rejected ${adjusted.health.rejected}`);
+    push();
+    push("## Guideline scores");
+    push("| Guideline | Score | Open findings | Files affected |");
+    push("|---|---|---|---|");
+    for (const r of adjusted.rollups) push(`| ${RULEBOOK[r.guideline].name} | ${r.score}/100 | ${r.findingCount} | ${r.filesAffected} |`);
+    push();
+    if (Object.keys(resolutions).length) {
+      push("## Duplicate & version resolutions");
+      for (const [setId, r] of Object.entries(resolutions)) {
+        const st = sets.find((x) => x.id === setId);
+        if (!st) continue;
+        if (r.keepId === null) {
+          push(`- Kept all copies: ${st.memberNames.join(" \u2194 ")} (recommendation dismissed)`);
+        } else {
+          const keep = st.memberNames[st.memberIds.indexOf(r.keepId)];
+          const drop = st.memberNames.filter((_, i) => st.memberIds[i] !== r.keepId);
+          push(`- Kept **${keep}**, excluded ${drop.join(", ")} (${st.kind})`);
+        }
+      }
+      push();
+    }
+    const openFindings = adjusted.findings.filter((f) => f.status === "open");
+    if (openFindings.length) {
+      push("## Open remediation backlog");
+      for (const f of openFindings.slice(0, 15)) push(`- [${f.level}] ${RULEBOOK[f.guideline].name} \u00b7 ${f.fileName}: ${f.name}`);
+      push();
+    }
+    const confirmedTopics = (report.topics ?? []).filter((t) => topicLabels[t.id] !== undefined);
+    if (confirmedTopics.length) {
+      push("## Confirmed topics");
+      for (const t of confirmedTopics) push(`- **${topicLabels[t.id]}**: ${t.memberNames.join(", ")}`);
+      push();
+    }
+    if (report.languages.length) {
+      push(`Language mix (heuristic, prose files): ${report.languages.map((l) => `${l.label} \u00d7${l.files}`).join(", ")}`);
+      push();
+    }
+    if (lastProof) {
+      push("## Cleaning-to-quality proof (measured in-browser)");
+      push(`Raw ${lastProof.r.raw.accuracyPct}% \u2192 cleaned ${lastProof.r.cleaned.accuracyPct}% golden-set retrieval accuracy; stale evidence ${lastProof.r.raw.staleSharePct}% \u2192 ${lastProof.r.cleaned.staleSharePct}%${lastProof.preview ? " (preview run with recommended resolutions)" : ""}.`);
+      push();
+    }
+    push("---");
+    push("Deterministic in-browser analysis \u00b7 Data Lab, AI Program Command Center \u00b7 no data left this browser.");
+    const blob = new Blob([lines.join("\n")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "corpus-readiness-dossier.md";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -258,9 +375,14 @@ export function CorpusView() {
             </div>
           )}
           {report && (
-            <button onClick={reset} className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-slatey-300 hover:text-slatey-100">
-              <RotateCcw className="h-3.5 w-3.5" /> Clear corpus
-            </button>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button onClick={downloadDossier} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-2.5 py-1.5 text-xs font-semibold text-slatey-200 hover:text-ink">
+                <FileDown className="h-3.5 w-3.5" /> Readiness dossier (.md)
+              </button>
+              <button onClick={reset} className="inline-flex items-center gap-1 text-xs font-medium text-slatey-300 hover:text-slatey-100">
+                <RotateCcw className="h-3.5 w-3.5" /> Clear corpus
+              </button>
+            </div>
           )}
         </Panel>
 
@@ -281,6 +403,26 @@ export function CorpusView() {
         {report && adjusted && (
           <>
             <CorpusHealth report={{ ...report, health: adjusted.health }} />
+
+            {/* Guided corpus pass (Phase 5): the three-beat path through the lab. */}
+            <ol className="flex flex-wrap items-center gap-2 text-[11px]" aria-label="Guided corpus pass">
+              {[
+                { n: 1, label: "Profile the corpus", done: stepProfile },
+                { n: 2, label: "Resolve duplicates & versions", done: stepResolve },
+                { n: 3, label: "Clear criticals & hand off", done: stepHandoff },
+              ].map((st) => (
+                <li key={st.n} className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium",
+                  st.done ? "border-emerald-200 bg-emerald-50/70 text-emerald-700" : "border-line bg-white text-slatey-400",
+                )}>
+                  <span className={cn("grid h-4 w-4 place-items-center rounded-full text-[9px] font-bold", st.done ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-600")}>
+                    {st.done ? "\u2713" : st.n}
+                  </span>
+                  {st.label}
+                </li>
+              ))}
+              <li className="text-slatey-500">then the handoff on the <span className="font-medium">Data</span> page carries it to Build.</li>
+            </ol>
 
             <ReadinessBoard
               files={adjusted.files}
@@ -326,11 +468,17 @@ export function CorpusView() {
                     selectedId={selectedId}
                     onSelect={setSelectedId}
                     onEdgeClick={(p) => setFocusSetId(setIdForPair(sets, p))}
+                    hulls={hulls}
                   />
                 )}
                 {(adjusted.health.excluded ?? 0) > 0 && (
                   <p className="mt-2 text-[11px] text-slatey-500">
                     {adjusted.health.excluded} file{(adjusted.health.excluded ?? 0) > 1 ? "s" : ""} excluded by resolution, no longer part of the active corpus.
+                  </p>
+                )}
+                {report.languages.length > 0 && (
+                  <p className="mt-1 text-[11px] text-slatey-500">
+                    Language mix (heuristic, prose files): {report.languages.map((l) => `${l.label} \u00d7${l.files}`).join(" \u00b7 ")}
                   </p>
                 )}
               </Panel>
@@ -350,6 +498,26 @@ export function CorpusView() {
                 })}
               />
             </div>
+
+            <TopicGroups
+              topics={report.topics}
+              confirmed={topicLabels}
+              onConfirm={(id, label) => setTopicLabels((m) => ({ ...m, [id]: label }))}
+              onUnconfirm={(id) => setTopicLabels((m) => {
+                const next = { ...m };
+                delete next[id];
+                return next;
+              })}
+            />
+
+            <CleaningProof
+              files={(inputs ?? []).map((f) => ({ name: f.name, text: f.text }))}
+              excludedNames={excludedNames}
+              topicsByFile={topicsByFile}
+              hasResolutions={Object.keys(resolutions).length > 0}
+              previewExclusions={previewExclusions}
+              onResult={(r, preview) => setLastProof({ r, preview })}
+            />
 
             <RemediationBacklog
               findings={adjusted.findings}

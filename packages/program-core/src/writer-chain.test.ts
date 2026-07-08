@@ -107,6 +107,22 @@ describe("stage-writer chain reaches a fixed point", () => {
     expect(stripVolatile(s2)).toEqual(stripVolatile(s1));
   });
 
+  it("confirmed topics enrich the handoff's metadata requirements and converge", () => {
+    const s0 = demoState("knowledge-assistant");
+    s0.data = {
+      ...(s0.data ?? {}),
+      corpusTopics: [
+        { label: "Claims handling", files: ["claims_playbook.txt", "escalation_guide.txt"] },
+        { label: "Coverage policy", files: ["travel_policy_v3.1_current.txt"] },
+      ],
+    };
+    const s1 = applyWriterChain(s0);
+    const s2 = applyWriterChain(s1);
+    const reqs = s1.data?.handoff?.metadataRequirements ?? [];
+    expect(reqs.join("|")).toContain("Tag chunks with confirmed topics: Claims handling, Coverage policy");
+    expect(stripVolatile(s2)).toEqual(stripVolatile(s1));
+  });
+
   it("derivations are deterministic for identical input state", () => {
     const s = applyWriterChain(demoState("knowledge-assistant"));
     const a = stripVolatile(applyWriterChain(s));

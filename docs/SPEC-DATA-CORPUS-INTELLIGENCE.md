@@ -1,7 +1,7 @@
 # SPEC — Data Lab · Corpus Intelligence Program
 ### Phased build plan + cross-lab wiring for the roadmap in DATA-LAB-DQ-GAP-ANALYSIS.md
 
-**Date:** 2026-07-07 · **Status:** Phases 0–3 complete (2026-07-07); Phase 4 (deep signals) next. Note: Phase 1 sandbox gate ran tests + typecheck; the full production build gate runs in CI/Vercel on push (sandbox call-window too short for a cold compile).
+**Date:** 2026-07-07 · **Status:** ALL PHASES COMPLETE (0–5, 2026-07-07). The Corpus Intelligence program shipped: readiness board, remediation backlog, duplicate/version resolution, PCA corpus atlas (2D/3D), parsability/language/topic signals, cleaning-to-quality proof, readiness dossier, registry + changelog + guide closure. Production build verified in CI/Vercel per push (sandbox window constraint documented in Phase 1). Note: Phase 1 sandbox gate ran tests + typecheck; the full production build gate runs in CI/Vercel on push (sandbox call-window too short for a cold compile).
 **Scope:** F-1…F-10 (rev 2 roadmap) delivered in **six phases (0–5)**, est. 6–8 working sessions.
 **Doctrine:** every phase ends green (typecheck · tests · lint · build · link audit), every new score ships with engine tests, every state write follows the signature pattern and extends `writer-chain.test.ts`, honesty badges throughout.
 

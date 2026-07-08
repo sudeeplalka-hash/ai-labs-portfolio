@@ -57,6 +57,12 @@ export const LABS: LabEntry[] = [
     decision: "Score faithfulness/citations/hallucination before trusting a RAG build.", href: "/build",
   },
   {
+    id: "C1-corpus", collection: 1, title: "Corpus Intelligence, readiness board to measured cleanup", status: "shipped", live: "LIVE",
+    problem: "Is this document corpus actually fit to feed a RAG system?",
+    decision: "Score every guideline, resolve duplicates and stale versions, confirm topics, and measure the retrieval-quality effect of the cleanup, before Build ingests a single chunk.",
+    href: "/data/corpus",
+  },
+  {
     id: "C1-govern", collection: 1, title: "Govern, guardrails & risk tiering", status: "shipped", live: "SIMULATED",
     problem: "Which use cases need which controls before they ship?",
     decision: "Risk tier a use case; map required guardrails.", href: "/govern",
@@ -243,7 +249,7 @@ export const DOMAINS: Domain[] = [
   {
     id: "program-delivery", title: "AI Program Delivery & Governance",
     claim: "Runs the governed lifecycle, gate by gate, and the day two loop after it.",
-    labIds: ["C1", "C1-backlog", "C1-rag", "C1-govern", "C1-operate"],
+    labIds: ["C1", "C1-backlog", "C1-rag", "C1-corpus", "C1-govern", "C1-operate"],
     engagementEvidence: ["Multi-portfolio AI delivery at AMEX", "4.5× portfolio scale"],
   },
   {

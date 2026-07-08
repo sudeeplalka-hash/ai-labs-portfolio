@@ -24,6 +24,7 @@ const STEPS = [
   { n: "4", icon: ShieldCheck, title: "Apply org guidelines", body: "Enforce the rulebook: admissibility, freshness/versioning, provenance and licensing, and required taxonomy/metadata tags.", why: "This is where a stale Policy v2.7 gets quarantined before it can contradict v3.1 in answers." },
   { n: "5", icon: ShieldAlert, title: "Clear sensitive data", body: "Scan for emails, phones, SSNs, cards and IPs. Redact, mask, or escalate for sign off before anything is embedded.", why: "Anything embedded becomes retrievable, PII leaks are a one way door." },
   { n: "6", icon: Scissors, title: "Chunk readiness & gate", body: "Confirm the content segments cleanly within the embedding band, then roll everything into a readiness score and an explicit gate. A human owner signs off.", why: "An honest gate keeps the knowledge base, and every answer built on it, trustworthy." },
+  { n: "7", icon: Gavel, title: "Corpus intelligence & proof", body: "At corpus level: the readiness board scores every guideline per file, duplicate and version sets get resolved (exclusions flow to Build and Govern), topics are confirmed by a human, and the cleaning-to-quality proof measures the retrieval delta of your cleanup.", why: "Files can pass one by one while the corpus still fails as a whole, conflicts, staleness, and off-topic drift only show up across documents." },
 ];
 
 const GATE = [

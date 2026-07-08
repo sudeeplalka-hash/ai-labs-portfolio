@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useProgram } from "@labs/program-core";
-import { getSessions, getCorpusBacklog, getCorpusExclusions } from "@data/lib/live/session";
+import { getSessions, getCorpusBacklog, getCorpusExclusions, getCorpusTopics } from "@data/lib/live/session";
 
 // Writes the real Data lab result into ProgramState.data so Realize/Deploy can
 // read it. Reuses the Data lab's own session store, no duplicated logic.
@@ -21,12 +21,13 @@ export function DataSliceWriter() {
       const status = readiness >= 70 ? "healthy" : readiness >= 40 ? "watch" : "at-risk";
       const backlog = getCorpusBacklog();
       const exclusions = getCorpusExclusions();
-      const sig = JSON.stringify({ readiness, gaps, b: backlog.map((e) => e.finding + e.status), x: exclusions.map((e) => e.file) });
+      const topics = getCorpusTopics();
+      const sig = JSON.stringify({ readiness, gaps, b: backlog.map((e) => e.finding + e.status), x: exclusions.map((e) => e.file), t: topics.map((t) => t.label + t.files.length) });
       if (sig === last.current) return;
       last.current = sig;
       // Merge, never replace, so derived fields on the data slice (e.g. the
       // Data Readiness Handoff written by DataHandoffCard) survive this sync.
-      update((d) => { d.data = { ...(d.data ?? {}), readinessScore: readiness, gaps, status, corpusBacklog: backlog, corpusExclusions: exclusions }; });
+      update((d) => { d.data = { ...(d.data ?? {}), readinessScore: readiness, gaps, status, corpusBacklog: backlog, corpusExclusions: exclusions, corpusTopics: topics }; });
     };
     sync();
     const id = setInterval(sync, 3000);

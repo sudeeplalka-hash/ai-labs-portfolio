@@ -7,7 +7,8 @@ import type { ProfileId } from "./profiles";
 // the dedup / conflict / coverage lens, a different question than the RAG lab's
 // query-relative embedding view.
 
-import { contentConcentration, topicalCohesion } from "./signals";
+import { contentConcentration, topicalCohesion, parsabilityProfile, languageProfile } from "./signals";
+import { deriveTopicGroups, type TopicGroup } from "./topics";
 import { pca3, dot } from "@labs/kit";
 import type { CheckResult } from "./types";
 
@@ -54,6 +55,10 @@ export interface CorpusReport {
   files: CorpusFile[];
   pairs: DupPair[];
   health: CorpusHealth;
+  /** Suggested topic groups (Phase 4); the human confirms labels in the lab. */
+  topics: TopicGroup[];
+  /** Corpus language mix (heuristic): primary language per file, aggregated. */
+  languages: { label: string; files: number }[];
 }
 
 export interface CorpusInput {
@@ -152,10 +157,17 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
   const vectors = tokenLists.map((t) => tfVector(t, vocab));
   const coords = project(vectors, vocab.length);
 
-  // Corpus-level guideline checks (Phase 1): concentration is per-document,
-  // cohesion is relative to the whole corpus, so both live here rather than in
-  // the single-file engine. Visible math in ./signals.ts.
+  // Corpus-level guideline checks (Phases 1 & 4): concentration is per-document,
+  // cohesion and language are relative to the whole corpus, so they live here
+  // rather than in the single-file engine. Visible math in ./signals.ts.
   const cohesion = inputs.length >= 3 ? topicalCohesion(vectors) : null;
+  // Language is a PROSE property: tabular files (CSV name/value columns) give
+  // meaningless stopword votes, so they sit out of detection and the mix.
+  const proseLike = inputs.map((f) => !/\.(csv|tsv)$/i.test(f.name));
+  const langProfiles = inputs.map((f, i) => (proseLike[i] ? languageProfile(f.text) : null));
+  const langCounts = new Map<string, number>();
+  for (const lp of langProfiles) if (lp) langCounts.set(lp.primary, (langCounts.get(lp.primary) ?? 0) + 1);
+  const corpusPrimaryLang = [...langCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? "Unknown";
 
   const files: CorpusFile[] = inputs.map((f, i) => {
     const report = buildReport(f.name, f.text, f.size, profileId);
@@ -191,6 +203,32 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
         downstream: "Off-topic documents surface as irrelevant evidence and dilute retrieval relevance.",
         // No in-lab fix: the honest remediations are exclusion or corpus rescope
         // (Resolution workflow, Phase 2). Until then it can only be accepted.
+      });
+    }
+
+    // Parsability (Phase 4): measured on the visitor's own file.
+    const pp = parsabilityProfile(f.text, f.size);
+    if (pp.level !== "healthy") {
+      report.checks.push({
+        id: "parsability",
+        guideline: "format",
+        name: "Parsability",
+        level: pp.level,
+        detail: pp.reasons.join(" "),
+        downstream: "What extraction loses or mangles never reaches the index, the model answers from a partial document.",
+      });
+    }
+
+    // Language (Phase 4, heuristic): flag prose files off the corpus's primary language.
+    const lp = langProfiles[i];
+    if (lp && lp.primary !== "Unknown" && corpusPrimaryLang !== "Unknown" && lp.primary !== corpusPrimaryLang && inputs.length >= 3) {
+      report.checks.push({
+        id: "language",
+        guideline: "admissibility",
+        name: "Language mismatch",
+        level: lp.confidence === "high" ? "risk" : "watch",
+        detail: `Reads as ${lp.primary} while the corpus is predominantly ${corpusPrimaryLang} (heuristic script/stopword detection).`,
+        downstream: "Retrieval mixes languages the target model setup may not expect, answers cite passages users can't read.",
       });
     }
 
@@ -238,5 +276,15 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
     conflicts: pairs.filter((p) => p.kind === "stale-version").length,
   };
 
-  return { files, pairs, health };
+  const topics = deriveTopicGroups(
+    files.map((f) => f.id),
+    files.map((f) => f.name),
+    vectors,
+    vocab,
+  );
+  const languages = [...langCounts.entries()]
+    .map(([label, n2]) => ({ label, files: n2 }))
+    .sort((a, b) => b.files - a.files || a.label.localeCompare(b.label));
+
+  return { files, pairs, health, topics, languages };
 }

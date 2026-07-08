@@ -56,6 +56,7 @@ export function DataHandoffCard() {
     // self-retrigger risk.
     cb: state.data?.corpusBacklog?.map((e) => e.finding + e.status),
     cx: state.data?.corpusExclusions?.map((e) => e.file),
+    ct: state.data?.corpusTopics?.map((t) => t.label + t.files.length),
   });
   useEffect(() => {
     if (!hydrated || isDemo || !state.initiative?.name) return;

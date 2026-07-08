@@ -78,7 +78,16 @@ export function buildDataReadinessHandoff(s: ProgramState): DataReadinessHandoff
     blockedSources: blocked,
     rejectedSources: rejected,
     sensitivityRestrictions: sensitive ? ["Redact PII/PHI before indexing", "Access-controlled retrieval by role"] : [],
-    metadataRequirements: ["Source + version on every chunk", "Last-updated timestamp", "Sensitivity label"],
+    metadataRequirements: [
+      "Source + version on every chunk",
+      "Last-updated timestamp",
+      "Sensitivity label",
+      // Phase 4: human-confirmed topic labels from the live corpus session
+      // become a tagging requirement Build's retrieval can lean on.
+      ...((s.data?.corpusTopics?.length ?? 0) > 0
+        ? [`Tag chunks with confirmed topics: ${s.data!.corpusTopics!.map((t) => t.label).join(", ")}`]
+        : []),
+    ],
     chunkingRequirements: pattern.includes("Summar") ? "Section-aware chunks; preserve document structure." : "512-token chunks, 64 overlap; keep policy clauses intact.",
     evalDatasetReadiness: clamp(readiness - 15),
     knownDataRisks: risks,

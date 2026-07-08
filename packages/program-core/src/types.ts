@@ -371,6 +371,9 @@ export interface DataSlice {
   /** Accepted duplicate/version exclusions from the Data lab's resolution
    * workflow (Phase 2). Merged into the handoff's blockedSources. */
   corpusExclusions?: { file: string; reason: string }[];
+  /** Human-confirmed topic groups from the Data lab (Phase 4). Enrich the
+   * handoff's metadata requirements; suggestions never travel unconfirmed. */
+  corpusTopics?: { label: string; files: string[] }[];
 }
 export interface RagSlice {
   faithfulness?: number; citationAccuracy?: number; hallucination?: number; costPerAnswer?: number; status?: string;

@@ -46,7 +46,7 @@ const GLOSSARY: { term: string; def: string }[] = [
   { term: "SLO / p95 / error rate", def: "Service Level Objective metrics: is the system up (availability), how slow is the slowest 5% of requests (p95 latency), and how often does it error. “System health,” not “answer health.”" },
   { term: "Canary evals / golden set", def: "A frozen set of questions with known good answers, rerun on a schedule. “Canary pass rate” is the percent still answered correctly. The golden set is inherited from Build, so this is the same yardstick used to ship." },
   { term: "Build baseline", def: "The canary pass rate the system launched with (from Build's faithfulness contract). Drift is measured against it, not against a fixed number." },
-  { term: "Index staleness", def: "How many days the retrieval corpus is behind the live source of truth. The root cause of most RAG answer decay: the model is fine, the documents it reads are old." },
+  { term: "Index staleness", def: "How many days the retrieval corpus is behind the live source of truth. The root cause of most RAG answer decay: the model is fine, the documents it reads are old. The baseline for what counts as fresh traces back to the Data stage's Freshness guideline (the corpus recency profile set before Build)." },
   { term: "Retrieval recall", def: "Of the documents that should be retrieved for a question, the percent the retriever actually surfaces. Falls as the index goes stale." },
   { term: "Citation rate", def: "Percent of answers that cite a real supporting source. Drops when retrieval degrades, and answers get vaguer and less grounded." },
   { term: "Cache hit", def: "Percent of requests served from cache instead of a fresh model call. Higher means cheaper and faster." },

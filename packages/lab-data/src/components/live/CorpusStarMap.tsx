@@ -33,12 +33,38 @@ const dotR = (f: CorpusFile, files: CorpusFile[]): number => {
 
 // Corpus similarity map: a 2D projection where distance = content similarity, so
 // duplicates and stale versions fall into tight clusters. Light, on-theme.
+export interface AtlasHull {
+  label: string;
+  memberIds: string[];
+  color: string;
+}
+
+// Monotone-chain convex hull over 2D points (tiny n, exact and deterministic).
+function convexHull(pts: { x: number; y: number }[]): { x: number; y: number }[] {
+  if (pts.length < 3) return pts;
+  const p = pts.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  const cross = (o: { x: number; y: number }, a: { x: number; y: number }, b: { x: number; y: number }) =>
+    (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower: { x: number; y: number }[] = [];
+  for (const pt of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], pt) <= 0) lower.pop();
+    lower.push(pt);
+  }
+  const upper: { x: number; y: number }[] = [];
+  for (const pt of p.slice().reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pt) <= 0) upper.pop();
+    upper.push(pt);
+  }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+
 export function CorpusStarMap({
   files,
   pairs,
   selectedId,
   onSelect,
   onEdgeClick,
+  hulls,
 }: {
   files: CorpusFile[];
   pairs: DupPair[];
@@ -46,6 +72,8 @@ export function CorpusStarMap({
   onSelect: (id: string) => void;
   /** Phase 2: clicking a duplicate/version edge focuses its resolution set. */
   onEdgeClick?: (pair: DupPair) => void;
+  /** Phase 4: confirmed topic groups drawn as soft hulls behind the points. */
+  hulls?: AtlasHull[];
 }) {
   const [hover, setHover] = useState<string | null>(null);
   const byId = new Map(files.map((f) => [f.id, f]));
@@ -63,6 +91,27 @@ export function CorpusStarMap({
               <line x1="4" y1={g} x2="96" y2={g} stroke="rgba(21,36,51,0.06)" strokeWidth="0.3" />
             </g>
           ))}
+
+          {/* confirmed topic hulls (Phase 4), soft regions behind everything */}
+          {(hulls ?? []).map((h) => {
+            const pts = h.memberIds
+              .map((id) => byId.get(id))
+              .filter((f): f is CorpusFile => !!f)
+              .map((f) => ({ x: f.x, y: f.y }));
+            if (pts.length < 3) return null;
+            const hull = convexHull(pts);
+            const cx = hull.reduce((a, p2) => a + p2.x, 0) / hull.length;
+            const cyy = hull.reduce((a, p2) => a + p2.y, 0) / hull.length;
+            // pad the hull outward slightly around its centroid
+            const padded = hull.map((p2) => ({ x: cx + (p2.x - cx) * 1.18, y: cyy + (p2.y - cyy) * 1.18 }));
+            const d = padded.map((p2, i2) => `${i2 === 0 ? "M" : "L"}${p2.x.toFixed(1)},${p2.y.toFixed(1)}`).join(" ") + " Z";
+            return (
+              <g key={h.label}>
+                <path d={d} fill={h.color} opacity={0.09} stroke={h.color} strokeOpacity={0.35} strokeWidth={0.4} strokeLinejoin="round" />
+                <text x={cx} y={Math.max(6, cyy - 0)} textAnchor="middle" fontSize="3" fill={h.color} opacity={0.85} fontFamily="ui-monospace, monospace">{h.label}</text>
+              </g>
+            );
+          })}
 
           {/* edges between related docs (click one to open its resolution set) */}
           {pairs.map((p, i) => {

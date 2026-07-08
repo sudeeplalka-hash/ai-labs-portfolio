@@ -153,3 +153,34 @@ export function recordCorpusExclusions(entries: CorpusExclusion[]): void {
     /* ignore quota / serialization errors */
   }
 }
+
+export interface CorpusTopic {
+  label: string;
+  files: string[];
+}
+
+const TOPICS_KEY = "datalab.corpustopics.v1";
+
+export function getCorpusTopics(): CorpusTopic[] {
+  if (!canUse()) return [];
+  try {
+    const raw = window.localStorage.getItem(TOPICS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as CorpusTopic[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Human-confirmed topic labels for the current corpus session. Only
+ * confirmed labels travel (suggestions never leave the lab unapproved);
+ * the handoff turns them into metadata tagging requirements. */
+export function recordCorpusTopics(topics: CorpusTopic[]): void {
+  if (!canUse()) return;
+  try {
+    window.localStorage.setItem(TOPICS_KEY, JSON.stringify(topics.slice(0, 8)));
+  } catch {
+    /* ignore quota / serialization errors */
+  }
+}

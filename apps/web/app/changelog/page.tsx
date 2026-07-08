@@ -12,6 +12,16 @@ interface Entry { date: string; tag: string; tone: "emerald" | "blue" | "amber";
 
 const ENTRIES: Entry[] = [
   {
+    date: "2026-07", tag: "Data", tone: "emerald", title: "Corpus Intelligence: from file scorer to corpus operating tool",
+    items: [
+      "Corpus Readiness Board: all ten guidelines scored corpus-wide with a per-file matrix, plus a Remediation Backlog whose fix and accept-risk actions re-score the board, the gates, and the handoff together.",
+      "Version & Duplicate Resolution: pairwise detections grouped into sets with a deterministic keep-latest recommendation; accepted exclusions flow to blocked sources, Build's re-rank, and Govern findings with no extra wiring.",
+      "Corpus Atlas: the similarity map's axes upgraded to true PCA (shared engine with Build's projector), decision overlays (PII rings, staleness dimming, token sizing), and a house-built 3D view.",
+      "Deep signals: parsability measured on the visitor's own upload (extraction yield, encoding damage, boilerplate share), heuristic language profiling, and deterministic topic groups where the human confirms every label.",
+      "Cleaning-to-quality proof: the same baseline retriever run raw vs cleaned against an authored golden set, in-browser, with the measured accuracy delta and stale-evidence share, plus a downloadable readiness dossier.",
+    ],
+  },
+  {
     date: "2026-07", tag: "Operate", tone: "emerald", title: "Operate: the 7th stage, day two observability plus the loop back to Frame",
     items: [
       "Day two observability added to the Enterprise AI Program lifecycle: the four signal families (system SLOs, model quality canary, RAG freshness and staleness, agent and cost) on a 12 week time axis.",
