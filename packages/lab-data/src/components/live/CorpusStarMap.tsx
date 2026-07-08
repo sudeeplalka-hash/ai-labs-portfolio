@@ -19,6 +19,18 @@ const EDGE: Record<DupPair["kind"], string> = {
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
+// Atlas overlays (Phase 3): decision signals drawn onto the similarity map.
+const piiHits = (f: CorpusFile): number => f.report.pii.reduce((a, b) => a + b.count, 0);
+const isStale = (f: CorpusFile): boolean => {
+  const c = f.report.checks.find((x) => x.guideline === "freshness");
+  return !!c && c.level !== "healthy";
+};
+/** Dot radius from document size: sqrt scale, 1.6..3.2 viewBox units. */
+const dotR = (f: CorpusFile, files: CorpusFile[]): number => {
+  const max = Math.max(...files.map((x) => x.tokens), 1);
+  return 1.6 + 1.6 * Math.sqrt(f.tokens / max);
+};
+
 // Corpus similarity map: a 2D projection where distance = content similarity, so
 // duplicates and stale versions fall into tight clusters. Light, on-theme.
 export function CorpusStarMap({
@@ -26,11 +38,14 @@ export function CorpusStarMap({
   pairs,
   selectedId,
   onSelect,
+  onEdgeClick,
 }: {
   files: CorpusFile[];
   pairs: DupPair[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  /** Phase 2: clicking a duplicate/version edge focuses its resolution set. */
+  onEdgeClick?: (pair: DupPair) => void;
 }) {
   const [hover, setHover] = useState<string | null>(null);
   const byId = new Map(files.map((f) => [f.id, f]));
@@ -49,26 +64,36 @@ export function CorpusStarMap({
             </g>
           ))}
 
-          {/* edges between related docs */}
+          {/* edges between related docs (click one to open its resolution set) */}
           {pairs.map((p, i) => {
             const a = byId.get(p.aId);
             const b = byId.get(p.bId);
             if (!a || !b) return null;
             return (
+              <g key={`hit-${i}`}>
+              {onEdgeClick && (
+                <line
+                  x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                  stroke="transparent" strokeWidth="4" className="cursor-pointer"
+                  onClick={() => onEdgeClick(p)}
+                >
+                  <title>{`${p.aName} \u2194 ${p.bName}: resolve this ${p.kind.replace("-", " ")}`}</title>
+                </line>
+              )}
               <line
-                key={i}
                 x1={a.x} y1={a.y} x2={b.x} y2={b.y}
                 stroke={EDGE[p.kind]}
                 strokeWidth={p.kind === "near-duplicate" ? 0.4 : 0.7}
                 strokeDasharray={p.kind === "stale-version" ? "1.5 1.2" : undefined}
                 opacity={0.55}
               />
+              </g>
             );
           })}
 
-          {/* soft pulsing ring on the active node */}
+          {/* soft pulsing ring on the active node (hidden under reduced motion) */}
           {active && (
-            <g>
+            <g className="motion-reduce:hidden">
               <circle cx={active.x} cy={active.y} r={4.6} fill="none" stroke={GATE_HEX[active.gate.color]} strokeWidth="0.6" opacity={0.5} />
               <circle cx={active.x} cy={active.y} r={4.6} fill="none" stroke={GATE_HEX[active.gate.color]} strokeWidth="0.6">
                 <animate attributeName="r" values="4.6;7.4;4.6" dur="2.2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.2 1;0.4 0 0.2 1" />
@@ -77,12 +102,17 @@ export function CorpusStarMap({
             </g>
           )}
 
-          {/* dots */}
+          {/* dots: size = document tokens, ring = PII present, dimmed = stale */}
           {files.map((f) => {
             const on = f.id === activeId;
+            const r = dotR(f, files);
+            const stale = isStale(f);
             return (
-              <g key={f.id} className="cursor-pointer" onMouseEnter={() => setHover(f.id)} onMouseLeave={() => setHover(null)} onClick={() => onSelect(f.id)}>
-                <circle cx={f.x} cy={f.y} r={on ? 2.9 : 2.1} fill={GATE_HEX[f.gate.color]} stroke="#ffffff" strokeWidth="0.7" />
+              <g key={f.id} className="cursor-pointer" opacity={stale && !on ? 0.5 : 1} onMouseEnter={() => setHover(f.id)} onMouseLeave={() => setHover(null)} onClick={() => onSelect(f.id)}>
+                {piiHits(f) > 0 && (
+                  <circle cx={f.x} cy={f.y} r={r + 1.3} fill="none" stroke="#f43f5e" strokeWidth="0.45" strokeDasharray="1 0.8" />
+                )}
+                <circle cx={f.x} cy={f.y} r={on ? r + 0.8 : r} fill={GATE_HEX[f.gate.color]} stroke="#ffffff" strokeWidth="0.7" />
               </g>
             );
           })}
@@ -90,6 +120,18 @@ export function CorpusStarMap({
           {/* axis hint: this plane spreads documents by content similarity */}
           <text x="50" y="99" textAnchor="middle" fontSize="2.6" fill="#9aa7b4" fontWeight="600">documents spread by content similarity</text>
         </svg>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slatey-500">
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.emerald }} /> approved</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.amber }} /> conditional</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.rose }} /> rejected</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full border border-dashed border-rose-500" /> PII inside</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" /> dimmed = stale</span>
+          <span>size = tokens · lines = duplicate/version links</span>
+        </div>
+        <p className="mt-1.5 text-[10px] leading-relaxed text-slatey-500">
+          How this is built: term-frequency vectors reduced with the same PCA engine as Build&apos;s embedding
+          projector (@labs/kit), so distance on this map genuinely tracks content similarity.
+        </p>
 
         {/* hover / selected tooltip, clamped & wrapping so it never clips */}
         {active && (() => {

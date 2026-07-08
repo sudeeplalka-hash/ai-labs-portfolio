@@ -121,3 +121,35 @@ export function recordCorpusBacklog(entries: CorpusBacklogEntry[]): void {
     /* ignore quota / serialization errors */
   }
 }
+
+export interface CorpusExclusion {
+  file: string;
+  reason: string;
+}
+
+const EXCLUSIONS_KEY = "datalab.corpusexclusions.v1";
+
+export function getCorpusExclusions(): CorpusExclusion[] {
+  if (!canUse()) return [];
+  try {
+    const raw = window.localStorage.getItem(EXCLUSIONS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as CorpusExclusion[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Snapshot of accepted duplicate/version exclusions for the current corpus
+ * session. DataSliceWriter carries these into ProgramState, where the Data
+ * Readiness Handoff merges them into blockedSources — from there Build's
+ * re-rank and Govern's findings react with no extra wiring. */
+export function recordCorpusExclusions(entries: CorpusExclusion[]): void {
+  if (!canUse()) return;
+  try {
+    window.localStorage.setItem(EXCLUSIONS_KEY, JSON.stringify(entries.slice(0, 20)));
+  } catch {
+    /* ignore quota / serialization errors */
+  }
+}

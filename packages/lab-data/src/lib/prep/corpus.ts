@@ -8,6 +8,7 @@ import type { ProfileId } from "./profiles";
 // query-relative embedding view.
 
 import { contentConcentration, topicalCohesion } from "./signals";
+import { pca3, dot } from "@labs/kit";
 import type { CheckResult } from "./types";
 
 export interface CorpusFile {
@@ -19,6 +20,8 @@ export interface CorpusFile {
   tokens: number;
   x: number; // 0..100 for SVG plotting
   y: number;
+  /** Third principal component, 0..100 (Corpus Atlas 3D view, Phase 3). */
+  z: number;
 }
 
 export type PairKind = "duplicate" | "stale-version" | "near-duplicate";
@@ -35,6 +38,8 @@ export interface DupPair {
 
 export interface CorpusHealth {
   total: number;
+  /** Files excluded by duplicate/version resolution (Phase 2). */
+  excluded?: number;
   approved: number;
   conditional: number;
   hold: number;
@@ -70,7 +75,7 @@ function jaccard(a: Set<string>, b: Set<string>): number {
   return inter / (a.size + b.size - inter);
 }
 
-const hasVersionMarker = (name: string) => /v\d|version|legacy|old|draft|backup|archive|\bcopy\b|superseded/i.test(name);
+export const hasVersionMarker = (name: string) => /v\d|version|legacy|old|draft|backup|archive|\bcopy\b|superseded/i.test(name);
 
 // deterministic PRNG
 function mulberry32(seed: number) {
@@ -100,24 +105,44 @@ function tfVector(tokens: string[], vocab: string[]): number[] {
   return v.map((x) => x / norm);
 }
 
-function project(vectors: number[][], dim: number): { x: number; y: number }[] {
+function scaleAxis(vals: number[]): number[] {
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  if (max - min < 1e-9) return vals.map(() => 50);
+  return vals.map((v) => 8 + ((v - min) / (max - min)) * 84); // pad to 8..92
+}
+
+// Corpus projection (Phase 3): top principal components via @labs/kit's pca3,
+// the SAME engine behind Build's embedding projector, so on the Atlas,
+// distance genuinely means content similarity. Small or degenerate corpora
+// (fewer than 3 docs, or a vocabulary too thin for stable components) fall
+// back to a seeded deterministic spread so the map always renders.
+function project(vectors: number[][], dim: number): { x: number; y: number; z: number }[] {
+  const n = vectors.length;
+  if (n >= 3 && dim >= 3) {
+    const mean = new Array(dim).fill(0);
+    for (const v of vectors) for (let j = 0; j < dim; j++) mean[j] += v[j];
+    for (let j = 0; j < dim; j++) mean[j] /= Math.max(1, n);
+    const comps = pca3(vectors, mean);
+    const centered = vectors.map((v) => v.map((x, j) => x - mean[j]));
+    const raw = centered.map((c) => ({ x: dot(c, comps[0]), y: dot(c, comps[1]), z: dot(c, comps[2]) }));
+    const xs = scaleAxis(raw.map((p) => p.x));
+    const ys = scaleAxis(raw.map((p) => p.y));
+    const zs = scaleAxis(raw.map((p) => p.z));
+    return raw.map((_, i) => ({ x: xs[i], y: ys[i], z: zs[i] }));
+  }
+  // Fallback: seeded random axes (deterministic), z centered.
   const r1 = mulberry32(101);
   const r2 = mulberry32(202);
   const a1 = Array.from({ length: dim }, () => r1() * 2 - 1);
   const a2 = Array.from({ length: dim }, () => r2() * 2 - 1);
   const raw = vectors.map((v) => ({
-    x: v.reduce((s, x, i) => s + x * a1[i], 0),
-    y: v.reduce((s, x, i) => s + x * a2[i], 0),
+    x: v.reduce((s2, x, i) => s2 + x * a1[i], 0),
+    y: v.reduce((s2, x, i) => s2 + x * a2[i], 0),
   }));
-  const xs = raw.map((p) => p.x);
-  const ys = raw.map((p) => p.y);
-  const scale = (val: number, arr: number[]) => {
-    const min = Math.min(...arr);
-    const max = Math.max(...arr);
-    if (max - min < 1e-9) return 50;
-    return 8 + ((val - min) / (max - min)) * 84; // pad to 8..92
-  };
-  return raw.map((p) => ({ x: scale(p.x, xs), y: scale(p.y, ys) }));
+  const xs = scaleAxis(raw.map((p) => p.x));
+  const ys = scaleAxis(raw.map((p) => p.y));
+  return raw.map((_, i) => ({ x: xs[i], y: ys[i], z: 50 }));
 }
 
 export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "general"): CorpusReport {
@@ -171,7 +196,7 @@ export function analyzeCorpus(inputs: CorpusInput[], profileId: ProfileId = "gen
 
     const score = scoreWithFixes(report.checks, new Set());
     const gate = computeGate(score, hasUnclearedBlocker(report.checks, new Set()));
-    return { id: `f${i}`, name: f.name, report, score, gate, tokens: tokenLists[i].length, x: coords[i].x, y: coords[i].y };
+    return { id: `f${i}`, name: f.name, report, score, gate, tokens: tokenLists[i].length, x: coords[i].x, y: coords[i].y, z: coords[i].z };
   });
 
   // pairwise duplicate / stale-version detection

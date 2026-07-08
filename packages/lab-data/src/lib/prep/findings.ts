@@ -135,8 +135,15 @@ export function rollupCategories(
 import { scoreWithFixes, computeGate, hasUnclearedBlocker } from "./engine";
 import type { CorpusReport, CorpusHealth } from "./corpus";
 
+/** A corpus file plus its Phase-2 exclusion state (duplicate/version resolution). */
+export type ResolvedFile = CorpusFile & { excluded?: { reason: string } };
+
 export interface RecomputedCorpus {
-  files: CorpusFile[];
+  files: ResolvedFile[];
+  /** Files still in the corpus (not excluded); health and rollups cover these. */
+  activeFiles: ResolvedFile[];
+  /** Pairs whose BOTH endpoints are still active (drives map edges + counts). */
+  activePairs: CorpusReport["pairs"];
   findings: CorpusFinding[];
   rollups: CategoryRollup[];
   health: CorpusHealth;
@@ -149,9 +156,16 @@ export interface RecomputedCorpus {
 export function recomputeCorpus(
   report: CorpusReport,
   statuses: Record<string, FindingStatus>,
+  /** Phase 2: fileId -> exclusion reason, from accepted duplicate/version
+   * resolutions. Excluded files leave the active corpus: their findings drop
+   * from the open queue, health covers the remainder, and only pairs between
+   * still-active files continue to count as conflicts. */
+  exclusions: Record<string, string> = {},
 ): RecomputedCorpus {
   const baseFindings = deriveCorpusFindings(report.files);
-  const findings = baseFindings.map((f) => ({ ...f, status: statuses[f.key] ?? "open" }));
+  const withStatus = baseFindings.map((f) => ({ ...f, status: statuses[f.key] ?? "open" }));
+  // Excluded files are out of the corpus, their findings are moot.
+  const findings = withStatus.filter((f) => !(f.fileId in exclusions));
 
   const appliedByFile = new Map<string, Set<string>>();
   for (const f of findings) {
@@ -162,27 +176,35 @@ export function recomputeCorpus(
     }
   }
 
-  const files = report.files.map((f) => {
+  const files: ResolvedFile[] = report.files.map((f) => {
     const applied = appliedByFile.get(f.id) ?? new Set<string>();
     const score = scoreWithFixes(f.report.checks, applied);
     const gate = computeGate(score, hasUnclearedBlocker(f.report.checks, applied));
-    return { ...f, score, gate };
+    const reason = exclusions[f.id];
+    return reason ? { ...f, score, gate, excluded: { reason } } : { ...f, score, gate };
   });
 
-  const rollups = rollupCategories(files, findings);
+  const activeFiles = files.filter((f) => !f.excluded);
+  const activePairs = report.pairs.filter((p) => !(p.aId in exclusions) && !(p.bId in exclusions));
+
+  const rollups = rollupCategories(activeFiles, findings);
 
   const counts = { Approved: 0, Conditional: 0, Hold: 0, Rejected: 0 } as Record<string, number>;
-  for (const f of files) counts[f.gate.gate]++;
-  const total = files.length;
+  for (const f of activeFiles) counts[f.gate.gate]++;
+  const total = activeFiles.length;
   const health: CorpusHealth = {
     ...report.health,
+    total,
+    excluded: files.length - activeFiles.length,
     approved: counts.Approved,
     conditional: counts.Conditional,
     hold: counts.Hold,
     rejected: counts.Rejected,
     readyPct: total ? Math.round((counts.Approved / total) * 100) : 0,
-    avgScore: total ? Math.round(files.reduce((a, f) => a + f.score, 0) / total) : 0,
+    avgScore: total ? Math.round(activeFiles.reduce((a, f) => a + f.score, 0) / total) : 0,
+    duplicates: activePairs.filter((p) => p.kind === "duplicate" || p.kind === "near-duplicate").length,
+    conflicts: activePairs.filter((p) => p.kind === "stale-version").length,
   };
 
-  return { files, findings, rollups, health };
+  return { files, activeFiles, activePairs, findings, rollups, health };
 }

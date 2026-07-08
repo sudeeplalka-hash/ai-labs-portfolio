@@ -34,7 +34,11 @@ export function buildDataReadinessHandoff(s: ProgramState): DataReadinessHandoff
   const sensitive = !!meta?.auditEvidenceRequired || meta?.governanceTier === "High" || meta?.governanceTier === "Critical";
 
   const tmpl = PATTERN_SOURCES[pattern] ?? PATTERN_SOURCES["Search / knowledge assistant"];
-  const blocked = sensitive ? ["Raw customer PII export"] : [];
+  // Phase 2: accepted duplicate/version exclusions from the live corpus join
+  // the blocked list. Downstream needs no new code, Build's re-rank already
+  // excludes blocked sources and Govern already raises a finding per entry.
+  const excludedFiles = (s.data?.corpusExclusions ?? []).map((e) => `${e.file} (excluded: superseded duplicate)`);
+  const blocked = [...(sensitive ? ["Raw customer PII export"] : []), ...excludedFiles];
   const rejected = readiness < 55 ? ["Unversioned scraped web content"] : [];
 
   const risks: string[] = [];

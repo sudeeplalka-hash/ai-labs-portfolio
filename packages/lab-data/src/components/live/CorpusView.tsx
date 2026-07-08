@@ -17,11 +17,14 @@ import {
 } from "lucide-react";
 import { analyzeCorpus, type CorpusReport, type DupPair } from "@data/lib/prep/corpus";
 import { recomputeCorpus, type FindingStatus } from "@data/lib/prep/findings";
+import { deriveDuplicateSets, setIdForPair } from "@data/lib/prep/resolution";
+import { DuplicateResolution, type SetResolution } from "./DuplicateResolution";
+import { CorpusAtlas3D } from "./CorpusAtlas3D";
 import { ReadinessBoard } from "./ReadinessBoard";
 import { RemediationBacklog } from "./RemediationBacklog";
 import { getProfile, type ProfileId } from "@data/lib/prep/profiles";
 import { extractTextFromFile, CORPUS_UPLOAD_ACCEPT, FileExtractionError } from "@data/lib/prep/fileExtraction";
-import { recordSessions, recordCorpusBacklog } from "@data/lib/live/session";
+import { recordSessions, recordCorpusBacklog, recordCorpusExclusions } from "@data/lib/live/session";
 import { CORPUS_SAMPLES } from "@data/data/sampleCorpus";
 import { Panel } from "@data/components/common/Panel";
 import { SectionHeader } from "@data/components/common/SectionHeader";
@@ -60,12 +63,18 @@ export function CorpusView() {
   // Backlog statuses (Phase 1): keyed by finding key, applied through the same
   // engine scoring path as the file view, so Board + gates re-score together.
   const [statuses, setStatuses] = useState<Record<string, FindingStatus>>({});
+  // Accepted set resolutions (Phase 2): setId -> chosen keeper (null = keep all).
+  const [resolutions, setResolutions] = useState<Record<string, SetResolution>>({});
+  const [focusSetId, setFocusSetId] = useState<string | null>(null);
+  const [atlasMode, setAtlasMode] = useState<"2d" | "3d">("2d");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const analyze = useCallback((ins: Input[], pid: ProfileId) => {
     setRunning(true);
     setInputs(ins);
     setStatuses({});
+    setResolutions({});
+    setFocusSetId(null);
     // brief async so the loading state paints
     setTimeout(() => {
       const rep = analyzeCorpus(ins, pid);
@@ -127,6 +136,7 @@ export function CorpusView() {
   const changeProfile = (id: ProfileId) => {
     setProfileId(id);
     setStatuses({});
+    setResolutions({});
     if (inputs) setReport(analyzeCorpus(inputs, id));
   };
 
@@ -136,19 +146,43 @@ export function CorpusView() {
     setSelectedId(null);
     setParseErrors([]);
     setStatuses({});
+    setResolutions({});
+    setFocusSetId(null);
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  // Live view of the corpus with backlog statuses applied (pure derivation).
-  const adjusted = report ? recomputeCorpus(report, statuses) : null;
+  // Duplicate/version sets from the base report (stable ids), and the
+  // exclusions implied by accepted resolutions.
+  const sets = report ? deriveDuplicateSets(report.files, report.pairs) : [];
+  const exclusions: Record<string, string> = {};
+  for (const [setId, r] of Object.entries(resolutions)) {
+    if (r.keepId === null) continue;
+    const st = sets.find((x) => x.id === setId);
+    if (!st) continue;
+    const keepName = st.memberNames[st.memberIds.indexOf(r.keepId)];
+    for (const id of st.memberIds) if (id !== r.keepId) exclusions[id] = `Superseded by ${keepName} (duplicate resolution)`;
+  }
+
+  // Live view of the corpus with backlog statuses + exclusions applied.
+  const adjusted = report ? recomputeCorpus(report, statuses, exclusions) : null;
 
   // Bridge the backlog to the lifecycle (Phase 1): DataSliceWriter reads this
   // snapshot and carries it into ProgramState, where the Data Readiness
   // Handoff turns it into structured remediation entries for Govern.
   useEffect(() => {
     if (!adjusted) return;
-    recordCorpusBacklog(
-      adjusted.findings.map((f) => ({
+    const unresolvedSets = sets
+      .filter((s2) => !(s2.id in resolutions))
+      .map((s2) => ({
+        finding: `${s2.kind === "version" ? "Version conflict" : s2.kind === "duplicate" ? "Duplicate copies" : "Overlapping documents"}: ${s2.memberNames.join(" \u2194 ")}`,
+        guideline: "dedup",
+        severity: s2.kind === "overlap" ? ("watch" as const) : ("risk" as const),
+        recommendation: `Keep ${s2.recommendation.keepName}`,
+        status: "open" as const,
+      }));
+    recordCorpusBacklog([
+      ...unresolvedSets,
+      ...adjusted.findings.map((f) => ({
         finding: f.name,
         guideline: f.guideline,
         severity: f.level,
@@ -156,9 +190,15 @@ export function CorpusView() {
         recommendation: f.fixLabel,
         status: f.status,
       })),
+    ]);
+    recordCorpusExclusions(
+      Object.entries(exclusions).map(([id, reason]) => ({
+        file: report?.files.find((f) => f.id === id)?.name ?? id,
+        reason,
+      })),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [report, statuses]);
+  }, [report, statuses, resolutions]);
   const selected = adjusted && selectedId ? adjusted.files.find((f) => f.id === selectedId) : undefined;
 
   return (
@@ -252,37 +292,63 @@ export function CorpusView() {
 
             <div className="grid gap-6 lg:grid-cols-2">
               <Panel>
-                <SectionHeader title="Corpus map" description="Clusters of similar, duplicate & stale documents" icon={Boxes} />
-                <CorpusStarMap files={adjusted.files} pairs={report.pairs} selectedId={selectedId} onSelect={setSelectedId} />
-              </Panel>
-
-              <Panel>
-                <SectionHeader title="Conflicts & duplicates" description="Cross file issues that single file checks can't catch" icon={Copy} />
-                {report.pairs.length === 0 ? (
-                  <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 p-3 text-sm text-emerald-700">
-                    No duplicate or conflicting documents detected across the corpus.
+                <div className="flex items-start justify-between gap-2">
+                  <SectionHeader title="Corpus atlas" description="Distance = content similarity (PCA), click an edge to resolve its set" icon={Boxes} />
+                  <div className="inline-flex shrink-0 rounded-lg border border-line bg-white p-0.5" role="group" aria-label="Atlas view mode">
+                    {(["2d", "3d"] as const).map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => setAtlasMode(m)}
+                        aria-pressed={atlasMode === m}
+                        disabled={m === "3d" && adjusted.activeFiles.length < 4}
+                        title={m === "3d" && adjusted.activeFiles.length < 4 ? "3D needs at least 4 documents" : undefined}
+                        className={cn(
+                          "rounded-md px-2 py-1 text-[11px] font-semibold uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                          atlasMode === m ? "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25" : "text-slatey-400 hover:text-ink",
+                        )}
+                      >
+                        {m}
+                      </button>
+                    ))}
                   </div>
+                </div>
+                {atlasMode === "3d" && adjusted.activeFiles.length >= 4 ? (
+                  <CorpusAtlas3D
+                    files={adjusted.activeFiles}
+                    pairs={adjusted.activePairs}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                  />
                 ) : (
-                  <div className="space-y-2.5">
-                    {report.pairs.map((p, i) => {
-                      const b = PAIR_BADGE[p.kind];
-                      return (
-                        <div key={i} className="rounded-lg border border-line p-3">
-                          <div className="flex items-center gap-2">
-                            <b.icon className="h-4 w-4 text-slatey-300" />
-                            <Badge color={b.color}>{b.label}</Badge>
-                            <span className="font-mono text-[11px] text-slatey-400">{Math.round(p.similarity * 100)}%</span>
-                          </div>
-                          <div className="mt-1.5 font-mono text-[12px] text-slatey-100">
-                            {p.aName} <span className="text-slatey-400">↔</span> {p.bName}
-                          </div>
-                          <div className="mt-1 text-[13px] leading-snug text-slatey-300">{p.note}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <CorpusStarMap
+                    files={adjusted.activeFiles}
+                    pairs={adjusted.activePairs}
+                    selectedId={selectedId}
+                    onSelect={setSelectedId}
+                    onEdgeClick={(p) => setFocusSetId(setIdForPair(sets, p))}
+                  />
+                )}
+                {(adjusted.health.excluded ?? 0) > 0 && (
+                  <p className="mt-2 text-[11px] text-slatey-500">
+                    {adjusted.health.excluded} file{(adjusted.health.excluded ?? 0) > 1 ? "s" : ""} excluded by resolution, no longer part of the active corpus.
+                  </p>
                 )}
               </Panel>
+
+              <DuplicateResolution
+                sets={sets}
+                resolutions={resolutions}
+                focusSetId={focusSetId}
+                onResolve={(setId, keepId) => {
+                  setResolutions((m) => ({ ...m, [setId]: { keepId } }));
+                  setFocusSetId(null);
+                }}
+                onUndo={(setId) => setResolutions((m) => {
+                  const next = { ...m };
+                  delete next[setId];
+                  return next;
+                })}
+              />
             </div>
 
             <RemediationBacklog
@@ -325,7 +391,7 @@ export function CorpusView() {
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate font-mono text-[12px] text-slatey-100">{f.name}</span>
-                      <Badge color={f.gate.color}>{f.score}</Badge>
+                      {f.excluded ? <Badge color="slate">excluded</Badge> : <Badge color={f.gate.color}>{f.score}</Badge>}
                     </div>
                     <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slatey-400">
                       {f.gate.gate === "Approved" ? (

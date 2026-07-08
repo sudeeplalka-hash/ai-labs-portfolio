@@ -55,6 +55,7 @@ export function DataHandoffCard() {
     // handoff refreshes when the live corpus backlog changes without any
     // self-retrigger risk.
     cb: state.data?.corpusBacklog?.map((e) => e.finding + e.status),
+    cx: state.data?.corpusExclusions?.map((e) => e.file),
   });
   useEffect(() => {
     if (!hydrated || isDemo || !state.initiative?.name) return;

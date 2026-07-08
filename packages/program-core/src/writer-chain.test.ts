@@ -89,6 +89,24 @@ describe("stage-writer chain reaches a fixed point", () => {
     expect(JSON.stringify(findings)).toContain("Topical outlier");
   });
 
+  it("an accepted exclusion ripples to blockedSources and Govern with no extra wiring", () => {
+    const s0 = demoState("knowledge-assistant");
+    s0.data = {
+      ...(s0.data ?? {}),
+      corpusExclusions: [{ file: "travel_policy_v2.7_legacy.txt", reason: "Superseded by travel_policy_v3.1_current.txt (duplicate resolution)" }],
+    };
+    const s1 = applyWriterChain(s0);
+    const s2 = applyWriterChain(s1);
+    // Handoff carries the exclusion as a blocked source…
+    const blocked = s1.data?.handoff?.blockedSources ?? [];
+    expect(blocked.join("|")).toContain("travel_policy_v2.7_legacy.txt");
+    // …Govern turns it into a High open finding via the existing mapper…
+    const findings = s1.governance?.decision?.openFindings ?? [];
+    expect(JSON.stringify(findings)).toContain("Blocked source: travel_policy_v2.7_legacy.txt");
+    // …and the chain still reaches its fixed point.
+    expect(stripVolatile(s2)).toEqual(stripVolatile(s1));
+  });
+
   it("derivations are deterministic for identical input state", () => {
     const s = applyWriterChain(demoState("knowledge-assistant"));
     const a = stripVolatile(applyWriterChain(s));

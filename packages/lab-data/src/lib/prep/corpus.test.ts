@@ -75,3 +75,46 @@ describe("corpus-level guideline checks (Phase 1)", () => {
     }
   });
 });
+
+describe("PCA projection (Corpus Atlas, Phase 3)", () => {
+  const r = analyzeCorpus(inputs);
+
+  it("is deterministic and keeps every axis inside the plot band", () => {
+    const again = analyzeCorpus(inputs);
+    expect(again.files.map((f) => [f.x, f.y, f.z])).toEqual(r.files.map((f) => [f.x, f.y, f.z]));
+    for (const f of r.files) {
+      for (const v of [f.x, f.y, f.z]) {
+        expect(v).toBeGreaterThanOrEqual(0);
+        expect(v).toBeLessThanOrEqual(100);
+      }
+    }
+  });
+
+  it("distance means similarity: a duplicate pair sits closer than the average pair", () => {
+    const dup = r.pairs.find((p) => p.kind === "duplicate")!;
+    const byId = new Map(r.files.map((f) => [f.id, f]));
+    const d = (aId: string, bId: string) => {
+      const a = byId.get(aId)!;
+      const b = byId.get(bId)!;
+      return Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
+    };
+    const dupDist = d(dup.aId, dup.bId);
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < r.files.length; i++) {
+      for (let j = i + 1; j < r.files.length; j++) {
+        sum += d(r.files[i].id, r.files[j].id);
+        count++;
+      }
+    }
+    expect(dupDist).toBeLessThan(sum / count);
+  });
+
+  it("tiny corpora still render via the deterministic fallback", () => {
+    const two = analyzeCorpus(inputs.slice(0, 2));
+    for (const f of two.files) {
+      expect(Number.isFinite(f.x)).toBe(true);
+      expect(f.z).toBe(50);
+    }
+  });
+});

@@ -368,6 +368,9 @@ export interface DataSlice {
   readinessScore?: number; gaps?: number; status?: string; handoff?: DataReadinessHandoff;
   /** Live corpus backlog bridged from the Data lab session (DataSliceWriter). */
   corpusBacklog?: RemediationEntry[];
+  /** Accepted duplicate/version exclusions from the Data lab's resolution
+   * workflow (Phase 2). Merged into the handoff's blockedSources. */
+  corpusExclusions?: { file: string; reason: string }[];
 }
 export interface RagSlice {
   faithfulness?: number; citationAccuracy?: number; hallucination?: number; costPerAnswer?: number; status?: string;
