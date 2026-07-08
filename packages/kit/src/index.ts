@@ -8,3 +8,4 @@ export * from "./industries";
 export * from "./use-cases";
 export * from "./labs";
 export * from "./storylines";
+export * from "./projection";
