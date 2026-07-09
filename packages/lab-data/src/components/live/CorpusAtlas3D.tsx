@@ -10,10 +10,12 @@ import { Badge } from "@data/components/common/Badge";
 // the user acts — no autoplay, no motion for its own sake. Drag orbits, wheel
 // or buttons zoom, double-click resets, hover raises a document card, click
 // selects a document or opens a linked pair's resolution set. Depth is carried
-// by a floor grid, stems, shadows and distance attenuation rather than spin.
-// Honest axes: the SAME PCA space as the 2D map — PC1/PC2 match it, PC3 adds
-// the third component. Confirmed topic groups draw as hulls here too, so the
-// two views tell one story.
+// by a gridded room — the floor plus whichever walls face away from you, so
+// the cube reads as a space you look into from any angle — with shadows and
+// distance attenuation. The only motion is a sonar pulse on the hovered
+// document (skipped under prefers-reduced-motion). Honest axes: the SAME PCA
+// space as the 2D map — PC1/PC2 match it, PC3 adds the third component.
+// Confirmed topic groups draw as hulls here too, so both views tell one story.
 
 const GATE_HEX: Record<string, string> = {
   emerald: "#10b981",
@@ -102,7 +104,9 @@ export function CorpusAtlas3D({
   const screenPts = useRef<Map<string, { sx: number; sy: number; r: number; fade: number }>>(new Map());
   const screenSegs = useRef<{ i: number; x1: number; y1: number; x2: number; y2: number }[]>([]);
 
-  // Render exactly once per state change: static scene, no animation loop.
+  // One draw per state change. While a document is hovered (and the user
+  // hasn't asked for reduced motion) a bounded rAF loop replays the same
+  // deterministic frame with only the pulse phase advancing.
   useEffect(() => {
     const canvas = canvasRef.current;
     const wrap = wrapRef.current;
@@ -118,8 +122,6 @@ export function CorpusAtlas3D({
     canvas.height = Math.floor(H * dpr);
     canvas.style.width = `${W}px`;
     canvas.style.height = `${H}px`;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, W, H);
 
     const { yaw, pitch, zoom } = view;
     const cy = Math.cos(yaw);
@@ -168,216 +170,265 @@ export function CorpusAtlas3D({
       const w = cam / (cam - z2);
       return { sx: W / 2 + x1 * w * scale, sy: H / 2 - y2 * w * scale, w };
     };
+    // View-space depth only (for choosing which cube walls face away).
+    const depthOf = (x: number, y: number, z: number) => {
+      const z1 = -x * sy + z * cy;
+      return y * sp + z1 * cp;
+    };
 
-    // ---- depth scaffolding: floor grid + bounding box (static cues) ----
-    ctx.lineWidth = 1;
     const G = Math.max(0.55, E * 1.12);
-    for (let i = 0; i <= 6; i++) {
-      const t = -G + (2 * G * i) / 6;
-      const a1 = proj(t, -G, -G);
-      const b1 = proj(t, -G, G);
-      const a2 = proj(-G, -G, t);
-      const b2 = proj(G, -G, t);
-      ctx.strokeStyle = LINE_SOFT;
-      ctx.beginPath(); ctx.moveTo(a1.sx, a1.sy); ctx.lineTo(b1.sx, b1.sy); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(a2.sx, a2.sy); ctx.lineTo(b2.sx, b2.sy); ctx.stroke();
-    }
-    const corners: [number, number, number][] = [
-      [-G, -G, -G], [G, -G, -G], [G, -G, G], [-G, -G, G],
-      [-G, G, -G], [G, G, -G], [G, G, G], [-G, G, G],
-    ];
-    const boxEdges: [number, number][] = [
-      [0, 1], [1, 2], [2, 3], [3, 0],
-      [4, 5], [5, 6], [6, 7], [7, 4],
-      [0, 4], [1, 5], [2, 6], [3, 7],
-    ];
-    ctx.strokeStyle = LINE;
-    for (const [a, b] of boxEdges) {
-      const pa = proj(...corners[a]);
-      const pb = proj(...corners[b]);
-      ctx.beginPath(); ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pb.sx, pb.sy); ctx.stroke();
-    }
-
-    // ---- principal-component axis labels (visible math, not decoration) ----
-    ctx.font = `500 9px ${MONO}`;
-    ctx.fillStyle = "rgba(21,36,51,0.4)";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    const axisTags: { label: string; at: [number, number, number] }[] = [
-      { label: "PC1", at: [G + 0.16, -G, -G] },
-      { label: "PC2", at: [-G, G + 0.16, -G] },
-      { label: "PC3", at: [-G, -G, G + 0.16] },
-    ];
-    for (const a of axisTags) {
-      const p = proj(...a.at);
-      ctx.fillText(a.label, p.sx, p.sy);
-    }
-    ctx.textAlign = "left";
-    ctx.textBaseline = "alphabetic";
-
     const byId = new Map(files.map((f) => [f.id, f]));
     const maxTokens = Math.max(...files.map((f) => f.tokens), 1);
 
-    // ---- confirmed topic hulls (same groups as the 2D map) ----
-    const hullLabelRects: { x: number; y: number; w: number; h: number }[] = [];
-    for (const h of hulls) {
-      const pts = h.memberIds
-        .map((id) => npos.get(id))
-        .filter((p): p is { x: number; y: number; z: number } => !!p)
-        .map((p) => proj(p.x, p.y, p.z));
-      if (pts.length < 2) continue;
-      const cx2 = pts.reduce((a, p) => a + p.sx, 0) / pts.length;
-      const cy2 = pts.reduce((a, p) => a + p.sy, 0) / pts.length;
-      if (pts.length === 2) {
-        ctx.strokeStyle = h.color;
-        ctx.globalAlpha = 0.07;
-        ctx.lineWidth = 30;
-        ctx.lineCap = "round";
-        ctx.beginPath(); ctx.moveTo(pts[0].sx, pts[0].sy); ctx.lineTo(pts[1].sx, pts[1].sy); ctx.stroke();
-        ctx.lineCap = "butt";
-      } else {
-        const hp = hull2d(pts.map((p) => ({ x: p.sx, y: p.sy }))).map((q) => {
-          const d = Math.hypot(q.x - cx2, q.y - cy2) || 1;
-          const k = 1 + 16 / d;
-          return { x: cx2 + (q.x - cx2) * k, y: cy2 + (q.y - cy2) * k };
-        });
-        ctx.beginPath();
-        hp.forEach((q, qi) => (qi === 0 ? ctx.moveTo(q.x, q.y) : ctx.lineTo(q.x, q.y)));
-        ctx.closePath();
-        ctx.fillStyle = h.color;
-        ctx.globalAlpha = 0.055;
-        ctx.fill();
-        ctx.globalAlpha = 0.35;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 3]);
-        ctx.strokeStyle = h.color;
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-      const topY = Math.min(...pts.map((p) => p.sy));
-      ctx.globalAlpha = 1;
-      ctx.font = `600 10px ${SANS}`;
-      ctx.textAlign = "center";
-      const lw = ctx.measureText(h.label).width;
-      ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.lineWidth = 3;
-      ctx.lineJoin = "round";
-      ctx.strokeText(h.label, cx2, topY - 12);
-      ctx.fillStyle = h.color;
-      ctx.fillText(h.label, cx2, topY - 12);
-      ctx.textAlign = "left";
-      hullLabelRects.push({ x: cx2 - lw / 2, y: topY - 22, w: lw, h: 12 });
-    }
-    ctx.globalAlpha = 1;
+    const draw = (pulse: number) => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
 
-    // ---- relation edges (click one to open its resolution set) ----
-    screenSegs.current = [];
-    pairs.forEach((pr, i) => {
-      const a = byId.get(pr.aId);
-      const b = byId.get(pr.bId);
-      if (!a || !b) return;
-      const na = npos.get(a.id);
-      const nb = npos.get(b.id);
-      if (!na || !nb) return;
-      const pa = proj(na.x, na.y, na.z);
-      const pb = proj(nb.x, nb.y, nb.z);
-      const hot = hoverEdge?.i === i;
-      ctx.strokeStyle = EDGE_HEX[pr.kind];
-      ctx.globalAlpha = hot ? 0.9 : 0.5;
-      ctx.lineWidth = (pr.kind === "near-duplicate" ? 1 : 1.4) + (hot ? 0.6 : 0);
-      ctx.setLineDash(pr.kind === "stale-version" ? [5, 3] : []);
-      ctx.beginPath(); ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pb.sx, pb.sy); ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 1;
-      screenSegs.current.push({ i, x1: pa.sx, y1: pa.sy, x2: pb.sx, y2: pb.sy });
-    });
-
-    // ---- documents (far → near) ----
-    const drawn = files
-      .map((f) => {
-        const p = npos.get(f.id) ?? { x: 0, y: 0, z: 0 };
-        return { f, p, s: proj(p.x, p.y, p.z) };
-      })
-      .sort((a, b) => a.s.w - b.s.w);
-    screenPts.current.clear();
-    for (const { f, p, s } of drawn) {
-      const active = f.id === (hoverId ?? selectedId);
-      const base = 4 + 5 * Math.sqrt(f.tokens / maxTokens);
-      const r = base * s.w * (active ? 1.25 : 1);
-      const depthFade = 0.55 + 0.45 * Math.min(1, Math.max(0, (s.w - 0.7) / 0.7));
-      ctx.globalAlpha = (isStale(f) && !active ? 0.45 : 1) * depthFade;
-
-      // stem + drop hint on the floor for depth reading
-      const foot = proj(p.x, -G, p.z);
-      ctx.strokeStyle = "rgba(21,36,51,0.07)";
+      // ---- the room: floor grid + grids on the far walls of the cube ----
+      // The two vertical walls that face away from the camera carry the grid,
+      // re-chosen every orbit so the cube always reads as a room you look into.
+      const line3 = (a: [number, number, number], b: [number, number, number]) => {
+        const pa = proj(...a);
+        const pb = proj(...b);
+        ctx.beginPath(); ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pb.sx, pb.sy); ctx.stroke();
+      };
+      const wallGrid = (fix: "x" | "y" | "z", s: number) => {
+        for (let i = 0; i <= 6; i++) {
+          const t = -G + (2 * G * i) / 6;
+          if (fix === "y") {
+            line3([t, s * G, -G], [t, s * G, G]);
+            line3([-G, s * G, t], [G, s * G, t]);
+          } else if (fix === "x") {
+            line3([s * G, t, -G], [s * G, t, G]);
+            line3([s * G, -G, t], [s * G, G, t]);
+          } else {
+            line3([t, -G, s * G], [t, G, s * G]);
+            line3([-G, t, s * G], [G, t, s * G]);
+          }
+        }
+      };
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(foot.sx, foot.sy); ctx.lineTo(s.sx, s.sy); ctx.stroke();
-      ctx.fillStyle = "rgba(21,36,51,0.06)";
-      ctx.beginPath(); ctx.ellipse(foot.sx, foot.sy, r * 0.7, r * 0.24, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = LINE_SOFT;
+      const wallX = depthOf(G, 0, 0) < depthOf(-G, 0, 0) ? 1 : -1;
+      const wallZ = depthOf(0, 0, G) < depthOf(0, 0, -G) ? 1 : -1;
+      wallGrid("y", -1);
+      wallGrid("x", wallX);
+      wallGrid("z", wallZ);
 
-      if (piiHits(f) > 0) {
-        ctx.strokeStyle = "#f43f5e";
-        ctx.lineWidth = 1.1;
-        ctx.setLineDash([3, 2.4]);
-        ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 3.4, 0, Math.PI * 2); ctx.stroke();
-        ctx.setLineDash([]);
-      }
-      ctx.fillStyle = GATE_HEX[f.gate.color] ?? "#64748b";
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.arc(s.sx, s.sy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      if (active) {
-        ctx.strokeStyle = INK;
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 2, 0, Math.PI * 2); ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      screenPts.current.set(f.id, { sx: s.sx, sy: s.sy, r: Math.max(r, 7), fade: depthFade });
-    }
-
-    // ---- file-name labels (collision-avoided, depth-faded) ----
-    const showAll = files.length <= 14;
-    type LRect = { x: number; y: number; w: number; h: number };
-    const placed: LRect[] = [...hullLabelRects];
-    const controlsZone: LRect = { x: W - 48, y: 0, w: 48, h: 122 };
-    const hits = (a: LRect, b: LRect) =>
-      a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-    const prio = [...drawn].reverse(); // nearest first, selected front-most
-    prio.sort((a, b) => Number(b.f.id === selectedId) - Number(a.f.id === selectedId));
-    ctx.font = `500 9px ${MONO}`;
-    for (const { f, s } of prio) {
-      const isSel = f.id === selectedId;
-      if (!showAll && !isSel) continue;
-      if (f.id === hoverId) continue; // the hover card already names it
-      const pt = screenPts.current.get(f.id);
-      if (!pt) continue;
-      let name = f.name;
-      if (name.length > 18) name = `${name.slice(0, 16)}…`;
-      const w = ctx.measureText(name).width;
-      const cand: LRect[] = [
-        { x: s.sx + pt.r + 5, y: s.sy - 5, w, h: 10 },
-        { x: s.sx - pt.r - 5 - w, y: s.sy - 5, w, h: 10 },
-        { x: s.sx - w / 2, y: s.sy - pt.r - 15, w, h: 10 },
-        { x: s.sx - w / 2, y: s.sy + pt.r + 5, w, h: 10 },
+      const corners: [number, number, number][] = [
+        [-G, -G, -G], [G, -G, -G], [G, -G, G], [-G, -G, G],
+        [-G, G, -G], [G, G, -G], [G, G, G], [-G, G, G],
       ];
-      const spot = cand.find(
-        (cr) =>
-          cr.x >= 3 && cr.x + cr.w <= W - 3 && cr.y >= 3 && cr.y + cr.h <= H - 4 &&
-          !hits(cr, controlsZone) && !placed.some((q) => hits(cr, q)),
-      );
-      if (!spot) continue; // crowded spot: hover still reveals it
-      placed.push(spot);
-      ctx.globalAlpha = Math.min(1, pt.fade + (isSel ? 0.35 : 0));
-      ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.lineWidth = 3;
-      ctx.lineJoin = "round";
-      ctx.strokeText(name, spot.x, spot.y + 8);
-      ctx.fillStyle = isSel ? INK : "rgba(21,36,51,0.72)";
-      ctx.fillText(name, spot.x, spot.y + 8);
-      ctx.globalAlpha = 1;
-    }
+      const boxEdges: [number, number][] = [
+        [0, 1], [1, 2], [2, 3], [3, 0],
+        [4, 5], [5, 6], [6, 7], [7, 4],
+        [0, 4], [1, 5], [2, 6], [3, 7],
+      ];
+      ctx.strokeStyle = LINE;
+      for (const [a, b] of boxEdges) line3(corners[a], corners[b]);
 
+      // ---- principal-component axis labels (visible math, not decoration) ----
+      ctx.font = `500 9px ${MONO}`;
+      ctx.fillStyle = "rgba(21,36,51,0.4)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const axisTags: { label: string; at: [number, number, number] }[] = [
+        { label: "PC1", at: [G + 0.16, -G, -G] },
+        { label: "PC2", at: [-G, G + 0.16, -G] },
+        { label: "PC3", at: [-G, -G, G + 0.16] },
+      ];
+      for (const a of axisTags) {
+        const p = proj(...a.at);
+        ctx.fillText(a.label, p.sx, p.sy);
+      }
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      // ---- confirmed topic hulls (same groups as the 2D map) ----
+      const hullLabelRects: { x: number; y: number; w: number; h: number }[] = [];
+      for (const h of hulls) {
+        const pts = h.memberIds
+          .map((id) => npos.get(id))
+          .filter((p): p is { x: number; y: number; z: number } => !!p)
+          .map((p) => proj(p.x, p.y, p.z));
+        if (pts.length < 2) continue;
+        const cx2 = pts.reduce((a, p) => a + p.sx, 0) / pts.length;
+        const cy2 = pts.reduce((a, p) => a + p.sy, 0) / pts.length;
+        if (pts.length === 2) {
+          ctx.strokeStyle = h.color;
+          ctx.globalAlpha = 0.07;
+          ctx.lineWidth = 30;
+          ctx.lineCap = "round";
+          ctx.beginPath(); ctx.moveTo(pts[0].sx, pts[0].sy); ctx.lineTo(pts[1].sx, pts[1].sy); ctx.stroke();
+          ctx.lineCap = "butt";
+        } else {
+          const hp = hull2d(pts.map((p) => ({ x: p.sx, y: p.sy }))).map((q) => {
+            const d = Math.hypot(q.x - cx2, q.y - cy2) || 1;
+            const k = 1 + 16 / d;
+            return { x: cx2 + (q.x - cx2) * k, y: cy2 + (q.y - cy2) * k };
+          });
+          ctx.beginPath();
+          hp.forEach((q, qi) => (qi === 0 ? ctx.moveTo(q.x, q.y) : ctx.lineTo(q.x, q.y)));
+          ctx.closePath();
+          ctx.fillStyle = h.color;
+          ctx.globalAlpha = 0.055;
+          ctx.fill();
+          ctx.globalAlpha = 0.35;
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 3]);
+          ctx.strokeStyle = h.color;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        const topY = Math.min(...pts.map((p) => p.sy));
+        ctx.globalAlpha = 1;
+        ctx.font = `600 10px ${SANS}`;
+        ctx.textAlign = "center";
+        const lw = ctx.measureText(h.label).width;
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.strokeText(h.label, cx2, topY - 12);
+        ctx.fillStyle = h.color;
+        ctx.fillText(h.label, cx2, topY - 12);
+        ctx.textAlign = "left";
+        hullLabelRects.push({ x: cx2 - lw / 2, y: topY - 22, w: lw, h: 12 });
+      }
+      ctx.globalAlpha = 1;
+
+      // ---- relation edges (click one to open its resolution set) ----
+      screenSegs.current = [];
+      pairs.forEach((pr, i) => {
+        const a = byId.get(pr.aId);
+        const b = byId.get(pr.bId);
+        if (!a || !b) return;
+        const na = npos.get(a.id);
+        const nb = npos.get(b.id);
+        if (!na || !nb) return;
+        const pa = proj(na.x, na.y, na.z);
+        const pb = proj(nb.x, nb.y, nb.z);
+        const hot = hoverEdge?.i === i;
+        ctx.strokeStyle = EDGE_HEX[pr.kind];
+        ctx.globalAlpha = hot ? 0.9 : 0.5;
+        ctx.lineWidth = (pr.kind === "near-duplicate" ? 1 : 1.4) + (hot ? 0.6 : 0);
+        ctx.setLineDash(pr.kind === "stale-version" ? [5, 3] : []);
+        ctx.beginPath(); ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pb.sx, pb.sy); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+        screenSegs.current.push({ i, x1: pa.sx, y1: pa.sy, x2: pb.sx, y2: pb.sy });
+      });
+
+      // ---- documents (far → near) ----
+      const drawn = files
+        .map((f) => {
+          const p = npos.get(f.id) ?? { x: 0, y: 0, z: 0 };
+          return { f, p, s: proj(p.x, p.y, p.z) };
+        })
+        .sort((a, b) => a.s.w - b.s.w);
+      screenPts.current.clear();
+      for (const { f, p, s } of drawn) {
+        const active = f.id === (hoverId ?? selectedId);
+        const base = 4 + 5 * Math.sqrt(f.tokens / maxTokens);
+        const r = base * s.w * (active ? 1.25 : 1);
+        const depthFade = 0.55 + 0.45 * Math.min(1, Math.max(0, (s.w - 0.7) / 0.7));
+        ctx.globalAlpha = (isStale(f) && !active ? 0.45 : 1) * depthFade;
+
+        // drop hint on the floor for depth reading
+        const foot = proj(p.x, -G, p.z);
+        ctx.fillStyle = "rgba(21,36,51,0.06)";
+        ctx.beginPath(); ctx.ellipse(foot.sx, foot.sy, r * 0.7, r * 0.24, 0, 0, Math.PI * 2); ctx.fill();
+
+        if (piiHits(f) > 0) {
+          ctx.strokeStyle = "#f43f5e";
+          ctx.lineWidth = 1.1;
+          ctx.setLineDash([3, 2.4]);
+          ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 3.4, 0, Math.PI * 2); ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        ctx.fillStyle = GATE_HEX[f.gate.color] ?? "#64748b";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(s.sx, s.sy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        if (active) {
+          ctx.strokeStyle = INK;
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 2, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+        screenPts.current.set(f.id, { sx: s.sx, sy: s.sy, r: Math.max(r, 7), fade: depthFade });
+      }
+
+      // ---- sonar pulse on the hovered document ----
+      if (hoverId && pulse > 0) {
+        const pt = screenPts.current.get(hoverId);
+        const hf = byId.get(hoverId);
+        if (pt && hf) {
+          ctx.strokeStyle = GATE_HEX[hf.gate.color] ?? INK;
+          ctx.globalAlpha = (1 - pulse) * 0.45;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(pt.sx, pt.sy, pt.r + 2 + pulse * 10, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // ---- file-name labels (collision-avoided, depth-faded) ----
+      const showAll = files.length <= 14;
+      type LRect = { x: number; y: number; w: number; h: number };
+      const placed: LRect[] = [...hullLabelRects];
+      const controlsZone: LRect = { x: W - 48, y: 0, w: 48, h: 122 };
+      const hits = (a: LRect, b: LRect) =>
+        a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+      const prio = [...drawn].reverse(); // nearest first, selected front-most
+      prio.sort((a, b) => Number(b.f.id === selectedId) - Number(a.f.id === selectedId));
+      ctx.font = `500 9px ${MONO}`;
+      for (const { f, s } of prio) {
+        const isSel = f.id === selectedId;
+        if (!showAll && !isSel) continue;
+        if (f.id === hoverId) continue; // the hover card already names it
+        const pt = screenPts.current.get(f.id);
+        if (!pt) continue;
+        let name = f.name;
+        if (name.length > 18) name = `${name.slice(0, 16)}…`;
+        const w = ctx.measureText(name).width;
+        const cand: LRect[] = [
+          { x: s.sx + pt.r + 5, y: s.sy - 5, w, h: 10 },
+          { x: s.sx - pt.r - 5 - w, y: s.sy - 5, w, h: 10 },
+          { x: s.sx - w / 2, y: s.sy - pt.r - 15, w, h: 10 },
+          { x: s.sx - w / 2, y: s.sy + pt.r + 5, w, h: 10 },
+        ];
+        const spot = cand.find(
+          (cr) =>
+            cr.x >= 3 && cr.x + cr.w <= W - 3 && cr.y >= 3 && cr.y + cr.h <= H - 4 &&
+            !hits(cr, controlsZone) && !placed.some((q) => hits(cr, q)),
+        );
+        if (!spot) continue; // crowded spot: hover still reveals it
+        placed.push(spot);
+        ctx.globalAlpha = Math.min(1, pt.fade + (isSel ? 0.35 : 0));
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 3;
+        ctx.lineJoin = "round";
+        ctx.strokeText(name, spot.x, spot.y + 8);
+        ctx.fillStyle = isSel ? INK : "rgba(21,36,51,0.72)";
+        ctx.fillText(name, spot.x, spot.y + 8);
+        ctx.globalAlpha = 1;
+      }
+    };
+
+    draw(0);
     canvas.style.cursor = hoverId || hoverEdge ? "pointer" : "";
+
+    // Pulse loop: only while a document is hovered, never otherwise.
+    const reduced =
+      typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (!hoverId || reduced) return;
+    let raf = 0;
+    const t0 = typeof performance !== "undefined" ? performance.now() : 0;
+    const loop = (t: number) => {
+      draw(((t - t0) % 1200) / 1200);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
   }, [files, pairs, hulls, selectedId, hoverId, hoverEdge, view, sizeTick]);
 
   // Re-render on wrapper resize (the atlas card width changes with breakpoints).
@@ -581,9 +632,9 @@ export function CorpusAtlas3D({
       </div>
 
       <p className="mt-1.5 text-[10px] text-slatey-500">
-        Static view · drag to orbit · scroll or +/− to zoom · double-click to reset · click a document to inspect, a
-        relation line to resolve its set · PC1/PC2 match the 2D map, PC3 adds depth · confirmed topics draw as hulls in
-        both views.
+        Static view · drag to orbit the room · scroll or +/− to zoom · double-click to reset · hover to pulse a
+        document, click to inspect · click a relation line to resolve its set · PC1/PC2 match the 2D map, PC3 adds
+        depth · confirmed topics draw as hulls in both views.
       </p>
     </div>
   );
