@@ -276,6 +276,7 @@ export function CompetencyMap() {
             <Link href="/storylines" className="text-slatey-500 hover:text-ink hover:underline">Program storylines</Link>
             <Link href="/industries" className="text-slatey-500 hover:text-ink hover:underline">Industry Atlas</Link>
             <Link href="/changelog" className="text-slatey-500 hover:text-ink hover:underline">Changelog</Link>
+            <span className="font-mono text-[11px] text-slatey-500">build {process.env.NEXT_PUBLIC_BUILD_SHA ?? "local"}</span>
           </div>
         </div>
       </footer>

@@ -1,6 +1,6 @@
 # Netlify deploy for the modular monolith (apps/web static export).
 [build]
-  command = "corepack enable && pnpm install && pnpm turbo run build --filter=@labs/web"
+  command = "corepack enable && pnpm install && pnpm turbo run build --filter=@labs/web --force"
   publish = "apps/web/out"
 
 [build.environment]

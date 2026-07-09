@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "pnpm install --no-frozen-lockfile",
-  "buildCommand": "pnpm turbo run build --filter=@labs/web",
+  "buildCommand": "pnpm turbo run build --filter=@labs/web --force",
   "outputDirectory": "apps/web/out",
   "git": { "deploymentEnabled": { "main": true } }
 }

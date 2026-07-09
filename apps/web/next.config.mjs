@@ -23,6 +23,9 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_STATIC_DEMO: process.env.NEXT_PUBLIC_STATIC_DEMO || "1",
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "",
+    // Build stamp: which commit this bundle was built from (footer badge).
+    // Vercel injects VERCEL_GIT_COMMIT_SHA at build time; local builds say "local".
+    NEXT_PUBLIC_BUILD_SHA: (process.env.VERCEL_GIT_COMMIT_SHA || "local").slice(0, 7),
   },
 };
 export default nextConfig;

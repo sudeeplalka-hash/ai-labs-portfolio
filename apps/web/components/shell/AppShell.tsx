@@ -56,7 +56,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         <footer className="no-print border-t border-line px-5 py-4 text-center text-xs text-slatey-500 md:px-8">
-          AI Program Command Center · one initiative, end to end · client side demo
+          AI Program Command Center · one initiative, end to end · client side demo · build{" "}
+          <span className="font-mono">{process.env.NEXT_PUBLIC_BUILD_SHA ?? "local"}</span>
         </footer>
       </div>
     </div>
