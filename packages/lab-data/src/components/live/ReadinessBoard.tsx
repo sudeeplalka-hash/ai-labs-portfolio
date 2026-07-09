@@ -81,7 +81,7 @@ export function ReadinessBoard({
       {/* Category rollups */}
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
         {rollups.map((r) => (
-          <div key={r.guideline} className="rounded-lg border border-line bg-white p-2.5">
+          <div key={r.guideline} className="flex flex-col rounded-lg border border-line bg-white p-2.5">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-slatey-400">{r.name}</span>
               <span className={cn("rounded px-1.5 py-0.5 font-mono text-[11px] font-semibold", LEVEL_TONE[r.level])}>{r.score}</span>
@@ -97,7 +97,7 @@ export function ReadinessBoard({
             </div>
             <p className="mt-1.5 text-[11px] leading-snug text-slatey-400">{r.definition}</p>
             {r.findingCount > 0 && (
-              <p className="mt-1 text-[11px] font-medium text-slatey-300">
+              <p className="mt-auto pt-1.5 text-[11px] font-medium text-slatey-300">
                 {r.findingCount} open · {r.filesAffected} file{r.filesAffected === 1 ? "" : "s"}
               </p>
             )}
@@ -121,7 +121,7 @@ export function ReadinessBoard({
           <tbody>
             {files.map((f) => (
               <tr key={f.id}>
-                <td className="sticky left-0 max-w-[180px] truncate bg-white py-0.5 pr-3 font-mono text-[11px] text-slatey-300">{f.name}</td>
+                <td title={f.name} className="sticky left-0 max-w-[220px] truncate bg-white py-0.5 pr-3 font-mono text-[11px] text-slatey-300">{f.name}</td>
                 {rollups.map((r) => {
                   const cell = fileCategoryScore(findings, f.id, r.guideline);
                   return (

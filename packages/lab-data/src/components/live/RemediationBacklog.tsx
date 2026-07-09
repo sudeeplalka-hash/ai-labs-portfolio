@@ -106,7 +106,9 @@ export function RemediationBacklog({
               <div className="flex flex-wrap items-center gap-1.5 border-b border-line/70 px-2.5 py-2">
                 <Badge color={SEV_COLOR[g.worst]}>{g.worst}</Badge>
                 <span className="text-[13px] font-semibold text-ink">{g.name}</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{RULEBOOK[g.guideline].name}</span>
+                {RULEBOOK[g.guideline].name.toLowerCase() !== g.name.toLowerCase() && (
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{RULEBOOK[g.guideline].name}</span>
+                )}
                 <span className="ml-auto text-[11px] text-slatey-500">{g.items.filter((x) => x.status === "open").length} open · {g.items.length} file{g.items.length === 1 ? "" : "s"}</span>
                 {g.items.filter((x) => x.status === "open").length > 1 && (
                   <span className="flex items-center gap-1.5">

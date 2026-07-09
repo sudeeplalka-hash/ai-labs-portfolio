@@ -50,6 +50,7 @@ export function CorpusAtlas3D({
   const wrapRef = useRef<HTMLDivElement>(null);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [view, setView] = useState({ ...HOME });
+  const [sizeTick, setSizeTick] = useState(0);
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const screenPts = useRef<Map<string, { sx: number; sy: number; r: number }>>(new Map());
 
@@ -61,9 +62,10 @@ export function CorpusAtlas3D({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    void sizeTick; // re-render when the wrapper resizes (grid breakpoints)
     const dpr = Math.min(2, typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
     const W = wrap.clientWidth;
-    const H = Math.max(260, Math.round(W * 0.68));
+    const H = Math.max(300, Math.min(520, Math.round(W * 0.72)));
     canvas.width = Math.floor(W * dpr);
     canvas.height = Math.floor(H * dpr);
     canvas.style.width = `${W}px`;
@@ -77,7 +79,39 @@ export function CorpusAtlas3D({
     const cp = Math.cos(pitch);
     const sp = Math.sin(pitch);
     const cam = 3.2;
-    const scale = Math.min(W, H) * 0.34 * zoom;
+
+    // Per-corpus normalization: center the cloud on its midrange and divide by
+    // the dominant half-range (uniform, so relative geometry is preserved).
+    // The data then sits around the origin wherever PCA landed in 0..100 space.
+    const axes = (["x", "y", "z"] as const).map((k) => {
+      let lo = Infinity;
+      let hi = -Infinity;
+      for (const f of files) {
+        lo = Math.min(lo, f[k]);
+        hi = Math.max(hi, f[k]);
+      }
+      return { mid: (lo + hi) / 2, half: (hi - lo) / 2 };
+    });
+    const half = Math.max(axes[0].half, axes[1].half, axes[2].half, 1e-6);
+    const npos = new Map(
+      files.map((f) => [
+        f.id,
+        { x: (f.x - axes[0].mid) / half, y: (f.y - axes[1].mid) / half, z: (f.z - axes[2].mid) / half },
+      ]),
+    );
+
+    // Auto-fit: scale from the cloud's bounding sphere, so no document can
+    // leave the frame at ANY orbit angle. Rotation preserves distance from the
+    // origin; the worst perspective magnification happens at the nearest depth.
+    let R = 0.35;
+    let E = 0.35;
+    for (const p of npos.values()) {
+      R = Math.max(R, Math.hypot(p.x, p.y, p.z));
+      E = Math.max(E, Math.abs(p.x), Math.abs(p.y), Math.abs(p.z));
+    }
+    const wmax = cam / (cam - Math.min(R, cam - 0.6));
+    const pad = 12 * wmax + 22; // max dot radius + PII ring + breathing room
+    const scale = (Math.max(60, Math.min(W, H) / 2 - pad) / (R * wmax)) * zoom;
 
     const proj = (x: number, y: number, z: number) => {
       const x1 = x * cy + z * sy;
@@ -87,11 +121,10 @@ export function CorpusAtlas3D({
       const w = cam / (cam - z2);
       return { sx: W / 2 + x1 * w * scale, sy: H / 2 - y2 * w * scale, w };
     };
-    const norm = (v: number) => (v - 50) / 42;
 
     // ---- depth scaffolding: floor grid + bounding box (static cues) ----
     ctx.lineWidth = 1;
-    const G = 1.15;
+    const G = Math.max(0.55, E * 1.12);
     for (let i = 0; i <= 6; i++) {
       const t = -G + (2 * G * i) / 6;
       const a1 = proj(t, -G, -G);
@@ -126,8 +159,11 @@ export function CorpusAtlas3D({
       const a = byId.get(p.aId);
       const b = byId.get(p.bId);
       if (!a || !b) continue;
-      const pa = proj(norm(a.x), norm(a.y), norm(a.z));
-      const pb = proj(norm(b.x), norm(b.y), norm(b.z));
+      const na = npos.get(a.id);
+      const nb = npos.get(b.id);
+      if (!na || !nb) continue;
+      const pa = proj(na.x, na.y, na.z);
+      const pb = proj(nb.x, nb.y, nb.z);
       ctx.strokeStyle = EDGE_HEX[p.kind];
       ctx.globalAlpha = 0.5;
       ctx.lineWidth = p.kind === "near-duplicate" ? 1 : 1.4;
@@ -139,10 +175,13 @@ export function CorpusAtlas3D({
 
     // ---- documents (far → near) ----
     const drawn = files
-      .map((f) => ({ f, s: proj(norm(f.x), norm(f.y), norm(f.z)) }))
+      .map((f) => {
+        const p = npos.get(f.id) ?? { x: 0, y: 0, z: 0 };
+        return { f, p, s: proj(p.x, p.y, p.z) };
+      })
       .sort((a, b) => a.s.w - b.s.w);
     screenPts.current.clear();
-    for (const { f, s } of drawn) {
+    for (const { f, p, s } of drawn) {
       const active = f.id === (hoverId ?? selectedId);
       const base = 4 + 5 * Math.sqrt(f.tokens / maxTokens);
       const r = base * s.w * (active ? 1.25 : 1);
@@ -150,7 +189,7 @@ export function CorpusAtlas3D({
       ctx.globalAlpha = (isStale(f) && !active ? 0.45 : 1) * depthFade;
 
       // drop hint on the floor for depth reading
-      const foot = proj(norm(f.x), -G, norm(f.z));
+      const foot = proj(p.x, -G, p.z);
       ctx.fillStyle = "rgba(21,36,51,0.06)";
       ctx.beginPath(); ctx.ellipse(foot.sx, foot.sy, r * 0.7, r * 0.24, 0, 0, Math.PI * 2); ctx.fill();
 
@@ -173,7 +212,30 @@ export function CorpusAtlas3D({
       ctx.globalAlpha = 1;
       screenPts.current.set(f.id, { sx: s.sx, sy: s.sy, r: Math.max(r, 7) });
     }
-  }, [files, pairs, selectedId, hoverId, view]);
+  }, [files, pairs, selectedId, hoverId, view, sizeTick]);
+
+  // Re-render on wrapper resize (the atlas card width changes with breakpoints).
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setSizeTick((t) => t + 1));
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, []);
+
+  // Wheel zoom needs a native non-passive listener: React attaches wheel
+  // handlers passively at the root, so preventDefault there can't stop the
+  // page from scrolling while the user zooms the scene.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      setView((v) => ({ ...v, zoom: Math.min(2.4, Math.max(0.5, v.zoom * (e.deltaY < 0 ? 1.12 : 0.9))) }));
+    };
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
+  }, []);
 
   const pick = (clientX: number, clientY: number): string | null => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -230,10 +292,6 @@ export function CorpusAtlas3D({
         onPointerLeave={() => {
           drag.current = null;
           setHoverId(null);
-        }}
-        onWheel={(e) => {
-          e.preventDefault();
-          zoomBy(e.deltaY < 0 ? 1.12 : 0.9);
         }}
         onKeyDown={(e) => {
           const step = 0.12;

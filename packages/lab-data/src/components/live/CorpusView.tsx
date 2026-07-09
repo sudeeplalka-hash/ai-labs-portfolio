@@ -319,7 +319,11 @@ export function CorpusView() {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="space-y-6">
+      {/* Top row: intake on the left, corpus health + guided pass on the right.
+          Everything below spans the full content width — the pipeline sections
+          (board, backlog, atlas, topics, proof, tray) need the room. */}
+      <div className="grid gap-6 lg:grid-cols-3">
       {/* LEFT: intake */}
       <div className="space-y-6 lg:col-span-1">
         <Panel>
@@ -386,16 +390,9 @@ export function CorpusView() {
           )}
         </Panel>
 
-        {report && (
-          <Panel>
-            <SectionHeader title="Compliance profile" description="Re scores the whole corpus" icon={SlidersHorizontal} />
-            <RuleProfileSelector value={profileId} onChange={changeProfile} />
-            <p className="mt-2 font-mono text-[11px] text-slatey-400">Active: {getProfile(profileId).name}</p>
-          </Panel>
-        )}
       </div>
 
-      {/* RIGHT */}
+      {/* RIGHT of the top row: health + guided pass */}
       <div className="space-y-6 lg:col-span-2">
         {!report && !running && <EmptyCorpus onLoad={loadSampleCorpus} />}
         {running && <div className="panel p-10 text-center text-sm text-slatey-300">Analyzing corpus…</div>}
@@ -436,8 +433,25 @@ export function CorpusView() {
                 <li className="text-slatey-500">then the handoff on the <span className="font-medium">Data</span> page carries it to Build.</li>
               )}
             </ol>
+          </>
+        )}
+      </div>
+      </div>
 
-            <div id="corpus-board" className="scroll-mt-24" />
+      {report && adjusted && (
+        <>
+          {/* Compliance profile: a slim full-width strip right above the board it re-scores */}
+          <Panel>
+            <div className="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
+              <SectionHeader className="mb-0" title="Compliance profile" description="Re-scores the whole corpus" icon={SlidersHorizontal} />
+              <div className="w-full max-w-2xl lg:w-auto lg:flex-1">
+                <RuleProfileSelector value={profileId} onChange={changeProfile} />
+                <p className="mt-1.5 font-mono text-[11px] text-slatey-400">Active: {getProfile(profileId).name}</p>
+              </div>
+            </div>
+          </Panel>
+
+          <div id="corpus-board" className="scroll-mt-24">
             <ReadinessBoard
               files={adjusted.files}
               findings={adjusted.findings}
@@ -445,14 +459,15 @@ export function CorpusView() {
               selectedId={selectedId}
               onSelectFile={setSelectedId}
             />
+          </div>
 
             <RemediationBacklog
               findings={adjusted.findings}
               onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
             />
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Panel>
+            <div className="grid gap-6 lg:grid-cols-5">
+              <Panel className="lg:col-span-3">
                 <div className="flex items-start justify-between gap-2">
                   <SectionHeader title="Corpus atlas" description="Distance = content similarity (PCA), click an edge to resolve its set" icon={Boxes} />
                   <div className="inline-flex shrink-0 rounded-lg border border-line bg-white p-0.5" role="group" aria-label="Atlas view mode">
@@ -502,8 +517,8 @@ export function CorpusView() {
                 )}
               </Panel>
 
-              <div id="corpus-resolution" className="scroll-mt-24" />
-            <DuplicateResolution
+              <div id="corpus-resolution" className="scroll-mt-24 lg:col-span-2">
+                <DuplicateResolution
                 sets={sets}
                 resolutions={resolutions}
                 focusSetId={focusSetId}
@@ -516,7 +531,8 @@ export function CorpusView() {
                   delete next[setId];
                   return next;
                 })}
-              />
+                />
+              </div>
             </div>
 
             <TopicGroups
@@ -530,8 +546,8 @@ export function CorpusView() {
               })}
             />
 
-            <div id="corpus-proof" className="scroll-mt-24" />
-            <CleaningProof
+            <div id="corpus-proof" className="scroll-mt-24">
+              <CleaningProof
               files={(inputs ?? []).map((f) => ({ name: f.name, text: f.text }))}
               excludedNames={excludedNames}
               topicsByFile={topicsByFile}
@@ -539,6 +555,7 @@ export function CorpusView() {
               previewExclusions={previewExclusions}
               onResult={(r, preview) => setLastProof({ r, preview })}
             />
+            </div>
 
 
             {/* File tray */}
@@ -575,7 +592,7 @@ export function CorpusView() {
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="truncate font-mono text-[12px] text-slatey-100">{f.name}</span>
+                      <span title={f.name} className="truncate font-mono text-[12px] text-slatey-100">{f.name}</span>
                       {f.excluded ? <Badge color="slate">excluded</Badge> : <Badge color={f.gate.color}>{`score ${f.score}`}</Badge>}
                     </div>
                     <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slatey-400">
@@ -590,9 +607,8 @@ export function CorpusView() {
                 ))}
               </div>
             </Panel>
-          </>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
@@ -643,7 +659,7 @@ function CorpusHealth({ report }: { report: CorpusReport }) {
             <div className="mt-1 text-2xl font-semibold tracking-tight text-ink">{m.value}</div>
             <div className="mt-1">
               <Badge color={m.color}>
-                {m.label === "Corpus ready" ? "approved / active files" : m.label === "Conflicts" ? "stale versions" : m.label === "Avg file score" ? "mean of file gates" : "across corpus"}
+                {m.label === "Corpus ready" ? "approved / active" : m.label === "Conflicts" ? "stale versions" : m.label === "Avg file score" ? "mean of file gates" : "across corpus"}
               </Badge>
             </div>
           </div>
