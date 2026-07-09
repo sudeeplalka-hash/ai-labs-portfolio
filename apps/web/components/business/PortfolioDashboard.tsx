@@ -600,7 +600,7 @@ export function PortfolioDashboard() {
                       </svg>
                     );
                   })()}
-                  <p className="mt-1 text-[10px] text-slatey-500">Steepest first: the concave curve shows diminishing returns. The knee (amber) is where per initiative efficiency drops below the book average &mdash; the {frontier.kneeCount} before it are the efficient core.</p>
+                  <p className="mt-1 text-[10px] text-slatey-500">Steepest first: the concave curve shows diminishing returns. The knee (amber) is where per initiative efficiency drops below the book average, the {frontier.kneeCount} before it are the efficient core.</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <button onClick={() => setBudgetM(Number(frontier.kneeSpend.toFixed(1)))} className="rounded-md border border-teal-500/40 bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-700 hover:bg-teal-100">Fund the efficient core ({frontier.kneeCount})</button>
                     <button onClick={() => setBudgetM(Number(frontier.totalSpend.toFixed(1)))} className="rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-slatey-400 hover:text-ink">Fund all</button>

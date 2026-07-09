@@ -333,11 +333,11 @@ export function OperateStage() {
           <Panel>
             <p className="stat-label mb-2">Projected quality breach <span className="font-normal text-slatey-500">· at the current decay rate</span></p>
             {projection.alreadyBelow ? (
-              <p className="text-sm text-slatey-300">Canary is already at <span className="font-semibold text-rose-600">{projection.lastPct}%</span>, at or below the {projection.floorPct}% quality floor &mdash; refresh or retrain now.</p>
+              <p className="text-sm text-slatey-300">Canary is already at <span className="font-semibold text-rose-600">{projection.lastPct}%</span>, at or below the {projection.floorPct}% quality floor, refresh or retrain now.</p>
             ) : projection.breachWeek !== null ? (
-              <p className="text-sm text-slatey-300">Canary is sliding <span className="font-mono">{projection.slopePerWeek}pts/wk</span>. At that rate it crosses the <span className="font-semibold">{projection.floorPct}%</span> quality floor in <span className="font-semibold text-amber-700">~{projection.weeksToBreach} weeks</span> (week {projection.breachWeek}) &mdash; schedule the refresh before then, not after.</p>
+              <p className="text-sm text-slatey-300">Canary is sliding <span className="font-mono">{projection.slopePerWeek}pts/wk</span>. At that rate it crosses the <span className="font-semibold">{projection.floorPct}%</span> quality floor in <span className="font-semibold text-amber-700">~{projection.weeksToBreach} weeks</span> (week {projection.breachWeek}), schedule the refresh before then, not after.</p>
             ) : (
-              <p className="text-sm text-slatey-300">Canary trend is flat or improving &mdash; no projected breach of the {projection.floorPct}% floor. Keep monitoring.</p>
+              <p className="text-sm text-slatey-300">Canary trend is flat or improving, no projected breach of the {projection.floorPct}% floor. Keep monitoring.</p>
             )}
             <p className="mt-1 text-[10px] text-slatey-500">Illustrative linear extrapolation of the trailing canary trend against a {projection.floorPct}% floor.</p>
           </Panel>

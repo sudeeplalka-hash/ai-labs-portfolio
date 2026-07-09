@@ -301,7 +301,7 @@ export function OrchestrationBoard() {
                       <pre className="whitespace-pre-wrap break-words text-slate-200">{JSON.stringify({ from: frames[inspected].from, to: frames[inspected].to, method: frames[inspected].method, params: frames[inspected].params }, null, 2)}</pre>
                     </div>
                   )}
-                  <p className="mt-1.5 text-[10px] text-slatey-500">Click a message to inspect its A2A frame &mdash; the envelope an agent to agent protocol carries.</p>
+                  <p className="mt-1.5 text-[10px] text-slatey-500">Click a message to inspect its A2A frame, the envelope an agent to agent protocol carries.</p>
                 </>
               )}
             </Panel>
@@ -328,7 +328,7 @@ export function OrchestrationBoard() {
                   <div className="mt-2 border-t border-line pt-2">
                     <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Baseline (single agent)</span><span className="font-mono text-ink">{singleFrac >= 1 ? "done" : `${(preset.single.latencyS * singleFrac).toFixed(1)}s / ${preset.single.latencyS}s`}</span></div>
                     <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-slate-400 transition-all duration-300" style={{ width: `${singleFrac * 100}%` }} /></div>
-                    {singleFrac >= 1 && !done && <p className="mt-1 text-[10px] text-slatey-500">Single agent already finished &mdash; at {preset.single.quality} quality vs {preset.multi.quality} for multi.</p>}
+                    {singleFrac >= 1 && !done && <p className="mt-1 text-[10px] text-slatey-500">Single agent already finished, at {preset.single.quality} quality vs {preset.multi.quality} for multi.</p>}
                   </div>
                 </div>
               )}
@@ -345,7 +345,7 @@ export function OrchestrationBoard() {
                 ))}
               </div>
               <div className="mt-3 rounded-md bg-teal-50 px-3 py-2 text-xs text-teal-800">
-                <span className="font-semibold">The tradeoff:</span> {h2h.verdict}. That ratio &mdash; not the demo &mdash; is the decision.
+                <span className="font-semibold">The tradeoff:</span> {h2h.verdict}. That ratio, not the demo, is the decision.
               </div>
             </Panel>
 
@@ -377,7 +377,7 @@ export function OrchestrationBoard() {
                   </div>
                 </div>
               </div>
-              <p className="mt-2 text-[11px] text-slatey-500">The agents run in series &mdash; each hands off to the next &mdash; so their spans add up. That&apos;s the latency you buy for the quality. Per agent durations are an even split of the authored {preset.multi.latencyS}s (illustrative); the sequence is the point.</p>
+              <p className="mt-2 text-[11px] text-slatey-500">The agents run in series, each hands off to the next, so their spans add up. That&apos;s the latency you buy for the quality. Per agent durations are an even split of the authored {preset.multi.latencyS}s (illustrative); the sequence is the point.</p>
             </Panel>
           </div>
         </div>

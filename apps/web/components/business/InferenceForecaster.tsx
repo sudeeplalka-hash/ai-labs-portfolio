@@ -172,7 +172,7 @@ export function InferenceForecaster() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed &mdash; earlier (green) means self host pays off sooner.</p>
+              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed, earlier (green) means self host pays off sooner.</p>
             </Panel>
           </div>
         </div>

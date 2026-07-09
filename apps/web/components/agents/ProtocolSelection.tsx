@@ -410,7 +410,7 @@ export function ProtocolSelection() {
                 );
               })()}
               <p className="mt-1 text-[11px] text-slatey-500">
-                Bespoke point to point integrations grow as producers&times;consumers; a shared protocol grows as producers+consumers. {crossoverM ? <>Past ~{Math.ceil(crossoverM)} consumer{Math.ceil(crossoverM) === 1 ? "" : "s"} the protocol wins &mdash; you&apos;re at {consumers}.</> : <>With a single producer, bespoke is already minimal.</>}
+                Bespoke point to point integrations grow as producers&times;consumers; a shared protocol grows as producers+consumers. {crossoverM ? <>Past ~{Math.ceil(crossoverM)} consumer{Math.ceil(crossoverM) === 1 ? "" : "s"} the protocol wins, you&apos;re at {consumers}.</> : <>With a single producer, bespoke is already minimal.</>}
               </p>
             </Panel>
 

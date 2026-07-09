@@ -214,7 +214,7 @@ export function EstimationStudio() {
             <p className="mt-2 text-[11px] text-slatey-400">Past similar engagement {uc.analogous.baseWeeks}w × complexity {uc.analogous.factor.toFixed(2)}. Fast, but blind to what&apos;s new about this one.</p>
           </MethodCard>
           <MethodCard on={method === "pert"} onClick={() => setMethod("pert")} title="Three point (PERT)" weeks={pert} range={`${pert - pertStd} to ${pert + pertStd}w`}>
-            <p className="mt-2 text-[11px] text-slatey-400">O {uc.three.o} · M {uc.three.m} · P {uc.three.p}. PERT = (O+4M+P)/6; ±1σ = {pertStd}w. Present the range, not the point &mdash; <span className="font-semibold text-ink">commit at P80 = {pertP80}w</span> (P90 {pertP90}w).</p>
+            <p className="mt-2 text-[11px] text-slatey-400">O {uc.three.o} · M {uc.three.m} · P {uc.three.p}. PERT = (O+4M+P)/6; ±1σ = {pertStd}w. Present the range, not the point, <span className="font-semibold text-ink">commit at P80 = {pertP80}w</span> (P90 {pertP90}w).</p>
           </MethodCard>
         </div>
 

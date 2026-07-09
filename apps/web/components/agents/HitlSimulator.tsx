@@ -110,7 +110,7 @@ export function HitlSimulator() {
           <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Autonomy level</label><span className="font-mono text-xs font-semibold text-ink">L{level} · {LEVELS[level - 1].label}</span></div>
           <input type="range" aria-label="Autonomy level" min={1} max={5} step={1} value={level} onChange={(e) => setLevel(Number(e.target.value))} className="w-full accent-teal-600" />
           <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="text-slatey-500">Recommended: <span className="font-semibold text-ink">L{sweet}</span> &mdash; the most autonomy that still catches every edge case.</span>
+            <span className="text-slatey-500">Recommended: <span className="font-semibold text-ink">L{sweet}</span>, the most autonomy that still catches every edge case.</span>
             {level !== sweet && <button onClick={() => setLevel(sweet)} className="rounded border border-primary/40 bg-primary/5 px-1.5 py-0.5 font-semibold text-primary">Set L{sweet}</button>}
           </div>
           <div className="mt-1 flex justify-between text-[10px] text-slatey-500">{LEVELS.map((l) => <span key={l.n}>L{l.n}</span>)}</div>

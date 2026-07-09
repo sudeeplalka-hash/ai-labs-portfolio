@@ -315,7 +315,7 @@ export function AdoptionReadiness() {
                   );
                 })}
               </div>
-              <p className="mt-2 text-[11px] text-slatey-500">Max composite gain if that factor alone were raised to 100 (weight &times; current gap) &mdash; the bars sum to your distance from a perfect 100.</p>
+              <p className="mt-2 text-[11px] text-slatey-500">Max composite gain if that factor alone were raised to 100 (weight &times; current gap), the bars sum to your distance from a perfect 100.</p>
             </Panel>
           </div>
 
@@ -402,7 +402,7 @@ export function AdoptionReadiness() {
                   </div>
                 ))}
               </div>
-              <p className="mt-1.5 text-[10px] text-slatey-500">Factor deltas (B &minus; A), centered at zero &mdash; teal = reference ahead, rose = behind. Reference populations are illustrative.</p>
+              <p className="mt-1.5 text-[10px] text-slatey-500">Factor deltas (B &minus; A), centered at zero, teal = reference ahead, rose = behind. Reference populations are illustrative.</p>
             </Panel>
 
             {c < A.scaleCut && (
@@ -418,7 +418,7 @@ export function AdoptionReadiness() {
                         </li>
                       ))}
                     </ol>
-                    <p className="mt-2 text-[11px] text-slatey-500">The fewest total points to clear the gate &mdash; highest leverage (highest weight) factors first. Lands the composite at ~{gatePlan.projected}.</p>
+                    <p className="mt-2 text-[11px] text-slatey-500">The fewest total points to clear the gate, highest leverage (highest weight) factors first. Lands the composite at ~{gatePlan.projected}.</p>
                     <div className="mt-3">
                       <p className="stat-label mb-1">Projected path to Scale <span className="font-normal text-slatey-500">· as the moves land on the 2-week schedule</span></p>
                       {(() => {
@@ -451,7 +451,7 @@ export function AdoptionReadiness() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-slatey-400">Even maxing every factor can&apos;t reach {A.scaleCut} under these weights &mdash; revisit the model, not just the rollout.</p>
+                  <p className="text-sm text-slatey-400">Even maxing every factor can&apos;t reach {A.scaleCut} under these weights, revisit the model, not just the rollout.</p>
                 )}
               </Panel>
             )}
@@ -479,7 +479,7 @@ export function AdoptionReadiness() {
                       </div>
                     ))}
                   </div>
-                  <p className="mt-1 text-[10px] text-slatey-500">Illustrative 14-day sequencing &mdash; weakest factors start first and run longest. <span className="text-teal-700">Focus</span> vs <span className="text-slatey-400">support</span>.</p>
+                  <p className="mt-1 text-[10px] text-slatey-500">Illustrative 14-day sequencing, weakest factors start first and run longest. <span className="text-teal-700">Focus</span> vs <span className="text-slatey-400">support</span>.</p>
                 </div>
               )}
               {priorities.length === 0 ? (

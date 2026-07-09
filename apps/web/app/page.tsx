@@ -12,9 +12,9 @@ export const metadata: Metadata = IS_COMMAND_CENTER
       description: CURRENT_SITE.description,
     }
   : {
-      title: "Sudeep Lalka — Technology Strategy & AI Artifacts",
+      title: "Sudeep Lalka: Technology Strategy & AI Artifacts",
       description:
-        "A portfolio of 23 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run — strategy you can open, pressure-test, and take into the boardroom.",
+        "A portfolio of 23 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run. Strategy you can open, pressure-test, and take into the boardroom.",
     };
 
 export default function Page() {
