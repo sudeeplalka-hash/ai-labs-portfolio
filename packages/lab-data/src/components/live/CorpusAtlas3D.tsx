@@ -12,8 +12,9 @@ import { Badge } from "@data/components/common/Badge";
 // selects a document or opens a linked pair's resolution set. Depth is carried
 // by a gridded room — the floor plus whichever walls face away from you, so
 // the cube reads as a space you look into from any angle — with shadows and
-// distance attenuation. The only motion is a sonar pulse on the hovered
-// document (skipped under prefers-reduced-motion). Honest axes: the SAME PCA
+// distance attenuation. Motion is bounded and user-initiated: a sonar pulse
+// while hovering, a brief glide when a drag lets go, and an eased return on
+// reset — all skipped under prefers-reduced-motion. Honest axes: the SAME PCA
 // space as the 2D map — PC1/PC2 match it, PC3 adds the third component.
 // Confirmed topic groups draw as hulls here too, so both views tell one story.
 
@@ -100,7 +101,9 @@ export function CorpusAtlas3D({
   const [hoverEdge, setHoverEdge] = useState<EdgeHit | null>(null);
   const [view, setView] = useState({ ...HOME });
   const [sizeTick, setSizeTick] = useState(0);
-  const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
+  const drag = useRef<{ x: number; y: number; moved: boolean; t: number } | null>(null);
+  const vel = useRef({ vx: 0, vy: 0, t: 0 });
+  const motionRaf = useRef(0);
   const screenPts = useRef<Map<string, { sx: number; sy: number; r: number; fade: number }>>(new Map());
   const screenSegs = useRef<{ i: number; x1: number; y1: number; x2: number; y2: number }[]>([]);
 
@@ -307,9 +310,10 @@ export function CorpusAtlas3D({
         if (!na || !nb) return;
         const pa = proj(na.x, na.y, na.z);
         const pb = proj(nb.x, nb.y, nb.z);
-        const hot = hoverEdge?.i === i;
+        const focusId = hoverId ?? selectedId;
+        const hot = hoverEdge?.i === i || (focusId !== null && (pr.aId === focusId || pr.bId === focusId));
         ctx.strokeStyle = EDGE_HEX[pr.kind];
-        ctx.globalAlpha = hot ? 0.9 : 0.5;
+        ctx.globalAlpha = hot ? 0.9 : focusId ? 0.22 : 0.5;
         ctx.lineWidth = (pr.kind === "near-duplicate" ? 1 : 1.4) + (hot ? 0.6 : 0);
         ctx.setLineDash(pr.kind === "stale-version" ? [5, 3] : []);
         ctx.beginPath(); ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pb.sx, pb.sy); ctx.stroke();
@@ -340,16 +344,15 @@ export function CorpusAtlas3D({
 
         if (piiHits(f) > 0) {
           ctx.strokeStyle = "#f43f5e";
-          ctx.lineWidth = 1.1;
-          ctx.setLineDash([3, 2.4]);
-          ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 3.4, 0, Math.PI * 2); ctx.stroke();
-          ctx.setLineDash([]);
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 3.2, 0, Math.PI * 2); ctx.stroke();
         }
         ctx.fillStyle = GATE_HEX[f.gate.color] ?? "#64748b";
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1.4;
         ctx.beginPath(); ctx.arc(s.sx, s.sy, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-        if (active) {
+        if (f.id === selectedId && f.id !== hoverId) {
+          // selection marker only — hover feedback is the pulse, not a ring
           ctx.strokeStyle = INK;
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.arc(s.sx, s.sy, r + 2, 0, Math.PI * 2); ctx.stroke();
@@ -454,6 +457,74 @@ export function CorpusAtlas3D({
     return () => canvas.removeEventListener("wheel", onWheel);
   }, []);
 
+  // Cancel any glide/reset animation on unmount.
+  useEffect(
+    () => () => {
+      if (motionRaf.current) cancelAnimationFrame(motionRaf.current);
+    },
+    [],
+  );
+
+  // ---- bounded, user-initiated motion (embedding-projector feel, no deps) ----
+  const reducedMotion = () =>
+    typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const stopMotion = () => {
+    if (motionRaf.current) cancelAnimationFrame(motionRaf.current);
+    motionRaf.current = 0;
+  };
+  // Inertia: keep orbiting briefly after the drag lets go, decaying fast.
+  const glide = () => {
+    stopMotion();
+    if (reducedMotion()) return;
+    if (performance.now() - vel.current.t > 90) return; // pointer had already stopped
+    vel.current.vx = Math.max(-0.006, Math.min(0.006, vel.current.vx));
+    vel.current.vy = Math.max(-0.004, Math.min(0.004, vel.current.vy));
+    let last = performance.now();
+    const step = (t: number) => {
+      const dt = Math.min(48, Math.max(1, t - last));
+      last = t;
+      const decay = Math.exp(-dt / 110);
+      vel.current.vx *= decay;
+      vel.current.vy *= decay;
+      if (Math.abs(vel.current.vx) + Math.abs(vel.current.vy) < 0.00002) {
+        motionRaf.current = 0;
+        return;
+      }
+      setView((v) => ({
+        ...v,
+        yaw: v.yaw + vel.current.vx * dt,
+        pitch: Math.max(-1.25, Math.min(1.25, v.pitch + vel.current.vy * dt)),
+      }));
+      motionRaf.current = requestAnimationFrame(step);
+    };
+    motionRaf.current = requestAnimationFrame(step);
+  };
+  // Eased return to the home view instead of a hard jump.
+  const resetView = () => {
+    stopMotion();
+    if (reducedMotion()) {
+      setView({ ...HOME });
+      return;
+    }
+    const TWO_PI = Math.PI * 2;
+    const from = { yaw: view.yaw, pitch: view.pitch, zoom: view.zoom };
+    const targetYaw = HOME.yaw + Math.round((from.yaw - HOME.yaw) / TWO_PI) * TWO_PI;
+    const start = performance.now();
+    const D = 320;
+    const step = (t: number) => {
+      const k = Math.min(1, (t - start) / D);
+      const e = 1 - Math.pow(1 - k, 3);
+      setView({
+        yaw: from.yaw + (targetYaw - from.yaw) * e,
+        pitch: from.pitch + (HOME.pitch - from.pitch) * e,
+        zoom: from.zoom + (HOME.zoom - from.zoom) * e,
+      });
+      if (k < 1) motionRaf.current = requestAnimationFrame(step);
+      else motionRaf.current = 0;
+    };
+    motionRaf.current = requestAnimationFrame(step);
+  };
+
   const pick = (clientX: number, clientY: number): string | null => {
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return null;
@@ -503,12 +574,16 @@ export function CorpusAtlas3D({
           tabIndex={0}
           className="w-full cursor-grab rounded-xl border border-line bg-gradient-to-br from-slate-50 to-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:cursor-grabbing"
           onPointerDown={(e) => {
-            drag.current = { x: e.clientX, y: e.clientY, moved: false };
+            stopMotion();
+            drag.current = { x: e.clientX, y: e.clientY, moved: false, t: performance.now() };
+            vel.current = { vx: 0, vy: 0, t: 0 };
             setHoverEdge(null);
             (e.target as HTMLElement).setPointerCapture(e.pointerId);
           }}
           onPointerMove={(e) => {
             if (drag.current) {
+              const now = performance.now();
+              const dt = Math.max(1, now - drag.current.t);
               const dx = e.clientX - drag.current.x;
               const dy = e.clientY - drag.current.y;
               if (Math.abs(dx) + Math.abs(dy) > 2) drag.current.moved = true;
@@ -517,7 +592,12 @@ export function CorpusAtlas3D({
                 yaw: v.yaw + dx * 0.008,
                 pitch: Math.max(-1.25, Math.min(1.25, v.pitch + dy * 0.006)),
               }));
-              drag.current = { x: e.clientX, y: e.clientY, moved: drag.current.moved };
+              vel.current = {
+                vx: 0.75 * ((dx * 0.008) / dt) + 0.25 * vel.current.vx,
+                vy: 0.75 * ((dy * 0.006) / dt) + 0.25 * vel.current.vy,
+                t: now,
+              };
+              drag.current = { x: e.clientX, y: e.clientY, moved: drag.current.moved, t: now };
             } else {
               const id = pick(e.clientX, e.clientY);
               setHoverId(id);
@@ -526,7 +606,9 @@ export function CorpusAtlas3D({
           }}
           onPointerUp={(e) => {
             const wasClick = drag.current && !drag.current.moved;
+            const wasDrag = drag.current?.moved ?? false;
             drag.current = null;
+            if (wasDrag) glide();
             if (wasClick) {
               const id = pick(e.clientX, e.clientY);
               if (id) {
@@ -542,7 +624,7 @@ export function CorpusAtlas3D({
             setHoverId(null);
             setHoverEdge(null);
           }}
-          onDoubleClick={() => setView({ ...HOME })}
+          onDoubleClick={resetView}
           onKeyDown={(e) => {
             const step = 0.12;
             if (e.key === "ArrowLeft") setView((v) => ({ ...v, yaw: v.yaw - step }));
@@ -551,7 +633,7 @@ export function CorpusAtlas3D({
             else if (e.key === "ArrowDown") setView((v) => ({ ...v, pitch: Math.min(1.25, v.pitch + step) }));
             else if (e.key === "+" || e.key === "=") zoomBy(1.12);
             else if (e.key === "-") zoomBy(0.9);
-            else if (e.key === "0" || e.key === "Home") setView({ ...HOME });
+            else if (e.key === "0" || e.key === "Home") resetView();
             else return;
             e.preventDefault();
           }}
@@ -565,7 +647,7 @@ export function CorpusAtlas3D({
           <button onClick={() => zoomBy(0.87)} aria-label="Zoom out" className="rounded-lg border border-line bg-white/90 p-1.5 text-slatey-300 shadow-card hover:text-ink">
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => setView({ ...HOME })} aria-label="Reset view" className="rounded-lg border border-line bg-white/90 p-1.5 text-slatey-300 shadow-card hover:text-ink">
+          <button onClick={resetView} aria-label="Reset view" className="rounded-lg border border-line bg-white/90 p-1.5 text-slatey-300 shadow-card hover:text-ink">
             <RotateCcw className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -613,7 +695,7 @@ export function CorpusAtlas3D({
           </span>
         ))}
         <span className="inline-flex items-center gap-1">
-          <span className="h-2.5 w-2.5 rounded-full border border-dashed" style={{ borderColor: GATE_HEX.rose }} />
+          <span className="h-2.5 w-2.5 rounded-full border" style={{ borderColor: GATE_HEX.rose }} />
           PII inside
         </span>
         <span>dimmed = stale</span>

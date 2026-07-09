@@ -159,7 +159,7 @@ export function CorpusStarMap({
             return (
               <g key={f.id} className="cursor-pointer" opacity={stale && !on ? 0.5 : 1} onMouseEnter={() => setHover(f.id)} onMouseLeave={() => setHover(null)} onClick={() => onSelect(f.id)}>
                 {piiHits(f) > 0 && (
-                  <circle cx={f.x} cy={f.y} r={r + 1.3} fill="none" stroke="#f43f5e" strokeWidth="0.45" strokeDasharray="1 0.8" />
+                  <circle cx={f.x} cy={f.y} r={r + 1.3} fill="none" stroke="#f43f5e" strokeWidth="0.4" />
                 )}
                 <circle cx={f.x} cy={f.y} r={on ? r + 0.8 : r} fill={GATE_HEX[f.gate.color]} stroke="#ffffff" strokeWidth="0.7" />
               </g>
@@ -173,7 +173,7 @@ export function CorpusStarMap({
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.emerald }} /> approved</span>
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.amber }} /> conditional</span>
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.rose }} /> rejected</span>
-          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full border border-dashed border-rose-500" /> PII inside</span>
+          <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full border border-rose-500" /> PII inside</span>
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300" /> dimmed = stale</span>
           <span>size = tokens · lines = duplicate/version links</span>
         </div>
