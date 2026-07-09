@@ -494,6 +494,8 @@ export function CorpusView() {
                     pairs={adjusted.activePairs}
                     selectedId={selectedId}
                     onSelect={setSelectedId}
+                    hulls={hulls}
+                    onEdgeClick={(p) => setFocusSetId(setIdForPair(sets, p))}
                   />
                 ) : (
                   <CorpusStarMap
