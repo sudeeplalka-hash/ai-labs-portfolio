@@ -114,7 +114,9 @@ export function rankChunks(chunks: Chunk[], query: string, topicHint?: string): 
   const df = new Map<string, number>();
   for (const c of chunks) for (const t of new Set(c.terms)) df.set(t, (df.get(t) ?? 0) + 1);
 
-  const qTerms = tok(query);
+  // Unique query terms: repeated words in a question must not double-count
+  // (standard BM25 practice, cf. Lucene / MiniSearch implementations).
+  const qTerms = [...new Set(tok(query))];
   const scored = chunks.map((c) => {
     const counts = new Map<string, number>();
     for (const t of c.terms) counts.set(t, (counts.get(t) ?? 0) + 1);

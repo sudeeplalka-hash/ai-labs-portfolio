@@ -101,7 +101,7 @@ export function CorpusAtlas3D({
   const [hoverEdge, setHoverEdge] = useState<EdgeHit | null>(null);
   const [view, setView] = useState({ ...HOME });
   const [sizeTick, setSizeTick] = useState(0);
-  const drag = useRef<{ x: number; y: number; moved: boolean; t: number } | null>(null);
+  const drag = useRef<{ ox: number; oy: number; lx: number; ly: number; moved: boolean; t: number } | null>(null);
   const vel = useRef({ vx: 0, vy: 0, t: 0 });
   const motionRaf = useRef(0);
   const screenPts = useRef<Map<string, { sx: number; sy: number; r: number; fade: number }>>(new Map());
@@ -560,6 +560,8 @@ export function CorpusAtlas3D({
 
   const hovered = hoverId ? files.find((f) => f.id === hoverId) : null;
   const hoverPt = hoverId ? screenPts.current.get(hoverId) : null;
+  const pinned = !hovered && selectedId ? files.find((f) => f.id === selectedId) : null;
+  const pinnedPt = pinned && selectedId ? screenPts.current.get(selectedId) : null;
   const edgePair = hoverEdge && hoverEdge.i < pairs.length ? pairs[hoverEdge.i] : null;
   const zoomBy = (k: number) => setView((v) => ({ ...v, zoom: Math.min(2.4, Math.max(0.5, v.zoom * k)) }));
   const wrapW = wrapRef.current?.clientWidth ?? 300;
@@ -575,18 +577,21 @@ export function CorpusAtlas3D({
           className="w-full cursor-grab rounded-xl border border-line bg-gradient-to-br from-slate-50 to-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 active:cursor-grabbing"
           onPointerDown={(e) => {
             stopMotion();
-            drag.current = { x: e.clientX, y: e.clientY, moved: false, t: performance.now() };
+            drag.current = { ox: e.clientX, oy: e.clientY, lx: e.clientX, ly: e.clientY, moved: false, t: performance.now() };
             vel.current = { vx: 0, vy: 0, t: 0 };
             setHoverEdge(null);
             (e.target as HTMLElement).setPointerCapture(e.pointerId);
           }}
           onPointerMove={(e) => {
             if (drag.current) {
+              const d = drag.current;
+              // 5px dead-zone from the press origin: a click with natural hand
+              // jitter stays a click instead of becoming a micro-orbit.
+              if (!d.moved && Math.hypot(e.clientX - d.ox, e.clientY - d.oy) <= 5) return;
               const now = performance.now();
-              const dt = Math.max(1, now - drag.current.t);
-              const dx = e.clientX - drag.current.x;
-              const dy = e.clientY - drag.current.y;
-              if (Math.abs(dx) + Math.abs(dy) > 2) drag.current.moved = true;
+              const dt = Math.max(1, now - d.t);
+              const dx = e.clientX - d.lx;
+              const dy = e.clientY - d.ly;
               setView((v) => ({
                 ...v,
                 yaw: v.yaw + dx * 0.008,
@@ -597,7 +602,7 @@ export function CorpusAtlas3D({
                 vy: 0.75 * ((dy * 0.006) / dt) + 0.25 * vel.current.vy,
                 t: now,
               };
-              drag.current = { x: e.clientX, y: e.clientY, moved: drag.current.moved, t: now };
+              drag.current = { ...d, lx: e.clientX, ly: e.clientY, moved: true, t: now };
             } else {
               const id = pick(e.clientX, e.clientY);
               setHoverId(id);
@@ -669,6 +674,24 @@ export function CorpusAtlas3D({
             <p className="mt-1 text-[10px] text-slatey-500">
               {piiHits(hovered) > 0 ? `PII inside · ` : ""}{isStale(hovered) ? "stale version · " : ""}click to inspect
             </p>
+          </div>
+        )}
+
+        {/* selected document card: stays after a click so the click visibly did something */}
+        {pinned && pinnedPt && (
+          <div
+            className="pointer-events-none absolute z-10 w-52 rounded-lg border border-primary/30 bg-white p-2.5 shadow-cardhover"
+            style={{
+              left: Math.min(Math.max(pinnedPt.sx - 104, 8), wrapW - 216),
+              top: Math.max(pinnedPt.sy - pinnedPt.r - 92, 8),
+            }}
+          >
+            <p className="truncate font-mono text-[11px] font-medium text-ink">{pinned.name}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              <Badge color={pinned.gate.color}>{pinned.gate.gate}</Badge>
+              <span className="font-mono text-[10px] text-slatey-400">score {pinned.score} · {pinned.tokens.toLocaleString()} tok</span>
+            </div>
+            <p className="mt-1 text-[10px] text-slatey-500">selected · full detail in the file tray below</p>
           </div>
         )}
 

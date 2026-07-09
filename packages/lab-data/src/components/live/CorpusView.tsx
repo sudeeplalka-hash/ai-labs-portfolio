@@ -177,8 +177,22 @@ export function CorpusView() {
     for (const id of st.memberIds) if (id !== r.keepId) exclusions[id] = `Superseded by ${keepName} (duplicate resolution)`;
   }
 
+  // Files kept by an accepted resolution: their freshness confirmation is done.
+  const keepers = new Set(
+    Object.values(resolutions)
+      .map((r) => r.keepId)
+      .filter((x): x is string => x !== null),
+  );
+
   // Live view of the corpus with backlog statuses + exclusions applied.
-  const adjusted = report ? recomputeCorpus(report, statuses, exclusions) : null;
+  const adjusted = report ? recomputeCorpus(report, statuses, exclusions, keepers) : null;
+
+  // When nothing is approved yet, name the file closest to the 85-point gate
+  // so the "Corpus ready 0%" card teaches instead of stonewalling.
+  const nearestToGate =
+    adjusted && adjusted.health.readyPct === 0 && adjusted.activeFiles.length
+      ? [...adjusted.activeFiles].filter((f) => f.gate.gate !== "Approved").sort((a, b) => b.score - a.score)[0]
+      : undefined;
 
   // Guided pass state (Phase 5): profile → resolve → hand off.
   const stepProfile = !!report;
@@ -399,7 +413,14 @@ export function CorpusView() {
 
         {report && adjusted && (
           <>
-            <CorpusHealth report={{ ...report, health: adjusted.health }} />
+            <CorpusHealth
+              report={{ ...report, health: adjusted.health }}
+              hint={
+                nearestToGate
+                  ? `No file has cleared the gate yet (score ≥85, no open blockers). Closest: ${nearestToGate.name} at ${nearestToGate.score} — fixing its backlog findings moves it through.`
+                  : undefined
+              }
+            />
 
             {/* Guided corpus pass (Phase 5): the three-beat path through the lab. */}
             <ol className="flex flex-wrap items-center gap-2 text-[11px]" aria-label="Guided corpus pass">
@@ -636,7 +657,7 @@ function EmptyCorpus({ onLoad }: { onLoad: () => void }) {
   );
 }
 
-function CorpusHealth({ report }: { report: CorpusReport }) {
+function CorpusHealth({ report, hint }: { report: CorpusReport; hint?: string }) {
   const h = report.health;
   const segs = [
     { ...GATE_SEG[0], n: h.approved },
@@ -667,6 +688,7 @@ function CorpusHealth({ report }: { report: CorpusReport }) {
           </div>
         ))}
       </div>
+      {hint && <p className="mt-2.5 text-[11px] leading-snug text-slatey-500">{hint}</p>}
       <div className="mt-4">
         <div className="stat-label mb-1.5">Gate distribution</div>
         <div className="flex h-6 w-full overflow-hidden rounded-md bg-slate-100">

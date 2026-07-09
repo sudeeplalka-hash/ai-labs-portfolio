@@ -161,11 +161,21 @@ export function recomputeCorpus(
    * from the open queue, health covers the remainder, and only pairs between
    * still-active files continue to count as conflicts. */
   exclusions: Record<string, string> = {},
+  /** Files kept by an accepted duplicate/version resolution. Choosing the
+   * keeper IS the freshness confirmation ("Confirm latest version"), so the
+   * keeper's freshness finding completes automatically through the same fix
+   * path — resolution visibly moves the score it logically clears. */
+  keepers: Set<string> = new Set(),
 ): RecomputedCorpus {
   const baseFindings = deriveCorpusFindings(report.files);
   const withStatus = baseFindings.map((f) => ({ ...f, status: statuses[f.key] ?? "open" }));
+  const resolved = withStatus.map((f) =>
+    f.status === "open" && f.checkId === "freshness" && keepers.has(f.fileId)
+      ? { ...f, status: "fixed" as FindingStatus }
+      : f,
+  );
   // Excluded files are out of the corpus, their findings are moot.
-  const findings = withStatus.filter((f) => !(f.fileId in exclusions));
+  const findings = resolved.filter((f) => !(f.fileId in exclusions));
 
   const appliedByFile = new Map<string, Set<string>>();
   for (const f of findings) {
