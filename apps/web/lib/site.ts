@@ -45,12 +45,12 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
   },
   portfolio: {
     domain: "https://portfolio.sudeeplalka.com",
-    titleDefault: "Sudeep Lalka: Enterprise AI and Technology Strategy Portfolio",
+    titleDefault: "Sudeep Lalka — Technology Strategy & AI Artifacts",
     titleTemplate: "%s · Sudeep Lalka",
     description:
-      "A working portfolio of enterprise AI and technology strategy artifacts organized around architecture choices, delivery governance, financial impact, risk, operating models, and adoption. Each module maps technical work to the decisions senior leaders make when funding, architecting, governing, scaling, or operating AI programs.",
-    homeTitle: "Sudeep Lalka: Enterprise AI and Technology Strategy Portfolio",
-    attribution: "Enterprise AI and Technology Strategy Portfolio · portfolio.sudeeplalka.com",
+      "A portfolio of 23 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run — strategy you can open, pressure-test, and take into the boardroom.",
+    homeTitle: "Sudeep Lalka — Technology Strategy & AI Artifacts",
+    attribution: "Technology Strategy & AI Artifacts · portfolio.sudeeplalka.com",
     ogImage: "/og-portfolio.png",
   },
 };

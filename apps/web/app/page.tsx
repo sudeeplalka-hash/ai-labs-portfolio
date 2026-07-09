@@ -12,9 +12,9 @@ export const metadata: Metadata = IS_COMMAND_CENTER
       description: CURRENT_SITE.description,
     }
   : {
-      title: "Sudeep Lalka: Enterprise AI and Technology Strategy Portfolio",
+      title: "Sudeep Lalka — Technology Strategy & AI Artifacts",
       description:
-        "A working portfolio of enterprise AI and technology strategy artifacts organized around architecture choices, delivery governance, financial impact, risk, operating models, and adoption. Each module maps technical work to the decisions senior leaders make when funding, architecting, governing, scaling, or operating AI programs.",
+        "A portfolio of 23 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run — strategy you can open, pressure-test, and take into the boardroom.",
     };
 
 export default function Page() {
