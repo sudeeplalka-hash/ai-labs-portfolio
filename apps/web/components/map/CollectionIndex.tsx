@@ -97,6 +97,7 @@ export function CollectionIndex() {
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-[11px] text-slatey-500">
         <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden /> LIVE, runs for real</span>
         <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden /> SIMULATED, transparent deterministic logic</span>
+        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-indigo-500" aria-hidden /> RECORDED, a real run captured and embedded</span>
       </div>
     </section>
   );

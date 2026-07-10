@@ -258,6 +258,13 @@ export const LABS: LabEntry[] = [
     flagship: true,
     href: "https://rag-quality-evaluator.vercel.app",
   },
+  {
+    id: "LB-07", collection: 5, title: "labs-catalog MCP server (real wire session)", status: "shipped", live: "RECORDED",
+    liveNote: "a working MCP server over this very registry; the repo ships an actual captured JSON-RPC session (tee-wire tap), regenerable with npm run capture",
+    problem: "GAP-01 simulates the MCP wire protocol. What does a real session actually look like?",
+    decision: "Expose an internal catalog via MCP: three tools, one server file, and the observable wire shape of each call.",
+    href: "https://github.com/sudeeplalka-hash/labs-catalog-mcp",
+  },
 ];
 
 // --- Five domains of the Competency Map (§C0) ---
