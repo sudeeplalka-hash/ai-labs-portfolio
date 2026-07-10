@@ -482,11 +482,6 @@ export function CorpusView() {
             />
           </div>
 
-            <RemediationBacklog
-              findings={adjusted.findings}
-              onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
-            />
-
             <div className="grid gap-6 lg:grid-cols-5">
               <Panel className="lg:col-span-3">
                 <div className="flex items-start justify-between gap-2">
@@ -557,6 +552,11 @@ export function CorpusView() {
                 />
               </div>
             </div>
+
+            <RemediationBacklog
+              findings={adjusted.findings}
+              onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
+            />
 
             <TopicGroups
               topics={report.topics}
