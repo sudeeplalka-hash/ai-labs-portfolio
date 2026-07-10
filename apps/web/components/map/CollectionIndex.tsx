@@ -6,7 +6,7 @@
 
 import Link from "next/link";
 import {
-  Workflow, Boxes, LineChart, Users, ChevronRight, ArrowRight,
+  Workflow, Boxes, LineChart, Users, Cpu, ChevronRight, ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import { labById, labsByCollection, type LabEntry, type Collection as Col } from "@labs/kit";
@@ -17,6 +17,7 @@ const ACCENT: Record<string, Accent> = {
   teal: { chip: "bg-teal-50", text: "text-teal-700", num: "text-teal-600" },
   amber: { chip: "bg-amber-50", text: "text-amber-700", num: "text-amber-600" },
   violet: { chip: "bg-violet-50", text: "text-violet-700", num: "text-violet-600" },
+  emerald: { chip: "bg-emerald-50", text: "text-emerald-700", num: "text-emerald-600" },
 };
 
 type DomainDef = { c: Col; title: string; tag: string; accent: keyof typeof ACCENT; icon: LucideIcon };
@@ -25,6 +26,10 @@ const DOMAINS: DomainDef[] = [
   { c: 2, title: "Agent Architecture & Protocols", tag: "integration decision models", accent: "teal", icon: Boxes },
   { c: 3, title: "AI Investment & Economics", tag: "capital, cost, ROI", accent: "amber", icon: LineChart },
   { c: 4, title: "Operating Model & Adoption", tag: "governance, readiness, alignment", accent: "violet", icon: Users },
+  // Collection 5 (Live Builds) registers here but stays invisible until its
+  // first artifact lands in the registry — the section render is count-gated,
+  // so shipping LB-01 makes it appear with no further UI change.
+  { c: 5, title: "Live Builds", tag: "real models, real metrics", accent: "emerald", icon: Cpu },
 ];
 
 // Collection 1 prepends the LIVE spine (C1); the others read straight from the registry.
@@ -34,6 +39,8 @@ const labsFor = (c: Col): LabEntry[] =>
 function StatusPill({ live }: { live: LabEntry["live"] }) {
   if (live === "LIVE") return <span className="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-emerald-700">Live</span>;
   if (live === "SIMULATED") return <span className="shrink-0 rounded bg-amber-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-amber-700">Simulated</span>;
+  if (live === "BYO-KEY") return <span className="shrink-0 rounded bg-sky-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-sky-700">BYO-key</span>;
+  if (live === "RECORDED") return <span className="shrink-0 rounded bg-indigo-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-indigo-700">Recorded</span>;
   return null;
 }
 
@@ -85,7 +92,7 @@ export function CollectionIndex() {
         <span className="font-mono text-[11px] text-slatey-500">every artifact, and the decision it enables</span>
       </div>
       <div className="flex flex-col gap-3">
-        {DOMAINS.map((d, i) => <DomainSection key={d.c} def={d} defaultOpen={i === 0} />)}
+        {DOMAINS.filter((d) => labsFor(d.c).length > 0).map((d, i) => <DomainSection key={d.c} def={d} defaultOpen={i === 0} />)}
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-[11px] text-slatey-500">
         <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden /> LIVE, runs for real</span>

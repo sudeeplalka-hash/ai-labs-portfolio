@@ -4,13 +4,15 @@ import { deriveCorpusFindings, rollupCategories, recomputeCorpus, FINDING_WEIGHT
 import { RULEBOOK_LIST } from "./rulebook";
 
 // Real engine output in, findings spine out — no mocked checks.
-const clean = (i: number) => ({
-  name: `policy-note-${i}.txt`,
-  text: `Source: Policy Office. Last updated 2026-06-0${i + 1}.\n` +
-    `Claims handling guideline ${i}: adjusters review coverage terms, document decisions, ` +
-    `and escalate disputed liability to the review board within five business days. ` +
-    `Customers receive written status updates and clear appeal instructions at every stage ${i}.`,
-});
+const doc = (name: string, text: string) => ({ name, text, size: text.length });
+const clean = (i: number) =>
+  doc(
+    `policy-note-${i}.txt`,
+    `Source: Policy Office. Last updated 2026-06-0${i + 1}.\n` +
+      `Claims handling guideline ${i}: adjusters review coverage terms, document decisions, ` +
+      `and escalate disputed liability to the review board within five business days. ` +
+      `Customers receive written status updates and clear appeal instructions at every stage ${i}.`,
+  );
 
 describe("corpus findings spine", () => {
   it("clean corpus: no critical findings, all eight categories rolled up", () => {
@@ -29,11 +31,11 @@ describe("corpus findings spine", () => {
   });
 
   it("PII in a file produces a privacy finding and drags the privacy rollup below a clean corpus", () => {
-    const dirty = {
-      name: "customer-export.txt",
-      text: "Customer john.doe@example.com called from 555-123-4567 about claim 9. " +
+    const dirty = doc(
+      "customer-export.txt",
+      "Customer john.doe@example.com called from 555-123-4567 about claim 9. " +
         "SSN 123-45-6789 was read aloud during the call and stored in the note.",
-    };
+    );
     const cleanReport = analyzeCorpus([clean(0), clean(1)]);
     const dirtyReport = analyzeCorpus([clean(0), dirty]);
     const cleanRoll = rollupCategories(cleanReport.files, deriveCorpusFindings(cleanReport.files));
@@ -48,7 +50,7 @@ describe("corpus findings spine", () => {
   });
 
   it("finding keys are stable and unique; severity ordering holds within a file", () => {
-    const report = analyzeCorpus([clean(0), { name: "dup.txt", text: clean(0).text }]);
+    const report = analyzeCorpus([clean(0), doc("dup.txt", clean(0).text)]);
     const findings = deriveCorpusFindings(report.files);
     const keys = findings.map((f) => f.key);
     expect(new Set(keys).size).toBe(keys.length);
@@ -64,10 +66,7 @@ describe("corpus findings spine", () => {
   });
 
   it("status transitions change rollups the documented way", () => {
-    const dirty = {
-      name: "customer-export.txt",
-      text: "Contact jane@corp.com or 555-987-6543. SSN 987-65-4321 on file.",
-    };
+    const dirty = doc("customer-export.txt", "Contact jane@corp.com or 555-987-6543. SSN 987-65-4321 on file.");
     const report = analyzeCorpus([clean(0), dirty]);
     const findings = deriveCorpusFindings(report.files);
     const privacyIdx = findings.findIndex((f) => f.guideline === "privacy");
@@ -92,7 +91,7 @@ describe("corpus findings spine", () => {
 });
 
 describe("recomputeCorpus (live Backlog re-scoring)", () => {
-  const spam = { name: "template-spam.txt", text: ("This document is confidential and proprietary to the company. ").repeat(40) };
+  const spam = doc("template-spam.txt", ("This document is confidential and proprietary to the company. ").repeat(40));
   const base = () => analyzeCorpus([clean(0), clean(1), spam]);
 
   it("fixing a finding raises the file score, its rollup, and corpus health together", () => {

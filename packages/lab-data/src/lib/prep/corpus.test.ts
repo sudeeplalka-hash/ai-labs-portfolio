@@ -19,7 +19,7 @@ describe("analyzeCorpus", () => {
   it("detects a stale-version conflict pair", () => {
     const sv = r.pairs.find((p) => p.kind === "stale-version");
     expect(sv).toBeDefined();
-    expect(sv?.aName + sv?.bName).toMatch(/policy/i);
+    expect(`${sv!.aName} ${sv!.bName}`).toMatch(/policy/i);
   });
 
   it("spreads documents in the 2D projection", () => {
@@ -49,7 +49,8 @@ describe("corpus-level guideline checks (Phase 1)", () => {
   });
 
   it("boilerplate-heavy input triggers a concentration finding with a fix", () => {
-    const spam = { name: "template-spam.txt", text: ("This document is confidential and proprietary to the company. ").repeat(40) };
+    const spamText = ("This document is confidential and proprietary to the company. ").repeat(40);
+    const spam = { name: "template-spam.txt", text: spamText, size: spamText.length };
     const r = analyzeCorpus([...inputs.slice(0, 2), spam]);
     const f = r.files.find((x) => x.name === "template-spam.txt")!;
     const check = f.report.checks.find((c) => c.guideline === "concentration")!;
@@ -58,10 +59,9 @@ describe("corpus-level guideline checks (Phase 1)", () => {
   });
 
   it("an off-topic document is flagged as a cohesion outlier", () => {
-    const offtopic = {
-      name: "recipe.txt",
-      text: "Preheat the oven to 220 degrees. Slice tomatoes basil mozzarella. Bake the dough eight minutes, add toppings, finish with olive oil and oregano. Serve the pizza hot with a side salad and lemon dressing.",
-    };
+    const offtopicText =
+      "Preheat the oven to 220 degrees. Slice tomatoes basil mozzarella. Bake the dough eight minutes, add toppings, finish with olive oil and oregano. Serve the pizza hot with a side salad and lemon dressing.";
+    const offtopic = { name: "recipe.txt", text: offtopicText, size: offtopicText.length };
     const r = analyzeCorpus([...inputs.slice(0, 4), offtopic]);
     const f = r.files.find((x) => x.name === "recipe.txt")!;
     const check = f.report.checks.find((c) => c.guideline === "cohesion")!;

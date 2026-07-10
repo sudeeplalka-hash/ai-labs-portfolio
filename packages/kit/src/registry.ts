@@ -3,9 +3,13 @@
 // from here, so shipping a lab (flipping status) updates the map automatically.
 // C0 mechanics: "No claim without an evidence badge, if a row has none, delete it."
 
-export type Collection = 0 | 1 | 2 | 3 | 4;
+export type Collection = 0 | 1 | 2 | 3 | 4 | 5; // 5 = Live Builds (real models, real metrics)
 export type LabStatus = "shipped" | "in-build" | "planned"; // ✅ / 🔨 / (backlog)
-export type LiveMode = "LIVE" | "SIMULATED";
+// Badge vocabulary (§C0 honesty): LIVE = real computation in the browser;
+// SIMULATED = transparent deterministic logic, labeled as such; BYO-KEY = a
+// real call made client-side with the reviewer's own key, nothing stored;
+// RECORDED = a real execution captured and embedded, never dressed up as LIVE.
+export type LiveMode = "LIVE" | "SIMULATED" | "BYO-KEY" | "RECORDED";
 export type Priority = "P0" | "P1" | "P2";
 
 export interface LabEntry {
