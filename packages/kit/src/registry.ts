@@ -243,6 +243,14 @@ export const LABS: LabEntry[] = [
     href: "https://ai-governance-control-plane.vercel.app",
   },
   {
+    id: "LB-03", collection: 5, title: "Model Evaluation & Threshold Economics", status: "shipped", live: "LIVE",
+    liveNote: "trains a logistic model in your browser on a disclosed synthetic corpus; ROC/PR/calibration/cost curves all computed live",
+    problem: "The model scores 0.91 AUC. So where do we set the threshold, in dollars?",
+    decision: "Pick the operating point from the cost curve (review cost vs fraud loss), not from the leaderboard metric.",
+    priority: "P0",
+    href: "/builds/eval-bench",
+  },
+  {
     id: "LB-02", collection: 5, title: "RAG Quality Evaluator (live lab)", status: "shipped", live: "LIVE",
     liveNote: "deterministic evaluator runs in-browser; BYO-key live lab calls your model client-side, nothing stored",
     problem: "Is this RAG answer grounded, cited, and safe to trust?",
