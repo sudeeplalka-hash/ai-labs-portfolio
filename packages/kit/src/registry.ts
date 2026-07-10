@@ -33,7 +33,7 @@ export const STATUS_BADGE: Record<LabStatus, string> = {
   planned: "•",
 };
 
-// --- The catalog: 23 labs + Layer 0, plus Collection 1 (shipped spine) ---
+// --- The catalog: 23 in-site labs + Layer 0 + Collection 1 (shipped spine) + Collection 5 standalone Live Builds ---
 export const LABS: LabEntry[] = [
   // Layer 0
   {
@@ -231,6 +231,25 @@ export const LABS: LabEntry[] = [
     resumeEcho: "Weekly leadership updates and QBRs across multiple AMEX portfolios.",
     href: "/engagement/exec-comms",
   },
+
+  // Collection 5, Live Builds (real models, real metrics; standalone deploys).
+  // Doctrine: entries land here only when the deploy is verified live.
+  {
+    id: "LB-01", collection: 5, title: "Enterprise AI Governance Control Plane", status: "shipped", live: "LIVE",
+    liveNote: "fully static in-browser engine (guardrails, risk scoring, audit chain); optional FastAPI service",
+    problem: "Can we prove to an auditor that the guardrails actually ran?",
+    decision: "Which guardrails gate which risk tier, and what a tamper-evident audit trail must capture.",
+    flagship: true,
+    href: "https://ai-governance-control-plane.vercel.app",
+  },
+  {
+    id: "LB-02", collection: 5, title: "RAG Quality Evaluator (live lab)", status: "shipped", live: "LIVE",
+    liveNote: "deterministic evaluator runs in-browser; BYO-key live lab calls your model client-side, nothing stored",
+    problem: "Is this RAG answer grounded, cited, and safe to trust?",
+    decision: "Gate a RAG build on measured faithfulness, citation accuracy, and hallucination risk.",
+    flagship: true,
+    href: "https://rag-quality-evaluator.vercel.app",
+  },
 ];
 
 // --- Five domains of the Competency Map (§C0) ---
@@ -300,8 +319,8 @@ export const labById = (id: string): LabEntry | undefined => LABS.find((l) => l.
 export const shippedLabs = (): LabEntry[] => LABS.filter((l) => l.status === "shipped");
 export const liveShippedCount = (): number => LABS.filter((l) => l.status === "shipped" && l.live === "LIVE").length;
 
-// Count only the 23 new catalog labs (Collections 2 to 4); exclude Layer 0 and every
-// Collection-1 row (spine + instruments) so "X of 23" can never miscount.
+// Count the catalog labs (Collections 2 to 5); exclude Layer 0 and every
+// Collection-1 row (spine + instruments) so the ratio can never miscount.
 const isCatalogLab = (l: LabEntry) => l.collection >= 2;
 export function progress(): { shipped: number; inBuild: number; planned: number; total: number } {
   const labs = LABS.filter(isCatalogLab);
