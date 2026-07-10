@@ -20,8 +20,13 @@ describe("cleaning-to-quality proof (golden-set validation)", () => {
   it("resolving duplicates measurably improves retrieval", () => {
     const r = runProof(
       files,
-      new Set(["travel_policy_v2.7_legacy.txt", "customers_master.csv"]),
-      new Map([["travel_policy_v3.1_current.txt", ["Travel policy"]]]),
+      new Set([
+        "travel_policy_v1.0_archive.txt",
+        "travel_policy_v2.7_legacy.txt",
+        "customers_master.csv",
+        "vendor_onboarding_faq.md",
+      ]),
+      new Map([["travel_policy_v3.1_current.txt", ["travel · approval"]]]),
     );
     expect(r.cleanedDiffers).toBe(true);
     expect(r.cleaned.accuracyPct).toBeGreaterThanOrEqual(r.raw.accuracyPct);

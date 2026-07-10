@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { runProof, PROOF_QUESTIONS } from "./proof";
 import { analyzeCorpus } from "./corpus";
+import { deriveDuplicateSets } from "./resolution";
 import { CORPUS_SAMPLES } from "@data/data/sampleCorpus";
 
 // Hint-alignment regression (2026-07-09): the disclosed topic bonus must be
@@ -39,8 +40,16 @@ describe("proof topic hints align with the suggester's vocabulary", () => {
     }
   });
 
-  it("with suggested labels confirmed, the cleaned run stays perfect", () => {
-    const r = runProof(files, new Set(["travel_policy_v2.7_legacy.txt", "customers_master.csv"]), topics);
+  it("with suggested labels confirmed and the recommended drops applied, the cleaned run stays perfect", () => {
+    // Exclusions come from the Resolution engine's own recommendations, the
+    // same path the UI's one-click preview takes — nothing hand-picked here.
+    const report = analyzeCorpus(CORPUS_SAMPLES.map((s) => ({ name: s.name, text: s.content, size: s.content.length })));
+    const drops = new Set(
+      deriveDuplicateSets(report.files, report.pairs).flatMap((set) =>
+        set.recommendation.dropIds.map((id) => report.files.find((f) => f.id === id)!.name),
+      ),
+    );
+    const r = runProof(files, drops, topics);
     expect(r.cleaned.accuracyPct).toBe(100);
     expect(r.cleaned.staleHits).toBe(0);
   });

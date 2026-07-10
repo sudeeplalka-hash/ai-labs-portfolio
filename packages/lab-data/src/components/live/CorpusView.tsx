@@ -346,7 +346,7 @@ export function CorpusView() {
             onClick={loadSampleCorpus}
             className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white shadow-glow transition-colors hover:bg-primary-dark"
           >
-            <Sparkles className="h-4 w-4" /> Load sample corpus (6 files)
+            <Sparkles className="h-4 w-4" /> Load sample corpus (14 files)
           </button>
           <label
             htmlFor="corpusInput"

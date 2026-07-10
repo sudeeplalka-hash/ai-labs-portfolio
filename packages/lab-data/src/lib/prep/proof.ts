@@ -56,22 +56,26 @@ export interface ProofResult {
 }
 
 // Golden questions authored against the sample corpus content. Each answer
-// verifiably lives in expectedFile; traps point at the superseded copies.
+// verifiably lives in expectedFile; traps point at superseded or drifted
+// copies (the v1.0/v2.7 policies, the FAQ whose payment answer went stale).
 // topicHints are chosen from the vocabulary the topic suggester actually
-// produces on this corpus (the travel cluster suggests "travel · approval";
-// the vendor group surfaces vendor/onboarding terms), so confirming a
-// suggestion as-is is enough to arm the disclosed retrieval bonus. q8 carries
-// no hint: eng_update_q2.md clusters with the travel docs, so no honest
-// engineering label can exist for it.
+// produces on this corpus ("travel · approval", "vendor · onboarding",
+// "reranker · search", "support · team"), so confirming a suggestion as-is
+// is enough to arm the disclosed retrieval bonus. q12 carries no hint: the
+// overview clusters with the vendor docs, so no honest product label exists.
 export const PROOF_QUESTIONS: ProofQuestion[] = [
   { id: "q1", question: "What is the daily meal allowance for domestic travel?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
   { id: "q2", question: "Over what amount do expenses require manager approval?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
   { id: "q3", question: "Which class must air travel be booked in for flights under six hours?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
-  { id: "q4", question: "When did the current authoritative travel policy become effective?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
+  { id: "q4", question: "When did the current authoritative travel policy become effective?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v1.0_archive.txt", topicHint: "travel" },
   { id: "q5", question: "What must new vendors complete before any contract is signed?", expectedFile: "vendor_onboarding_kb.md", topicHint: "vendor" },
   { id: "q6", question: "How quickly does the procurement team review vendor submissions?", expectedFile: "vendor_onboarding_kb.md", topicHint: "vendor" },
-  { id: "q7", question: "What are the standard vendor payment terms?", expectedFile: "vendor_onboarding_kb.md", topicHint: "vendor" },
-  { id: "q8", question: "What is the main remaining engineering risk under peak load?", expectedFile: "eng_update_q2.md" },
+  { id: "q7", question: "What are the standard vendor payment terms?", expectedFile: "vendor_onboarding_kb.md", trapFile: "vendor_onboarding_faq.md", topicHint: "vendor" },
+  { id: "q8", question: "What is the main remaining engineering risk under peak load?", expectedFile: "eng_update_q2.md", topicHint: "reranker" },
+  { id: "q9", question: "What was the root cause of the April search outage?", expectedFile: "incident_postmortem_2026-04.md", topicHint: "reranker" },
+  { id: "q10", question: "What shipped in the 2026 Q2 release?", expectedFile: "release_notes_2026q2.md", topicHint: "reranker" },
+  { id: "q11", question: "Which plan includes the priority support tier?", expectedFile: "product_catalog.json", topicHint: "support" },
+  { id: "q12", question: "Which connectors does the platform cover?", expectedFile: "product_overview.md" },
 ];
 
 // ---- retrieval mechanics (visible math) ------------------------------------

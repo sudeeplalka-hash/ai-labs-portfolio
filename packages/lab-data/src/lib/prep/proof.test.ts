@@ -3,11 +3,23 @@ import { runProof, PROOF_QUESTIONS } from "./proof";
 import { CORPUS_SAMPLES } from "@data/data/sampleCorpus";
 
 const files = CORPUS_SAMPLES.map((s) => ({ name: s.name, text: s.content }));
-const RECOMMENDED_EXCLUSIONS = new Set(["travel_policy_v2.7_legacy.txt", "customers_master.csv"]);
+// The four drops the Resolution workflow itself recommends on this corpus.
+const RECOMMENDED_EXCLUSIONS = new Set([
+  "travel_policy_v1.0_archive.txt",
+  "travel_policy_v2.7_legacy.txt",
+  "customers_master.csv",
+  "vendor_onboarding_faq.md",
+]);
+// Suggested labels confirmed as-is (see topics probe): the hint path the UI takes.
 const TAGS = new Map<string, string[]>([
-  ["travel_policy_v3.1_current.txt", ["Travel policy"]],
-  ["vendor_onboarding_kb.md", ["Vendor onboarding"]],
-  ["eng_update_q2.md", ["Engineering updates"]],
+  ["travel_policy_v3.1_current.txt", ["travel · approval"]],
+  ["vendor_onboarding_kb.md", ["vendor · onboarding"]],
+  ["product_overview.md", ["vendor · onboarding"]],
+  ["eng_update_q2.md", ["reranker · search"]],
+  ["incident_postmortem_2026-04.md", ["reranker · search"]],
+  ["release_notes_2026q2.md", ["reranker · search"]],
+  ["product_catalog.json", ["support · team"]],
+  ["soporte_macros_es.md", ["support · team"]],
 ]);
 
 describe("cleaning-to-quality proof (Phase 5)", () => {

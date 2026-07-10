@@ -72,10 +72,13 @@ describe("language + parsability integration (Phase 4)", () => {
     expect(f.gate.gate).toBe("Rejected"); // critical blocks the gate
   });
 
-  it("the sample corpus reports an all-English mix over its prose files (tabular files sit out)", () => {
+  it("the sample corpus reports a mixed English/Spanish language profile (tabular files sit out)", () => {
     const r = analyzeCorpus(inputs);
     const proseCount = inputs.filter((f) => !/\.(csv|tsv)$/i.test(f.name)).length;
-    expect(r.languages).toEqual([{ label: "English", files: proseCount }]);
+    expect(r.languages).toEqual([
+      { label: "English", files: proseCount - 1 },
+      { label: "Spanish", files: 1 },
+    ]);
     // and no tabular file carries a language check
     for (const f of r.files) {
       if (/\.csv$/i.test(f.name)) {

@@ -21,7 +21,7 @@ describe("corpus ready % responds to the workflow", () => {
     for (const f of deriveCorpusFindings(report.files)) if (f.fixId) statuses[f.key] = "fixed";
     const adj = recomputeCorpus(report, statuses);
     expect(adj.health.readyPct).toBe(100);
-    expect(adj.health.approved).toBe(6);
+    expect(adj.health.approved).toBe(14);
     // Unfixable findings (cohesion, parsability) cost points but not the gate.
     for (const f of adj.files) expect(f.gate.gate).toBe("Approved");
   });
