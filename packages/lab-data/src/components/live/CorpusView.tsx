@@ -666,7 +666,7 @@ function CorpusHealth({ report, hint }: { report: CorpusReport; hint?: string })
     { ...GATE_SEG[3], n: h.rejected },
   ];
   const metrics: { label: string; value: string; color: BadgeColor }[] = [
-    { label: "Corpus ready", value: `${h.readyPct}%`, color: h.readyPct >= 70 ? "emerald" : h.readyPct >= 40 ? "amber" : "orange" },
+    { label: "Corpus ready", value: `${h.approved} / ${h.total}`, color: h.readyPct >= 70 ? "emerald" : h.readyPct >= 40 ? "amber" : "orange" },
     { label: "Avg file score", value: String(h.avgScore), color: "blue" },
     { label: "Files", value: String(h.total), color: "blue" },
     { label: "Duplicates", value: String(h.duplicates), color: h.duplicates ? "rose" : "emerald" },

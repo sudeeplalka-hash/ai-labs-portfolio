@@ -57,15 +57,21 @@ export interface ProofResult {
 
 // Golden questions authored against the sample corpus content. Each answer
 // verifiably lives in expectedFile; traps point at the superseded copies.
+// topicHints are chosen from the vocabulary the topic suggester actually
+// produces on this corpus (the travel cluster suggests "travel · approval";
+// the vendor group surfaces vendor/onboarding terms), so confirming a
+// suggestion as-is is enough to arm the disclosed retrieval bonus. q8 carries
+// no hint: eng_update_q2.md clusters with the travel docs, so no honest
+// engineering label can exist for it.
 export const PROOF_QUESTIONS: ProofQuestion[] = [
-  { id: "q1", question: "What is the daily meal allowance for domestic travel?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "policy" },
-  { id: "q2", question: "Over what amount do expenses require manager approval?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "policy" },
-  { id: "q3", question: "Which class must air travel be booked in for flights under six hours?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "policy" },
-  { id: "q4", question: "When did the current authoritative travel policy become effective?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "policy" },
+  { id: "q1", question: "What is the daily meal allowance for domestic travel?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
+  { id: "q2", question: "Over what amount do expenses require manager approval?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
+  { id: "q3", question: "Which class must air travel be booked in for flights under six hours?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
+  { id: "q4", question: "When did the current authoritative travel policy become effective?", expectedFile: "travel_policy_v3.1_current.txt", trapFile: "travel_policy_v2.7_legacy.txt", topicHint: "travel" },
   { id: "q5", question: "What must new vendors complete before any contract is signed?", expectedFile: "vendor_onboarding_kb.md", topicHint: "vendor" },
   { id: "q6", question: "How quickly does the procurement team review vendor submissions?", expectedFile: "vendor_onboarding_kb.md", topicHint: "vendor" },
   { id: "q7", question: "What are the standard vendor payment terms?", expectedFile: "vendor_onboarding_kb.md", topicHint: "vendor" },
-  { id: "q8", question: "What is the main remaining engineering risk under peak load?", expectedFile: "eng_update_q2.md", topicHint: "engineering" },
+  { id: "q8", question: "What is the main remaining engineering risk under peak load?", expectedFile: "eng_update_q2.md" },
 ];
 
 // ---- retrieval mechanics (visible math) ------------------------------------
