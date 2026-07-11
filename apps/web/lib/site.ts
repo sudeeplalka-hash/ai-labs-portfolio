@@ -48,7 +48,7 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
     titleDefault: "Sudeep Lalka: Technology Strategy & AI Artifacts",
     titleTemplate: "%s · Sudeep Lalka",
     description:
-      "A portfolio of 25 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run. Strategy you can open, pressure-test, and take into the boardroom.",
+      "A portfolio of 26 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run. Strategy you can open, pressure-test, and take into the boardroom.",
     homeTitle: "Sudeep Lalka: Technology Strategy & AI Artifacts",
     attribution: "Technology Strategy & AI Artifacts · portfolio.sudeeplalka.com",
     ogImage: "/og-portfolio.png",

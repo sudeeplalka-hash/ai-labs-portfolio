@@ -235,12 +235,12 @@ export const LABS: LabEntry[] = [
   // Collection 5, Live Builds (real models, real metrics; standalone deploys).
   // Doctrine: entries land here only when the deploy is verified live.
   {
-    id: "LB-01", collection: 5, title: "Enterprise AI Governance Control Plane", status: "shipped", live: "LIVE",
-    liveNote: "fully static in-browser engine (guardrails, risk scoring, audit chain); optional FastAPI service",
+    id: "LB-01", collection: 5, title: "Governance Control Plane backend (code evidence)", status: "shipped", live: "RECORDED",
+    liveNote: "the real system behind /govern's in-browser engine: FastAPI service, 25/25 tests, RBAC, persistent hash-chained audit log - published as a repo, not a duplicate site",
     problem: "Can we prove to an auditor that the guardrails actually ran?",
     decision: "Which guardrails gate which risk tier, and what a tamper-evident audit trail must capture.",
     flagship: true,
-    href: "https://ai-governance-control-plane.vercel.app",
+    href: "https://github.com/sudeeplalka-hash/enterprise-ai-governance-control-plane",
   },
   {
     id: "LB-03", collection: 5, title: "Model Evaluation & Threshold Economics", status: "shipped", live: "LIVE",
@@ -249,14 +249,6 @@ export const LABS: LabEntry[] = [
     decision: "Pick the operating point from the cost curve (review cost vs fraud loss), not from the leaderboard metric.",
     priority: "P0",
     href: "/builds/eval-bench",
-  },
-  {
-    id: "LB-02", collection: 5, title: "RAG Quality Evaluator (live lab)", status: "shipped", live: "LIVE",
-    liveNote: "deterministic evaluator runs in-browser; BYO-key live lab calls your model client-side, nothing stored",
-    problem: "Is this RAG answer grounded, cited, and safe to trust?",
-    decision: "Gate a RAG build on measured faithfulness, citation accuracy, and hallucination risk.",
-    flagship: true,
-    href: "https://rag-quality-evaluator.vercel.app",
   },
   {
     id: "LB-07", collection: 5, title: "labs-catalog MCP server (real wire session)", status: "shipped", live: "RECORDED",

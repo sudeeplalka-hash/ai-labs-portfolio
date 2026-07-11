@@ -58,7 +58,7 @@ export function CompetencyMap() {
             Enterprise AI strategy, proven in <span className="italic text-primary">working artifacts</span>.
           </h1>
           <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-slate-300 md:mt-5 md:text-lg">
-            A portfolio of 25 interactive AI artifacts that turn the architecture, economics, governance, and adoption
+            A portfolio of 26 interactive AI artifacts that turn the architecture, economics, governance, and adoption
             decisions behind enterprise AI into tools that actually run. Strategy you can open, pressure-test, and take
             into the boardroom.
           </p>
