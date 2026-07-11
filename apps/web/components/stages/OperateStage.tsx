@@ -187,7 +187,7 @@ export function OperateStage() {
     <div>
       {/* Stage header */}
       <div className="mb-4">
-        <p className="eyebrow mb-1">Stage 07 · the loop</p>
+        <p className="eyebrow mb-1">Stage 07 · Operate · Day Two</p>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold tracking-tight text-ink">Operate: Day Two Observability</h1>
           <LiveBadge mode="SIMULATED" />

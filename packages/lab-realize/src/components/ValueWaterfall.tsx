@@ -1,16 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import type { StageKey } from "@labs/program-core";
+import { formatMoney, type StageKey } from "@labs/program-core";
 import type { RiverFlow } from "../engine/types";
 
 const STAGE_HREF: Record<StageKey, string> = { frame: "/frame", data: "/data", build: "/build", deploy: "/deploy", govern: "/govern", realize: "/realize", operate: "/operate" };
-const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "AI Ops", govern: "Govern", realize: "Realize", operate: "Operate" };
-const usd = (n: number) => {
-  const a = Math.abs(n);
-  const s = n < 0 ? "-" : "";
-  return a >= 1000 ? `${s}$${Math.round(a / 1000).toLocaleString()}k` : `${s}$${Math.round(a)}`;
-};
+const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "Deploy", govern: "Govern", realize: "Realize", operate: "Operate" };
+// Shared money style (R1.4), matching the verdict and the handoff strip.
+const usd = formatMoney;
 
 // A proper waterfall / bridge chart: start at the addressable value, step DOWN
 // for every leak (adoption, quality, run cost, risk), and land on the

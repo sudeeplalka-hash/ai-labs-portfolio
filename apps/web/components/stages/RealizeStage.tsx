@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
-import { useProgram } from "@labs/program-core";
+import { useProgram, formatMoney } from "@labs/program-core";
 import { RealizeView } from "@labs/lab-realize";
 import { PageIntro } from "@labs/design-system";
 import { StagePlaceholder } from "@/components/shell/StagePlaceholder";
@@ -9,7 +9,8 @@ import { StageDemonstrates } from "@/components/reviewer/Reviewer";
 
 // Stage 06 · Realize, its own lab now (split out of Govern). The risk adjusted
 // business case where every number traces back to an upstream decision.
-const fmtUsd = (n: number) => (Math.abs(n) >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${Math.round(n / 1000)}k`);
+// Money renders through the shared formatter (R1.4), one style program-wide.
+const fmtUsd = formatMoney;
 
 export function RealizeStage() {
   const { state, hydrated } = useProgram();

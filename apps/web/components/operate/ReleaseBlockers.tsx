@@ -36,7 +36,7 @@ export function ReleaseBlockers() {
             <li key={i} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-sm">
               <span className="text-slatey-300">{b.text}</span>
               <Link href={stage.href} className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-amber-800 underline-offset-2 hover:underline">
-                fix in {stage.label} <ArrowRight className="h-3 w-3" />
+                fix in {stage.short} <ArrowRight className="h-3 w-3" />
               </Link>
             </li>
           );

@@ -4,7 +4,7 @@
 // contract loop never depend on which pages have been visited.
 
 import type { ProgramState, StageKey } from "./types";
-import { buildDataReadinessHandoff, buildBuildOutputContract, deriveGovernanceDecision, deriveOpenFindings } from "./contracts";
+import { resolveDataHandoff, resolveBuildContract, deriveGovernanceDecision, deriveOpenFindings } from "./contracts";
 import { computeReleaseReadiness } from "./operate";
 import { deriveOpsSeries, detectSignals, valueAtRisk } from "./operate-day2";
 
@@ -36,8 +36,10 @@ export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
   const sc = s.initiative.scores;
   const overall = sc ? Math.round(sc.value * 0.4 + sc.feasibility * 0.3 + sc.dataReadiness * 0.3) : null;
 
-  const handoff = s.data?.handoff ?? buildDataReadinessHandoff(s);
-  const contract = s.rag?.contract ?? buildBuildOutputContract(s);
+  // hasLive is true here, so the resolvers always return an artifact; both are
+  // the SAME resolution release readiness uses (R1.1, one truth per fact).
+  const handoff = resolveDataHandoff(s)!;
+  const contract = resolveBuildContract(s)!;
   const rr = computeReleaseReadiness(s);
   const decision = s.governance?.decision ?? deriveGovernanceDecision(s);
 
@@ -82,11 +84,16 @@ export function selectReleaseBlockers(s: ProgramState): ReleaseBlocker[] {
   if (!s.initiative?.name) return [];
   const out: ReleaseBlocker[] = [];
 
-  (s.rag?.contract?.failedGates ?? []).forEach((g) => out.push({ text: `Build gate failing: ${g}`, source: "build" }));
-  computeReleaseReadiness(s).blockers.forEach((b) => out.push({ text: b, source: "deploy" }));
+  (resolveBuildContract(s)?.failedGates ?? []).forEach((g) => out.push({ text: `Build gate failing: ${g}`, source: "build" }));
+  // R1.3: readiness blockers carry the stage that owns the fix (a data gap
+  // routes to Data, an eval gap to Build), no more "fix in Deploy" for all.
+  computeReleaseReadiness(s).blockerItems.forEach((b) => out.push({ text: b.text, source: b.stage }));
   deriveOpenFindings(s)
     .filter((f) => f.severity === "Critical" || f.severity === "High")
-    .forEach((f) => out.push({ text: f.finding, source: f.dueStage === "Data" ? "data" : f.dueStage === "Operate" ? "deploy" : "build" }));
+    .forEach((f) => out.push({
+      text: f.finding,
+      source: f.dueStage === "Data" ? "data" : f.dueStage === "Operate" ? "deploy" : f.dueStage === "Govern" ? "govern" : "build",
+    }));
   (s.governance?.decision?.releaseBlockers ?? []).forEach((b) => out.push({ text: b, source: "govern" }));
 
   const seen = new Set<string>();

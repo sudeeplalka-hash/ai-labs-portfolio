@@ -56,17 +56,22 @@ export function GovernLoop() {
     try { navigator.clipboard?.writeText(auditPackToText(src)); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked */ }
   };
 
-  const live = isLiveMode && g.hasLive;
+  // R1.1: the banner derives from the SAME source (src) as the sidebar and the
+  // stepper. In Demo mode src is the curated archetype, so the banner names it
+  // instead of claiming no initiative exists while the rail shows one.
+  const loaded = g.hasLive;
 
   return (
     <div className="space-y-6">
       {/* 1, Banner */}
-      {live ? (
+      {loaded ? (
         <div className="rounded-xl border border-primary/25 bg-primary/[0.04] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-primary-dark">Live initiative loaded</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-primary-dark">
+                {isDemo ? "Demo initiative · curated sample" : "Live initiative loaded"}
+              </span>
             </div>
             <Badge tone={decTone(decision.decision)}>{decision.decision}</Badge>
           </div>

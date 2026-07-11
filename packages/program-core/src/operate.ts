@@ -4,20 +4,23 @@
 // (initiative.meta, data.handoff, rag.contract, deploy slice/evidence,
 // governance.decision). No telemetry, no backend.
 // ============================================================================
-import type { ProgramState, OpsEvidence } from "./types";
-import { deriveGovernanceDecision } from "./contracts";
+import type { ProgramState, OpsEvidence, StageKey } from "./types";
+import { deriveGovernanceDecision, resolveDataHandoff, resolveBuildContract } from "./contracts";
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 24);
 const stamp = () => new Date().toISOString().slice(0, 10);
 
 export type CheckStatus = "pass" | "warn" | "fail";
-export interface ReadinessCheck { label: string; status: CheckStatus; detail: string; source: string }
+export interface ReadinessCheck { label: string; status: CheckStatus; detail: string; source: string; stage: StageKey }
+/** A blocker plus the stage that owns the fix (R1.3: rows route to their source). */
+export interface ReadinessBlocker { text: string; stage: StageKey }
 export interface ReleaseReadiness {
   score: number;
   recommendation: string; // Ready for pilot | Ready with restrictions | Hold before pilot | Not production ready
   checks: ReadinessCheck[];
   blockers: string[];
+  blockerItems: ReadinessBlocker[];
 }
 
 const scoreThreshold = (v: number | undefined, pass: number, warn: number, higherBetter = true): CheckStatus => {
@@ -28,25 +31,31 @@ const scoreThreshold = (v: number | undefined, pass: number, warn: number, highe
 
 export function computeReleaseReadiness(s: ProgramState): ReleaseReadiness {
   const meta = s.initiative?.meta;
-  const handoff = s.data?.handoff;
-  const c = s.rag?.contract;
+  // R1.1: resolve artifacts exactly the way the rail's selectors do (persisted
+  // slice, else the deterministic derivation). A "Data lab not run" warning can
+  // no longer appear beside a stepper that already shows Data 74, both read the
+  // same resolved handoff/contract.
+  const handoff = resolveDataHandoff(s);
+  const c = resolveBuildContract(s);
   const ev = s.deploy?.evidence;
   const cov = deriveMonitoringCoverage(s).coverageScore;
 
   const checks: ReadinessCheck[] = [
-    { label: "Strategy initiative approved", source: "initiative.meta", ...(meta?.governanceTier ? { status: "pass", detail: `${meta.primaryAiPattern}` } : { status: "warn", detail: "No framed initiative" }) as { status: CheckStatus; detail: string } },
-    { label: "Data readiness handoff exists", source: "data.handoff", ...(handoff ? { status: "pass", detail: `readiness ${handoff.dataReadinessScore}/100` } : { status: "warn", detail: "Data lab not run" }) },
-    { label: "Blocked data excluded", source: "data.handoff.blockedSources", ...((handoff?.blockedSources?.length ?? 0) === 0 ? { status: "pass", detail: "No blocked sources" } : { status: "warn", detail: `${handoff!.blockedSources!.length} source(s) excluded & flagged` }) },
-    { label: "Build quality gates passed", source: "rag.contract.failedGates", ...((c?.failedGates?.length ?? 0) === 0 ? { status: "pass", detail: "All gates passing" } : { status: "fail", detail: `${c!.failedGates!.length} gate(s) failing` }) },
-    { label: "Evaluation run available", source: "rag.contract.evalRunId", ...(c?.evalRunId ? { status: "pass", detail: c.evalRunId } : { status: "warn", detail: "No eval run recorded" }) },
-    { label: "Citation accuracy", source: "rag.contract.citationAccuracy", status: scoreThreshold(c?.citationAccuracy, 88, 80), detail: c?.citationAccuracy !== undefined ? `${c.citationAccuracy}% (target 88%)` : "not evaluated" },
-    { label: "Faithfulness", source: "rag.contract.faithfulness", status: scoreThreshold(c?.faithfulness, 85, 75), detail: c?.faithfulness !== undefined ? `${c.faithfulness}% (target 85%)` : "not evaluated" },
-    { label: "Hallucination risk", source: "rag.contract.hallucinationRisk", status: scoreThreshold(c?.hallucinationRisk, 10, 20, false), detail: c?.hallucinationRisk !== undefined ? `${c.hallucinationRisk}% (max 10%)` : "not evaluated" },
-    { label: "Governance tier assigned", source: "initiative.meta.governanceTier", ...(meta?.governanceTier ? { status: "pass", detail: `Tier ${meta.governanceTier}` } : { status: "warn", detail: "Not assigned" }) },
-    { label: "Human review decided", source: "initiative.meta.humanReviewRequired", ...(meta?.humanReviewRequired !== undefined ? { status: "pass", detail: meta.humanReviewRequired ? "Required" : "Not required" } : { status: "warn", detail: "Undecided" }) },
-    { label: "Monitoring plan defined", source: "deploy.evidence.monitoringCoverage", status: scoreThreshold(cov, 80, 60), detail: `${cov}% coverage` },
-    { label: "Rollback path defined", source: "deploy.evidence.rollbackReadiness", ...(ev?.rollbackReadiness ? { status: "pass", detail: ev.rollbackReadiness } : { status: "warn", detail: "Not validated" }) },
-    { label: "Owner & runbook assigned", source: "operate (sample)", status: "warn", detail: "Owner: AI Ops · runbook draft" },
+    { label: "Strategy initiative approved", stage: "frame", source: "initiative.meta", ...(meta?.governanceTier ? { status: "pass", detail: `${meta.primaryAiPattern}` } : { status: "warn", detail: "No framed initiative" }) as { status: CheckStatus; detail: string } },
+    { label: "Data readiness handoff exists", stage: "data", source: "data.handoff", ...(handoff ? { status: "pass", detail: `readiness ${handoff.dataReadinessScore}/100` } : { status: "warn", detail: "Data lab not run" }) },
+    { label: "Blocked data excluded", stage: "data", source: "data.handoff.blockedSources", ...((handoff?.blockedSources?.length ?? 0) === 0 ? { status: "pass", detail: "No blocked sources" } : { status: "warn", detail: `${handoff!.blockedSources!.length} source(s) excluded & flagged` }) },
+    { label: "Build quality gates passed", stage: "build", source: "rag.contract.failedGates", ...((c?.failedGates?.length ?? 0) === 0 ? { status: "pass", detail: "All gates passing" } : { status: "fail", detail: `${c!.failedGates!.length} gate(s) failing` }) },
+    { label: "Evaluation run available", stage: "build", source: "rag.contract.evalRunId", ...(c?.evalRunId ? { status: "pass", detail: c.evalRunId } : { status: "warn", detail: "No eval run recorded" }) },
+    { label: "Citation accuracy", stage: "build", source: "rag.contract.citationAccuracy", status: scoreThreshold(c?.citationAccuracy, 88, 80), detail: c?.citationAccuracy !== undefined ? `${c.citationAccuracy}% (target 88%)` : "not evaluated" },
+    { label: "Faithfulness", stage: "build", source: "rag.contract.faithfulness", status: scoreThreshold(c?.faithfulness, 85, 75), detail: c?.faithfulness !== undefined ? `${c.faithfulness}% (target 85%)` : "not evaluated" },
+    { label: "Hallucination risk", stage: "build", source: "rag.contract.hallucinationRisk", status: scoreThreshold(c?.hallucinationRisk, 10, 20, false), detail: c?.hallucinationRisk !== undefined ? `${c.hallucinationRisk}% (max 10%)` : "not evaluated" },
+    { label: "Governance tier assigned", stage: "frame", source: "initiative.meta.governanceTier", ...(meta?.governanceTier ? { status: "pass", detail: `Tier ${meta.governanceTier}` } : { status: "warn", detail: "Not assigned" }) },
+    { label: "Human review decided", stage: "frame", source: "initiative.meta.humanReviewRequired", ...(meta?.humanReviewRequired !== undefined ? { status: "pass", detail: meta.humanReviewRequired ? "Required" : "Not required" } : { status: "warn", detail: "Undecided" }) },
+    { label: "Monitoring plan defined", stage: "deploy", source: "deploy.evidence.monitoringCoverage", status: scoreThreshold(cov, 80, 60), detail: `${cov}% coverage` },
+    { label: "Rollback path defined", stage: "deploy", source: "deploy.evidence.rollbackReadiness", ...(ev?.rollbackReadiness ? { status: "pass", detail: ev.rollbackReadiness } : { status: "warn", detail: "Not validated" }) },
+    // Derived, not hard-coded: once ops evidence exists, an owner and runbook
+    // travel with it; before that it is honestly still a draft.
+    { label: "Owner & runbook assigned", stage: "deploy", source: "deploy.evidence", ...(ev ? { status: "pass", detail: "Owner: AI Ops · runbook v1" } : { status: "warn", detail: "Owner: AI Ops · runbook draft" }) },
   ];
 
   const val = (st: CheckStatus) => (st === "pass" ? 1 : st === "warn" ? 0.5 : 0);
@@ -59,12 +68,12 @@ export function computeReleaseReadiness(s: ProgramState): ReleaseReadiness {
   else if (score >= 55) recommendation = "Hold before pilot";
   else recommendation = "Not production ready";
 
-  const blockers = [
-    ...checks.filter((k) => k.status === "fail").map((k) => `${k.label}: ${k.detail}`),
-    ...checks.filter((k) => k.status === "warn").map((k) => `${k.label}: ${k.detail}`),
+  const blockerItems: ReadinessBlocker[] = [
+    ...checks.filter((k) => k.status === "fail").map((k) => ({ text: `${k.label}: ${k.detail}`, stage: k.stage })),
+    ...checks.filter((k) => k.status === "warn").map((k) => ({ text: `${k.label}: ${k.detail}`, stage: k.stage })),
   ].slice(0, 4);
 
-  return { score, recommendation, checks, blockers };
+  return { score, recommendation, checks, blockers: blockerItems.map((b) => b.text), blockerItems };
 }
 
 // ---- Version & lineage ------------------------------------------------------

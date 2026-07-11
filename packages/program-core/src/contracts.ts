@@ -214,6 +214,24 @@ export function buildBuildOutputContract(s: ProgramState): BuildOutputContract {
   };
 }
 
+// ---- Canonical artifact resolution (R1.1, one truth for every widget) --------
+// The rail derives handoff/contract on the fly so it "never depends on which
+// pages have been visited". These resolvers make that THE shared rule: use the
+// persisted artifact when a lab wrote one, otherwise the same deterministic
+// derivation, gated on an initiative existing. Release readiness, blockers,
+// steppers, and banners all resolve through here, so "Data 74" in the stepper
+// and "Data lab not run" in a blocker can no longer coexist.
+
+export function resolveDataHandoff(s: ProgramState): DataReadinessHandoff | undefined {
+  if (s.data?.handoff) return s.data.handoff;
+  return s.initiative?.name ? buildDataReadinessHandoff(s) : undefined;
+}
+
+export function resolveBuildContract(s: ProgramState): BuildOutputContract | undefined {
+  if (s.rag?.contract) return s.rag.contract;
+  return s.initiative?.name ? buildBuildOutputContract(s) : undefined;
+}
+
 /** Inputs Govern needs from the live initiative (Strategy + Data + Build + Ops +
  *  Realize). `hasLive` is true once Strategy has stamped a governance tier. */
 export interface GovernInputs {

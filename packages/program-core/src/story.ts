@@ -13,6 +13,7 @@
 import type { ProgramState, StageKey } from "./types";
 import { STAGE_MAP } from "./stages";
 import { deriveOpsSeries, detectSignals, valueAtRisk } from "./operate-day2";
+import { formatMoney } from "./format";
 
 export type StoryTone = "healthy" | "watch" | "risk" | "neutral";
 
@@ -49,13 +50,8 @@ export interface StoryBeat {
 const DASH = "N/A";
 const num = (v: unknown): number | null => (typeof v === "number" && isFinite(v) ? v : null);
 
-function usd(v: number): string {
-  const a = Math.abs(v);
-  const sign = v < 0 ? "-" : "";
-  if (a >= 1_000_000) return `${sign}$${(a / 1_000_000).toFixed(1)}M`;
-  if (a >= 1_000) return `${sign}$${Math.round(a / 1_000)}k`;
-  return `${sign}$${Math.round(a)}`;
-}
+// One money style everywhere (R1.4): the shared formatter, not a local variant.
+const usd = formatMoney;
 
 function scoreTone(v: number | null, good = 70, ok = 50): StoryTone {
   if (v === null) return "neutral";

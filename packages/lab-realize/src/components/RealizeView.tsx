@@ -7,17 +7,15 @@ import {
   CheckCircle2, AlertTriangle, Users,
 } from "lucide-react";
 import { Panel, SectionHeader, KpiCard, Badge, InsightCard, cn } from "@labs/design-system";
-import { useProgramSource, type StageKey } from "@labs/program-core";
+import { useProgramSource, formatMoney, formatMonths, type StageKey } from "@labs/program-core";
 import { deriveInputs, applyOverrides, computeRoi, valueRiver, sensitivity, dossier, type Overrides } from "../engine/model";
 import { deriveAdoptionPlan, projectAdoption, ADOPTION_TARGET, type AdoptionIntervention } from "../engine/adoption";
 import { ValueWaterfall } from "./ValueWaterfall";
 
-const usd = (n: number) => {
-  const a = Math.abs(n);
-  const s = n < 0 ? "-" : "";
-  return a >= 1000 ? `${s}$${Math.round(a / 1000).toLocaleString()}k` : `${s}$${Math.round(a)}`;
-};
-const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "AI Ops", govern: "Govern", realize: "Realize", operate: "Operate" };
+// One money style everywhere (R1.4): the shared program formatter, so the
+// verdict here and the handoff strip upstream can never disagree on format.
+const usd = formatMoney;
+const STAGE_LABEL: Record<StageKey, string> = { frame: "Frame", data: "Data", build: "Build", deploy: "Deploy", govern: "Govern", realize: "Realize", operate: "Operate" };
 const STAGE_HREF: Record<StageKey, string> = { frame: "/frame", data: "/data", build: "/build", deploy: "/deploy", govern: "/govern", realize: "/realize", operate: "/operate" };
 
 function Src({ s }: { s: StageKey }) {
@@ -122,7 +120,7 @@ export function RealizeView() {
 
           <h1 className="mt-3 text-2xl font-semibold leading-snug tracking-tight text-ink">
             {worth ? (
-              <>Returns <span className="text-emerald-700">{usd(roi.riskAdjustedValue)}/yr</span> on a {usd(inp.investment)} build{payback !== null ? <>, paying for itself in <span className="text-emerald-700">{payback} month{payback === 1 ? "" : "s"}</span></> : ""}.</>
+              <>Returns <span className="text-emerald-700">{usd(roi.riskAdjustedValue)}/yr</span> on a {usd(inp.investment)} build{payback !== null ? <>, paying for itself in <span className="text-emerald-700">{formatMonths(payback)}</span></> : ""}.</>
             ) : (
               <>Not fundable as it stands, the value it creates doesn&rsquo;t yet cover what it costs to build and run.</>
             )}

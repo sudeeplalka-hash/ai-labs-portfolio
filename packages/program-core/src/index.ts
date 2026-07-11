@@ -5,9 +5,11 @@ export {
   DEMO_ARCHETYPES, DEMO_ARCHETYPE_KEY, type DemoArchetype,
 } from "./store";
 export { toPayload, encodeInitiative, handoffQuery, readHandoff } from "./handoff";
+export { formatMoney, formatMoneyPerYear, formatMonths, formatMonthsShort } from "./format";
 export {
   selectGovernInputs, deriveGovernanceDecision, selectRealizeContext,
   buildDataReadinessHandoff, buildBuildOutputContract,
+  resolveDataHandoff, resolveBuildContract,
   deriveGovernanceScorecard, deriveOpenFindings, deriveRequiredControls,
   type GovernInputs, type RealizeContext,
   type ScorecardDim, type GovFinding, type GovControl, type GovLevel, type Severity,
@@ -29,7 +31,7 @@ export {
 export {
   computeReleaseReadiness, deriveVersionLineage, deriveMonitoringCoverage,
   deriveEvalRegression, deriveIncidents, deriveOpsEvidenceEnrichment, ROLLBACK_OPTIONS,
-  type ReleaseReadiness, type ReadinessCheck, type CheckStatus, type LineageRow,
+  type ReleaseReadiness, type ReadinessCheck, type ReadinessBlocker, type CheckStatus, type LineageRow,
   type MonitoringCoverage, type MonitorSignal, type EvalRegression, type RegressionRow,
   type OpsIncident,
 } from "./operate";

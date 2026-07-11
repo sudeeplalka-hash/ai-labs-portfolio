@@ -20,7 +20,7 @@ describe("selectStageHeadlines", () => {
     expect(Number(byKey.build.value)).toBeGreaterThan(0);
     expect(Number(byKey.deploy.value)).toBeGreaterThan(0);
     expect(byKey.govern.value).not.toBeNull();
-    expect(byKey.realize.value).toBe("180%"); // demoState outcomes.roi
+    expect(byKey.realize.value).toBe("414%"); // demoState outcomes.roi, engine-synced (see lab-realize fixture-sync.test.ts)
   });
 
   it("keeps stage order frame→realize", () => {

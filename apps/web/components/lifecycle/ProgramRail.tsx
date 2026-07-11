@@ -11,13 +11,9 @@ import { usePathname } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import {
   useProgramSource, selectStageHeadlines, selectReleaseBlockers, STAGES,
-  type StageKey, type StageStatus,
+  type StageStatus,
 } from "@labs/program-core";
 import { cn } from "@labs/design-system";
-
-const SHORT_LABEL: Record<StageKey, string> = {
-  frame: "Strategy", data: "Data", build: "Build", deploy: "Deploy", govern: "Govern", realize: "Realize", operate: "Operate",
-};
 
 const dotCls = (status: StageStatus) =>
   status === "done" ? "bg-emerald-500" : status === "active" ? "bg-sky-500" : "bg-slate-300";
@@ -53,7 +49,7 @@ export function ProgramRail() {
                 )}
               >
                 <span className={cn("h-1.5 w-1.5 rounded-full", dotCls(src.progress[s.key]))} />
-                {SHORT_LABEL[s.key]}
+                {s.short}
                 <span className={cn("font-mono font-semibold", h?.value ? "text-ink" : "text-slate-300")}>
                   {h?.value ?? "N/A"}
                 </span>

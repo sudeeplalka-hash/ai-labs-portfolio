@@ -1,4 +1,6 @@
-import type { ProgramState, PortfolioEntry } from "./types";
+import type { ProgramState, PortfolioEntry, OpsEvidence } from "./types";
+import { buildDataReadinessHandoff, buildBuildOutputContract, deriveGovernanceDecision } from "./contracts";
+import { deriveOpsEvidenceEnrichment } from "./operate";
 
 export const STATE_KEY = "apcc_state";
 export const PORTFOLIO_KEY = "apcc_portfolio";
@@ -48,7 +50,39 @@ export const DEMO_ARCHETYPES: { id: DemoArchetype; label: string; blurb: string 
   { id: "at-risk", label: "At risk initiative", blurb: "What bad looks like: weak data, failing gates, and a business case that doesn't clear." },
 ];
 
+// ---- The ONE seeded program fixture (R1.1) -----------------------------------
+// Every demo archetype is sealed before it ships: the Data handoff, Build
+// contract, Ops evidence, and Governance decision are DERIVED from the seed by
+// the same engines the stages use, so no widget can find an artifact "missing"
+// while another widget shows its score. A contradiction is impossible by
+// construction; fixture.test.ts enforces it for every archetype.
+function sealDemo(s: ProgramState): ProgramState {
+  // Order matters: the handoff feeds the contract, both feed ops evidence, and
+  // the governance decision reads all three.
+  s.data = { ...(s.data ?? {}), handoff: buildDataReadinessHandoff(s) };
+  s.rag = { ...(s.rag ?? {}), contract: buildBuildOutputContract(s) };
+  const atRisk = (s.data.status ?? "") === "at-risk";
+  const baseEvidence: OpsEvidence = {
+    sloStatus: s.deploy?.status === "healthy" ? "within" : "at risk",
+    latencyP95: s.deploy?.latencyP95,
+    costPerQuery: s.deploy?.costPerQuery,
+    errorBudgetPct: s.deploy?.errorBudgetPct,
+    driftRisk: s.deploy?.driftRisk,
+    // The at-risk archetype honestly lacks a validated rollback path, that gap
+    // is part of its story; every other curated program has one.
+    rollbackReadiness: atRisk ? undefined : "Validated: prompt / index / model rollback tested",
+  };
+  s.deploy = { ...(s.deploy ?? {}), evidence: baseEvidence };
+  s.deploy.evidence = { ...baseEvidence, ...deriveOpsEvidenceEnrichment(s) };
+  s.governance = { ...(s.governance ?? {}), decision: deriveGovernanceDecision(s) };
+  return s;
+}
+
 export function demoState(archetype: DemoArchetype = "knowledge-assistant"): ProgramState {
+  return sealDemo(demoSeed(archetype));
+}
+
+function demoSeed(archetype: DemoArchetype): ProgramState {
   const base: ProgramState = {
     initiative: {
       name: "Customer answer assistant",
@@ -84,7 +118,12 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
       reliability: 0.997, errorBudgetPct: 60, driftRisk: 30, status: "healthy",
     },
     governance: { riskTier: "Medium", controls: 8, status: "ok" },
-    outcomes: { roi: 180, adoption: 0.62, riskAdjustedValue: 2400000, paybackMonths: 8 },
+    // Outcomes are SYNCED to the Realize engine's output for this sealed fixture
+    // (computeRoi(deriveInputs(demoState(id)))), enforced by lab-realize's
+    // fixture-sync.test.ts, so the verdict banner and the handoff strip can
+    // never show two different numbers for the same fact (R1.4). After any
+    // engine change: run that test, and paste the printed values back here.
+    outcomes: { roi: 414, adoption: 0.73, riskAdjustedValue: 2353910, paybackMonths: 1.4 },
     progress: { frame: "done", data: "done", build: "done", deploy: "done", govern: "done", realize: "done", operate: "done" },
   };
 
@@ -114,7 +153,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
         },
         data: { readinessScore: 76, gaps: 1, status: "ready" },
         rag: { ...base.rag, faithfulness: 90, citationAccuracy: 82, hallucination: 7, costPerAnswer: 0.015 },
-        outcomes: { roi: 120, adoption: 0.7, riskAdjustedValue: 1300000, paybackMonths: 11 },
+        outcomes: { roi: 138, adoption: 0.76, riskAdjustedValue: 767750, paybackMonths: 4.2 },
       };
 
     case "classification":
@@ -142,7 +181,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
         },
         data: { readinessScore: 78, gaps: 2, status: "ready" },
         rag: { ...base.rag, faithfulness: 86, citationAccuracy: 88, hallucination: 8, costPerAnswer: 0.008 },
-        outcomes: { roi: 210, adoption: 0.75, riskAdjustedValue: 2900000, paybackMonths: 6 },
+        outcomes: { roi: 118, adoption: 0.73, riskAdjustedValue: 687632, paybackMonths: 5.2 },
       };
 
     case "decision-support":
@@ -172,7 +211,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
         rag: { ...base.rag, faithfulness: 87, citationAccuracy: 89, hallucination: 9, costPerAnswer: 0.03 },
         deploy: { ...base.deploy, driftRisk: 45, status: "watch" },
         governance: { riskTier: "High", controls: 12, status: "review" },
-        outcomes: { roi: 95, adoption: 0.55, riskAdjustedValue: 1800000, paybackMonths: 14 },
+        outcomes: { roi: 173, adoption: 0.66, riskAdjustedValue: 1038974, paybackMonths: 3.6 },
       };
 
     case "agentic-workflow":
@@ -202,7 +241,7 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
         rag: { ...base.rag, faithfulness: 87, citationAccuracy: 89, hallucination: 8, costPerAnswer: 0.04 },
         deploy: { ...base.deploy, costPerQuery: 0.09, monthlyCostAtTarget: 36000, driftRisk: 38 },
         governance: { riskTier: "High", controls: 14, status: "review" },
-        outcomes: { roi: 240, adoption: 0.6, riskAdjustedValue: 3400000, paybackMonths: 7 },
+        outcomes: { roi: 61, adoption: 0.68, riskAdjustedValue: 458408, paybackMonths: 8.4 },
       };
 
     case "at-risk":
@@ -232,7 +271,11 @@ export function demoState(archetype: DemoArchetype = "knowledge-assistant"): Pro
         rag: { ...base.rag, faithfulness: 81, citationAccuracy: 78, hallucination: 14, costPerAnswer: 0.05, status: "watch" },
         deploy: { ...base.deploy, driftRisk: 65, errorBudgetPct: 25, status: "watch" },
         governance: { riskTier: "High", controls: 6, status: "review" },
-        outcomes: { roi: 20, adoption: 0.35, riskAdjustedValue: 260000, paybackMonths: 34 },
+        // Engine-synced: even the at-risk archetype computes marginally positive
+        // (48% ROI, 13-month payback), the "not fundable yet" story is carried
+        // by the weak scores, blocked sources, and failing gates, not by a
+        // hand-authored negative ROI the verdict engine would contradict.
+        outcomes: { roi: 48, adoption: 0.56, riskAdjustedValue: 298963, paybackMonths: 13.2 },
       };
 
     case "knowledge-assistant":
