@@ -37,3 +37,19 @@ Before building, reviving, deploying, or registering ANY lab, app, or capability
   `GIT_INDEX_FILE` plumbing + direct ref write. Never trust mount `git status`.
 - `/tmp` is wiped on VM recycle; rebuild toolchain from `git archive HEAD`.
 - Background processes are killed silently; run foreground with `timeout 40`.
+
+## Rule 4: The simulator is NOT in this repo (2026-07-11)
+
+The AI Program Simulator — a hosted teaching product built on a hard fork of
+`program-core` + `engines` — lives in its own repo:
+`~/Claude/Projects/ai-program-simulator` (separate git remote, own CLAUDE.md).
+
+- **Nothing simulator-related belongs here.** No `sim-core`, no scenario packs,
+  no `apps/sim`, no simulator docs. If you find some, it drifted back in by
+  mistake — remove it.
+- The fork is **one-way and final**. The simulator took a copy of the engines at
+  a recorded SHA and cut the cord. There is no shared package, no upstream
+  dependency, and no sync process. A bug fixed there is NOT fixed here, and
+  vice versa. That is intended: this repo is a finished portfolio artifact; the
+  simulator is a living commercial product with different needs.
+- This repo stays what it is: the portfolio + the Command Center.
