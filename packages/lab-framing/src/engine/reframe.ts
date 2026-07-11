@@ -29,6 +29,9 @@ const PAIN_FIX: Record<string, string> = {
   "Knowledge trapped": "what is already known is easy to reach",
   "Poor experience": "the experience feels effortless",
   "Impossible today": "it becomes possible at all",
+  "Costly mistakes": "the expensive mistakes stop",
+  "Compliance exposure": "every answer stands up to an audit",
+  "Trust erosion": "trust comes back",
 };
 
 const LEADING = /^(i\s*('m|am)?\s*)?(really\s+)?(want|wish|would\s+like|need|hope|like|love)\s+(to\s+|that\s+|our\s+|my\s+|us\s+to\s+|the\s+)?|^we\s+(really\s+)?(want|wish|need|would\s+like)\s+(to\s+|our\s+|the\s+)?|^help\s+(me\s+|us\s+|our\s+)?|^can\s+(we|you|i)\s+|^please\s+|^i'?d\s+like\s+to\s+/i;

@@ -4,10 +4,12 @@
 // ============================================================================
 import type { FramingParams, TriangleScores, Verdict, VerdictTone } from "./types";
 import { SCORE_TARGETS } from "./scoring";
+import { PAINS } from "./params";
 
 export function deriveVerdict(p: FramingParams, sc: TriangleScores): Verdict {
   const min = Math.min(sc.value, sc.feasibility, sc.dataReadiness);
   const humanReview =
+    PAINS[p.pain].mode === "correctness" ||
     (p.risk === "Aggressive" && (sc.feasibility < 45 || sc.dataReadiness < 45)) ||
     sc.dataReadiness < 35;
 

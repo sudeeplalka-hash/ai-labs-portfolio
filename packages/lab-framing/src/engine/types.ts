@@ -12,7 +12,14 @@ export type JobKey =
 
 export type PainKey =
   | "Too slow" | "Inconsistent" | "Too expensive" | "Hard to scale"
-  | "Error prone" | "Knowledge trapped" | "Poor experience" | "Impossible today";
+  | "Error prone" | "Knowledge trapped" | "Poor experience" | "Impossible today"
+  | "Costly mistakes" | "Compliance exposure" | "Trust erosion";
+
+// What KIND of hurt the pain is. Severity says how much it hurts; mode says
+// what shape of solution relieves it: throughput pains want speed/deflection,
+// correctness pains want review-shaped ideas and a higher evidence bar,
+// coverage pains want reach, experience pains want the interaction fixed.
+export type PainMode = "throughput" | "correctness" | "coverage" | "experience";
 
 export type PostureKey = "Rich & ready" | "Scattered" | "Sparse" | "Unstructured";
 

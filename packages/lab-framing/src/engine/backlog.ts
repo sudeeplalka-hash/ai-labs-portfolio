@@ -5,9 +5,10 @@
 // which ideas surface, while relevance weighting keeps the most fitting ones up
 // top. Deterministic and offline.
 // ============================================================================
-import type { FramingParams, UseCase, BucketKey } from "./types";
+import type { FramingParams, UseCase, BucketKey, PainMode } from "./types";
 import { clamp } from "./scoring";
 import { analyzeAmbition } from "./analyze";
+import { PAINS } from "./params";
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const singular = (s: string) => (s.endsWith("ies") ? s.slice(0, -3) + "y" : s.endsWith("ss") ? s : s.endsWith("s") ? s.slice(0, -1) : s);
@@ -24,7 +25,7 @@ function hashFloat(str: string): number {
 interface Ctx {
   u: string; us: string; obj: string; objS: string;
   verb: string; verbCap: string; noun: string; flavor: string;
-  pain: string; intentKey: string; poorData: boolean;
+  pain: string; mode: PainMode; intentKey: string; poorData: boolean;
 }
 
 interface Arch {
@@ -47,7 +48,7 @@ const POOL: Arch[] = [
     title: (c) => `A quick win: ${c.verb} the top ${c.obj}`,
     desc: (c) => `A narrow, high frequency slice of ${c.obj}. Easy for ${c.u} to trust on day one.` },
   { id: "w-selfserve", bucket: "Wins", v: 66, e: 32,
-    rel: (c) => 0.45 + (c.pain === "Poor experience" || c.pain === "Too slow" ? 0.2 : 0),
+    rel: (c) => 0.45 + (c.mode === "experience" || c.pain === "Too slow" ? 0.2 : 0),
     title: (c) => `Let ${c.u} self-serve the everyday ${c.obj}`,
     desc: (c) => `Hand ${c.u} a fast, self-service path for routine ${c.obj}, no waiting in a queue.` },
   { id: "w-deflect", bucket: "Wins", v: 67, e: 30,
@@ -58,6 +59,10 @@ const POOL: Arch[] = [
     rel: (c) => 0.4 + (c.pain === "Too slow" ? 0.35 : 0),
     title: (c) => `Instant first response on every ${c.objS}`,
     desc: (c) => `Cut the wait for ${c.u} with an immediate, useful first reply.` },
+  { id: "w-review", bucket: "Wins", v: 67, e: 33,
+    rel: (c) => (c.mode === "correctness" ? 0.62 : -1),
+    title: (c) => `Draft ${c.obj} for one-click sign-off`,
+    desc: (c) => `The draft is ready before anyone asks; a person approves it, and nothing reaches ${c.u} unreviewed.` },
   { id: "w-flavor", bucket: "Wins", v: 66, e: 31,
     rel: (c) => (c.flavor ? 0.6 : -1),
     title: (c) => `Catch the ${c.flavor} ${c.obj} first`,
@@ -73,7 +78,7 @@ const POOL: Arch[] = [
     title: (c) => `Built into the tools ${c.u} already use`,
     desc: (c) => `Bring ${c.obj} into the workflow ${c.u} live in and cut the context switching.` },
   { id: "c-human", bucket: "Core", v: 70, e: 50,
-    rel: (c) => 0.45 + (c.pain === "Error prone" ? 0.25 : 0),
+    rel: (c) => 0.45 + (c.mode === "correctness" ? 0.3 : 0),
     title: (c) => `${c.verbCap} ${c.obj} with a human in the loop`,
     desc: (c) => `Draft automatically, let ${c.u} approve, and learn from every edit.` },
   { id: "c-consistent", bucket: "Core", v: 72, e: 47,
@@ -95,7 +100,7 @@ const POOL: Arch[] = [
     title: (c) => `A proactive layer that gets ahead of ${c.obj}`,
     desc: () => "Move from reactive to proactive, acting before anyone has to ask. The hard, defensible bet." },
   { id: "d-agent", bucket: "Differentiators", v: 85, e: 80,
-    rel: (c) => 0.5 + (c.intentKey === "automate" ? 0.3 : 0),
+    rel: (c) => 0.5 + (c.intentKey === "automate" ? 0.3 : 0) - (c.mode === "correctness" ? 0.2 : 0),
     title: (c) => `An agent that resolves ${c.obj} end to end`,
     desc: () => "Closes the loop instead of only suggesting. Highest ceiling, highest effort." },
   { id: "d-predict", bucket: "Differentiators", v: 80, e: 72,
@@ -117,7 +122,7 @@ const POOL: Arch[] = [
     title: (c) => `Unify and clean the ${c.obj} sources`,
     desc: () => "The fuel. Pull together the scattered data this depends on." },
   { id: "f-eval", bucket: "Foundations", v: 42, e: 44,
-    rel: (c) => 0.45 + (c.pain === "Error prone" ? 0.3 : 0),
+    rel: (c) => 0.45 + (c.mode === "correctness" ? 0.3 : 0),
     title: () => `An evaluation harness with guardrails`,
     desc: (c) => `Measure accuracy on real ${c.obj} and contain failures before anyone trusts it.` },
   { id: "f-feedback", bucket: "Foundations", v: 40, e: 38,
@@ -133,7 +138,7 @@ const POOL: Arch[] = [
     title: (c) => `Cache and route ${c.obj} by difficulty to cut cost`,
     desc: (c) => `Serve the easy ${c.obj} cheaply and reserve spend for the hard ones.` },
   { id: "f-audit", bucket: "Foundations", v: 43, e: 46,
-    rel: () => 0.32,
+    rel: (c) => 0.32 + (c.pain === "Compliance exposure" ? 0.45 : c.mode === "correctness" ? 0.12 : 0),
     title: (c) => `A review and audit trail for ${c.obj}`,
     desc: (c) => `Log every decision on ${c.obj} so it can be checked and trusted later.` },
 ];
@@ -148,7 +153,7 @@ export function generateBacklog(p: FramingParams, ambition = ""): UseCase[] {
     u: p.user.toLowerCase(), us: singular(p.user.toLowerCase()),
     obj: sig.object, objS: singular(sig.object),
     verb: sig.verb, verbCap: cap(sig.verb), noun: sig.noun, flavor: sig.flavor,
-    pain: p.pain, intentKey: sig.intentKey, poorData,
+    pain: p.pain, mode: PAINS[p.pain].mode, intentKey: sig.intentKey, poorData,
   };
 
   // Seed selection on EVERY parameter and the full normalized ask, so any change
