@@ -202,7 +202,8 @@ export function OperateStage() {
       </div>
       <StageThread stage="operate" />
 
-      {/* Orientation: the one idea + the 1-2-3 the tabs below follow */}
+      {/* Orientation: the one idea + the 1-2-3 stepper. These cards ARE the
+          view switcher (R3): one control, not a card row and a button row. */}
       <div className="mb-5 rounded-xl border border-line bg-white p-4 shadow-card">
         <div className="flex items-start gap-2">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
@@ -225,21 +226,6 @@ export function OperateStage() {
         </div>
       </div>
 
-      {/* View switch (numbered to mirror the stepper) */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        {STEPS.map(({ k, n: num, label, Icon }) => (
-          <button key={k} onClick={() => setView(k)}
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${view === k ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>
-            <span className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold ${view === k ? "bg-white/25 text-white" : "bg-slate-100 text-slatey-500"}`}>{num}</span>
-            <Icon className="h-3.5 w-3.5" /> {label}
-          </button>
-        ))}
-        <button
-          onClick={() => downloadMd(`weekly-ops-review-wk${last.week}.md`, buildWeeklyOpsReview(src, series, signals))}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slatey-400 hover:border-primary/40 hover:text-ink">
-          <Download className="h-3.5 w-3.5" /> Weekly ops review
-        </button>
-      </div>
 
       {/* ---------------- View 1 · Health board ---------------- */}
       {view === "health" && (
