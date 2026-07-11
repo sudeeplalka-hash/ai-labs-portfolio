@@ -232,16 +232,10 @@ export const LABS: LabEntry[] = [
     href: "/engagement/exec-comms",
   },
 
-  // Collection 5, Live Builds (real models, real metrics; standalone deploys).
-  // Doctrine: entries land here only when the deploy is verified live.
-  {
-    id: "LB-01", collection: 5, title: "Governance Control Plane backend (code evidence)", status: "shipped", live: "RECORDED",
-    liveNote: "the real system behind /govern's in-browser engine: FastAPI service, 25/25 tests, RBAC, persistent hash-chained audit log - published as a repo, not a duplicate site",
-    problem: "Can we prove to an auditor that the guardrails actually ran?",
-    decision: "Which guardrails gate which risk tier, and what a tamper-evident audit trail must capture.",
-    flagship: true,
-    href: "https://github.com/sudeeplalka-hash/enterprise-ai-governance-control-plane",
-  },
+  // Collection 5, Live Builds (real models, real metrics). Doctrine: entries
+  // land here only when their public evidence link is verified reachable.
+  // (LB-01, the governance backend repo, returns the moment that repo is made
+  // public - the row is one commit away, see docs/field-notes/lb-01.)
   {
     id: "LB-03", collection: 5, title: "Model Evaluation & Threshold Economics", status: "shipped", live: "LIVE",
     liveNote: "trains a logistic model in your browser on a disclosed synthetic corpus; ROC/PR/calibration/cost curves all computed live",
