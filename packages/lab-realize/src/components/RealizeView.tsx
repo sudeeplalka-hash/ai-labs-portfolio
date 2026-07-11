@@ -122,7 +122,7 @@ export function RealizeView() {
 
           <h1 className="mt-3 text-2xl font-semibold leading-snug tracking-tight text-ink">
             {worth ? (
-              <>Returns <span className="text-emerald-700">{usd(roi.riskAdjustedValue)}/yr</span> on a {usd(inp.investment)} build{payback !== null ? <>, paying for itself in <span className="text-emerald-700">{payback} months</span></> : ""}.</>
+              <>Returns <span className="text-emerald-700">{usd(roi.riskAdjustedValue)}/yr</span> on a {usd(inp.investment)} build{payback !== null ? <>, paying for itself in <span className="text-emerald-700">{payback} month{payback === 1 ? "" : "s"}</span></> : ""}.</>
             ) : (
               <>Not fundable as it stands, the value it creates doesn&rsquo;t yet cover what it costs to build and run.</>
             )}
