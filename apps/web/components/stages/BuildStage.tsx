@@ -8,6 +8,7 @@ import { LiveLabView } from "@rag/components/live-lab/LiveLabView";
 import { BuildContractCard } from "@/components/lifecycle/StageContracts";
 import { StageDemonstrates } from "@/components/reviewer/Reviewer";
 import { NextStageCTA } from "@/components/lifecycle/NextStageCTA";
+import { StageThread } from "@/components/story/StageThread";
 
 // Stage 03. Locked until Framing completes, then the live RAG evaluator renders
 // in the shared shell. (Operations/cost and latency now live in Deploy; maturity in Govern.)
@@ -23,6 +24,7 @@ export function BuildStage() {
         faithfulness, citation accuracy, and an honest quality verdict. This is where the bet&apos;s feasibility
         guess from Framing meets the truth.
       </PageIntro>
+      <StageThread stage="build" />
       <div className="mb-5"><StageDemonstrates>RAG build maturity through retrieval, evidence, citations, faithfulness, hallucination risk, traces, evaluations, and quality gates.</StageDemonstrates></div>
       <HandoffBanner stage="build" />
       {state.operate?.buildTask && (

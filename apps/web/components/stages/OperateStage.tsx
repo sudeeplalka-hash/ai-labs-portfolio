@@ -26,6 +26,7 @@ import {
   buildOperateFeedback, buildWeeklyOpsReview, buildIncidentReport,
   type OpsSignal, type RemediationOption, type OperateFeedback,
 } from "@labs/program-core";
+import { StageThread } from "@/components/story/StageThread";
 
 type View = "health" | "incident" | "loop";
 const SEV_TONE: Record<string, BadgeTone> = { high: "rose", med: "amber", low: "slate" };
@@ -199,6 +200,7 @@ export function OperateStage() {
           It loops back: retrain, reindex, rollback, or rescope.
         </p>
       </div>
+      <StageThread stage="operate" />
 
       {/* Orientation: the one idea + the 1-2-3 the tabs below follow */}
       <div className="mb-5 rounded-xl border border-line bg-white p-4 shadow-card">

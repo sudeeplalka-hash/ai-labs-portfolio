@@ -45,3 +45,105 @@ export function labHref(labId: string, ucId?: string): string {
   if (!route) return "/";
   return ucId ? `${route.href}/?uc=${ucId}` : route.href;
 }
+
+// ---------------------------------------------------------------------------
+// STAGE_SECTIONS · the ONE nav config for Collection 1's stage sub-pages (R2.2).
+// Both the sidebar's collapsible trees AND the in-page StageSubnav render from
+// this list, so the two can never disagree again (Build's grouped sections used
+// to exist only in the sidebar while its in-page subnav showed a flat row).
+// Hash hrefs (Deploy/Realize) address in-page sections; the views listen for
+// hashchange. Grouped stages follow Govern's grouped pattern; a single
+// unlabeled group renders as a flat chip row.
+// ---------------------------------------------------------------------------
+
+export interface StageSectionItem { label: string; href: string }
+export interface StageSectionGroup { label?: string; items: StageSectionItem[] }
+/** Mirrors program-core's StageKey (kit stays dependency-free by design). */
+export type StageSectionsKey = "frame" | "data" | "build" | "deploy" | "govern" | "realize" | "operate";
+
+export const STAGE_SECTIONS: Partial<Record<StageSectionsKey, StageSectionGroup[]>> = {
+  frame: [{ items: [
+    { label: "Strategy workshop", href: "/frame" },
+    { label: "Guide", href: "/frame/guide" },
+  ] }],
+  data: [{ items: [
+    { label: "Live Data Lab", href: "/data" },
+    { label: "Overview", href: "/data/overview" },
+    { label: "Corpus", href: "/data/corpus" },
+    { label: "Pipeline", href: "/data/pipeline" },
+    { label: "Guide", href: "/data/guide" },
+  ] }],
+  build: [
+    { label: "Pipeline", items: [
+      { label: "Live Evaluator", href: "/build" },
+      { label: "Model fit", href: "/build/model" },
+      { label: "Retrieval", href: "/build/retrieval" },
+      { label: "Answers", href: "/build/answers" },
+    ] },
+    { label: "Evaluation", items: [
+      { label: "Evaluations", href: "/build/evaluations" },
+      { label: "Golden Dataset", href: "/build/dataset" },
+      { label: "Traces", href: "/build/traces" },
+      { label: "Quality Gates", href: "/build/quality-gates" },
+      { label: "Failures", href: "/build/failures" },
+    ] },
+    { label: "Capabilities", items: [
+      { label: "Agents & Tools", href: "/build/agents" },
+      { label: "Training Readiness", href: "/build/training" },
+      { label: "Under the Hood", href: "/build/internals" },
+    ] },
+    { label: "Reference", items: [
+      { label: "Overview", href: "/build/overview" },
+      { label: "Guide", href: "/build/guide" },
+    ] },
+  ],
+  deploy: [{ items: [
+    { label: "Operating envelope", href: "/deploy#envelope" },
+    { label: "Compare configs", href: "/deploy#compare" },
+    { label: "Under load", href: "/deploy#under-load" },
+    { label: "Incident response", href: "/deploy#incident" },
+    { label: "Guide", href: "/deploy/guide" },
+  ] }],
+  govern: [
+    { label: "Overview", items: [
+      { label: "Cockpit", href: "/govern" },
+      { label: "Guide", href: "/govern/guide" },
+    ] },
+    { label: "Control plane", items: [
+      { label: "Use cases", href: "/govern/use-cases" },
+      { label: "Risk", href: "/govern/risk" },
+      { label: "Policies", href: "/govern/policies" },
+      { label: "Playground", href: "/govern/playground" },
+      { label: "Evals", href: "/govern/evals" },
+    ] },
+    { label: "Experiences", items: [
+      { label: "See it live", href: "/govern/live" },
+      { label: "Red team arcade", href: "/govern/arcade" },
+      { label: "What if calc", href: "/govern/value" },
+      { label: "Maturity", href: "/govern/maturity" },
+    ] },
+    { label: "Assurance", items: [
+      { label: "Audit log", href: "/govern/audit-logs" },
+      { label: "Review queue", href: "/govern/review-queue" },
+      { label: "Evidence", href: "/govern/evidence" },
+      { label: "Readiness", href: "/govern/readiness" },
+      { label: "Board brief", href: "/govern/brief" },
+    ] },
+    { label: "Reference", items: [
+      { label: "Docs", href: "/govern/docs" },
+      { label: "Settings", href: "/govern/settings" },
+    ] },
+  ],
+  realize: [{ items: [
+    { label: "The verdict", href: "/realize#verdict" },
+    { label: "Where the value goes", href: "/realize#value" },
+    { label: "What moves it most", href: "/realize#levers" },
+    { label: "Adoption plan", href: "/realize#adoption" },
+    { label: "Traceability dossier", href: "/realize#dossier" },
+    { label: "Guide", href: "/realize/guide" },
+  ] }],
+  operate: [{ items: [
+    { label: "Day two console", href: "/operate" },
+    { label: "Guide", href: "/operate/guide" },
+  ] }],
+};

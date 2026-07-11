@@ -7,105 +7,19 @@ import {
   Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, Lock, Check, ChevronDown, BookOpen, type LucideIcon,
 } from "lucide-react";
 import { useProgram, STAGES, type StageKey, type StageStatus } from "@labs/program-core";
+import { STAGE_SECTIONS, type StageSectionItem } from "@labs/kit";
 import { cn } from "@labs/design-system";
 
 const ICONS: Record<StageKey, LucideIcon> = {
   frame: Compass, data: Database, build: Boxes, deploy: Rocket, govern: ShieldCheck, realize: TrendingUp, operate: RefreshCcw,
 };
 
-// Each lab's sub-pages, surfaced in the sidebar so they aren't hidden behind the
-// in-page subnav. Route-based labs link to real URLs; Deploy and Realize use a
-// hash that their views read to switch the active in-page section.
-type Sub = { label: string; href: string };
-// Sub-pages can be grouped (like Govern's in-page subnav). Labs without a natural
-// grouping use a single unlabeled group.
-type Group = { label?: string; items: Sub[] };
-const SUBNAV: Partial<Record<StageKey, Group[]>> = {
-  frame: [{ items: [
-    { label: "Strategy workshop", href: "/frame" },
-    { label: "Guide", href: "/frame/guide" },
-  ] }],
-  data: [{ items: [
-    { label: "Live Data Lab", href: "/data" },
-    { label: "Overview", href: "/data/overview" },
-    { label: "Corpus", href: "/data/corpus" },
-    { label: "Pipeline", href: "/data/pipeline" },
-    { label: "Guide", href: "/data/guide" },
-  ] }],
-  build: [
-    { label: "Pipeline", items: [
-      { label: "Live Evaluator", href: "/build" },
-      { label: "Model fit", href: "/build/model" },
-      { label: "Retrieval", href: "/build/retrieval" },
-      { label: "Answers", href: "/build/answers" },
-    ] },
-    { label: "Evaluation", items: [
-      { label: "Evaluations", href: "/build/evaluations" },
-      { label: "Golden Dataset", href: "/build/dataset" },
-      { label: "Traces", href: "/build/traces" },
-      { label: "Quality Gates", href: "/build/quality-gates" },
-      { label: "Failures", href: "/build/failures" },
-    ] },
-    { label: "Capabilities", items: [
-      { label: "Agents & Tools", href: "/build/agents" },
-      { label: "Training Readiness", href: "/build/training" },
-      { label: "Under the Hood", href: "/build/internals" },
-    ] },
-    { label: "Reference", items: [
-      { label: "Overview", href: "/build/overview" },
-      { label: "Guide", href: "/build/guide" },
-    ] },
-  ],
-  deploy: [{ items: [
-    { label: "Operating envelope", href: "/deploy#envelope" },
-    { label: "Compare configs", href: "/deploy#compare" },
-    { label: "Under load", href: "/deploy#under-load" },
-    { label: "Incident response", href: "/deploy#incident" },
-    { label: "Guide", href: "/deploy/guide" },
-  ] }],
-  govern: [
-    { label: "Overview", items: [
-      { label: "Cockpit", href: "/govern" },
-      { label: "Guide", href: "/govern/guide" },
-    ] },
-    { label: "Control plane", items: [
-      { label: "Use cases", href: "/govern/use-cases" },
-      { label: "Risk", href: "/govern/risk" },
-      { label: "Policies", href: "/govern/policies" },
-      { label: "Playground", href: "/govern/playground" },
-      { label: "Evals", href: "/govern/evals" },
-    ] },
-    { label: "Experiences", items: [
-      { label: "See it live", href: "/govern/live" },
-      { label: "Red team arcade", href: "/govern/arcade" },
-      { label: "What if calc", href: "/govern/value" },
-      { label: "Maturity", href: "/govern/maturity" },
-    ] },
-    { label: "Assurance", items: [
-      { label: "Audit log", href: "/govern/audit-logs" },
-      { label: "Review queue", href: "/govern/review-queue" },
-      { label: "Evidence", href: "/govern/evidence" },
-      { label: "Readiness", href: "/govern/readiness" },
-      { label: "Board brief", href: "/govern/brief" },
-    ] },
-    { label: "Reference", items: [
-      { label: "Docs", href: "/govern/docs" },
-      { label: "Settings", href: "/govern/settings" },
-    ] },
-  ],
-  realize: [{ items: [
-    { label: "The verdict", href: "/realize#verdict" },
-    { label: "Where the value goes", href: "/realize#value" },
-    { label: "What moves it most", href: "/realize#levers" },
-    { label: "Adoption plan", href: "/realize#adoption" },
-    { label: "Traceability dossier", href: "/realize#dossier" },
-    { label: "Guide", href: "/realize/guide" },
-  ] }],
-  operate: [{ items: [
-    { label: "Day two console", href: "/operate" },
-    { label: "Guide", href: "/operate/guide" },
-  ] }],
-};
+// Each lab's sub-pages, surfaced in the sidebar so they aren't hidden behind
+// the in-page subnav. The config lives in @labs/kit (STAGE_SECTIONS) and is
+// shared with the in-page StageSubnav, so the two surfaces can never diverge
+// (R2.2). Route-based labs link to real URLs; Deploy and Realize use a hash
+// that their views read to switch the active in-page section.
+type Sub = StageSectionItem;
 
 function Dot({ status }: { status: StageStatus }) {
   return (
@@ -188,7 +102,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           const onRoute = s.href === "/" ? pathname === "/" : pathname.startsWith(s.href);
           const locked = status === "locked";
           const Icon = ICONS[s.key];
-          const children = SUBNAV[s.key];
+          const children = STAGE_SECTIONS[s.key];
           const expanded = open[s.key] ?? onRoute; // auto-open the lab you're in
           return (
             <div key={s.key}>

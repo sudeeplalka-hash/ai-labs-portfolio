@@ -52,6 +52,7 @@ export function ProgramRail() {
                 {s.short}
                 <span className={cn("font-mono font-semibold", h?.value ? "text-ink" : "text-slate-300")}>
                   {h?.value ?? "N/A"}
+                  {h?.value && h.unit ? <span className="font-normal text-slatey-500">{h.unit}</span> : null}
                 </span>
               </Link>
             </span>

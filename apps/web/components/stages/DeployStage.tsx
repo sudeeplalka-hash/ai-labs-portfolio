@@ -8,6 +8,7 @@ import { StagePlaceholder } from "@/components/shell/StagePlaceholder";
 import { ReleaseReadinessPanel, OperateEvidencePanels } from "@/components/operate/OperateSpine";
 import { NextStageCTA } from "@/components/lifecycle/NextStageCTA";
 import { ReleaseBlockers } from "@/components/operate/ReleaseBlockers";
+import { StageThread } from "@/components/story/StageThread";
 
 // Stage 04 · Deploy · AI Ops ("make it run"; day two lives in 07 Operate).
 // Vocabulary settled 2026-07-11 (R1.2). The existing operating-envelope engine
@@ -25,6 +26,7 @@ export function DeployStage() {
         production readiness evidence: release gates, version lineage, monitoring coverage, evaluation regression, drift,
         incidents, rollback options, and cost and latency controls. Day two, keeping it running, lives in Operate.
       </PageIntro>
+      <StageThread stage="deploy" />
       <ReleaseBlockers />
       <ReleaseReadinessPanel />
       <DeployView />

@@ -10,6 +10,7 @@ import { DataPurposes } from "@/components/data/DataPurposes";
 import { StageDemonstrates } from "@/components/reviewer/Reviewer";
 import { NextStageCTA } from "@/components/lifecycle/NextStageCTA";
 import { SourceWhatIf } from "@/components/data/SourceWhatIf";
+import { StageThread } from "@/components/story/StageThread";
 
 // Stage 02. Locked until Framing completes, then the real Data lab renders in the
 // shared shell, with the framed bet carried over.
@@ -25,6 +26,7 @@ export function DataStage() {
         ingestion guidelines, clears sensitive data, previews chunking, and gives an honest readiness verdict,
         then hands the approved corpus to the RAG evaluator. Everything runs locally.
       </PageIntro>
+      <StageThread stage="data" />
       <div className="mb-5"><StageDemonstrates>AI readiness depends on source quality, ownership, sensitivity, metadata, provenance, chunk readiness, and exclusion decisions before build.</StageDemonstrates></div>
       <HandoffBanner stage="data" />
       <DataLabView />

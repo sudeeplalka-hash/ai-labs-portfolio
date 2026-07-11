@@ -12,6 +12,9 @@ export interface StageHeadline {
   key: StageKey;
   /** Short display value for the rail chip (e.g. "74", "Approved w/ conditions"). */
   value: string | null;
+  /** Unit suffix rendered after the value (R2.3): "/100", " signals". Includes
+   * its own leading separator so the chip can concatenate directly. */
+  unit?: string | null;
   /** One-line context shown as tooltip / secondary text. */
   detail: string | null;
 }
@@ -52,25 +55,33 @@ export function selectStageHeadlines(s: ProgramState): StageHeadline[] {
   const opsSignals = detectSignals(opsSeries, s.initiative?.meta?.governanceTier);
   const opsVaR = valueAtRisk(s, opsSeries);
 
+  // R2.3: every chip carries its unit, and every tooltip names the metric, so
+  // "75 · 74 · 91 · 69 · Approved · 180% · 4" reads as scored facts, not codes.
   return [
-    { key: "frame", value: overall !== null ? `${overall}` : "✓", detail: s.initiative.name },
-    { key: "data", value: `${handoff.dataReadinessScore}`, detail: blocked ? `${blocked} blocked source(s)` : "readiness /100" },
-    { key: "build", value: contract.qualityScore !== undefined ? `${contract.qualityScore}` : null, detail: gates ? `${gates} gate(s) failing` : "quality /100" },
-    { key: "deploy", value: `${rr.score}`, detail: rr.recommendation },
-    { key: "govern", value: short(decision.decision), detail: decision.score !== undefined ? `score ${decision.score}/100` : null },
+    { key: "frame", value: overall !== null ? `${overall}` : "✓", unit: overall !== null ? "/100" : null,
+      detail: s.initiative.name ? `${s.initiative.name} · opportunity score ${overall ?? "N/A"}/100` : null },
+    { key: "data", value: `${handoff.dataReadinessScore}`, unit: "/100",
+      detail: `Data readiness ${handoff.dataReadinessScore}/100${blocked ? ` · ${blocked} blocked source(s)` : ""}` },
+    { key: "build", value: contract.qualityScore !== undefined ? `${contract.qualityScore}` : null, unit: contract.qualityScore !== undefined ? "/100" : null,
+      detail: gates ? `Build quality ${contract.qualityScore}/100 · ${gates} gate(s) failing` : `Build quality ${contract.qualityScore}/100` },
+    { key: "deploy", value: `${rr.score}`, unit: "/100", detail: `Release readiness ${rr.score}/100 · ${rr.recommendation}` },
+    { key: "govern", value: short(decision.decision), unit: null,
+      detail: decision.score !== undefined ? `Governance score ${decision.score}/100` : null },
     {
       key: "realize",
       value: roi !== undefined ? `${roi}%` : null,
+      unit: null,
       detail: roi !== undefined
-        ? (payback !== undefined && Number.isFinite(payback) ? `payback ${Math.round(payback)}mo` : "risk adjusted ROI")
+        ? `Risk adjusted ROI ${roi}%${payback !== undefined && Number.isFinite(payback) ? ` · payback ${Math.round(payback)}mo` : ""}`
         : "visit Realize to compute ROI",
     },
     {
       key: "operate",
       value: `${opsSignals.length}`,
+      unit: opsSignals.length === 1 ? " signal" : " signals",
       detail: opsSignals.length
-        ? `${opsSignals.length} signal(s) · $${Math.round(opsVaR.valueAtRiskUsd / 1000)}k/yr at risk`
-        : "systems steady",
+        ? `${opsSignals.length} open signal(s) · $${Math.round(opsVaR.valueAtRiskUsd / 1000)}k/yr at risk`
+        : "Open signals: 0 · systems steady",
     },
   ];
 }

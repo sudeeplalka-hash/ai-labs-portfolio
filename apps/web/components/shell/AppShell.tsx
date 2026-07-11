@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
-import { STAGES } from "@labs/program-core";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
-import { StoryThread } from "@/components/story/StoryThread";
 import { ProgramRail } from "@/components/lifecycle/ProgramRail";
 import { IS_COMMAND_CENTER } from "@/lib/site";
 
@@ -24,13 +22,13 @@ function isBareRoute(pathname: string): boolean {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  // Which stage are we in? (Home and the Storyline aren't a single lab.)
-  const stage = STAGES.find((s) => pathname === s.href || pathname.startsWith(s.href + "/"))?.key;
   // Layer 0 landing and the new collections render without C1's shell.
   if (isBareRoute(pathname)) return <>{children}</>;
   return (
     <div className="flex min-h-screen">
-      <aside className="no-print hidden w-64 shrink-0 bg-ink lg:block">
+      {/* w-72 (R2.4): the rail was w-64 and truncated "Strategy & Planning" /
+          "Build · RAG"; the extra 32px fits every stage label at rest. */}
+      <aside className="no-print hidden w-72 shrink-0 bg-ink lg:block">
         <div className="sticky top-0 h-screen"><Sidebar /></div>
       </aside>
 
@@ -51,8 +49,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <ProgramRail />
         {/* overflow-x-clip: guard against sub-viewport-width leaks on mobile
             without creating a scroll container (keeps lg:sticky panels working). */}
+        {/* R2.1: the per-stage story band moved INTO each stage header (see
+            StageThread), one header per page instead of a stacked triple. */}
         <main className="mx-auto w-full max-w-[1440px] flex-1 overflow-x-clip px-5 py-6 md:px-8 md:py-8">
-          {stage && <StoryThread stage={stage} />}
           {children}
         </main>
         <footer className="no-print border-t border-line px-5 py-4 text-center text-xs text-slatey-500 md:px-8">
