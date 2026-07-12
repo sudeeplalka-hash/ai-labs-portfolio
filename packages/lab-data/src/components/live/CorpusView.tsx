@@ -51,11 +51,13 @@ const PAIR_BADGE: Record<DupPair["kind"], { color: BadgeColor; label: string; ic
   "near-duplicate": { color: "slate", label: "Near-duplicate", icon: Layers },
 };
 
+// Stacked-bar segments are solid decorative fills (3:1 non-text), so they keep the
+// vivid `-fill` tone. Text/icon uses of status now resolve to the darker AA-safe ink.
 const GATE_SEG: { key: "approved" | "conditional" | "hold" | "rejected"; label: string; bg: string }[] = [
-  { key: "approved", label: "Approved", bg: "bg-status-healthy" },
-  { key: "conditional", label: "Conditional", bg: "bg-status-watch" },
-  { key: "hold", label: "Hold", bg: "bg-status-risk" },
-  { key: "rejected", label: "Rejected", bg: "bg-status-critical" },
+  { key: "approved", label: "Approved", bg: "bg-status-healthy-fill" },
+  { key: "conditional", label: "Conditional", bg: "bg-status-watch-fill" },
+  { key: "hold", label: "Hold", bg: "bg-status-risk-fill" },
+  { key: "rejected", label: "Rejected", bg: "bg-status-critical-fill" },
 ];
 
 export function CorpusView() {

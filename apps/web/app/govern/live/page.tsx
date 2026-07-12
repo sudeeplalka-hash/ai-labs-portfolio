@@ -53,7 +53,7 @@ export default function LiveDemo() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">See it in action</p>
-          <h1 className="text-2xl font-semibold text-slate-900 mt-1">The same request, with and without governance</h1>
+          <h2 className="text-2xl font-semibold text-slate-900 mt-1">The same request, with and without governance</h2>
           <p className="text-sm text-slate-500 mt-1">Pick a request or type your own. Left is an unguarded model. Right is the control plane.</p>
         </div>
         <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs shrink-0">

@@ -4,12 +4,14 @@ import { MetricTooltip } from "./MetricTooltip";
 
 type Accent = "blue" | "emerald" | "amber" | "orange" | "rose";
 
+// Solid decorative accent bars: only WCAG 1.4.11 (3:1 non-text) applies, so these
+// keep the vivid `-fill` tone. The status DEFAULT is now the darker, text-safe ink.
 const ACCENT_BG: Record<Accent, string> = {
   blue: "bg-primary",
-  emerald: "bg-status-healthy",
-  amber: "bg-status-watch",
-  orange: "bg-status-risk",
-  rose: "bg-status-critical",
+  emerald: "bg-status-healthy-fill",
+  amber: "bg-status-watch-fill",
+  orange: "bg-status-risk-fill",
+  rose: "bg-status-critical-fill",
 };
 
 export function KpiCard({

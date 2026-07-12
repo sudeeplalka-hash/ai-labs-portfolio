@@ -21,7 +21,8 @@ export function PageIntro({
           {eyebrow}
         </p>
       )}
-      <h1 className="text-2xl font-semibold text-ink">{title}</h1>
+      {/* <h2>: the AppShell Header owns the page's single <h1>. Visuals unchanged. */}
+      <h2 className="text-2xl font-semibold text-ink">{title}</h2>
       {children && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-300">{children}</p>}
     </div>
   );

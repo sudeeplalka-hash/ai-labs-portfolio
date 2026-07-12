@@ -229,7 +229,10 @@ export function PageIntro({
             <Icon className="h-4 w-4" />
           </span>
         )}
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+        {/* <h2>, not <h1>: the AppShell Header owns the page's single <h1>. PageIntro
+            is the in-content title, so it is the first section heading. Visual output
+            is unchanged — Tailwind preflight resets heading sizes, the classes decide. */}
+        <h2 className="text-2xl font-semibold tracking-tight text-ink">{title}</h2>
       </div>
       {children && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">{children}</p>}
     </div>

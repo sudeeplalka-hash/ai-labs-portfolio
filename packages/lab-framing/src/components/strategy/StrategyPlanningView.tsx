@@ -48,7 +48,8 @@ export function StrategyPlanningView() {
       {/* HERO */}
       <header>
         <p className="eyebrow">Strategy &amp; Planning</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">Turn a vague AI idea into a <span className="text-primary">decision ready initiative</span>.</h1>
+        {/* <h2>: the AppShell Header owns the page's <h1> ("Strategy & Planning"). */}
+        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">Turn a vague AI idea into a <span className="text-primary">decision ready initiative</span>.</h2>
         <p className="mt-3 max-w-3xl text-base leading-relaxed text-slatey-300">
           Most AI programs don&rsquo;t fail because the model is weak. They fail because the use case was poorly framed, the value
           was unclear, the data assumptions were untested, or the risks were discovered too late. This lab helps teams define the

@@ -53,7 +53,7 @@ export function BoardBrief() {
       <article className="rounded-2xl border border-line bg-white p-8 shadow-card print:rounded-none print:border-0 print:p-0 print:shadow-none">
         <header className="border-b border-line pb-4">
           <p className="eyebrow">AI Initiative · Board Brief</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink">{i?.name ?? "Untitled initiative"}</h1>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink">{i?.name ?? "Untitled initiative"}</h2>
           {(i?.sharpenedProblem || i?.valueHypothesis) && (
             <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slatey-400">{i?.valueHypothesis ?? i?.sharpenedProblem}</p>
           )}

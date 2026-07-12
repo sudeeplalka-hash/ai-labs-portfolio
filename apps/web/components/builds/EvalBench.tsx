@@ -66,7 +66,7 @@ export function EvalBench() {
         </Link>
       </div>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">Model Evaluation &amp; Threshold Economics</h1>
+        <h2 className="text-2xl font-semibold tracking-tight text-ink">Model Evaluation &amp; Threshold Economics</h2>
         <LiveBadge mode="LIVE" />
         <Badge tone="amber">synthetic data · generator disclosed</Badge>
       </div>

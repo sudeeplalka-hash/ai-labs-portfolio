@@ -37,7 +37,7 @@ export default function Readiness() {
     <div className="p-8 space-y-6 max-w-[1050px]">
       <div>
         <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Regulatory readiness</p>
-        <h1 className="text-2xl font-semibold text-slate-900 mt-1">Am I ready for the AI rulebook?</h1>
+        <h2 className="text-2xl font-semibold text-slate-900 mt-1">Am I ready for the AI rulebook?</h2>
         <p className="text-sm text-slate-500 mt-1">How the control plane maps to the obligations that matter.</p>
       </div>
 

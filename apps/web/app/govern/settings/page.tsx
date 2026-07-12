@@ -10,7 +10,7 @@ export default function Settings() {
     <div className="p-8 max-w-[760px] space-y-6">
       <div>
         <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Settings</p>
-        <h1 className="text-2xl font-semibold text-slate-900 mt-1">Model &amp; connection</h1>
+        <h2 className="text-2xl font-semibold text-slate-900 mt-1">Model &amp; connection</h2>
         <p className="text-sm text-slate-500 mt-1">Run the lab on deterministic mock responses, or bring your own key to govern a real model.</p>
       </div>
 

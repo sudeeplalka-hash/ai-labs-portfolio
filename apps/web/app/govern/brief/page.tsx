@@ -20,7 +20,7 @@ export default function Brief() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Board brief</p>
-          <h1 className="text-2xl font-semibold text-slate-900 mt-1">One page for the board</h1>
+          <h2 className="text-2xl font-semibold text-slate-900 mt-1">One page for the board</h2>
           <p className="text-sm text-slate-500 mt-1">Turn the live posture into a screenshot ready executive summary.</p>
         </div>
         <div className="flex gap-2">

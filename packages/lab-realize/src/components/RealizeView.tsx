@@ -118,13 +118,14 @@ export function RealizeView() {
             {worth ? "Worth funding" : "Not yet fundable"}
           </span>
 
-          <h1 className="mt-3 text-2xl font-semibold leading-snug tracking-tight text-ink">
+          {/* <h2>: the AppShell Header owns the page's <h1> ("Realize"). */}
+          <h2 className="mt-3 text-2xl font-semibold leading-snug tracking-tight text-ink">
             {worth ? (
               <>Returns <span className="text-emerald-700">{usd(roi.riskAdjustedValue)}/yr</span> on a {usd(inp.investment)} build{payback !== null ? <>, paying for itself in <span className="text-emerald-700">{formatMonths(payback)}</span></> : ""}.</>
             ) : (
               <>Not fundable as it stands, the value it creates doesn&rsquo;t yet cover what it costs to build and run.</>
             )}
-          </h1>
+          </h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slatey-400">
             This is the <span className="font-medium text-ink">risk‑adjusted</span> number, the honest one you could defend to finance. It starts from all the value on the table and subtracts every real‑world leak, each traced to the stage that caused it (shown below).
           </p>

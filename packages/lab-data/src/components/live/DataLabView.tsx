@@ -78,11 +78,12 @@ const LEVEL_BADGE: Record<Level, { color: BadgeColor; word: string; icon: Lucide
   critical: { color: "rose", word: "Blocker", icon: ShieldAlert, hex: "#dc2626" },
 };
 
+// Solid gate bars — decorative fill, keeps the vivid tone (3:1 non-text is the bar).
 const GATE_BG: Record<string, string> = {
-  emerald: "bg-status-healthy",
-  amber: "bg-status-watch",
-  orange: "bg-status-risk",
-  rose: "bg-status-critical",
+  emerald: "bg-status-healthy-fill",
+  amber: "bg-status-watch-fill",
+  orange: "bg-status-risk-fill",
+  rose: "bg-status-critical-fill",
 };
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));

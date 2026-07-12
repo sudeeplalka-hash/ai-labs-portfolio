@@ -42,7 +42,8 @@ export default function Page() {
       <header>
         <Link href="/" className="inline-flex items-center gap-1 text-sm font-medium text-slatey-400 hover:text-primary"><ArrowLeft className="h-4 w-4" /> Home</Link>
         <p className="eyebrow mt-2">Product roadmap</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">What exists now, what comes next, and what&rsquo;s out of scope</h1>
+        {/* <h2>: the AppShell Header owns this page's <h1>. */}
+        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">What exists now, what comes next, and what&rsquo;s out of scope</h2>
       </header>
 
       <Section icon={<CircleCheck className="h-4 w-4 text-emerald-600" />} title="Current capabilities" items={CURRENT} tone="text-emerald-700" />

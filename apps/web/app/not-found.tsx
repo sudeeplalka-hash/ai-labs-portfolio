@@ -12,9 +12,10 @@ export default function NotFound() {
     <div className="flex min-h-[70vh] items-center justify-center px-5 py-16">
       <div className="w-full max-w-md text-center">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-slatey-500">404 &middot; not found</p>
-        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
+        {/* <h2>: the AppShell Header owns the page's <h1>. */}
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
           This page doesn&apos;t exist{IS_COMMAND_CENTER ? " in the Command Center" : " in the portfolio"}.
-        </h1>
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-slatey-400">
           The link may be from an older version of the site. Everything that ships is reachable from the
           {IS_COMMAND_CENTER ? " seven-stage home" : " Competency Map"}, start there.

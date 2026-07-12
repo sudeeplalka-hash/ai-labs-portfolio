@@ -29,7 +29,8 @@ export default function Page() {
       <header>
         <Link href="/" className="inline-flex items-center gap-1 text-sm font-medium text-slatey-400 hover:text-primary"><ArrowLeft className="h-4 w-4" /> Home</Link>
         <p className="eyebrow mt-2">Implementation notes</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">Architecture &amp; how it&rsquo;s built</h1>
+        {/* <h2>: the AppShell Header owns this page's <h1>. */}
+        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">Architecture &amp; how it&rsquo;s built</h2>
         <p className="mt-3 max-w-3xl text-base leading-relaxed text-slatey-300">
           AI Command Center is an enterprise AI program operating system, a portfolio command center that shows enterprise AI
           delivery mechanics without confidential data or cloud infrastructure.

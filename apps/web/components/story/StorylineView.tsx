@@ -37,9 +37,10 @@ export function StorylineView() {
       {/* Hero */}
       <header>
         <p className="eyebrow">The two minute story</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">
+        {/* <h2>: the AppShell Header owns the page's <h1> ("Storyline"). */}
+        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">
           One initiative, from a rough idea to a <span className="text-primary">business case you can defend</span>.
-        </h1>
+        </h2>
         <p className="mt-3 text-base leading-relaxed text-slatey-300">
           {betName
             ? <>Following <span className="font-medium text-ink">&ldquo;{betName}&rdquo;</span> through all seven stages. Each stage answers one question and produces one number the next stage builds on, so the final ROI traces all the way back to the first decision.</>

@@ -44,9 +44,10 @@ export function Home() {
       {/* Thesis */}
       <div className="max-w-3xl">
         <p className="eyebrow">AI Program Command Center</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-ink">
+        {/* <h2>: the AppShell Header owns the page's <h1> ("Command Center"). */}
+        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">
           Every enterprise has an AI idea. The hard part is <span className="text-primary">making it real</span>.
-        </h1>
+        </h2>
         <p className="mt-3 text-base leading-relaxed text-slatey-300">
           Most enterprise AI stalls right after the demo, when the real questions surface. Can the data actually
           support it? Do the answers hold up under scrutiny? Will it run without exceeding budget? Is it safe enough

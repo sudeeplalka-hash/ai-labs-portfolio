@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, FlaskConical, Lock, CircleDot, BookOpen, ArrowRight } from "lucide-react";
-import { useProgram, STAGES, STAGE_MAP, DEMO_ARCHETYPES, type DemoArchetype } from "@labs/program-core";
+import { useProgram, STAGES, DEMO_ARCHETYPES, type DemoArchetype } from "@labs/program-core";
+import { STAGE_SECTIONS } from "@labs/kit";
 import { cn } from "@labs/design-system";
 
 // The Live/Demo toggle is available on every mode-aware stage (and the
@@ -13,36 +14,87 @@ const MODE_ROUTES = ["/data", "/build", "/deploy", "/govern", "/realize", "/stor
 const onAny = (pathname: string, routes: string[]) =>
   routes.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
-export function Header({ onMenu }: { onMenu?: () => void }) {
+// Shelled routes that are NOT stages. These used to fall through `?? STAGE_MAP.frame`,
+// which made /architecture and /roadmap claim they were "Strategy & Planning" — wrong
+// <h1>, wrong subtitle, a bogus "Live" badge, and a "How this lab works" link pointing
+// at /frame/guide. A missing stage is now simply a missing stage. (a11y 2026-07-12)
+const NON_STAGE: Record<string, { title: string; subtitle: string }> = {
+  "/architecture": { title: "Architecture", subtitle: "How the Command Center is built, and why it's built that way." },
+  "/roadmap": { title: "Roadmap", subtitle: "What exists now, what comes next, and what's deliberately out of scope." },
+  "/builds/eval-bench": { title: "Eval Bench", subtitle: "Model evaluation and threshold economics." },
+  "/lifecycle": { title: "Lifecycle", subtitle: "The seven stages, and the contract between them." },
+};
+
+// The page's own <h1> is the specific one ("Am I ready for the AI rulebook?"), but the
+// Header is the only heading present on stage roots and on subpages that don't set one.
+// So the Header owns the single <h1> everywhere and pages render <h2> — which means the
+// Header's title has to be SPECIFIC, or ~20 govern routes all announce themselves as
+// "Govern". STAGE_SECTIONS is already the canonical route→label map, so reuse it.
+function sectionLabel(stageKey: string, pathname: string): string | undefined {
+  const groups = STAGE_SECTIONS[stageKey as keyof typeof STAGE_SECTIONS];
+  if (!groups) return undefined;
+  for (const g of groups) {
+    for (const item of g.items) {
+      if (item.href.includes("#")) continue; // in-page sections, not routes
+      if (pathname === item.href || pathname === item.href + "/") return item.label;
+    }
+  }
+  return undefined;
+}
+
+export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: React.RefObject<HTMLButtonElement | null> }) {
   const { mode, setMode, state, demoArchetype, setDemoArchetype } = useProgram();
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isStory = pathname === "/story" || pathname.startsWith("/story/");
-  const stage = STAGES.find((s) => pathname === s.href || pathname.startsWith(s.href + "/")) ?? STAGE_MAP.frame;
-  const isFrame = !isHome && !isStory && stage.key === "frame";
-  const status = state.progress[stage.key];
+  // No `?? STAGE_MAP.frame`: a route that isn't a stage must not pretend to be one.
+  const stage = STAGES.find((s) => pathname === s.href || pathname.startsWith(s.href + "/"));
+  const path = pathname.replace(/\/$/, "") || "/"; // trailingSlash routing
+  const nonStage = NON_STAGE[path];
+  // Only look up a section on SUBpages. On a stage root the title is just the stage
+  // ("Data"), not "Data · Live Data Lab".
+  const section = stage && path !== stage.href ? sectionLabel(stage.key, path) : undefined;
+
+  const isFrame = !isHome && !isStory && stage?.key === "frame";
+  const status = stage ? state.progress[stage.key] : undefined;
   const showMode = onAny(pathname, MODE_ROUTES);
-  const title = isHome ? "Command Center" : isStory ? "Storyline" : stage.label;
+
+  // Specific enough to identify the page on its own — this is the document's only <h1>.
+  const title = isHome
+    ? "Command Center"
+    : isStory
+      ? "Storyline"
+      : stage
+        ? section && section !== stage.label
+          ? `${stage.label} · ${section}`
+          : stage.label
+        : (nonStage?.title ?? "AI Program Command Center");
   const subtitle = isHome
     ? "Your AI program at a glance, walk it end-to-end, or open any lab."
     : isStory
       ? "The whole program in seven beats, one idea taken from ambition to business case."
-      : stage.will;
+      : stage
+        ? stage.will
+        : (nonStage?.subtitle ?? "");
   // A quiet entry point to the lab's guide, caught at the moment of arrival.
-  const showGuideLink = !isHome && !isStory && !pathname.includes("/guide");
-  const guideHref = `${stage.href}/guide`;
+  // Only a real stage has a guide — /architecture and /roadmap do not.
+  const showGuideLink = !!stage && !isHome && !isStory && !pathname.includes("/guide");
+  const guideHref = `${stage?.href ?? ""}/guide`;
 
   return (
     <header className="no-print sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur-md">
       <div className="flex items-center justify-between gap-4 px-5 py-4 md:px-8">
         <div className="flex items-center gap-3">
-          <button onClick={onMenu} className="rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden" aria-label="Open navigation">
+          {/* ref so the drawer can hand focus back here when it closes */}
+          <button ref={menuRef as React.RefObject<HTMLButtonElement>} onClick={onMenu} aria-haspopup="dialog" className="rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden" aria-label="Open navigation">
             <Menu className="h-5 w-5" />
           </button>
           <div>
             <div className="flex items-center gap-2">
+              {/* The single <h1> for every shelled route. Page content renders <h2>. */}
               <h1 className="text-lg font-semibold text-ink md:text-xl">{title}</h1>
-              {!isHome && !isStory && (isFrame ? (
+              {/* `stage &&`: /architecture and /roadmap are not labs, so no status badge. */}
+              {!isHome && !isStory && stage && (isFrame ? (
                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
                   <FlaskConical className="h-3 w-3" /> Live
                 </span>

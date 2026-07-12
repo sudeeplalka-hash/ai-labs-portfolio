@@ -152,7 +152,7 @@ export function OperateStage() {
     return (
       <Panel className="mx-auto max-w-2xl text-center">
         <Repeat className="mx-auto mb-2 h-6 w-6 text-slatey-500" />
-        <h1 className="text-lg font-semibold text-ink">Operate unlocks after Deploy</h1>
+        <h2 className="text-lg font-semibold text-ink">Operate unlocks after Deploy</h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-slatey-400">
           Day two operations watch the system you shipped. Complete <Link href="/deploy" className="font-medium text-primary hover:underline">Deploy</Link> first,
           or load the sample program from the home page to see a full operations history.
@@ -190,7 +190,7 @@ export function OperateStage() {
       <div className="mb-4">
         <p className="eyebrow mb-1">Stage 07 · Operate · Day Two</p>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">Operate: Day Two Observability</h1>
+          <h2 className="text-2xl font-semibold tracking-tight text-ink">Operate: Day Two Observability</h2>
           <LiveBadge mode="SIMULATED" />
           <FreshnessStamp freshness={{ lastVerified: "2026-07-04", note: "Seeded deterministic series, authored to teach the pattern" }} />
         </div>

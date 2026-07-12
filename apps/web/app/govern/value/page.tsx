@@ -54,7 +54,7 @@ export default function BusinessCase() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Business case</p>
-          <h1 className="text-2xl font-semibold text-slate-900 mt-1">What governance is worth</h1>
+          <h2 className="text-2xl font-semibold text-slate-900 mt-1">What governance is worth</h2>
           <p className="text-sm text-slate-500 mt-1">An illustrative model. Move the inputs to fit your portfolio.</p>
         </div>
         <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs shrink-0">

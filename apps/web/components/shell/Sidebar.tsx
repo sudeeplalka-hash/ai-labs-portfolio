@@ -21,11 +21,15 @@ const ICONS: Record<StageKey, LucideIcon> = {
 // that their views read to switch the active in-page section.
 type Sub = StageSectionItem;
 
+// The dot is a non-text indicator, so WCAG 1.4.11 applies: 3:1 against bg-ink.
+// bg-slate-600 (#475569) measured 2.08:1 — invisible to low-vision users, and it
+// is the ONLY thing distinguishing a pending stage. slate-500 clears the bar.
+// (Shape/label still carry the meaning too — see the Check and Lock icons below.)
 function Dot({ status }: { status: StageStatus }) {
   return (
     <span className={cn(
       "h-2 w-2 shrink-0 rounded-full",
-      status === "done" ? "bg-emerald-400" : status === "active" ? "bg-sky-400 ring-4 ring-sky-400/20" : "bg-slate-600",
+      status === "done" ? "bg-emerald-400" : status === "active" ? "bg-sky-400 ring-4 ring-sky-400/20" : "bg-slate-500",
     )} />
   );
 }
@@ -89,12 +93,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         >
           <BookOpen className="h-4 w-4 text-primary" />
           The story
-          <span className="ml-auto text-[10px] font-normal text-slate-500">2-min read</span>
+          <span className="ml-auto text-[10px] font-normal text-inkmuted">2-min read</span>
         </Link>
 
         <div className="px-2 pb-1 pt-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">The Program</p>
-          <p className="text-[10px] text-slate-500/80">An idea becomes governed value · gated</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-inkmuted">The Program</p>
+          <p className="text-[10px] text-inkmuted/80">An idea becomes governed value · gated</p>
         </div>
 
         {STAGES.map((s) => {
@@ -122,21 +126,26 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                   className={cn("flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-sm", onRoute ? "text-white" : "text-slate-300")}
                 >
                   <Dot status={status} />
-                  <span className="font-mono text-[10px] text-slate-500">{s.n}</span>
+                  <span className="font-mono text-[10px] text-inkmuted">{s.n}</span>
                   <Icon className={cn("h-4 w-4 shrink-0", onRoute ? "text-sky-400" : "text-slate-400")} />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate leading-tight">{s.label}</span>
-                    <span className="block text-[10px] leading-tight text-slate-500">{s.sub}</span>
+                    {/* No `truncate`: the rail is 288px and the label span is squeezed by
+                        dot + number + icon + check + chevron, so "Strategy & Planning" and
+                        "Operate · Day Two" clipped even at w-72. The row is already two
+                        lines tall, so wrapping costs nothing and stops the primary nav
+                        from lying about where it goes. */}
+                    <span className="block leading-tight">{s.label}</span>
+                    <span className="block text-[10px] leading-tight text-inkmuted">{s.sub}</span>
                   </span>
                   {status === "done" && <Check className="h-3.5 w-3.5 text-emerald-400" />}
-                  {locked && <Lock className="h-3 w-3 text-slate-500" />}
+                  {locked && <Lock className="h-3 w-3 text-inkmuted" />}
                 </Link>
                 {children && (
                   <button
                     onClick={() => setOpen((o) => ({ ...o, [s.key]: !expanded }))}
                     aria-label={expanded ? `Collapse ${s.label}` : `Expand ${s.label}`}
                     aria-expanded={expanded}
-                    className="shrink-0 px-2 py-2 text-slate-500 hover:text-white"
+                    className="shrink-0 px-2 py-2 text-inkmuted hover:text-white"
                   >
                     <ChevronDown className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")} />
                   </button>
@@ -156,7 +165,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         <button
                           onClick={() => setOpenGroup((o) => ({ ...o, [gkey]: !gOpen }))}
                           aria-expanded={gOpen}
-                          className="flex w-full items-center justify-between gap-2 rounded-md px-2.5 pb-0.5 pt-1 text-[9.5px] font-semibold uppercase tracking-wider text-slate-500 transition-colors hover:text-slate-300"
+                          className="flex w-full items-center justify-between gap-2 rounded-md px-2.5 pb-0.5 pt-1 text-[9.5px] font-semibold uppercase tracking-wider text-inkmuted transition-colors hover:text-slate-300"
                         >
                           <span>{g.label}</span>
                           <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform", gOpen && "rotate-180")} />

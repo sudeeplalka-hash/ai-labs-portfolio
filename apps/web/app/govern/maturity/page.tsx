@@ -40,7 +40,7 @@ export default function Maturity() {
     <div className="p-8 space-y-6 max-w-[1000px]">
       <div>
         <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Maturity index</p>
-        <h1 className="text-2xl font-semibold text-slate-900 mt-1">Where is your AI governance today?</h1>
+        <h2 className="text-2xl font-semibold text-slate-900 mt-1">Where is your AI governance today?</h2>
         <p className="text-sm text-slate-500 mt-1">Six quick questions. No data leaves your browser.</p>
       </div>
 

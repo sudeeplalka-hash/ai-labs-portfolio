@@ -36,9 +36,10 @@ export function Welcome() {
       <div className="flex min-h-full items-center justify-center px-5 py-10">
         <div className="w-full max-w-2xl text-center">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-300/80">AI Program Command Center</p>
-          <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
+          {/* <h2>: Welcome renders inside Home, which sits under the Header's <h1>. */}
+          <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
             Every enterprise has an AI idea.<br className="hidden sm:block" /> This is how one becomes <span className="text-sky-300">real</span>.
-          </h1>
+          </h2>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-slate-300 sm:text-base">
             Seven labs walk one initiative from a rough ambition to a governed, measurable business case,
             with every stage handing a real contract to the next.

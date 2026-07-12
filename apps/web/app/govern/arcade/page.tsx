@@ -68,7 +68,7 @@ export default function Arcade() {
     <div className="p-8 space-y-6 max-w-[1100px]">
       <div>
         <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Red team arcade</p>
-        <h1 className="text-2xl font-semibold text-slate-900 mt-1">Try to break the AI</h1>
+        <h2 className="text-2xl font-semibold text-slate-900 mt-1">Try to break the AI</h2>
         <p className="text-sm text-slate-500 mt-1">Throw your worst at it. Every attack the control plane contains scores points. See if you can get one through.</p>
       </div>
 
