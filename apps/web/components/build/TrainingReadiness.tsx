@@ -188,6 +188,12 @@ export function TrainingReadiness() {
           <p className="mt-2 text-[12px] leading-relaxed text-slatey-400">{curve.note}</p>
           <p className="mt-1 text-[11px] italic text-slatey-500">Simulated curves, no model is trained. The shape is deterministic and driven by dataset size.</p>
         </div>
+        {/* overflow-x-auto: this 520px table was a direct child of a panel inside
+            <main class="overflow-x-clip">. On a phone the viewport CLIPS rather than
+            scrolls, so the final "Risk" column was cut off and unreachable — the one
+            column the table exists to deliver. Every other wide table/chart in the repo
+            already wraps like this; this one was missed. (WCAG 1.4.10 Reflow, 2026-07-12) */}
+        <div className="overflow-x-auto">
         <table className="w-full min-w-[520px] text-left text-sm">
           <thead><tr className="border-b border-line text-[11px] uppercase tracking-wide text-slatey-500"><th className="py-2 pr-3 font-semibold">Scenario</th><th className="py-2 pr-3 font-semibold text-right">Train</th><th className="py-2 pr-3 font-semibold text-right">Validation</th><th className="py-2 pr-3 font-semibold text-right">Test</th><th className="py-2 font-semibold">Risk</th></tr></thead>
           <tbody>{GENERALIZATION_SCENARIOS.map((s) => (
@@ -200,6 +206,7 @@ export function TrainingReadiness() {
             </tr>
           ))}</tbody>
         </table>
+        </div>
         {ds.required && (
           <div className="mt-3 grid gap-4 md:grid-cols-2">
             <div><p className="stat-label mb-1">Risk triggers (this initiative)</p><ul className="space-y-0.5 text-[12px] text-slatey-400">{gen.riskTriggers.map((t, i) => <li key={i}>· {t}</li>)}</ul></div>
