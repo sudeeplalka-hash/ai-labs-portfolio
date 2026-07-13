@@ -78,7 +78,7 @@ const labPreset: Partial<Config> = {
         sans: ["var(--font-sans)", "Public Sans", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: [
           ["var(--font-sans)", "Public Sans", "ui-sans-serif", "system-ui", "sans-serif"],
-          { fontFeatureSettings: '"tnum"', fontVariantNumeric: "tabular-nums" },
+          { fontFeatureSettings: '"tnum"' },
         ],
         code: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
