@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@gov/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  // components/__tests__ needs @testing-library/react, which this package does
+  // not ship (same exclusion as vitest.config.ts). node_modules for safety.
+  "exclude": ["node_modules", "src/components/__tests__"]
+}

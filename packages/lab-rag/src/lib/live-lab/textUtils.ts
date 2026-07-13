@@ -23,6 +23,10 @@ export function tokenize(text: string): string[] {
     .toLowerCase()
     .replace(/[^a-z0-9\s$%.-]/g, " ")
     .split(/\s+/)
+    // Sentence-final punctuation must not make a token: "$25." !== "$25" made
+    // verbatim quotes of the evidence score as ungrounded (QA 2026-07-12).
+    // Internal dots survive ("$2.5"), trailing % survives ("15%").
+    .map((w) => w.replace(/[.\-]+$/, ""))
     .filter(Boolean);
 }
 

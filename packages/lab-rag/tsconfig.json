@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@rag/*": ["./src/*"],
+      "@labs/design-system": ["../design-system/src"],
+      "@labs/kit": ["../kit/src"],
+      "@labs/program-core": ["../program-core/src"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}
