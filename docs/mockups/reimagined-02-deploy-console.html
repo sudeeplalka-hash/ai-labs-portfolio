@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 02 · Deploy/Operate mission-control console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,450;0,9..144,550;1,9..144,450&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── Console tokens · dark side of "Instrument-grade editorial" ────────
+     space   #0b1220  deep-space navy (page)
+     panel   #101a2a  raised surface
+     panel2  #0d1524  inset surface
+     hair    rgba(148,163,184,.16)
+     txt     #e7edf5 (14.9:1) · txt-2 #9db0c4 (7.1:1) · txt-3 #7488a0 (4.6:1 floor)
+     data    #6fd6f2 cyan · ok #3fd68f · warn #f5b73d · risk #fb7185       */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Instrument Sans",system-ui,sans-serif; background:#0b1220; color:#e7edf5; -webkit-font-smoothing:antialiased; }
+  .serif { font-family:"Fraunces",Georgia,serif; }
+  .mono  { font-family:"JetBrains Mono",ui-monospace,monospace; }
+  .wrap  { max-width:1360px; margin:0 auto; padding:0 28px; }
+  .blueprint { background-image:radial-gradient(rgba(148,163,184,.09) 1px, transparent 1px); background-size:26px 26px; }
+
+  .panel { background:#101a2a; border:1px solid rgba(148,163,184,.16); position:relative; }
+  .panel::before,.panel::after { content:""; position:absolute; width:9px; height:9px; border-color:#7488a0; border-style:solid; opacity:.55; pointer-events:none; }
+  .panel::before { top:-1px; left:-1px; border-width:1.5px 0 0 1.5px; }
+  .panel::after  { bottom:-1px; right:-1px; border-width:0 1.5px 1.5px 0; }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; padding:13px 16px; border-bottom:1px solid rgba(148,163,184,.14); }
+  .panel-head h3 { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#9db0c4; font-weight:600; }
+  .panel-head .aux { font-family:"JetBrains Mono",monospace; font-size:10px; color:#7488a0; }
+
+  .led { display:inline-block; width:7px; height:7px; flex:none; }
+  .ok    { color:#3fd68f; } .led.ok    { background:#3fd68f; }
+  .warn  { color:#f5b73d; } .led.warn  { background:#f5b73d; }
+  .risk  { color:#fb7185; } .led.risk  { background:#fb7185; }
+  .data  { color:#6fd6f2; } .led.data  { background:#6fd6f2; }
+  .led.off { background:transparent; border:1.5px solid #7488a0; }
+  .led.blink { animation:blink 1.6s steps(2,start) infinite; }
+  @keyframes blink { 50% { opacity:.25; } }
+  @media (prefers-reduced-motion:reduce){ .led.blink{animation:none} .needle{transition:none} .scan::after{display:none} }
+
+  /* ── Console masthead ── */
+  .mast { border-bottom:1px solid rgba(148,163,184,.16); background:rgba(11,18,32,.92); backdrop-filter:blur(8px); position:sticky; top:0; z-index:40; }
+  .mast .wrap { display:flex; align-items:center; gap:22px; height:58px; }
+  .crumb { font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.18em; color:#7488a0; }
+  .crumb b { color:#6fd6f2; font-weight:500; }
+  .mast .q { font-family:"Fraunces",serif; font-size:16px; font-style:italic; font-weight:450; color:#e7edf5; letter-spacing:-.01em; }
+  .mast .right { margin-left:auto; display:flex; gap:10px; align-items:center; }
+  .chip { font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.08em; padding:6px 10px; border:1px solid rgba(148,163,184,.25); color:#9db0c4; display:flex; gap:8px; align-items:center; }
+  .chip.gate { border-color:rgba(63,214,143,.4); color:#3fd68f; }
+  .chip.inc  { border-color:rgba(251,113,133,.45); color:#fb7185; }
+
+  /* section tabs */
+  .tabs { display:flex; gap:2px; margin:20px 0 0; }
+  .tab { font-size:12px; font-weight:500; color:#9db0c4; padding:9px 16px; border:1px solid rgba(148,163,184,.16); border-bottom:0; background:#0d1524; cursor:pointer; }
+  .tab.on { background:#101a2a; color:#e7edf5; border-top:2px solid #6fd6f2; padding-top:8px; }
+  .tab:hover:not(.on) { color:#e7edf5; }
+
+  /* ── Incident banner ── */
+  .incident { display:grid; grid-template-columns:auto 1fr auto auto; gap:18px; align-items:center; padding:13px 18px; margin-top:0;
+    background:linear-gradient(90deg, rgba(251,113,133,.13), rgba(251,113,133,.04) 55%, transparent); border:1px solid rgba(251,113,133,.35); border-top:0; }
+  .incident .tag { font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.14em; color:#fb7185; display:flex; align-items:center; gap:9px; }
+  .incident p { font-size:12.5px; color:#e7edf5; }
+  .incident p em { font-style:normal; color:#fb7185; font-family:"JetBrains Mono",monospace; font-size:11.5px; }
+  .incident .act { font-size:11.5px; font-weight:600; color:#0b1220; background:#fb7185; padding:8px 14px; text-decoration:none; }
+  .incident .quiet { font-size:11px; color:#9db0c4; text-decoration:underline dotted; }
+
+  /* ── Instrument row (gauges) ── */
+  .gauges { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:18px 0 14px; }
+  .gauge { padding:16px 16px 14px; }
+  .gauge .lab { font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#7488a0; display:flex; justify-content:space-between; }
+  .gauge .lab s { text-decoration:none; font-family:"JetBrains Mono",monospace; }
+  .gauge .readout { display:flex; align-items:flex-end; gap:14px; margin-top:10px; }
+  .gauge svg { flex:none; }
+  .gauge .val { font-family:"JetBrains Mono",monospace; font-variant-numeric:tabular-nums; font-size:27px; font-weight:600; letter-spacing:-.02em; line-height:1; }
+  .gauge .val small { font-size:12px; color:#7488a0; font-weight:400; margin-left:2px; }
+  .gauge .tgt { font-family:"JetBrains Mono",monospace; font-size:10px; color:#7488a0; margin-top:7px; }
+  .needle { transition:transform 1.1s cubic-bezier(.2,.8,.25,1); transform-origin:50px 50px; }
+
+  /* ── Main grid ── */
+  .grid { display:grid; grid-template-columns:1fr 1fr 380px; gap:14px; align-items:start; padding-bottom:14px; }
+  .span2 { grid-column:span 2; }
+
+  /* envelope chart */
+  .chart { padding:8px 10px 6px; }
+  .chart svg { display:block; width:100%; height:auto; }
+  .axis { font-family:"JetBrains Mono",monospace; font-size:8.5px; fill:#7488a0; }
+  .keynote { display:flex; gap:20px; padding:10px 16px 14px; font-family:"JetBrains Mono",monospace; font-size:10px; color:#9db0c4; flex-wrap:wrap; }
+  .keynote s { text-decoration:none; display:flex; align-items:center; gap:7px; }
+
+  /* timeline */
+  .timeline { padding:6px 0 10px; }
+  .t-row { display:grid; grid-template-columns:74px 22px 1fr auto; gap:0 12px; align-items:start; padding:11px 16px 11px 12px; position:relative; }
+  .t-row + .t-row { border-top:1px dotted rgba(148,163,184,.14); }
+  .t-row .t { font-family:"JetBrains Mono",monospace; font-size:10.5px; color:#7488a0; padding-top:2px; text-align:right; }
+  .t-row .node { display:grid; place-items:center; padding-top:3px; }
+  .t-row b { font-size:12.5px; font-weight:600; display:block; }
+  .t-row span { font-size:11.5px; color:#9db0c4; display:block; margin-top:2px; line-height:1.5; }
+  .t-row .who { font-family:"JetBrains Mono",monospace; font-size:9.5px; color:#7488a0; border:1px solid rgba(148,163,184,.22); padding:3px 7px; }
+
+  /* right rail */
+  .gates { padding:4px 0 8px; }
+  .gate-row { display:flex; align-items:center; gap:11px; padding:9px 16px; font-size:12.5px; }
+  .gate-row + .gate-row { border-top:1px dotted rgba(148,163,184,.12); }
+  .gate-row .mono { margin-left:auto; font-size:10px; color:#7488a0; }
+  .gate-row.fail b { color:#f5b73d; }
+
+  .rollback { padding:16px; }
+  .rollback .vers { display:flex; align-items:center; gap:12px; font-family:"JetBrains Mono",monospace; font-size:12px; }
+  .rollback .vers .v { padding:7px 11px; border:1px solid rgba(148,163,184,.25); }
+  .rollback .vers .v.bad { border-color:rgba(245,183,61,.5); color:#f5b73d; }
+  .rollback .vers .v.good { border-color:rgba(63,214,143,.45); color:#3fd68f; }
+  .rollback .btn { display:block; text-align:center; margin-top:14px; padding:12px; background:#e7edf5; color:#0b1220; font-weight:600; font-size:13px; text-decoration:none; }
+  .rollback .btn:hover { background:#6fd6f2; }
+  .rollback p { font-size:11px; color:#7488a0; margin-top:9px; line-height:1.5; }
+
+  .handoff { padding:14px 16px; }
+  .handoff p { font-size:11.5px; color:#9db0c4; line-height:1.55; }
+  .handoff .to { display:flex; gap:8px; margin-top:12px; }
+  .handoff a { font-family:"JetBrains Mono",monospace; font-size:10px; letter-spacing:.08em; color:#6fd6f2; border:1px solid rgba(111,214,242,.35); padding:7px 11px; text-decoration:none; }
+  .handoff a:hover { background:rgba(111,214,242,.1); }
+
+  /* day-two ticker (Operate merged in) */
+  .ticker { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding-bottom:34px; }
+  .tick { padding:14px 16px; }
+  .tick .lab { font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#7488a0; }
+  .tick .line { display:flex; align-items:baseline; gap:10px; margin-top:8px; }
+  .tick .line b { font-family:"JetBrains Mono",monospace; font-size:19px; font-weight:600; }
+  .tick .line span { font-size:11px; color:#9db0c4; }
+  .spark { margin-top:10px; }
+
+  /* LIVE badge with scanline */
+  .scan { position:relative; overflow:hidden; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.18em; color:#3fd68f; border:1px solid rgba(63,214,143,.4); padding:5px 9px 5px 22px; }
+  .scan .led { position:absolute; left:9px; top:50%; margin-top:-3.5px; }
+  .scan::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, transparent 46%, rgba(63,214,143,.16) 50%, transparent 54%); animation:scan 3.2s linear infinite; }
+  @keyframes scan { from{transform:translateY(-100%)} to{transform:translateY(100%)} }
+
+  @media (max-width:1180px){ .grid{grid-template-columns:1fr 1fr} .rail-col{grid-column:span 2; display:grid; grid-template-columns:repeat(3,1fr); gap:14px} }
+  @media (max-width:860px){ .gauges,.ticker{grid-template-columns:1fr 1fr} .grid,.rail-col{grid-template-columns:1fr} .span2{grid-column:span 1} .mast .q{display:none} }
+</style>
+</head>
+<body class="blueprint">
+
+<!-- ── Masthead: stage identity + live posture at a glance ── -->
+<header class="mast">
+  <div class="wrap">
+    <span class="crumb">STAGE <b>04</b> / 07 · DEPLOY · AI OPS</span>
+    <span class="q">“Does it run reliably, at what cost?”</span>
+    <div class="right">
+      <span class="scan"><span class="led ok blink"></span>LIVE LAB</span>
+      <span class="chip gate"><span class="led ok"></span>RELEASE GATE 6/8</span>
+      <span class="chip inc"><span class="led risk blink"></span>1 OPEN INCIDENT</span>
+      <span class="chip">BUILD a875441</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- section tabs mirror STAGE_SECTIONS: envelope / compare / under load / incident -->
+  <div class="tabs" role="tablist">
+    <div class="tab on">Operating envelope</div>
+    <div class="tab">Compare configs</div>
+    <div class="tab">Under load</div>
+    <div class="tab">Incident response</div>
+    <div class="tab">Guide</div>
+  </div>
+
+  <!-- ── Active incident: value-at-risk framing carried from the current lab ── -->
+  <div class="incident">
+    <span class="tag"><span class="led risk blink"></span>INC-042 · SEV-2</span>
+    <p>Retrieval latency regression after index rebuild — canary p99 breached at 09:41.
+      <em>Value at risk while open: $212k/yr.</em></p>
+    <a class="act" href="#">Run incident drill →</a>
+    <a class="quiet" href="#">timeline</a>
+  </div>
+
+  <!-- ── Instrument row: the four numbers an operator checks first ── -->
+  <div class="gauges">
+    <div class="panel gauge">
+      <div class="lab"><span>p99 latency</span><s class="ok">WITHIN</s></div>
+      <div class="readout">
+        <svg width="86" height="52" viewBox="0 0 100 60" aria-hidden="true">
+          <path d="M8 52 A46 46 0 0 1 92 52" fill="none" stroke="rgba(148,163,184,.2)" stroke-width="7"/>
+          <path d="M8 52 A46 46 0 0 1 71 14" fill="none" stroke="#3fd68f" stroke-width="7"/>
+          <line class="needle" x1="50" y1="52" x2="50" y2="16" stroke="#e7edf5" stroke-width="2" style="transform:rotate(24deg)"/>
+          <circle cx="50" cy="52" r="3" fill="#e7edf5"/>
+        </svg>
+        <div><span class="val">1.42<small>s</small></span><div class="tgt">TARGET ≤ 2.0s · SLO 99%</div></div>
+      </div>
+    </div>
+    <div class="panel gauge">
+      <div class="lab"><span>error rate</span><s class="ok">WITHIN</s></div>
+      <div class="readout">
+        <svg width="86" height="52" viewBox="0 0 100 60" aria-hidden="true">
+          <path d="M8 52 A46 46 0 0 1 92 52" fill="none" stroke="rgba(148,163,184,.2)" stroke-width="7"/>
+          <path d="M8 52 A46 46 0 0 1 34 21" fill="none" stroke="#3fd68f" stroke-width="7"/>
+          <line class="needle" x1="50" y1="52" x2="50" y2="16" stroke="#e7edf5" stroke-width="2" style="transform:rotate(-38deg)"/>
+          <circle cx="50" cy="52" r="3" fill="#e7edf5"/>
+        </svg>
+        <div><span class="val">0.8<small>%</small></span><div class="tgt">BUDGET 2.0% · 28d BURN 41%</div></div>
+      </div>
+    </div>
+    <div class="panel gauge">
+      <div class="lab"><span>cost / query</span><s class="data">TRACKING</s></div>
+      <div class="readout">
+        <svg width="86" height="52" viewBox="0 0 100 60" aria-hidden="true">
+          <path d="M8 52 A46 46 0 0 1 92 52" fill="none" stroke="rgba(148,163,184,.2)" stroke-width="7"/>
+          <path d="M8 52 A46 46 0 0 1 58 13" fill="none" stroke="#6fd6f2" stroke-width="7"/>
+          <line class="needle" x1="50" y1="52" x2="50" y2="16" stroke="#e7edf5" stroke-width="2" style="transform:rotate(8deg)"/>
+          <circle cx="50" cy="52" r="3" fill="#e7edf5"/>
+        </svg>
+        <div><span class="val">$0.023</span><div class="tgt">PLAN $0.030 · CACHE HIT 38%</div></div>
+      </div>
+    </div>
+    <div class="panel gauge">
+      <div class="lab"><span>drift · z-score</span><s class="warn">WATCH</s></div>
+      <div class="readout">
+        <svg width="86" height="52" viewBox="0 0 100 60" aria-hidden="true">
+          <path d="M8 52 A46 46 0 0 1 92 52" fill="none" stroke="rgba(148,163,184,.2)" stroke-width="7"/>
+          <path d="M8 52 A46 46 0 0 1 84 24" fill="none" stroke="#f5b73d" stroke-width="7"/>
+          <line class="needle" x1="50" y1="52" x2="50" y2="16" stroke="#e7edf5" stroke-width="2" style="transform:rotate(52deg)"/>
+          <circle cx="50" cy="52" r="3" fill="#e7edf5"/>
+        </svg>
+        <div><span class="val">2.1<small>σ</small></span><div class="tgt">ALERT AT 3.0σ · EMBEDDINGS</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main grid: envelope chart + incident timeline · right rail = gates / rollback / handoff ── -->
+  <div class="grid">
+
+    <div class="panel span2">
+      <div class="panel-head"><h3>Operating envelope · latency vs load</h3><span class="aux">CONFIG C2 · SONNET + CACHE · LAST 24H</span></div>
+      <div class="chart">
+        <svg viewBox="0 0 720 240" role="img" aria-label="Latency versus requests per second with the envelope knee marked">
+          <!-- grid -->
+          <g stroke="rgba(148,163,184,.12)">
+            <line x1="50" y1="20" x2="50" y2="200"/><line x1="50" y1="200" x2="700" y2="200"/>
+            <line x1="50" y1="155" x2="700" y2="155"/><line x1="50" y1="110" x2="700" y2="110"/><line x1="50" y1="65" x2="700" y2="65"/>
+            <line x1="212" y1="20" x2="212" y2="200"/><line x1="374" y1="20" x2="374" y2="200"/><line x1="536" y1="20" x2="536" y2="200"/>
+          </g>
+          <text class="axis" x="38" y="204" text-anchor="end">0s</text>
+          <text class="axis" x="38" y="159" text-anchor="end">1s</text>
+          <text class="axis" x="38" y="114" text-anchor="end">2s</text>
+          <text class="axis" x="38" y="69" text-anchor="end">3s</text>
+          <text class="axis" x="50" y="216">0</text><text class="axis" x="212" y="216">40 rps</text>
+          <text class="axis" x="374" y="216">80 rps</text><text class="axis" x="536" y="216">120 rps</text>
+          <!-- SLO ceiling -->
+          <line x1="50" y1="110" x2="700" y2="110" stroke="#fb7185" stroke-width="1" stroke-dasharray="5 5"/>
+          <text class="axis" x="695" y="104" text-anchor="end" fill="#fb7185">SLO CEILING 2.0s</text>
+          <!-- envelope shading: safe region -->
+          <path d="M50 200 L50 172 C 210 168, 330 160, 452 128 L452 200 Z" fill="rgba(63,214,143,.09)"/>
+          <!-- latency curve with knee -->
+          <path d="M50 172 C 210 168, 330 160, 452 128 C 500 112, 540 84, 580 40" fill="none" stroke="#6fd6f2" stroke-width="2.5"/>
+          <!-- knee marker -->
+          <rect x="448" y="124" width="8" height="8" fill="#f5b73d"/>
+          <line x1="452" y1="132" x2="452" y2="200" stroke="#f5b73d" stroke-width="1" stroke-dasharray="3 4"/>
+          <text class="axis" x="452" y="34" text-anchor="middle" fill="#f5b73d">THE KNEE · 99 RPS</text>
+          <text class="axis" x="452" y="46" text-anchor="middle" fill="#f5b73d">headroom ends here</text>
+          <!-- current operating point -->
+          <circle cx="330" cy="161" r="5" fill="#3fd68f"/>
+          <circle cx="330" cy="161" r="10" fill="none" stroke="rgba(63,214,143,.4)"/>
+          <text class="axis" x="330" y="146" text-anchor="middle" fill="#3fd68f">NOW · 67 RPS</text>
+        </svg>
+      </div>
+      <div class="keynote">
+        <s><span class="led ok"></span>SAFE ENVELOPE</s>
+        <s><span class="led data"></span>MEASURED p99 CURVE</s>
+        <s><span class="led warn"></span>KNEE = LAST CHEAP RPS</s>
+        <s style="margin-left:auto">EVERY NUMBER RECOMPUTED CLIENT-SIDE · ASSUMPTIONS EDITABLE</s>
+      </div>
+    </div>
+
+    <div class="rail-col" style="display:contents">
+      <div class="panel">
+        <div class="panel-head"><h3>Release gates</h3><span class="aux">v1.4.2 CANDIDATE</span></div>
+        <div class="gates">
+          <div class="gate-row"><span class="led ok"></span><b>Eval regression</b><span class="mono">38/38 · Δ+0.4</span></div>
+          <div class="gate-row"><span class="led ok"></span><b>Golden dataset</b><span class="mono">94 PASS</span></div>
+          <div class="gate-row"><span class="led ok"></span><b>Latency budget</b><span class="mono">p99 1.42s</span></div>
+          <div class="gate-row"><span class="led ok"></span><b>Cost ceiling</b><span class="mono">$0.023/q</span></div>
+          <div class="gate-row"><span class="led ok"></span><b>Guardrail suite</b><span class="mono">19/19</span></div>
+          <div class="gate-row"><span class="led ok"></span><b>Rollback rehearsed</b><span class="mono">T-2d</span></div>
+          <div class="gate-row fail"><span class="led warn"></span><b>Drift watch</b><span class="mono">2.1σ OPEN</span></div>
+          <div class="gate-row fail"><span class="led warn"></span><b>Incident review</b><span class="mono">INC-042</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel rollback">
+          <div class="panel-head" style="padding:0 0 12px;border-bottom:1px solid rgba(148,163,184,.14);margin-bottom:13px"><h3>Rollback control</h3><span class="aux">ONE CLICK · REHEARSED</span></div>
+          <div class="vers"><span class="v bad">v1.4.2 · CANARY</span><span style="color:#7488a0">→</span><span class="v good">v1.4.1 · STABLE</span></div>
+          <a class="btn" href="#">Roll back to v1.4.1</a>
+          <p>Restores the last gated release. Lineage, eval scores, and audit entry recorded automatically — the arrow is the stage.</p>
+        </div>
+        <div class="panel handoff" style="margin-top:14px">
+          <div class="panel-head" style="padding:0 0 11px;border-bottom:1px solid rgba(148,163,184,.14)"><h3>Ops evidence handoff</h3><span class="aux">AUTO-COMPILED</span></div>
+          <p style="margin-top:11px">Monitoring coverage, gate history, incident record, and cost posture — packaged as evidence for the next gates.</p>
+          <div class="to"><a href="#">→ GOVERN · 05</a><a href="#">→ REALIZE · 06</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel span2" style="grid-column:span 3">
+      <div class="panel-head"><h3>Incident response · INC-042 drill</h3><span class="aux">SEV-2 · RETRIEVAL LATENCY · T+00:00 = 09:41:07</span></div>
+      <div class="timeline">
+        <div class="t-row"><span class="t">T+00:00</span><span class="node"><span class="led risk"></span></span><div><b>Canary breach detected</b><span>p99 crossed 2.0s on canary slice; burn-rate alert fired at 2× threshold.</span></div><span class="who">MONITOR</span></div>
+        <div class="t-row"><span class="t">T+00:02</span><span class="node"><span class="led warn"></span></span><div><b>On-call paged · triage opened</b><span>Blast radius: retrieval-heavy queries only. Generation path healthy.</span></div><span class="who">ON-CALL</span></div>
+        <div class="t-row"><span class="t">T+00:09</span><span class="node"><span class="led data"></span></span><div><b>Cause isolated: index rebuild</b><span>Last night's rebuild doubled candidate set; reranker saturated. Config, not code.</span></div><span class="who">DIAGNOSIS</span></div>
+        <div class="t-row"><span class="t">T+00:14</span><span class="node"><span class="led ok"></span></span><div><b>Mitigation: top-k restored, cache warmed</b><span>p99 recovering — 3.1s → 1.6s over 6 minutes. Gate stays amber until review.</span></div><span class="who">ACTION</span></div>
+        <div class="t-row"><span class="t">T+00:41</span><span class="node"><span class="led off"></span></span><div><b>Post-incident review scheduled</b><span>Owner assigned; rebuild runbook gains a candidate-set assertion. Evidence → Govern audit log.</span></div><span class="who">PENDING</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Day-two strip: Operate signals share the same console language ── -->
+  <div class="ticker">
+    <div class="panel tick">
+      <span class="lab">Day two · eval regression</span>
+      <div class="line"><b class="ok">98.4</b><span>weekly eval score · Δ +0.4 vs last release</span></div>
+      <svg class="spark" width="100%" height="26" viewBox="0 0 220 26" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 18 L24 17 L48 19 L72 14 L96 15 L120 12 L144 13 L168 9 L192 10 L220 7" fill="none" stroke="#3fd68f" stroke-width="1.8"/>
+      </svg>
+    </div>
+    <div class="panel tick">
+      <span class="lab">Day two · drift watch</span>
+      <div class="line"><b class="warn">2.1σ</b><span>embedding drift · retrain review at 3.0σ</span></div>
+      <svg class="spark" width="100%" height="26" viewBox="0 0 220 26" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 20 L24 19 L48 20 L72 18 L96 17 L120 15 L144 14 L168 11 L192 9 L220 8" fill="none" stroke="#f5b73d" stroke-width="1.8"/>
+      </svg>
+    </div>
+    <div class="panel tick">
+      <span class="lab">Day two · spend posture</span>
+      <div class="line"><b class="data">$41.2k</b><span>month-to-date · 12% under plan · cache doing the work</span></div>
+      <svg class="spark" width="100%" height="26" viewBox="0 0 220 26" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 8 L24 10 L48 9 L72 12 L96 13 L120 15 L144 14 L168 16 L192 17 L220 18" fill="none" stroke="#6fd6f2" stroke-width="1.8"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

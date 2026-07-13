@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 04 · Frame — Strategy Workshop, the idea engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,450;0,9..144,550;0,9..144,650;1,9..144,450&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Instrument-grade editorial · the workshop.
+     Left: the controls (enterprise painpoint drives the engine — pain-mode axis).
+     Right: the OUTPUT AS A DOCUMENT — a typeset initiative brief. The engine's
+     content is the real lab-framing engine: PAINS w/ severity+mode, TARGET_BY_RISK,
+     guardrails on correctness pains, review-shaped backlog under "Costly mistakes". */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Instrument Sans",system-ui,sans-serif; background:#f6f3ec; color:#10181f; -webkit-font-smoothing:antialiased; }
+  .serif { font-family:"Fraunces",Georgia,serif; }
+  .mono { font-family:"JetBrains Mono",ui-monospace,monospace; }
+  .wrap { max-width:1280px; margin:0 auto; padding:0 32px; }
+  .blueprint { background-image:radial-gradient(rgba(16,24,31,.07) 1px, transparent 1px); background-size:26px 26px; }
+  .panel { background:#fdfcf8; border:1px solid rgba(16,24,31,.16); position:relative; }
+  .panel::before,.panel::after { content:""; position:absolute; width:9px; height:9px; border-color:#10181f; border-style:solid; opacity:.4; pointer-events:none; }
+  .panel::before { top:-1px; left:-1px; border-width:1.5px 0 0 1.5px; }
+  .panel::after { bottom:-1px; right:-1px; border-width:0 1.5px 1.5px 0; }
+  .led { display:inline-block; width:7px; height:7px; flex:none; }
+
+  .mast { border-bottom:1px solid rgba(16,24,31,.14); background:rgba(246,243,236,.88); backdrop-filter:blur(8px); position:sticky; top:0; z-index:40; }
+  .mast .wrap { display:flex; align-items:center; gap:20px; height:56px; }
+  .crumb { font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.18em; color:#626f7c; }
+  .crumb b { color:#164fc0; font-weight:500; }
+  .mast .q { font-family:"Fraunces",serif; font-size:15.5px; font-style:italic; }
+  .chip { font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.1em; padding:5px 9px; border:1px solid rgba(16,24,31,.22); color:#4c5a66; margin-left:auto; }
+
+  .grid { display:grid; grid-template-columns:430px minmax(0,1fr); gap:18px; align-items:start; padding:22px 0 48px; }
+
+  /* ── controls ── */
+  .controls { padding:0; }
+  .c-head { padding:16px 18px 13px; border-bottom:1px solid rgba(16,24,31,.12); }
+  .c-head h2 { font-size:14px; font-weight:600; letter-spacing:-.01em; }
+  .c-head p { font-size:11.5px; color:#626f7c; margin-top:3px; }
+  .field { padding:14px 18px; border-bottom:1px solid rgba(16,24,31,.1); }
+  .field label { display:flex; justify-content:space-between; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#4c5a66; font-weight:600; margin-bottom:9px; }
+  .field label s { text-decoration:none; font-family:"JetBrains Mono",monospace; color:#626f7c; font-weight:400; }
+  .seg { display:flex; flex-wrap:wrap; gap:6px; }
+  .opt { font-size:12px; padding:7px 12px; border:1px solid rgba(16,24,31,.22); color:#4c5a66; cursor:pointer; background:transparent; font-family:inherit; }
+  .opt:hover { border-color:#10181f; color:#10181f; }
+  .opt.on { background:#10181f; color:#f6f3ec; border-color:#10181f; }
+  .opt.on.pain { background:#7a1f1f; border-color:#7a1f1f; }
+  /* the painpoint selector — severity shown as a filled meter, mode as a tag */
+  .pain-row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:9px 12px; border:1px solid rgba(16,24,31,.16); margin-bottom:6px; cursor:pointer; background:#fdfcf8; }
+  .pain-row:hover { border-color:#10181f; }
+  .pain-row.on { border-color:#7a1f1f; background:rgba(122,31,31,.05); box-shadow:inset 3px 0 0 #7a1f1f; }
+  .pain-row b { font-size:12.5px; font-weight:600; display:block; }
+  .pain-row i { font-style:italic; font-family:"Fraunces",serif; font-size:11.5px; color:#4c5a66; }
+  .pain-row .sev { text-align:right; }
+  .pain-row .sev b { font-family:"JetBrains Mono",monospace; font-size:11px; }
+  .pain-row .meter { width:56px; height:3px; background:rgba(16,24,31,.12); margin-top:5px; }
+  .pain-row .meter i { display:block; height:100%; background:#7a1f1f; }
+  .mode-tag { font-family:"JetBrains Mono",monospace; font-size:8.5px; letter-spacing:.12em; color:#7a1f1f; border:1px solid rgba(122,31,31,.35); padding:2px 6px; margin-left:7px; vertical-align:2px; }
+  .risk-note { font-size:11px; color:#626f7c; line-height:1.55; margin-top:9px; }
+  .risk-note b { color:#10181f; }
+  .go { display:block; margin:16px 18px 18px; padding:13px; text-align:center; background:#10181f; color:#f6f3ec; font-weight:600; font-size:13.5px; text-decoration:none; }
+  .go:hover { background:#164fc0; }
+  .engine-note { padding:0 18px 16px; font-family:"JetBrains Mono",monospace; font-size:9.5px; color:#626f7c; letter-spacing:.06em; line-height:1.7; }
+
+  /* ── the brief: output as a typeset document ── */
+  .brief { padding:0; }
+  .brief-head { display:flex; align-items:baseline; justify-content:space-between; padding:20px 34px 0; }
+  .brief-head .kicker { font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.2em; color:#7a1f1f; }
+  .brief-head .no { font-family:"Fraunces",serif; font-style:italic; font-size:15px; color:#626f7c; }
+  .brief-body { padding:10px 34px 30px; }
+  .brief h1 { font-family:"Fraunces",serif; font-size:31px; font-weight:550; letter-spacing:-.018em; line-height:1.16; margin-top:8px; max-width:560px; }
+  .brief h1 em { font-style:italic; color:#7a1f1f; }
+  .rule { display:flex; align-items:center; gap:12px; margin:22px 0 14px; }
+  .rule s { text-decoration:none; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.18em; color:#4c5a66; }
+  .rule::after { content:""; flex:1; border-top:1px solid rgba(16,24,31,.16); }
+  .brief p.body { font-size:13.5px; line-height:1.7; color:#4c5a66; max-width:640px; }
+  .brief p.body b { color:#10181f; font-weight:600; }
+  .hypo { border-left:2px solid #164fc0; padding:4px 0 4px 16px; margin-top:6px; }
+  .hypo p { font-family:"Fraunces",serif; font-size:15.5px; font-style:italic; line-height:1.6; color:#10181f; }
+  .hypo .falsify { font-size:11px; color:#626f7c; margin-top:7px; font-style:normal; font-family:"Instrument Sans",sans-serif; }
+
+  /* metric plate */
+  .plate { display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid rgba(16,24,31,.16); background:#f6f3ec; margin-top:6px; }
+  .cell { padding:14px 16px; border-right:1px solid rgba(16,24,31,.12); }
+  .cell:last-child { border-right:0; }
+  .cell .k { font-size:9.5px; letter-spacing:.16em; text-transform:uppercase; color:#626f7c; font-weight:600; }
+  .cell .v { font-family:"JetBrains Mono",monospace; font-size:19px; font-weight:600; margin-top:6px; letter-spacing:-.01em; }
+  .cell .d { font-size:10.5px; color:#626f7c; margin-top:4px; }
+  .cell.hot .v { color:#7a1f1f; }
+  .guard { display:flex; gap:10px; align-items:flex-start; margin-top:12px; padding:11px 14px; border:1px dashed rgba(122,31,31,.45); }
+  .guard .led { background:#7a1f1f; margin-top:4px; }
+  .guard p { font-size:12px; color:#4c5a66; line-height:1.55; }
+  .guard p b { color:#7a1f1f; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.14em; }
+
+  /* backlog — review-shaped because the pain is correctness */
+  .backlog { margin-top:6px; }
+  .wi { display:grid; grid-template-columns:34px 1fr auto; gap:12px; padding:11px 0; align-items:baseline; }
+  .wi + .wi { border-top:1px dotted rgba(16,24,31,.16); }
+  .wi .n { font-family:"Fraunces",serif; font-style:italic; font-size:16px; color:#7a1f1f; }
+  .wi b { font-size:13.5px; font-weight:600; }
+  .wi span { display:block; font-size:11.5px; color:#626f7c; margin-top:2px; }
+  .wi .why { font-family:"JetBrains Mono",monospace; font-size:9px; letter-spacing:.1em; color:#7a1f1f; border:1px solid rgba(122,31,31,.3); padding:3px 7px; }
+  .wi.dim b { color:#4c5a66; text-decoration:line-through; text-decoration-color:rgba(16,24,31,.35); text-decoration-thickness:1px; }
+  .wi.dim .why { color:#626f7c; border-color:rgba(16,24,31,.2); }
+
+  .verdict-strip { display:flex; align-items:center; gap:16px; margin-top:22px; padding:15px 18px; background:#10181f; color:#f6f3ec; }
+  .verdict-strip .word { font-family:"Fraunces",serif; font-style:italic; font-size:19px; color:#fbbf24; }
+  .verdict-strip p { font-size:12px; color:#a8b4c0; line-height:1.5; }
+  .verdict-strip p b { color:#f6f3ec; }
+  .actions { display:flex; gap:10px; margin-top:16px; }
+  .actions a { font-size:12.5px; font-weight:600; text-decoration:none; padding:11px 18px; }
+  .actions .primary { background:#10181f; color:#f6f3ec; } .actions .primary:hover { background:#164fc0; }
+  .actions .ghost { color:#10181f; border:1px solid rgba(16,24,31,.3); }
+
+  @media (max-width:1020px){ .grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body class="blueprint">
+
+<header class="mast">
+  <div class="wrap">
+    <span class="crumb">STAGE <b>01</b> / 07 · FRAME · STRATEGY WORKSHOP</span>
+    <span class="q">“Which AI idea is worth an initiative?”</span>
+    <span class="chip">ENGINE: lab-framing · DETERMINISTIC · 22 TESTS</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- ── The controls: painpoint-first, everything else follows ── -->
+    <div class="panel controls">
+      <div class="c-head">
+        <h2>The workshop</h2>
+        <p>Start from the enterprise painpoint — the engine reshapes everything downstream of it.</p>
+      </div>
+
+      <div class="field">
+        <label>Industry <s>1 OF 12</s></label>
+        <div class="seg">
+          <button class="opt">Banking</button><button class="opt on">Insurance</button><button class="opt">Retail</button><button class="opt">Healthcare</button><button class="opt">+8</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Business function <s>1 OF 9</s></label>
+        <div class="seg">
+          <button class="opt">Contact center</button><button class="opt on">Claims operations</button><button class="opt">Underwriting</button><button class="opt">+6</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Enterprise painpoint <s>SEVERITY · MODE</s></label>
+        <div class="pain-row"><div><b>Slow turnaround</b><i>“work queues that age faster than they drain”</i></div><div class="sev"><b>0.75</b><div class="meter"><i style="width:75%"></i></div></div></div>
+        <div class="pain-row on"><div><b>Costly mistakes<span class="mode-tag">MODE: CORRECTNESS</span></b><i>“paying for every mistake twice”</i></div><div class="sev"><b>0.90</b><div class="meter"><i style="width:90%"></i></div></div></div>
+        <div class="pain-row"><div><b>Compliance exposure</b><i>“one audit finding from a headline”</i></div><div class="sev"><b>0.95</b><div class="meter"><i style="width:95%"></i></div></div></div>
+        <div class="pain-row"><div><b>Trust erosion</b><i>“customers who stopped believing the answers”</i></div><div class="sev"><b>0.80</b><div class="meter"><i style="width:80%"></i></div></div></div>
+      </div>
+
+      <div class="field">
+        <label>Risk appetite <s>SETS THE TARGET</s></label>
+        <div class="seg">
+          <button class="opt on">Conservative</button><button class="opt">Balanced</button><button class="opt">Aggressive</button>
+        </div>
+        <p class="risk-note">Conservative + correctness pain → target <b>≥ 85% within threshold</b>, human review stays in the loop, and the backlog favors <b>draft-for-sign-off</b> shapes over autonomy.</p>
+      </div>
+
+      <a class="go" href="#">Generate the initiative brief →</a>
+      <p class="engine-note">SAME INPUTS → SAME BRIEF. NO CALLS LEAVE THE PAGE.<br>SCORING: SEVERITY × FIT × FEASIBILITY − RISK DAMPING.</p>
+    </div>
+
+    <!-- ── The output: a typeset initiative brief ── -->
+    <div class="panel brief">
+      <div class="brief-head">
+        <span class="kicker">INITIATIVE BRIEF · GENERATED</span>
+        <span class="no">no. 042 — insurance / claims</span>
+      </div>
+      <div class="brief-body">
+        <h1 class="serif">Stop <em>paying for every mistake twice</em> in claims adjudication.</h1>
+
+        <div class="rule"><s>I · THE SHARPENED PROBLEM</s></div>
+        <p class="body">Claims adjusters re-key policy details across three systems; each wrong answer is paid for twice — once in rework, once in leakage. The unit of pain is the <b>incorrectly settled claim</b>, not the slow one. AI helps only if it is <b>more correct than the current process, provably</b>.</p>
+
+        <div class="rule"><s>II · FALSIFIABLE HYPOTHESIS</s></div>
+        <div class="hypo">
+          <p class="serif">“An assistant that drafts settlement rationales for one-click adjuster sign-off will cut error-driven leakage by 20% within one quarter — measured against a held-out golden set, not anecdotes.”</p>
+          <p class="falsify">Falsified if: accuracy on the golden set < 85%, or adjusters override > 40% of drafts, or leakage moves < 5%.</p>
+        </div>
+
+        <div class="rule"><s>III · THE METRIC PLATE</s></div>
+        <div class="plate">
+          <div class="cell hot"><span class="k">North star</span><div class="v">≥ 85%</div><p class="d">within threshold — conservative target for a correctness pain</p></div>
+          <div class="cell"><span class="k">Counter-metric</span><div class="v">≤ 40%</div><p class="d">adjuster override rate — protects trust while accuracy climbs</p></div>
+          <div class="cell"><span class="k">Cost of wrong answer</span><div class="v">$1,140</div><p class="d">avg leakage + rework per error — the number that funds review</p></div>
+        </div>
+        <div class="guard"><span class="led"></span><p><b>GUARDRAIL · </b> No unreviewed answer reaches a claimant. Every draft carries its evidence; sign-off is one click, skipping review is not.</p></div>
+
+        <div class="rule"><s>IV · WINS BACKLOG · REVIEW-SHAPED</s></div>
+        <div class="backlog">
+          <div class="wi"><span class="n">i.</span><div><b>Draft settlement rationales for one-click sign-off</b><span>the w-review archetype — correctness mode boosts it to the top</span></div><span class="why">REL 0.62</span></div>
+          <div class="wi"><span class="n">ii.</span><div><b>Evidence panel beside every draft</b><span>adjusters see why, overrides teach the golden set</span></div><span class="why">REL 0.55</span></div>
+          <div class="wi"><span class="n">iii.</span><div><b>Weekly eval vs held-out claims</b><span>f-eval archetype +0.3 under correctness — the metric plate stays honest</span></div><span class="why">REL 0.51</span></div>
+          <div class="wi dim"><span class="n">iv.</span><div><b>Autonomous straight-through settlement</b><span>d-agent damped −0.2 under correctness — parked until the override rate earns it</span></div><span class="why">DAMPED</span></div>
+        </div>
+
+        <div class="verdict-strip">
+          <span class="word serif">Proceed, gated.</span>
+          <p>Human review is <b>required</b> (correctness pain). The brief carries its assumptions to <b>Data</b> — the corpus check decides if the evidence exists to draft from.</p>
+        </div>
+
+        <div class="actions">
+          <a class="primary" href="#">Adopt as current initiative →</a>
+          <a class="ghost" href="#">Regenerate</a>
+          <a class="ghost" href="#">Export brief</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

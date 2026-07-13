@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 03 · Build — RAG Live Evaluator lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,450;0,9..144,550;1,9..144,450&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Instrument-grade editorial · light lab surface.
+     Same tokens as mockup 01; lab-specific: evidence cards, metric bars,
+     the evaluator verdict. Gate thresholds are the REAL ones from
+     lab-rag/evaluation.ts — Passed = overall≥80 ∧ risk≤20 ∧ citations≥80. */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:"Instrument Sans",system-ui,sans-serif; background:#f6f3ec; color:#10181f; -webkit-font-smoothing:antialiased; }
+  .serif { font-family:"Fraunces",Georgia,serif; }
+  .mono { font-family:"JetBrains Mono",ui-monospace,monospace; }
+  .wrap { max-width:1280px; margin:0 auto; padding:0 32px; }
+  .blueprint { background-image:radial-gradient(rgba(16,24,31,.07) 1px, transparent 1px); background-size:26px 26px; }
+  .panel { background:#fdfcf8; border:1px solid rgba(16,24,31,.16); position:relative; }
+  .panel::before,.panel::after { content:""; position:absolute; width:9px; height:9px; border-color:#10181f; border-style:solid; opacity:.4; pointer-events:none; }
+  .panel::before { top:-1px; left:-1px; border-width:1.5px 0 0 1.5px; }
+  .panel::after { bottom:-1px; right:-1px; border-width:0 1.5px 1.5px 0; }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid rgba(16,24,31,.12); }
+  .panel-head h3 { font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:#4c5a66; font-weight:600; }
+  .panel-head .aux { font-family:"JetBrains Mono",monospace; font-size:10px; color:#626f7c; }
+  .led { display:inline-block; width:7px; height:7px; flex:none; }
+  .sq { width:7px; height:7px; display:inline-block; flex:none; }
+
+  /* masthead */
+  .mast { border-bottom:1px solid rgba(16,24,31,.14); background:rgba(246,243,236,.88); backdrop-filter:blur(8px); position:sticky; top:0; z-index:40; }
+  .mast .wrap { display:flex; align-items:center; gap:20px; height:56px; }
+  .crumb { font-family:"JetBrains Mono",monospace; font-size:10.5px; letter-spacing:.18em; color:#626f7c; }
+  .crumb b { color:#164fc0; font-weight:500; }
+  .mast .q { font-family:"Fraunces",serif; font-size:15.5px; font-style:italic; color:#10181f; }
+  .mast .right { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .chip { font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.1em; padding:5px 9px; border:1px solid rgba(16,24,31,.22); color:#4c5a66; display:flex; gap:7px; align-items:center; }
+  .chip.live { border-color:rgba(14,122,69,.45); color:#0e7a45; }
+  .chip.byo { border-color:rgba(3,105,161,.4); color:#0369a1; }
+
+  /* pipeline strip: the chain is the nav */
+  .pipeline { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid rgba(16,24,31,.16); background:#fdfcf8; margin:22px 0 18px; }
+  .step { padding:13px 16px; border-right:1px solid rgba(16,24,31,.12); display:flex; gap:11px; align-items:center; }
+  .step:last-child { border-right:0; }
+  .step .n { font-family:"Fraunces",serif; font-style:italic; font-size:21px; color:rgba(16,24,31,.3); }
+  .step b { display:block; font-size:12.5px; font-weight:600; }
+  .step span { display:block; font-size:10.5px; color:#626f7c; }
+  .step.on { background:#10181f; color:#f6f3ec; }
+  .step.on .n { color:#6fd6f2; } .step.on span { color:#9db0c4; }
+  .step.done .n { color:#0e7a45; }
+
+  .grid { display:grid; grid-template-columns:minmax(0,1fr) 400px; gap:16px; align-items:start; padding-bottom:44px; }
+
+  /* question bar */
+  .ask { display:flex; gap:0; margin-bottom:16px; }
+  .ask input { flex:1; font-family:"Instrument Sans",sans-serif; font-size:14.5px; padding:15px 18px; border:1px solid rgba(16,24,31,.25); border-right:0; background:#fdfcf8; color:#10181f; outline:none; }
+  .ask input:focus { border-color:#164fc0; }
+  .ask button { font-size:13px; font-weight:600; padding:0 24px; background:#10181f; color:#f6f3ec; border:0; cursor:pointer; }
+  .ask button:hover { background:#164fc0; }
+
+  /* answer document */
+  .answer { padding:26px 28px 22px; }
+  .answer .meta { display:flex; gap:14px; align-items:center; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.12em; color:#626f7c; text-transform:uppercase; margin-bottom:16px; }
+  .answer .meta .g { color:#0e7a45; display:flex; gap:7px; align-items:center; }
+  .answer p.text { font-family:"Fraunces",serif; font-size:19px; line-height:1.62; font-weight:450; }
+  .answer p.text .cite { font-family:"JetBrains Mono",monospace; font-size:10.5px; color:#164fc0; background:rgba(22,79,192,.08); border:1px solid rgba(22,79,192,.25); padding:1.5px 5px; margin:0 2px; vertical-align:2px; cursor:pointer; }
+  .answer p.text .cite:hover { background:rgba(22,79,192,.16); }
+  .answer .caveat { margin-top:14px; font-size:12px; color:#4c5a66; border-left:2px solid #9a5b00; padding:6px 0 6px 12px; }
+  .answer .caveat b { color:#9a5b00; font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.12em; }
+
+  /* evidence cards */
+  .evidence { margin-top:16px; }
+  .ev { display:grid; grid-template-columns:52px 1fr auto; gap:14px; padding:13px 16px; align-items:start; }
+  .ev + .ev { border-top:1px dotted rgba(16,24,31,.16); }
+  .ev .tag { font-family:"JetBrains Mono",monospace; font-size:11px; font-weight:600; color:#164fc0; padding-top:2px; }
+  .ev p { font-size:12.5px; line-height:1.6; color:#4c5a66; }
+  .ev p b { color:#10181f; background:rgba(22,79,192,.1); font-weight:500; padding:0 2px; }
+  .ev .rel { text-align:right; }
+  .ev .rel b { font-family:"JetBrains Mono",monospace; font-size:13px; display:block; }
+  .ev .rel span { font-size:9.5px; letter-spacing:.1em; color:#626f7c; text-transform:uppercase; }
+  .ev .bar { width:64px; height:3px; background:rgba(16,24,31,.12); margin-top:6px; margin-left:auto; }
+  .ev .bar i { display:block; height:100%; background:#164fc0; }
+  .ev.used { border-left:2px solid #0e7a45; margin-left:-1px; }
+
+  /* verdict rail */
+  .verdict { padding:0; }
+  .gate { padding:22px 20px 18px; background:#10181f; color:#f6f3ec; position:relative; overflow:hidden; }
+  .gate::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,transparent 47%,rgba(63,214,143,.08) 50%,transparent 53%); animation:scan 3.4s linear infinite; pointer-events:none; }
+  @keyframes scan { from{transform:translateY(-100%)} to{transform:translateY(100%)} }
+  @media (prefers-reduced-motion:reduce){ .gate::after{display:none} }
+  .gate .lab { font-family:"JetBrains Mono",monospace; font-size:9.5px; letter-spacing:.18em; color:#8ea3b8; }
+  .gate .word { font-family:"Fraunces",serif; font-size:40px; font-weight:550; letter-spacing:-.015em; color:#4ade80; line-height:1.05; margin-top:8px; }
+  .gate .why { font-size:11.5px; color:#a8b4c0; margin-top:10px; line-height:1.55; }
+  .gate .why b { color:#f6f3ec; font-weight:500; }
+  .metrics { padding:6px 0 10px; }
+  .m { display:grid; grid-template-columns:150px 1fr 46px; gap:12px; align-items:center; padding:9px 18px; }
+  .m + .m { border-top:1px dotted rgba(16,24,31,.12); }
+  .m span { font-size:11.5px; color:#4c5a66; }
+  .m .track { height:4px; background:rgba(16,24,31,.1); position:relative; }
+  .m .track i { position:absolute; inset:0 auto 0 0; background:#0e7a45; }
+  .m .track .th { position:absolute; top:-3px; bottom:-3px; width:1.5px; background:#10181f; opacity:.45; }
+  .m b { font-family:"JetBrains Mono",monospace; font-size:12px; text-align:right; font-variant-numeric:tabular-nums; }
+  .m.warn .track i { background:#9a5b00; } .m.warn b { color:#9a5b00; }
+  .m.inv .track i { background:#0e7a45; }
+  .foot-note { padding:12px 18px 16px; border-top:1px solid rgba(16,24,31,.12); font-size:11px; color:#626f7c; line-height:1.6; }
+  .foot-note b { color:#10181f; font-weight:600; }
+  .foot-note a { color:#164fc0; }
+
+  /* explainer — the evaluator narrates itself */
+  .explain { margin-top:16px; padding:18px 20px; }
+  .explain ol { list-style:none; counter-reset:x; }
+  .explain li { counter-increment:x; display:grid; grid-template-columns:30px 1fr; gap:10px; font-size:12.5px; color:#4c5a66; line-height:1.6; padding:7px 0; }
+  .explain li + li { border-top:1px dotted rgba(16,24,31,.12); }
+  .explain li::before { content:counter(x,lower-roman) "."; font-family:"Fraunces",serif; font-style:italic; color:#164fc0; }
+  .explain li b { color:#10181f; font-weight:600; }
+</style>
+</head>
+<body class="blueprint">
+
+<header class="mast">
+  <div class="wrap">
+    <span class="crumb">STAGE <b>03</b> / 07 · BUILD · PROVE THE ENGINE</span>
+    <span class="q">“Is this answer trustworthy — and why?”</span>
+    <div class="right">
+      <span class="chip live"><span class="led" style="background:#0e7a45"></span>LIVE · RUNS IN YOUR BROWSER</span>
+      <span class="chip byo">BYO-KEY: OFF · SIMULATED GENERATOR</span>
+      <span class="chip">CORPUS 14 FILES · 12 GOLDEN Qs</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- the pipeline is the navigation: question → retrieve → answer → judge -->
+  <div class="pipeline">
+    <div class="step done"><span class="n">i.</span><div><b>Ask</b><span>your question, any document</span></div></div>
+    <div class="step done"><span class="n">ii.</span><div><b>Retrieve</b><span>BM25 · k1 1.5 · b 0.75</span></div></div>
+    <div class="step done"><span class="n">iii.</span><div><b>Answer</b><span>cited, caveated</span></div></div>
+    <div class="step on"><span class="n">iv.</span><div><b>Judge</b><span>7 metrics · quality gate</span></div></div>
+  </div>
+
+  <div class="ask">
+    <input value="What is the daily meal reimbursement limit for international travel?" aria-label="Question">
+    <button>Run the chain →</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <!-- the answer as a document, citations inline -->
+      <div class="panel answer">
+        <div class="meta">
+          <span class="g"><span class="led" style="background:#0e7a45"></span>GATE: PASSED</span>
+          <span>ENGINE: SIMULATED · DETERMINISTIC</span>
+          <span>TRACE #T-2041 · 312ms</span>
+        </div>
+        <p class="text serif">The daily meal reimbursement limit for international travel is <b>$75 per day</b><span class="cite">C1</span>. Receipts are required for any expense over $25<span class="cite">C1</span>, and manager approval is required for trips over $2,500<span class="cite">C3</span>.</p>
+        <div class="caveat"><b>CAVEAT · </b> Applies to international trips only; domestic rates live in the FY26 travel addendum, which is not in this corpus.</div>
+      </div>
+
+      <!-- retrieved evidence, used chunks marked -->
+      <div class="panel evidence">
+        <div class="panel-head"><h3>Retrieved evidence · top 5 of 41 chunks</h3><span class="aux">LEXICAL · QUERY EXPANDED ×2</span></div>
+        <div class="ev used">
+          <span class="tag">C1</span>
+          <p>“The daily <b>meal reimbursement limit</b> for <b>international travel</b> is <b>$75 per day</b>. Receipts are required for expenses over $25.” — travel-policy.md · §2</p>
+          <div class="rel"><b>0.91</b><span>relevance</span><div class="bar"><i style="width:91%"></i></div></div>
+        </div>
+        <div class="ev">
+          <span class="tag">C2</span>
+          <p>“Per-diem tables are reviewed each fiscal year; the current table supersedes all prior guidance…” — travel-policy.md · §1</p>
+          <div class="rel"><b>0.64</b><span>relevance</span><div class="bar"><i style="width:64%"></i></div></div>
+        </div>
+        <div class="ev used">
+          <span class="tag">C3</span>
+          <p>“Manager <b>approval</b> is required for <b>trips</b> over <b>$2,500</b>. The finance team reviews exceptions before payment.” — approval-matrix.md · §4</p>
+          <div class="rel"><b>0.58</b><span>relevance</span><div class="bar"><i style="width:58%"></i></div></div>
+        </div>
+        <div class="ev">
+          <span class="tag">C4</span>
+          <p>“Expense categories excluded from reimbursement include personal entertainment and minibar…” — expense-faq.md · §7</p>
+          <div class="rel"><b>0.41</b><span>relevance</span><div class="bar"><i style="width:41%"></i></div></div>
+        </div>
+        <div class="ev">
+          <span class="tag">C5</span>
+          <p>“For the exclusive use of Contoso staff, 2026.” — travel-policy.md · footer <span class="mono" style="font-size:9.5px;color:#9a5b00">· BOILERPLATE, DOWN-WEIGHTED ×0.15</span></p>
+          <div class="rel"><b>0.09</b><span>relevance</span><div class="bar"><i style="width:9%"></i></div></div>
+        </div>
+      </div>
+
+      <!-- the evaluator narrates its own reasoning -->
+      <div class="panel explain">
+        <div class="panel-head" style="padding:0 0 12px"><h3>How the evaluator decided</h3><span class="aux">PLAIN ENGLISH · SAME NUMBERS</span></div>
+        <ol>
+          <li><span>It compared your question against <b>41 chunks</b> and kept the 5 most relevant; a repeated footer was recognized as boilerplate and down-weighted.</span></li>
+          <li><span>The answer cited <b>2 of the 2 chunks it used</b>, so every claim can be traced to evidence — citation coverage 100%.</span></li>
+          <li><span>Every figure in the answer ($75, $25, $2,500) <b>exists in the retrieved text</b>. No unsupported specifics, so hallucination risk stays low.</span></li>
+          <li><span><b>Quality decision: Passed.</b> Spot-check the cited chunks, then proceed — normal oversight is enough here.</span></li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- verdict rail -->
+    <div class="panel verdict">
+      <div class="gate">
+        <span class="lab">QUALITY GATE · PUBLISHED THRESHOLDS</span>
+        <div class="word serif">Passed</div>
+        <p class="why">Requires <b>overall ≥ 80</b> ∧ <b>risk ≤ 20</b> ∧ <b>citations ≥ 80</b>. This run: 88 · 4 · 100. Locked by 38 engine tests.</p>
+      </div>
+      <div class="metrics">
+        <div class="m"><span>Faithfulness</span><div class="track"><i style="width:97%"></i><span class="th" style="left:70%"></span></div><b>97</b></div>
+        <div class="m"><span>Citation accuracy</span><div class="track"><i style="width:100%"></i><span class="th" style="left:80%"></span></div><b>100</b></div>
+        <div class="m"><span>Retrieval relevance</span><div class="track"><i style="width:73%"></i><span class="th" style="left:50%"></span></div><b>73</b></div>
+        <div class="m"><span>Completeness</span><div class="track"><i style="width:82%"></i><span class="th" style="left:60%"></span></div><b>82</b></div>
+        <div class="m warn"><span>Context utilization</span><div class="track"><i style="width:40%"></i></div><b>40</b></div>
+        <div class="m inv"><span>Hallucination risk</span><div class="track"><i style="width:4%"></i><span class="th" style="left:20%"></span></div><b>4</b></div>
+        <div class="m"><span>Overall quality</span><div class="track"><i style="width:88%"></i><span class="th" style="left:80%"></span></div><b>88</b></div>
+      </div>
+      <div class="foot-note">
+        Tick marks are the <b>published thresholds</b> — the same constants the engine tests assert. Verbatim quotes now score fully grounded (tokenizer fix, <a href="#">ENGINE-QA-2026-07-12</a>).
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <span class="chip">→ QUALITY GATES</span><span class="chip">→ TRACES</span><span class="chip">→ FAILURES</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

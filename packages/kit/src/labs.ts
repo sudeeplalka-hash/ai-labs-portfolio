@@ -57,7 +57,26 @@ export function labHref(labId: string, ucId?: string): string {
 // ---------------------------------------------------------------------------
 
 export interface StageSectionItem { label: string; href: string }
-export interface StageSectionGroup { label?: string; items: StageSectionItem[] }
+export interface StageSectionGroup {
+  /** Short name. The sidebar rail is 288px wide, so this stays terse. */
+  label?: string;
+  /**
+   * Question-first act heading for the in-page pipeline nav. A stage that defines
+   * `act` on its groups opts INTO the editorial pipeline layout; every other stage
+   * keeps rendering the flat/grouped chip rows. STAGES already asks a question per
+   * stage ("Does the system work?") — this is the same voice one level down.
+   *
+   * Deliberately NOT reusing `label`: the sidebar wants "Evaluation", the in-page
+   * nav wants "Is it good enough?". One config, two surfaces, each taking the field
+   * that fits its width.
+   */
+  act?: string;
+  /** One quiet line under the act heading. */
+  blurb?: string;
+  /** Reference material. Renders in the footer row, not as an act column. */
+  utility?: boolean;
+  items: StageSectionItem[];
+}
 /** Mirrors program-core's StageKey (kit stays dependency-free by design). */
 export type StageSectionsKey = "frame" | "data" | "build" | "deploy" | "govern" | "realize" | "operate";
 
@@ -73,26 +92,29 @@ export const STAGE_SECTIONS: Partial<Record<StageSectionsKey, StageSectionGroup[
     { label: "Pipeline", href: "/data/pipeline" },
     { label: "Guide", href: "/data/guide" },
   ] }],
+  // Build's three acts. NOTE: the stage question is already "Does the system work?"
+  // (STAGES.build), so act 1 must NOT be "Does it work?" — it would echo the heading
+  // directly above it. "Can it answer?" narrows to what those four pages actually do.
   build: [
-    { label: "Pipeline", items: [
+    { label: "Pipeline", act: "Can it answer?", blurb: "Retrieval and generation, end to end.", items: [
       { label: "Live Evaluator", href: "/build" },
       { label: "Model fit", href: "/build/model" },
       { label: "Retrieval", href: "/build/retrieval" },
       { label: "Answers", href: "/build/answers" },
     ] },
-    { label: "Evaluation", items: [
+    { label: "Evaluation", act: "Is it good enough?", blurb: "Measured, not asserted.", items: [
       { label: "Evaluations", href: "/build/evaluations" },
       { label: "Golden Dataset", href: "/build/dataset" },
       { label: "Traces", href: "/build/traces" },
       { label: "Quality Gates", href: "/build/quality-gates" },
       { label: "Failures", href: "/build/failures" },
     ] },
-    { label: "Capabilities", items: [
+    { label: "Capabilities", act: "How far can it go?", blurb: "Agents, tuning, and the wiring underneath.", items: [
       { label: "Agents & Tools", href: "/build/agents" },
       { label: "Training Readiness", href: "/build/training" },
       { label: "Under the Hood", href: "/build/internals" },
     ] },
-    { label: "Reference", items: [
+    { label: "Reference", utility: true, items: [
       { label: "Overview", href: "/build/overview" },
       { label: "Guide", href: "/build/guide" },
     ] },
@@ -104,32 +126,35 @@ export const STAGE_SECTIONS: Partial<Record<StageSectionsKey, StageSectionGroup[
     { label: "Incident response", href: "/deploy#incident" },
     { label: "Guide", href: "/deploy/guide" },
   ] }],
+  // Govern is Build's structural twin: three substantive acts plus reference. The
+  // Cockpit is the stage's own landing page, so it sits in the utility row rather
+  // than inside an act — it is where you arrive, not a step you take.
   govern: [
-    { label: "Overview", items: [
+    { label: "Overview", utility: true, items: [
       { label: "Cockpit", href: "/govern" },
       { label: "Guide", href: "/govern/guide" },
     ] },
-    { label: "Control plane", items: [
+    { label: "Control plane", act: "What's allowed?", blurb: "Risk, policy, and the use-case gate.", items: [
       { label: "Use cases", href: "/govern/use-cases" },
       { label: "Risk", href: "/govern/risk" },
       { label: "Policies", href: "/govern/policies" },
       { label: "Playground", href: "/govern/playground" },
       { label: "Evals", href: "/govern/evals" },
     ] },
-    { label: "Experiences", items: [
+    { label: "Experiences", act: "Does it hold?", blurb: "Watch the guardrails take a hit.", items: [
       { label: "See it live", href: "/govern/live" },
       { label: "Red team arcade", href: "/govern/arcade" },
       { label: "What if calc", href: "/govern/value" },
       { label: "Maturity", href: "/govern/maturity" },
     ] },
-    { label: "Assurance", items: [
+    { label: "Assurance", act: "Can you prove it?", blurb: "The evidence a regulator asks for.", items: [
       { label: "Audit log", href: "/govern/audit-logs" },
       { label: "Review queue", href: "/govern/review-queue" },
       { label: "Evidence", href: "/govern/evidence" },
       { label: "Readiness", href: "/govern/readiness" },
       { label: "Board brief", href: "/govern/brief" },
     ] },
-    { label: "Reference", items: [
+    { label: "Reference", utility: true, items: [
       { label: "Docs", href: "/govern/docs" },
       { label: "Settings", href: "/govern/settings" },
     ] },
