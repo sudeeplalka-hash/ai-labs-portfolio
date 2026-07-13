@@ -16,7 +16,7 @@ const ICONS: Record<StageKey, LucideIcon> = {
 
 // Each lab's sub-pages, surfaced in the sidebar so they aren't hidden behind
 // the in-page subnav. The config lives in @labs/kit (STAGE_SECTIONS) and is
-// shared with the in-page StageSubnav, so the two surfaces can never diverge
+// shared with the Header band's StageNav, so the two surfaces can never diverge
 // (R2.2). Route-based labs link to real URLs; Deploy and Realize use a hash
 // that their views read to switch the active in-page section.
 type Sub = StageSectionItem;

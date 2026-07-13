@@ -1,7 +1,6 @@
 import { DataSliceWriter } from "@/components/bridges/DataSliceWriter";
 import { BuildSliceWriter } from "@/components/bridges/BuildSliceWriter";
 import { GovSliceWriter } from "@/components/bridges/GovSliceWriter";
-import { StageSubnav } from "@/components/shell/StageSubnav";
 
 // Realize aggregates every upstream stage into one business case. We mount the
 // slice writers here so the ROI traces correctly even when a visitor lands on
@@ -15,7 +14,6 @@ export default function RealizeLayout({ children }: { children: React.ReactNode 
       <DataSliceWriter />
       <BuildSliceWriter />
       <GovSliceWriter />
-      <StageSubnav stage="realize" />
       {children}
     </div>
   );

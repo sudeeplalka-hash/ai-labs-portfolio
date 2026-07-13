@@ -1,15 +1,29 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, FlaskConical, Lock, CircleDot, BookOpen, ArrowRight } from "lucide-react";
+import { Menu, FlaskConical, Lock, CircleDot } from "lucide-react";
 import { useProgram, STAGES, DEMO_ARCHETYPES, type DemoArchetype } from "@labs/program-core";
 import { STAGE_SECTIONS } from "@labs/kit";
 import { cn } from "@labs/design-system";
+import { useStageNav, StageNavFull, StageNavMini } from "./StageNav";
 
-// The Live/Demo toggle is available on every mode-aware stage (and the
-// Storyline). Strategy is excluded on purpose: it has its own "Use Sample
-// Initiative" flow and ignores the mode, so a toggle there would do nothing.
+// THE BAND (2026-07-12). Header and the in-stage nav used to be two stacked cards:
+// Header (~100px) + ProgramRail (~34px) + a subnav card inside <main> (~150px +
+// 24px margin) ≈ 310px of chrome before a single pixel of content. They were also
+// saying the same thing twice — the Header subtitle ("Prove the engine: retrieval +
+// generation…") was a prose restatement of the acts below it, and "New here? How
+// this lab works" duplicated the Guide link in the subnav's utility row.
+//
+// So they are now ONE sticky band: identity on the left, the stage's nav on the
+// right, using the horizontal space the header was already wasting. The subtitle
+// survives only on the stage ROOT, where a visitor is arriving and hasn't met the
+// lab yet; on the 13 subpages the acts say it better and the line is dropped.
+//
+// It collapses on scroll to a single line (identity · act › page · mode · Next).
+// See COLLAPSE/RESTORE below for why the two thresholds differ.
+
 const MODE_ROUTES = ["/data", "/build", "/deploy", "/govern", "/realize", "/story"];
 const onAny = (pathname: string, routes: string[]) =>
   routes.some((r) => pathname === r || pathname.startsWith(r + "/"));
@@ -17,7 +31,7 @@ const onAny = (pathname: string, routes: string[]) =>
 // Shelled routes that are NOT stages. These used to fall through `?? STAGE_MAP.frame`,
 // which made /architecture and /roadmap claim they were "Strategy & Planning" — wrong
 // <h1>, wrong subtitle, a bogus "Live" badge, and a "How this lab works" link pointing
-// at /frame/guide. A missing stage is now simply a missing stage. (a11y 2026-07-12)
+// at /frame/guide. A missing stage is now simply a missing stage.
 const NON_STAGE: Record<string, { title: string; subtitle: string }> = {
   "/architecture": { title: "Architecture", subtitle: "How the Command Center is built, and why it's built that way." },
   "/roadmap": { title: "Roadmap", subtitle: "What exists now, what comes next, and what's deliberately out of scope." },
@@ -25,17 +39,15 @@ const NON_STAGE: Record<string, { title: string; subtitle: string }> = {
   "/lifecycle": { title: "Lifecycle", subtitle: "The seven stages, and the contract between them." },
 };
 
-// The page's own <h1> is the specific one ("Am I ready for the AI rulebook?"), but the
-// Header is the only heading present on stage roots and on subpages that don't set one.
-// So the Header owns the single <h1> everywhere and pages render <h2> — which means the
-// Header's title has to be SPECIFIC, or ~20 govern routes all announce themselves as
-// "Govern". STAGE_SECTIONS is already the canonical route→label map, so reuse it.
+// The Header owns the page's single <h1>, so its title must be SPECIFIC — otherwise
+// ~20 govern routes all announce themselves as "Govern". STAGE_SECTIONS is already the
+// canonical route→label map, so reuse it rather than inventing a second one.
 function sectionLabel(stageKey: string, pathname: string): string | undefined {
   const groups = STAGE_SECTIONS[stageKey as keyof typeof STAGE_SECTIONS];
   if (!groups) return undefined;
   for (const g of groups) {
     for (const item of g.items) {
-      if (item.href.includes("#")) continue; // in-page sections, not routes
+      if (item.href.includes("#")) continue;
       if (pathname === item.href || pathname === item.href + "/") return item.label;
     }
   }
@@ -47,19 +59,20 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isStory = pathname === "/story" || pathname.startsWith("/story/");
+
   // No `?? STAGE_MAP.frame`: a route that isn't a stage must not pretend to be one.
   const stage = STAGES.find((s) => pathname === s.href || pathname.startsWith(s.href + "/"));
-  const path = pathname.replace(/\/$/, "") || "/"; // trailingSlash routing
+  const path = pathname.replace(/\/$/, "") || "/";
   const nonStage = NON_STAGE[path];
-  // Only look up a section on SUBpages. On a stage root the title is just the stage
-  // ("Data"), not "Data · Live Data Lab".
   const section = stage && path !== stage.href ? sectionLabel(stage.key, path) : undefined;
+  const atStageRoot = !!stage && path === stage.href;
+
+  const nav = useStageNav(stage?.key);
 
   const isFrame = !isHome && !isStory && stage?.key === "frame";
   const status = stage ? state.progress[stage.key] : undefined;
   const showMode = onAny(pathname, MODE_ROUTES);
 
-  // Specific enough to identify the page on its own — this is the document's only <h1>.
   const title = isHome
     ? "Command Center"
     : isStory
@@ -69,31 +82,70 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
           ? `${stage.label} · ${section}`
           : stage.label
         : (nonStage?.title ?? "AI Program Command Center");
+  // The subtitle is worth saying ONCE, on arrival. On subpages the acts restate it.
   const subtitle = isHome
     ? "Your AI program at a glance, walk it end-to-end, or open any lab."
     : isStory
       ? "The whole program in seven beats, one idea taken from ambition to business case."
       : stage
-        ? stage.will
+        ? (atStageRoot || !nav ? stage.will : "")
         : (nonStage?.subtitle ?? "");
-  // A quiet entry point to the lab's guide, caught at the moment of arrival.
-  // Only a real stage has a guide — /architecture and /roadmap do not.
-  const showGuideLink = !!stage && !isHome && !isStory && !pathname.includes("/guide");
-  const guideHref = `${stage?.href ?? ""}/guide`;
+
+  /* ------------------------------------------------------- scroll collapse */
+  // Two thresholds on purpose. Collapsing shrinks the band, which pulls the content
+  // below it upward. With ONE threshold the resulting layout shift can bounce you back
+  // across it and the header flickers open/closed forever. The gap breaks that loop.
+  // We deliberately do NOT compensate scrollTop: clamping at the top of the document
+  // makes compensation unsolvable (you cannot scroll to a negative offset), so instead
+  // the collapse is animated and the content slides rather than jumps.
+  const COLLAPSE = 120;
+  const RESTORE = 40;
+  const [small, setSmall] = useState(false);
+  const smallRef = useRef(false);
+
+  useEffect(() => {
+    if (!nav) return; // nothing to collapse
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (!smallRef.current && y > COLLAPSE) { smallRef.current = true; setSmall(true); }
+      else if (smallRef.current && y < RESTORE) { smallRef.current = false; setSmall(false); }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [nav]);
+
+  // A new route starts at the top of its own content, so start expanded.
+  useEffect(() => { smallRef.current = false; setSmall(false); }, [pathname]);
+
+  const collapsed = small && !!nav;
 
   return (
     <header className="no-print sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur-md">
-      <div className="flex items-center justify-between gap-4 px-5 py-4 md:px-8">
-        <div className="flex items-center gap-3">
-          {/* ref so the drawer can hand focus back here when it closes */}
-          <button ref={menuRef as React.RefObject<HTMLButtonElement>} onClick={onMenu} aria-haspopup="dialog" className="rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden" aria-label="Open navigation">
+      <div className="mx-auto w-full max-w-[1440px] px-5 py-3 md:px-8">
+        <div className="flex items-start gap-4">
+          <button
+            ref={menuRef as React.RefObject<HTMLButtonElement>}
+            onClick={onMenu}
+            aria-haspopup="dialog"
+            className="mt-0.5 rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden"
+            aria-label="Open navigation"
+          >
             <Menu className="h-5 w-5" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              {/* The single <h1> for every shelled route. Page content renders <h2>. */}
+
+          {/* Identity. On a stage with a nav this is the narrow left rail; the divider
+              separates two different KINDS of thing (who you are vs where you can go),
+              which is a divider earning its ink rather than decorating. */}
+          <div
+            className={cn(
+              "min-w-0",
+              nav && !collapsed && "shrink-0 lg:w-[172px] lg:border-r lg:border-line lg:pr-5",
+              collapsed && "hidden",
+            )}
+          >
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-semibold text-ink md:text-xl">{title}</h1>
-              {/* `stage &&`: /architecture and /roadmap are not labs, so no status badge. */}
               {!isHome && !isStory && stage && (isFrame ? (
                 <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
                   <FlaskConical className="h-3 w-3" /> Live
@@ -108,51 +160,71 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
                 </span>
               ))}
             </div>
-            <p className="hidden text-sm text-slatey-400 sm:block">{subtitle}</p>
-            {showGuideLink && (
-              <Link href={guideHref} className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary-dark">
-                <BookOpen className="h-3.5 w-3.5" /> New here? How this lab works
-                <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            )}
-          </div>
-        </div>
 
-        {showMode && (
-          <div className="flex flex-col items-end gap-1.5">
-            <div className="inline-flex rounded-lg border border-line bg-white p-1" role="group" aria-label="Lab mode">
-              {(["live", "demo"] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  aria-pressed={mode === m}
-                  title={m === "live" ? "Connected to your threaded initiative" : "Standalone sandbox with sample data"}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
-                    mode === m ? "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25" : "text-slatey-400 hover:text-ink",
-                  )}
-                >
-                  {m === "live" ? "Live lab" : "Demo"}
-                </button>
-              ))}
-            </div>
-            {/* Demo archetype switcher, shuffle through the six curated samples. */}
-            {mode === "demo" && (
-              <select
-                value={demoArchetype}
-                onChange={(e) => setDemoArchetype(e.target.value as DemoArchetype)}
-                aria-label="Demo archetype"
-                title={DEMO_ARCHETYPES.find((a) => a.id === demoArchetype)?.blurb}
-                className="max-w-[180px] rounded-lg border border-line bg-white px-2 py-1 text-xs font-medium text-slatey-300 focus:outline-none focus:ring-1 focus:ring-primary/40"
-              >
-                {DEMO_ARCHETYPES.map((a) => (
-                  <option key={a.id} value={a.id}>{a.label}</option>
-                ))}
-              </select>
+            {subtitle && <p className="mt-1 hidden text-sm text-slatey-400 sm:block">{subtitle}</p>}
+
+            {showMode && (
+              <div className={cn("mt-2 flex flex-wrap items-center gap-1.5", !nav && "hidden")}>
+                <ModeToggle mode={mode} setMode={setMode} />
+                {mode === "demo" && (
+                  <ArchetypeSelect value={demoArchetype} onChange={setDemoArchetype} />
+                )}
+              </div>
             )}
           </div>
-        )}
+
+          {/* The stage's nav. Full at rest, one line once you're into the lab. */}
+          {nav && (collapsed
+            ? <StageNavMini m={nav} title={title} />
+            : <StageNavFull m={nav} />
+          )}
+
+          {/* Routes with no stage nav keep the original right-aligned controls. */}
+          {!nav && showMode && (
+            <div className="ml-auto flex flex-col items-end gap-1.5">
+              <ModeToggle mode={mode} setMode={setMode} />
+              {mode === "demo" && <ArchetypeSelect value={demoArchetype} onChange={setDemoArchetype} />}
+            </div>
+          )}
+        </div>
       </div>
     </header>
+  );
+}
+
+function ModeToggle({ mode, setMode }: { mode: "live" | "demo"; setMode: (m: "live" | "demo") => void }) {
+  return (
+    <div className="inline-flex rounded-lg border border-line bg-white p-0.5" role="group" aria-label="Lab mode">
+      {(["live", "demo"] as const).map((m) => (
+        <button
+          key={m}
+          onClick={() => setMode(m)}
+          aria-pressed={mode === m}
+          title={m === "live" ? "Connected to your threaded initiative" : "Standalone sandbox with sample data"}
+          className={cn(
+            "rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors",
+            mode === m ? "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25" : "text-slatey-400 hover:text-ink",
+          )}
+        >
+          {m === "live" ? "Live lab" : "Demo"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ArchetypeSelect({ value, onChange }: { value: DemoArchetype; onChange: (v: DemoArchetype) => void }) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as DemoArchetype)}
+      aria-label="Demo archetype"
+      title={DEMO_ARCHETYPES.find((a) => a.id === value)?.blurb}
+      className="max-w-[172px] rounded-lg border border-line bg-white px-2 py-1 text-[11px] font-medium text-slatey-300 focus:outline-none focus:ring-1 focus:ring-primary/40"
+    >
+      {DEMO_ARCHETYPES.map((a) => (
+        <option key={a.id} value={a.id}>{a.label}</option>
+      ))}
+    </select>
   );
 }

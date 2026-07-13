@@ -48,7 +48,7 @@ export function labHref(labId: string, ucId?: string): string {
 
 // ---------------------------------------------------------------------------
 // STAGE_SECTIONS · the ONE nav config for Collection 1's stage sub-pages (R2.2).
-// Both the sidebar's collapsible trees AND the in-page StageSubnav render from
+// Both the sidebar's collapsible trees AND the Header band's StageNav render from
 // this list, so the two can never disagree again (Build's grouped sections used
 // to exist only in the sidebar while its in-page subnav showed a flat row).
 // Hash hrefs (Deploy/Realize) address in-page sections; the views listen for
