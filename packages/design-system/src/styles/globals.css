@@ -10,6 +10,14 @@ body {
   color: #152433;
   -webkit-font-smoothing: antialiased;
 }
+
+/* The only thing that ever overlays content is the Header's compact pinned bar
+   (~44px). Reserve that much when the browser scrolls to an anchor, so a hash link
+   (Deploy/Realize in-page sections, the skip link) never lands a heading UNDER the
+   bar. Without this, "jump to section" silently hides the section it jumped to. */
+html {
+  scroll-padding-top: 56px;
+}
 * {
   border-color: #e4e7eb;
 }
@@ -39,6 +47,20 @@ body {
   .data-table th { @apply whitespace-nowrap border-b border-line bg-slate-50 px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-slatey-500; }
   .data-table td { @apply border-b border-line px-3 py-2.5 align-top text-slatey-300; }
   .data-table tbody tr { @apply transition-colors hover:bg-slate-50; }
+}
+
+/* CODE, and only code. The `font-mono` utility now resolves to the SANS stack with
+   tabular figures (see preset.ts: monospace was decorating 280 UI elements and reading
+   as hobbyist). But actual code must stay monospaced, so restore it on the elements
+   that genuinely hold code: JSON payloads, tool schemas, policy snippets, audit hashes.
+
+   Unlayered on purpose, exactly like the focus rule below. Tailwind utilities live in
+   @layer utilities, and unlayered rules beat every layer, so a legacy
+   <pre className="font-mono"> still renders monospaced and no JSX had to change.
+   `.font-code` covers inline technical strings that are not inside a <code>. */
+pre, code, kbd, samp, .font-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: normal;
 }
 
 /* Keyboard focus — unlayered so it wins over Tailwind focus utilities. */

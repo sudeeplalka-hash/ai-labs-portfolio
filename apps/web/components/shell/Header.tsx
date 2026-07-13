@@ -16,13 +16,15 @@ import { useStageNav, StageNavFull, StageNavMini } from "./StageNav";
 // generation…") was a prose restatement of the acts below it, and "New here? How
 // this lab works" duplicated the Guide link in the subnav's utility row.
 //
-// So they are now ONE sticky band: identity on the left, the stage's nav on the
-// right, using the horizontal space the header was already wasting. The subtitle
-// survives only on the stage ROOT, where a visitor is arriving and hasn't met the
-// lab yet; on the 13 subpages the acts say it better and the line is dropped.
+// So they are now ONE band: identity on the left, the stage's nav on the right,
+// using the horizontal space the header was already wasting. The subtitle survives
+// only on the stage ROOT, where a visitor is arriving and hasn't met the lab yet;
+// on the 13 subpages the acts say it better and the line is dropped.
 //
-// It collapses on scroll to a single line (identity · act › page · mode · Next).
-// See COLLAPSE/RESTORE below for why the two thresholds differ.
+// The band is NOT sticky and does NOT collapse. It scrolls away like any other
+// content. A separate compact bar (identity · act › page · Next) is revealed once
+// the band has gone, and it lives in a zero-height sticky wrapper so it can never
+// move the page. See "the pinned bar" below.
 
 const MODE_ROUTES = ["/data", "/build", "/deploy", "/govern", "/realize", "/story"];
 const onAny = (pathname: string, routes: string[]) =>
@@ -91,59 +93,90 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
         ? (atStageRoot || !nav ? stage.will : "")
         : (nonStage?.subtitle ?? "");
 
-  /* ------------------------------------------------------- scroll collapse */
-  // Two thresholds on purpose. Collapsing shrinks the band, which pulls the content
-  // below it upward. With ONE threshold the resulting layout shift can bounce you back
-  // across it and the header flickers open/closed forever. The gap breaks that loop.
-  // We deliberately do NOT compensate scrollTop: clamping at the top of the document
-  // makes compensation unsolvable (you cannot scroll to a negative offset), so instead
-  // the collapse is animated and the content slides rather than jumps.
-  const COLLAPSE = 120;
-  const RESTORE = 40;
-  const [small, setSmall] = useState(false);
-  const smallRef = useRef(false);
+  /* --------------------------------------------------------- the pinned bar */
+  // The band DOES NOT collapse, and it is NOT sticky. It sits in normal flow and
+  // scrolls away like any other content, which is why this now feels smooth: the
+  // motion is native scrolling at exactly scroll speed, with nothing to animate and
+  // nothing to get wrong.
+  //
+  // The previous version was sticky AND in flow, so shrinking it removed ~200px of
+  // layout and every line of the page lurched upward. That jerk was the CONTENT
+  // moving, not the header, so no easing curve could have fixed it. The rule now:
+  // the header may never change the position of a single pixel of the page below it.
+  //
+  // Instead a compact bar is revealed once the band has scrolled past. It lives in a
+  // ZERO-HEIGHT sticky wrapper, so it contributes nothing to layout and can never
+  // reflow the page. It slides down over the top of the viewport on its own.
+  //
+  // Reveal is driven by IntersectionObserver on a sentinel at the foot of the band,
+  // not by a scroll handler. No scroll listener means no per-frame work on the main
+  // thread and no layout thrash, which is the other half of why this feels smooth.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [pinned, setPinned] = useState(false);
 
   useEffect(() => {
-    if (!nav) return; // nothing to collapse
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (!smallRef.current && y > COLLAPSE) { smallRef.current = true; setSmall(true); }
-      else if (smallRef.current && y < RESTORE) { smallRef.current = false; setSmall(false); }
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [nav]);
+    const el = sentinelRef.current;
+    if (!el || !nav) { setPinned(false); return; }
+    const io = new IntersectionObserver(
+      ([e]) => setPinned(!e.isIntersecting && e.boundingClientRect.top < 0),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nav, pathname]);
 
-  // A new route starts at the top of its own content, so start expanded.
-  useEffect(() => { smallRef.current = false; setSmall(false); }, [pathname]);
-
-  const collapsed = small && !!nav;
+  // A new route starts at the top of its own content.
+  useEffect(() => { setPinned(false); }, [pathname]);
 
   return (
-    <header className="no-print sticky top-0 z-20 border-b border-line bg-white/85 backdrop-blur-md">
-      <div className="mx-auto w-full max-w-[1440px] px-5 py-3 md:px-8">
-        <div className="flex items-start gap-4">
-          <button
-            ref={menuRef as React.RefObject<HTMLButtonElement>}
-            onClick={onMenu}
-            aria-haspopup="dialog"
-            className="mt-0.5 rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden"
-            aria-label="Open navigation"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-
-          {/* Identity. On a stage with a nav this is the narrow left rail; the divider
-              separates two different KINDS of thing (who you are vs where you can go),
-              which is a divider earning its ink rather than decorating. */}
+    <>
+      {/* THE PINNED BAR. The wrapper is `h-0`, so it occupies ZERO height in flow and
+          is physically incapable of moving the page. The bar inside slides down from
+          above the viewport once the band has scrolled past, and slides back up when
+          you return. Transform and opacity only: both are compositor properties, so
+          this animates off the main thread and never triggers layout.
+          (prefers-reduced-motion is honoured globally in globals.css.) */}
+      {nav && (
+        <div className="no-print sticky top-0 z-30 h-0 overflow-visible">
           <div
             className={cn(
-              "min-w-0",
-              nav && !collapsed && "shrink-0 lg:w-[172px] lg:border-r lg:border-line lg:pr-5",
-              collapsed && "hidden",
+              "border-b border-line bg-white/90 backdrop-blur-md",
+              "transition-[transform,opacity] duration-200 ease-out will-change-transform motion-reduce:transition-none",
+              pinned ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0",
             )}
+            aria-hidden={!pinned}
           >
+            <div className="mx-auto flex w-full max-w-[1440px] items-center px-5 py-2 md:px-8">
+              <StageNavMini m={nav} title={title} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* THE BAND. Not sticky: it scrolls away with the page, at exactly scroll speed.
+          Nothing to animate, nothing to jerk. */}
+      <header className="no-print border-b border-line bg-white">
+        <div className="mx-auto w-full max-w-[1440px] px-5 py-3 md:px-8">
+          <div className="flex items-start gap-4">
+            <button
+              ref={menuRef as React.RefObject<HTMLButtonElement>}
+              onClick={onMenu}
+              aria-haspopup="dialog"
+              className="mt-0.5 rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden"
+              aria-label="Open navigation"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+
+            {/* Identity. On a stage with a nav this is the narrow left rail; the divider
+                separates two different KINDS of thing (who you are vs where you can go),
+                which is a divider earning its ink rather than decorating. */}
+            <div
+              className={cn(
+                "min-w-0",
+                nav && "shrink-0 lg:w-[172px] lg:border-r lg:border-line lg:pr-5",
+              )}
+            >
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-semibold text-ink md:text-xl">{title}</h1>
               {!isHome && !isStory && stage && (isFrame ? (
@@ -173,22 +206,27 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
             )}
           </div>
 
-          {/* The stage's nav. Full at rest, one line once you're into the lab. */}
-          {nav && (collapsed
-            ? <StageNavMini m={nav} title={title} />
-            : <StageNavFull m={nav} />
-          )}
+          {/* The stage's nav, always in full. The compact version is not a state of
+              THIS element any more; it is the separate pinned bar above, which is why
+              nothing here has to resize and nothing below has to move. */}
+          {nav && <StageNavFull m={nav} />}
 
-          {/* Routes with no stage nav keep the original right-aligned controls. */}
-          {!nav && showMode && (
-            <div className="ml-auto flex flex-col items-end gap-1.5">
-              <ModeToggle mode={mode} setMode={setMode} />
-              {mode === "demo" && <ArchetypeSelect value={demoArchetype} onChange={setDemoArchetype} />}
-            </div>
-          )}
+            {/* Routes with no stage nav keep the original right-aligned controls. */}
+            {!nav && showMode && (
+              <div className="ml-auto flex flex-col items-end gap-1.5">
+                <ModeToggle mode={mode} setMode={setMode} />
+                {mode === "demo" && <ArchetypeSelect value={demoArchetype} onChange={setDemoArchetype} />}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Sentinel. Sits at the foot of the band; when it crosses the top of the
+          viewport the pinned bar reveals itself. A 1px element observed by
+          IntersectionObserver, rather than a scroll handler doing per-frame math. */}
+      <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+    </>
   );
 }
 

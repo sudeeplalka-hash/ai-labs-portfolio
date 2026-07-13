@@ -58,9 +58,29 @@ const labPreset: Partial<Config> = {
         destructive: { DEFAULT: "hsl(var(--destructive))", foreground: "hsl(var(--destructive-foreground))" },
         brand: { DEFAULT: "#1f6fc4", 600: "#1f6fc4" },
       },
+      // TYPOGRAPHY POLICY (2026-07-12). No monospace in the interface.
+      //
+      // It was decorating 280 elements: artifact counts, collection tags, status
+      // badges, stage numbers, eyebrows. UI copy dressed up as a terminal, which
+      // reads as hobbyist to the executive audience this portfolio is written for.
+      //
+      // `mono` is DELIBERATELY remapped to the sans stack with tabular figures. That
+      // retires the typewriter look across all 280 call sites in one line, with zero
+      // JSX churn, and tabular-nums keeps digits aligned in tables and counters,
+      // which was the only legitimate job monospace was doing there.
+      //
+      // Real monospace is NOT gone: globals.css restores it for `pre`, `code`, `kbd`
+      // and `samp`, so JSON payloads, tool schemas, policy snippets and audit hashes
+      // stay readable. Setting code in a proportional face is a legibility bug, not a
+      // style choice. Use `font-code` for inline technical strings (a SHA, an ID)
+      // that are not already inside a <code> element.
       fontFamily: {
         sans: ["var(--font-sans)", "Public Sans", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        mono: [
+          ["var(--font-sans)", "Public Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+          { fontFeatureSettings: '"tnum"', fontVariantNumeric: "tabular-nums" },
+        ],
+        code: ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"],
       },
       boxShadow: {
         card: "0 1px 2px rgba(21,36,51,0.04), 0 1px 3px rgba(21,36,51,0.06)",
