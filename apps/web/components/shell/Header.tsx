@@ -100,6 +100,41 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
           ? stage.will
           : (nonStage?.subtitle ?? "");
 
+  /* --------------------------------------------------------- the pinned bar */
+  // The band DOES NOT collapse, and it is NOT sticky. It sits in normal flow and
+  // scrolls away like any other content, which is why this now feels smooth: the
+  // motion is native scrolling at exactly scroll speed, with nothing to animate and
+  // nothing to get wrong.
+  //
+  // The previous version was sticky AND in flow, so shrinking it removed ~200px of
+  // layout and every line of the page lurched upward. That jerk was the CONTENT
+  // moving, not the header, so no easing curve could have fixed it. The rule now:
+  // the header may never change the position of a single pixel of the page below it.
+  //
+  // Instead a compact bar is revealed once the band has scrolled past. It lives in a
+  // ZERO-HEIGHT sticky wrapper, so it contributes nothing to layout and can never
+  // reflow the page. It slides down over the top of the viewport on its own.
+  //
+  // Reveal is driven by IntersectionObserver on a sentinel at the foot of the band,
+  // not by a scroll handler. No scroll listener means no per-frame work on the main
+  // thread and no layout thrash, which is the other half of why this feels smooth.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [pinned, setPinned] = useState(false);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !nav) { setPinned(false); return; }
+    const io = new IntersectionObserver(
+      ([e]) => setPinned(!e.isIntersecting && e.boundingClientRect.top < 0),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nav, pathname]);
+
+  // A new route starts at the top of its own content.
+  useEffect(() => { setPinned(false); }, [pathname]);
+
   /* Defined once, positioned differently by the two shapes below. */
   const menuButton = (
     <button
