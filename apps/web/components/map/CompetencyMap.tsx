@@ -9,8 +9,8 @@ import { LABS, progress, ALL_USE_CASES } from "@labs/kit";
 import { HeroCaseStudies } from "./HeroCaseStudies";
 import { CollectionIndex } from "./CollectionIndex";
 
-// Executive metric band, computed from the registry so figures never drift. The 23
-// is the catalog (collections 2-4); the Lifecycle is the spine, shown separately.
+// Executive metric band, computed from the registry so figures never drift. The 25
+// is the catalog (collections 2-5); the Lifecycle is the spine, shown separately.
 function MetricBand() {
   const p = progress();
   const metrics = [
@@ -68,8 +68,8 @@ export function CompetencyMap() {
             <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-300">Live in the browser</span>
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href="#collections" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
-              Explore the artifacts <ArrowRight className="h-4 w-4" />
+            <a href="#cases" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-primary/90">
+              Start with five decision cases <ArrowRight className="h-4 w-4" />
             </a>
             <Link href="/storylines" className="inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-white/5 px-3.5 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
               Follow the strategy <ArrowRight className="h-4 w-4" />

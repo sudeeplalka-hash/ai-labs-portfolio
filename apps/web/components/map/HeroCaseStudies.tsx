@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { type LabEntry } from "@labs/kit";
+import { progress, type LabEntry } from "@labs/kit";
 
 const HERO_PROOF: Record<string, { proves: string; depth: string; cta: string }> = {
   "GAP-03": {
@@ -35,14 +35,17 @@ const HERO_PROOF: Record<string, { proves: string; depth: string; cta: string }>
 };
 
 export function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
+  // Remainder is computed from the registry, never hardcoded. The five featured cases
+  // are themselves catalog labs, so the rest of the catalog is total minus what shows here.
+  const otherCount = progress().total - labs.length;
   return (
-    <section className="mb-9 mt-8">
+    <section id="cases" className="mb-9 mt-8 scroll-mt-24">
       <div className="flex items-baseline justify-between gap-3">
         <div>
           <p className="eyebrow text-primary">Executive decision cases</p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">Start with the five executive decision cases</h2>
         </div>
-        <span className="hidden shrink-0 text-xs text-slatey-500 sm:block">~10 minutes &middot; the other 18 show range</span>
+        <span className="hidden shrink-0 text-xs text-slatey-500 sm:block">~10 minutes &middot; the other {otherCount} show range</span>
       </div>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
         These five artifacts show the portfolio at its strongest: multiagent economics, architecture and protocol
