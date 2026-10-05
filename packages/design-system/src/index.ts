@@ -26,3 +26,4 @@ export { MOTION } from "./lib/playback";
 export { CHART_TOKENS, chartLabel } from "./lib/chart";
 export { CopyButton } from "./components/CopyButton";
 export { PlaybackControls } from "./components/PlaybackControls";
+export { requireCanvas2D } from "./lib/canvas";

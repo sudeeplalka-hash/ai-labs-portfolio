@@ -11,6 +11,7 @@ Implemented in the isolated portfolio-upgrade worktree. No engine formulas chang
 - The optional atlas defaults closed. Opening 3D dynamically imports its code; failure offers retry, 2D and file-list paths without discarding corpus state. Closing the disclosure unmounts the atlas. The 2D view uses a static selection ring. The 3D hover pulse is bounded to one 1.2-second cycle; pulse and inertia/reset work cancel on preference, visibility, viewport, resize and unmount changes. Duplicate-resolution scrolling follows reduced-motion preference.
 - The existing analysis pipeline no longer waits an artificial 300ms. Generation guards cancel publication from obsolete file parsing or analysis after reset/profile replacement/unmount.
 - Data's tooltip now reexports the shared accessible implementation; KPI and rulebook explanations provide metric-specific labels. File upload remains keyboard reachable with visible focus on the drop area.
+- Canvas fallback follow-up: a missing or blocked 2D context now produces an explicit Data message with its 2D/file-list alternatives. The selected document, scores and findings remain in the parent. RAG's corresponding context failure enters its existing optional-view error boundary, which offers in-place retry/close and retains the document and text evidence. Shared acquisition tests cover absent, blocked and working context responses; browser fault injection remains unverified.
 
 ## Governance: PF17, PF20, PF23 and PF32
 

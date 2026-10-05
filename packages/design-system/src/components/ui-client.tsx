@@ -1,23 +1,27 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Info, X } from "lucide-react";
 import { cn } from "../lib/cn";
 import { Modal } from "./Modal";
+import { createHelpDismissal } from "../lib/help";
 
 export function MetricTooltip({ text, label = "this metric", className }: { text: string; label?: string; className?: string }) {
   const [open, setOpen] = useState(false);
-  const [pinned, setPinned] = useState(false);
+  const pinned = useRef(false);
   const [position, setPosition] = useState({ left: 8, top: 8 });
   const [portal, setPortal] = useState<Element | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const tip = useRef<HTMLSpanElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const id = useId();
-  const show = () => { if (timer.current) clearTimeout(timer.current); setOpen(true); };
-  const leave = () => { if (!pinned) timer.current = setTimeout(() => setOpen(false), 160); };
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const dismissal = useMemo(() => createHelpDismissal(
+    () => pinned.current || Boolean(trigger.current?.contains(document.activeElement) || tip.current?.contains(document.activeElement)),
+    () => setOpen(false),
+  ), []);
+  const show = () => { dismissal.cancel(); setOpen(true); };
+  const leave = () => dismissal.schedule();
+  useEffect(() => dismissal.cancel, [dismissal]);
   useEffect(() => {
     if (!open) return;
     setPortal(trigger.current?.closest("dialog") ?? document.body);
@@ -30,14 +34,14 @@ export function MetricTooltip({ text, label = "this metric", className }: { text
     };
     place();
     const frame = requestAnimationFrame(place);
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setOpen(false); setPinned(false); } };
-    const outside = (event: PointerEvent) => { if (!trigger.current?.contains(event.target as Node) && !tip.current?.contains(event.target as Node)) { setOpen(false); setPinned(false); } };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); if (tip.current?.contains(document.activeElement)) trigger.current?.focus(); dismissal.cancel(); pinned.current = false; setOpen(false); } };
+    const outside = (event: PointerEvent) => { if (!trigger.current?.contains(event.target as Node) && !tip.current?.contains(event.target as Node)) { dismissal.cancel(); setOpen(false); pinned.current = false; } };
     document.addEventListener("keydown", onKey, true);
     document.addEventListener("pointerdown", outside);
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
     return () => { cancelAnimationFrame(frame); document.removeEventListener("keydown", onKey, true); document.removeEventListener("pointerdown", outside); window.removeEventListener("resize", place); window.removeEventListener("scroll", place, true); };
-  }, [open, text]);
+  }, [open, text, dismissal]);
   return (
     <span className={cn("relative inline-flex", className)}>
       <button
@@ -47,15 +51,22 @@ export function MetricTooltip({ text, label = "this metric", className }: { text
         onMouseLeave={leave}
         onFocus={show}
         onBlur={leave}
-        onClick={() => { setPinned(!pinned); setOpen(!pinned); }}
+        onClick={() => { dismissal.cancel(); pinned.current = !pinned.current; setOpen(pinned.current); }}
+        onKeyDown={(event) => { if (event.key === "ArrowDown" && open && tip.current) { event.preventDefault(); tip.current.focus(); } }}
         className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slatey-500 transition-colors hover:bg-primary-soft hover:text-primary"
         aria-label={`About ${label}`}
         aria-describedby={id}
+        aria-expanded={open}
+        aria-controls={open && portal ? id : undefined}
       >
         <Info aria-hidden className="h-4 w-4" />
       </button>
-      <span id={id} className="sr-only">{text}</span>
-      {open && portal && createPortal(<span ref={tip} role="tooltip" aria-hidden="true" onMouseEnter={show} onMouseLeave={leave} style={position} className="fixed z-[100] max-h-[70dvh] w-72 max-w-[calc(100vw-24px)] overflow-y-auto rounded-lg border border-line bg-white px-3 py-2.5 text-sm leading-relaxed text-slatey-300 shadow-card">{text}</span>, portal)}
+      {(!open || !portal) && <span id={id} className="sr-only">{text}</span>}
+      {open && portal && createPortal(<span id={id} ref={tip} role="region" aria-label={`${label} help`} tabIndex={0} onFocus={show} onBlur={leave} onMouseEnter={show} onMouseLeave={leave}
+        onKeyDown={(event) => { if (event.key === "Tab") { event.preventDefault(); event.stopPropagation(); trigger.current?.focus(); dismissal.cancel(); pinned.current = false; setOpen(false); } }}
+        style={position} className="fixed z-[100] max-h-[70dvh] w-72 max-w-[calc(100vw-24px)] overflow-y-auto overscroll-contain rounded-lg border border-line bg-white px-3 py-2.5 text-sm leading-relaxed text-slatey-300 shadow-card focus:outline focus:outline-2 focus:outline-primary">
+        {text}<span className="mt-2 block text-xs text-slatey-500">Arrow Down from the help button enters this panel. Scroll with arrow or Page keys; Tab or Escape returns to the button.</span>
+      </span>, portal)}
     </span>
   );
 }

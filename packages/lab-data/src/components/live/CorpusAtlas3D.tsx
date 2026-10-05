@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useInViewport, usePageVisible, useReducedMotion } from "@labs/design-system";
+import { requireCanvas2D, useInViewport, usePageVisible, useReducedMotion } from "@labs/design-system";
 import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import type { CorpusFile, DupPair } from "@data/lib/prep/corpus";
 import type { AtlasHull } from "./CorpusStarMap";
@@ -105,6 +105,7 @@ export function CorpusAtlas3D({
   const [hoverEdge, setHoverEdge] = useState<EdgeHit | null>(null);
   const [view, setView] = useState({ ...HOME });
   const [sizeTick, setSizeTick] = useState(0);
+  const [canvasUnavailable, setCanvasUnavailable] = useState(false);
   const drag = useRef<{ ox: number; oy: number; lx: number; ly: number; moved: boolean; t: number } | null>(null);
   const vel = useRef({ vx: 0, vy: 0, t: 0 });
   const motionRaf = useRef(0);
@@ -118,8 +119,8 @@ export function CorpusAtlas3D({
     const canvas = canvasRef.current;
     const wrap = wrapRef.current;
     if (!canvas || !wrap) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    let ctx: CanvasRenderingContext2D;
+    try { ctx = requireCanvas2D(canvas); } catch { setCanvasUnavailable(true); return; }
 
     void sizeTick; // re-render when the wrapper resizes (grid breakpoints)
     const dpr = Math.min(2, typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
@@ -566,6 +567,11 @@ export function CorpusAtlas3D({
   const edgePair = hoverEdge && hoverEdge.i < pairs.length ? pairs[hoverEdge.i] : null;
   const zoomBy = (k: number) => setView((v) => ({ ...v, zoom: Math.min(2.4, Math.max(0.5, v.zoom * k)) }));
   const wrapW = wrapRef.current?.clientWidth ?? 300;
+
+  if (canvasUnavailable) return <div ref={wrapRef} className="rounded-xl border border-line bg-slate-50 p-5 text-sm">
+    <p role="status">The 3D map cannot render in this browser. Your files, selected document, scores and findings are unchanged.</p>
+    <p className="mt-2">Choose the 2D view above, or <a href="#corpus-files" className="font-semibold text-primary underline">continue with the file list</a>.</p>
+  </div>;
 
   return (
     <div ref={wrapRef} className="w-full">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion, usePageVisible } from "@labs/design-system";
+import { requireCanvas2D, useReducedMotion, usePageVisible } from "@labs/design-system";
 import { X } from "lucide-react";
 
 export interface ProjPoint {
@@ -83,8 +83,8 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
     const canvas = canvasRef.current;
     const wrap = wrapRef.current;
     if (!canvas || !wrap) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    // React's enclosing ProjectorBoundary owns recovery without resetting the document.
+    const ctx = requireCanvas2D(canvas);
 
     let raf = 0;
     let onscreen = true;
