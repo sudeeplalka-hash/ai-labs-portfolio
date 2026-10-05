@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import UseCaseDetail from './UseCaseDetail';
 
 // Fixed IDs match the deterministic seed data in backend/app/core/seed.py.
@@ -10,6 +11,10 @@ export function generateStaticParams() {
     { id: '44444444-4444-4444-4444-444444444444' },
     { id: '55555555-5555-5555-5555-555555555555' },
   ];
+}
+
+export function generateMetadata({ params }: { params: { id: string } }) {
+  return { ...routeMetadata("Modeled governance use case", "Inspect the seeded use case, its risk and control evidence.", `/govern/use-cases/${params.id}`), robots: { index: false, follow: true } };
 }
 
 export default function Page({ params }: { params: { id: string } }) {

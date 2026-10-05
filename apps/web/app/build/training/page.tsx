@@ -1,9 +1,11 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { Scale } from "lucide-react";
 import { PageIntro } from "@labs/design-system";
 import { TrainingReadiness } from "@/components/build/TrainingReadiness";
 
-export const metadata: Metadata = { title: "Training Readiness" };
+export const metadata: Metadata = {
+  ...routeMetadata("Training Readiness", "Inspect training readiness through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/training"), title: "Training Readiness" };
 
 export default function Page() {
   return (

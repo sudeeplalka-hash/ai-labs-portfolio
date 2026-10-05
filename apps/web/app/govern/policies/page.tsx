@@ -1,5 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { caseHref } from '@gov/lib/navigation';
+import { useRole, can, roleLabel } from '@gov/lib/rbac';
 import { api } from '@gov/lib/api';
 import type { Policy } from '@gov/lib/types';
 import { SeverityBadge } from '@gov/components/shared/Badge';
@@ -21,20 +24,38 @@ export default function PolicyWorkbench() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Policy | null>(null);
   const [filter, setFilter] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [receipt, setReceipt] = useState('');
+  const [caseId, setCaseId] = useState('');
+  const [attempt, setAttempt] = useState(0);
+  const role = useRole();
+  const mayToggle = can(role, 'policy:toggle');
 
   useEffect(() => {
+    let current = true;
+    setLoading(true); setError('');
+    setCaseId(new URLSearchParams(window.location.search).get('case') || '');
     api.policies.list().then(d => {
+      if (!current) return;
       setPolicies(d);
       const slug = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('policy') : null;
       const focused = slug ? d.find(p => p.body_yaml?.includes(`id: ${slug}`) || p.name.toLowerCase().includes(slug.replace(/-/g, ' '))) : null;
       setSelected(focused || (d.length ? d[0] : null));
-    }).finally(() => setLoading(false));
-  }, []);
+    }).catch(() => { if (current) setError('Policies could not load.'); }).finally(() => { if (current) setLoading(false); });
+    return () => { current = false; };
+  }, [attempt]);
 
   const toggle = async (id: string) => {
-    await api.policies.toggle(id);
-    setPolicies(ps => ps.map(p => p.id === id ? { ...p, enabled: !p.enabled } : p));
-    if (selected?.id === id) setSelected(s => s ? { ...s, enabled: !s.enabled } : s);
+    if (!mayToggle || busy) return;
+    setBusy(true); setError(''); setReceipt('');
+    try {
+      const updated = await api.policies.toggle(id);
+      setPolicies(ps => ps.map(p => p.id === id ? { ...p, enabled: updated.enabled } : p));
+      setSelected(current => current?.id === id ? { ...current, enabled: updated.enabled } : current);
+      setReceipt(`Policy ${updated.enabled ? 'enabled' : 'disabled'}. ${process.env.NEXT_PUBLIC_STATIC_DEMO === '1' ? 'The sample registry changed for this browser session; runtime detector behavior is a separate fixed model.' : 'The API confirmed the update.'}`);
+    } catch { setError('The policy update did not complete. Retry when ready.'); }
+    finally { setBusy(false); }
   };
 
   const filtered = policies.filter(p =>
@@ -44,14 +65,18 @@ export default function PolicyWorkbench() {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-8 space-y-6">
       <div>
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Governance</p>
         <h2 className="text-2xl font-bold text-slate-900 mt-1">Policy Workbench</h2>
         <p className="text-sm text-slate-500 mt-1">{policies.filter(p => p.enabled).length} of {policies.length} policies active</p>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      {caseId && <p className="text-sm text-slate-600">Inspecting controls for <Link href={caseHref(caseId)} className="text-primary underline">case {caseId}</Link>. This list contains the registry&apos;s policies; consult the case&apos;s required controls.</p>}
+      {!mayToggle && <p id="policy-role-note" className="text-sm text-slate-500">{roleLabel(role)} can inspect policies. Enabling or disabling policies requires Administrator.</p>}
+      {error && <p role="alert" className="text-sm text-red-700">{error} <button onClick={() => setAttempt((value) => value + 1)} className="underline">Reload policies</button></p>}
+      {receipt && <p role="status" className="rounded-lg bg-primary-soft p-3 text-sm">{receipt}</p>}
+      <div className="flex gap-2 flex-wrap" role="group" aria-label="Policy category filter">
         {['', 'safety', 'privacy', 'compliance', 'operational'].map(f => (
           <button key={f} onClick={() => setFilter(f)} className={cn('px-3 py-1 text-xs rounded-full border transition-colors', filter === f ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400')}>
             {f || 'All'}
@@ -86,7 +111,7 @@ export default function PolicyWorkbench() {
                   <h3 className="font-semibold text-slate-900">{selected.name}</h3>
                   <p className="text-xs text-slate-400 mt-0.5">v{selected.version} · {selected.match_count} matches</p>
                 </div>
-                <button onClick={() => toggle(selected.id)} className={cn('text-xs px-3 py-1.5 rounded border font-medium transition-colors', selected.enabled ? 'border-slate-200 text-slate-600 hover:bg-slate-50' : 'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100')}>
+                <button onClick={() => toggle(selected.id)} disabled={!mayToggle || busy} aria-describedby={!mayToggle ? 'policy-role-note' : undefined} className={cn('text-xs px-3 py-2 rounded border font-medium transition-colors disabled:opacity-50', selected.enabled ? 'border-slate-200 text-slate-600 hover:bg-slate-50' : 'border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100')}>
                   {selected.enabled ? 'Disable' : 'Enable'}
                 </button>
               </div>

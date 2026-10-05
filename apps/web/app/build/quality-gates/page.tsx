@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import { CircleCheckBig, ShieldAlert, Wrench } from "lucide-react";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { DataSourceToggle } from "@rag/components/live-views/DataSourceToggle";
@@ -107,7 +108,8 @@ function QualityGatesDemo() {
   );
 }
 
-export const metadata = { title: "Quality Gates" };
+export const metadata = {
+  ...routeMetadata("Quality Gates", "Inspect quality gates through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/quality-gates"), title: "Quality Gates" };
 
 export default function QualityGatesPage() {
   return (

@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import { AlertTriangle, FileWarning, Wrench, Grid3x3 } from "lucide-react";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { DataSourceToggle } from "@rag/components/live-views/DataSourceToggle";
@@ -85,7 +86,8 @@ function FailuresDemo() {
   );
 }
 
-export const metadata = { title: "Failure Analysis" };
+export const metadata = {
+  ...routeMetadata("Failure Analysis", "Inspect failure analysis through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/failures"), title: "Failure Analysis" };
 
 export default function FailuresPage() {
   return (

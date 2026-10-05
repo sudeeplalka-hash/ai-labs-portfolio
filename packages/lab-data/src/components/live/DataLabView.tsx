@@ -650,7 +650,7 @@ function Rulebook({ checks, applied }: { checks: CheckResult[]; applied: Set<str
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-sm font-semibold text-ink">
                 {g.name}
-                <MetricTooltip text={`${g.rule}, ${g.downstream}`} />
+                <MetricTooltip label={g.name} text={`${g.rule}, ${g.downstream}`} />
               </span>
               <Badge color={b.color}>{b.word}</Badge>
             </div>

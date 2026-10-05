@@ -1,8 +1,10 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { Compass, Sparkles, Wand2, Layers, Target, Gauge, Flag } from "lucide-react";
 import { LabGuide } from "@/components/shell/LabGuide";
 
-export const metadata: Metadata = { title: "Guide · Strategy & Planning" };
+export const metadata: Metadata = {
+  ...routeMetadata("Guide \u00b7 Strategy & Planning", "Inspect guide \u00b7 strategy & planning through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/frame/guide"), title: "Guide · Strategy & Planning" };
 
 export default function Page() {
   return (

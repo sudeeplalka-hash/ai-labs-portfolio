@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C32_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { EvidenceTable, NumericControl, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "./DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type OKey = "api" | "ft" | "buy";
@@ -34,6 +35,7 @@ const WEIGHTS = { cost: 0.35, speed: 0.15, control: 0.15, diff: 0.20, risk: 0.15
 const fmt = (v: number) => (v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v / 1000)}k`);
 
 export function BuildBuyEvaluator() {
+  const [selectedPath, setSelectedPath] = useState<OKey>("api");
   const [volume, setVolume] = useState(1_000_000);
   const [dataSens, setDataSens] = useState(1);
   const [diffNeed, setDiffNeed] = useState(1);
@@ -86,36 +88,26 @@ export function BuildBuyEvaluator() {
   const primary = ranked[0];
   const runnerUp = ranked[1];
 
+  const savedState = { volume, dataSens, diffNeed, latency, teamSkill, selectedPath };
+  const scenarioLink = useScenarioLink({ id: "C3-2", state: savedState, activeId: activeUcId,
+    restore: (s) => { setVolume(s.volume); setDataSens(s.dataSens); setDiffNeed(s.diffNeed); setLatency(s.latency); setTeamSkill(s.teamSkill); setSelectedPath(s.selectedPath); },
+    validate: (v): v is typeof savedState => validateScenario(v, { selectedPath: oneOf(Object.keys(OPT)), volume: bounded(100000,12000000), dataSens: oneOf([0,1,2]), diffNeed: oneOf([0,1,2]), latency: oneOf([0,1,2]), teamSkill: oneOf([0,1,2]) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">C3-2</span>
-        </div>
-      </header>
+    <InstrumentShell title="Build, buy or fine tune" eyebrow="AI investment & economics" description="Compare three-year cost, strategic fit and the assumptions that change the choice."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "C3-2" }]}
+      decision={<DecisionSummary title={OPT[primary].label} explanation={`Model score ${composite[primary]}; three-year TCO ${fmt(tco[primary])}. Runner-up: ${OPT[runnerUp].label} (${composite[runnerUp]}).`} nextAction={`Review the runner-up when ${FLIP[runnerUp]}. This is an illustrative trigger, not a measured crossover.`} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={C32_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Enterprise AI solution strategy changes as volume, data sensitivity, customization need, latency requirements, and internal skill mature, and a good recommendation today may need to be revisited as usage grows or requirements change." approach="The evaluator estimates three year total cost and scores build, buy, and fine tune paths across cost and strategic criteria. It highlights the leading path, the runner up, and the flip condition." why="This connects solution strategy to investment horizon, time to value, capability ownership, vendor dependency, and operating cost." metric="Three year TCO per path; the break even volume or customization that flips it." tradeoff="Build and fine tune buy control at the cost of speed; buy trades customization for time to value." outcome="A defensible build/buy/fine tune call with the condition that would flip it." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Build, Buy, or Fine Tune Decision Evaluator</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Build, buy, and fine tune decisions should not be made from preference or vendor momentum. This artifact
-            compares the paths through total cost, strategic control, sensitivity, and the condition that would change the recommendation.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={C32_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Enterprise AI solution strategy changes as volume, data sensitivity, customization need, latency requirements, and internal skill mature, and a good recommendation today may need to be revisited as usage grows or requirements change." approach="The evaluator estimates three year total cost and scores build, buy, and fine tune paths across cost and strategic criteria. It highlights the leading path, the runner up, and the flip condition." why="This connects solution strategy to investment horizon, time to value, capability ownership, vendor dependency, and operating cost." metric="Three year TCO per path; the break even volume or customization that flips it." tradeoff="Build and fine tune buy control at the cost of speed; buy trades customization for time to value." outcome="A defensible build/buy/fine tune call with the condition that would flip it." />
+    >
 
         {/* Inputs */}
         <Panel className="mb-6">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid min-w-0 items-start gap-4 md:grid-cols-2">
             <div>
               <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Monthly volume</label><span className="font-mono text-xs font-semibold text-ink">{(volume / 1e6).toFixed(1)}M calls</span></div>
               <input type="range" aria-label="Monthly volume" min={100000} max={12000000} step={100000} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full accent-amber-500" />
@@ -128,7 +120,7 @@ export function BuildBuyEvaluator() {
         </Panel>
 
         {/* Three columns */}
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid min-w-0 items-start gap-3 md:grid-cols-3">
           {(Object.keys(OPT) as OKey[]).map((k) => {
             const isP = k === primary;
             return (
@@ -142,6 +134,7 @@ export function BuildBuyEvaluator() {
                   <div><p className="text-[11px] text-slatey-500">3-yr TCO</p><p className="font-mono text-2xl font-semibold text-ink">{fmt(tco[k])}</p></div>
                   <div className="text-right"><p className="text-[11px] text-slatey-500">Score</p><p className="font-mono text-lg font-semibold text-ink">{composite[k]}</p></div>
                 </div>
+                <button onClick={() => setSelectedPath(k)} aria-pressed={selectedPath === k} className="mt-3 rounded-lg border border-line px-3 py-2 text-sm text-primary">{selectedPath === k ? "Inspecting this path" : "Inspect cost and tradeoff"}</button>
                 <ul className="mt-3 space-y-0.5 border-t border-line pt-2 text-[11px]">
                   {items[k].map(([lbl, val]) => (
                     <li key={lbl} className="flex justify-between gap-2"><span className="text-slatey-400">{lbl}</span><span className="font-mono text-slatey-500">{fmt(val)}</span></li>
@@ -152,13 +145,15 @@ export function BuildBuyEvaluator() {
           })}
         </div>
 
+        <Panel className="mt-4"><h2 className="text-base font-semibold text-ink">Inspect: {OPT[selectedPath].label}</h2><p className="mt-2 text-sm text-slatey-400">Score {composite[selectedPath]}/100; {composite[primary] - composite[selectedPath]} points behind the current leader. Three-year cost {fmt(tco[selectedPath])}, {tco[selectedPath] >= tco[primary] ? "higher" : "lower"} than the recommended path by {fmt(Math.abs(tco[selectedPath] - tco[primary]))}.</p><EvidenceTable caption="Comparable cost components" headings={["Cost component", "Three-year cost"]} rows={[...items[selectedPath].map(([label, value]) => [label, fmt(value)]), ["Total", fmt(tco[selectedPath])]]} /><p className="mt-3 text-xs text-slatey-500">Scoring includes strategic fit as well as cost. Prices and revisit conditions are illustrative assumptions, not current quotes or calculated break-even thresholds.</p></Panel>
+
         {/* Recommendation */}
         <Panel className="mt-4">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="emerald">{OPT[primary].label}</Badge>
             <span className="text-sm text-slatey-300">at {(volume / 1e6).toFixed(1)}M calls/mo, this data sensitivity, and this team.</span>
           </div>
-          <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800"><span className="font-semibold">Flip condition, {OPT[runnerUp].label}</span> wins if {FLIP[runnerUp]}.</p>
+          <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800"><span className="font-semibold">Illustrative revisit trigger, {OPT[runnerUp].label}</span>: reconsider when {FLIP[runnerUp]}.</p>
         </Panel>
 
         <div className="mt-8 space-y-4 border-t border-line pt-6">
@@ -178,8 +173,8 @@ export function BuildBuyEvaluator() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled decision tool. A real sourcing decision would require procurement data, security review, vendor contracts, implementation estimates, legal input, and architecture validation.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 
@@ -189,7 +184,7 @@ function Seg({ label, value, onChange, opts }: { label: string; value: number; o
       <p className="mb-1 text-xs font-medium text-slatey-400">{label}</p>
       <div className="flex gap-1">
         {opts.map((o, i) => (
-          <button key={o} onClick={() => onChange(i)}
+          <button key={o} aria-pressed={value === i} aria-label={`${label}: ${o}`} onClick={() => onChange(i)}
             className={`flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${value === i ? "border-amber-500 bg-amber-500 text-white" : "border-line bg-white text-slatey-400 hover:border-amber-400/50 hover:text-ink"}`}>{o}</button>
         ))}
       </div>

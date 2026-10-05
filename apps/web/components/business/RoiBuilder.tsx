@@ -10,11 +10,12 @@ import { useRouter } from "next/navigation";
 import { cashflows, npv, irr, payback, roiTornado, HORIZON_YEARS, type RoiInputs } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, KpiCard, Badge, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
 import { C35_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { NumericControl, EvidenceTable, Delta, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "./DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -24,6 +25,7 @@ const fmt = (v: number) => (v < 0 ? "-" : "") + (Math.abs(v) >= 1e6 ? `$${(Math.
 
 export function RoiBuilder() {
   const [p, setP] = useState<RoiInputs>({ investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 });
+  const [baseline, setBaseline] = useState<RoiInputs>({ investment: 600000, annualValue: 1_400_000, rampMonths: 9, runCost: 180000, rate: 12 });
   const set = (k: keyof RoiInputs, v: number) => setP((cur) => ({ ...cur, [k]: v }));
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? C35_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
@@ -38,6 +40,12 @@ export function RoiBuilder() {
   const cf = cashflows(p);
   const baseNpv = npv(cf, r);
   const baseIrr = irr(cf);
+  const irrAvailable = cf.some((v) => v < 0) && cf.some((v) => v > 0) && npv(cf, -0.9) * npv(cf, 5) <= 0;
+  const irrLabel = irrAvailable ? `${Math.round(baseIrr * 100)}%` : "Not available";
+  const baselineCf = cashflows(baseline);
+  const baselineNpv = npv(baselineCf, baseline.rate / 100);
+  const discounted = cf.map((v, year) => v / (1 + r) ** year);
+  const bridge = discounted.map((v, year) => v - baselineCf[year] / (1 + baseline.rate / 100) ** year);
   const pb = payback(cf);
 
   const drivers = roiTornado(p);
@@ -71,7 +79,7 @@ export function RoiBuilder() {
       "| --- | --- |",
       `| NPV (base) | ${fmt(baseNpv)} @ ${p.rate}% discount |`,
       `| NPV (±30% range) | ${fmt(rangeLow)} to ${fmt(rangeHigh)} |`,
-      `| IRR | ${Math.round(baseIrr * 100)}% |`,
+      `| IRR | ${irrLabel} |`,
       `| Payback | ${pb ? `${pb.toFixed(1)} yr` : ">3 yr"} |`,
       "",
       "## Assumptions",
@@ -120,50 +128,44 @@ export function RoiBuilder() {
     })),
   ];
 
+  const savedState = { p, baseline };
+  const scenarioLink = useScenarioLink({ id: "C3-5", state: savedState, activeId: activeUcId,
+    restore: (s) => { setP(s.p); setBaseline(s.baseline); },
+    validate: (v): v is typeof savedState => validateScenario(v, { p: (v) => validateScenario(v, { investment: bounded(100000,2000000), annualValue: bounded(200000,5000000), rampMonths: bounded(1,24), runCost: bounded(0,800000), rate: bounded(4,25) }), baseline: (v) => validateScenario(v, { investment: bounded(100000,2000000), annualValue: bounded(200000,5000000), rampMonths: bounded(1,24), runCost: bounded(0,800000), rate: bounded(4,25) }) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">C3-5</span>
-          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
-        </div>
-      </header>
+    <InstrumentShell title="AI business case and ROI" eyebrow="AI investment & economics" description="Change an assumption and trace its effect on the funding decision."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "C3-5" }]}
+      decision={<DecisionSummary title={fundable} explanation={`NPV ${fmt(baseNpv)} at ${p.rate}% discount. The ±30% sensitivity range is ${fmt(rangeLow)} to ${fmt(rangeHigh)}.`} nextAction={`Start with ${drivers[0].label.toLowerCase()}, the largest sensitivity driver.`} tone={rangeLow > 0 ? "positive" : baseNpv > 0 ? "caution" : "negative"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={C35_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="AI business cases are often fragile because value, adoption, run cost, and implementation effort are uncertain. Funding decisions need to see the range, the payback, and the driver that can break the case." approach="The builder calculates NPV, IRR, payback, run cost impact, adoption ramp, and sensitivity. A tornado view shows which assumption creates the largest swing in value." why="This connects AI funding to financial discipline, value realization, adoption risk, run cost, and executive approval." metric="NPV and payback; the widest tornado bar (the driver the case hinges on)." tradeoff="Optimistic value versus conservative adoption and run cost assumptions." outcome="A fund/defer decision with the fragility named, not hidden in a point estimate." />}
+      actions={<ExportMenu actions={exportActions} />}
+    >
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">AI Business Case and ROI Builder</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A single ROI number rarely survives executive review. This artifact builds the case as a range, identifies the
-            assumption the value depends on most, and turns the analysis into a fund, fund with conditions, or do not fund recommendation. Adoption ramp ties to{" "}
-            <Link href="/engagement/adoption" className="font-medium text-primary hover:underline">EL-01</Link>.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={C35_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="AI business cases are often fragile because value, adoption, run cost, and implementation effort are uncertain. Funding decisions need to see the range, the payback, and the driver that can break the case." approach="The builder calculates NPV, IRR, payback, run cost impact, adoption ramp, and sensitivity. A tornado view shows which assumption creates the largest swing in value." why="This connects AI funding to financial discipline, value realization, adoption risk, run cost, and executive approval." metric="NPV and payback; the widest tornado bar (the driver the case hinges on)." tradeoff="Optimistic value versus conservative adoption and run cost assumptions." outcome="A fund/defer decision with the fragility named, not hidden in a point estimate." />
-
-        <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+        <Panel className="mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-base font-semibold text-ink">What changed from the pinned baseline</h2><p className="mt-1 text-sm text-slatey-400">Baseline {fmt(baselineNpv)} → current {fmt(baseNpv)}. NPV change: <Delta value={baseNpv - baselineNpv} format={fmt} />.</p></div><div className="flex flex-wrap gap-2"><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => setBaseline({ ...p })}>Pin current baseline</button><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => setP({ ...baseline })}>Restore baseline</button></div></div>
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">{bridge.map((delta, year) => <div key={year} className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slatey-500">{year === 0 ? "Upfront investment" : `Year ${year} discounted flow`}</p><p className="mt-1 text-sm font-semibold text-ink"><Delta value={delta} format={fmt} /></p></div>)}</div>
+          <p className="mt-3 text-xs text-slatey-500">The four contributions sum exactly to the NPV change before display rounding. Each scenario uses its own discount rate. Sensitivity below varies one input at a time; it is not a probability interval.</p>
+          <EvidenceTable caption="Cash flows and exact baseline bridge" headings={["Year", "Baseline cash flow", "Current cash flow", "Current discounted flow", "NPV contribution change"]} rows={cf.map((v, year) => [year, baselineCf[year].toLocaleString("en-US", {style:"currency",currency:"USD",maximumFractionDigits:0}), v.toLocaleString("en-US", {style:"currency",currency:"USD",maximumFractionDigits:0}), discounted[year].toLocaleString("en-US", {style:"currency",currency:"USD",maximumFractionDigits:0}), bridge[year].toLocaleString("en-US", {style:"currency",currency:"USD",maximumFractionDigits:0})])} />
+        </Panel>
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[0.8fr_1.2fr]">
           {/* Inputs */}
-          <Panel className="space-y-4">
-            <Slider label="Investment (upfront)" value={p.investment} min={100000} max={2000000} step={50000} onChange={(v) => set("investment", v)} fmt={fmt} />
-            <Slider label="Annual value @ full adoption" value={p.annualValue} min={200000} max={5000000} step={100000} onChange={(v) => set("annualValue", v)} fmt={fmt} />
-            <Slider label="Adoption ramp (months to full)" value={p.rampMonths} min={1} max={24} step={1} onChange={(v) => set("rampMonths", v)} fmt={(v) => `${v} mo`} />
-            <Slider label="Annual run cost" value={p.runCost} min={0} max={800000} step={20000} onChange={(v) => set("runCost", v)} fmt={fmt} />
-            <Slider label="Discount rate" value={p.rate} min={4} max={25} step={1} onChange={(v) => set("rate", v)} fmt={(v) => `${v}%`} />
+          <Panel className="min-w-0 space-y-4">
+            <NumericControl id="roi-investment" label="Investment (upfront)" value={p.investment} min={100000} max={2000000} step={50000} onChange={(v) => set("investment", v)} format={fmt} />
+            <NumericControl id="roi-annualValue" label="Annual value @ full adoption" value={p.annualValue} min={200000} max={5000000} step={100000} onChange={(v) => set("annualValue", v)} format={fmt} />
+            <NumericControl id="roi-rampMonths" label="Adoption ramp (months to full)" value={p.rampMonths} min={1} max={24} step={1} onChange={(v) => set("rampMonths", v)} format={(v) => `${v} mo`} />
+            <NumericControl id="roi-runCost" label="Annual run cost" value={p.runCost} min={0} max={800000} step={20000} onChange={(v) => set("runCost", v)} format={fmt} />
+            <NumericControl id="roi-rate" label="Discount rate" value={p.rate} min={4} max={25} step={1} onChange={(v) => set("rate", v)} format={(v) => `${v}%`} />
           </Panel>
 
           {/* Results */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+          <div className="min-w-0 space-y-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <KpiCard label={`NPV · ${H}yr`} value={fmt(baseNpv)} tone={baseNpv > 0 ? "healthy" : "critical"} interpretation={`@ ${p.rate}% discount`} />
-              <KpiCard label="IRR" value={`${Math.round(baseIrr * 100)}%`} tone={baseIrr > r ? "healthy" : "risk"} interpretation="Break even discount rate" />
+              <KpiCard label="IRR" value={irrLabel} tone={irrAvailable && baseIrr > r ? "healthy" : "risk"} interpretation={irrAvailable ? "Break-even discount rate" : "No root between −90% and 500%"} />
               <KpiCard label="Payback" value={pb ? `${pb.toFixed(1)} yr` : ">3 yr"} tone={pb && pb < 2 ? "healthy" : "watch"} interpretation="Undiscounted" />
             </div>
 
@@ -175,16 +177,16 @@ export function RoiBuilder() {
                   {drivers.map((d) => {
                     const l = Math.min(d.low, d.high), hgh = Math.max(d.low, d.high);
                     return (
-                      <div key={d.label}>
+                      <button key={d.label} onClick={() => document.getElementById(`roi-${d.key}`)?.focus()} className="block w-full rounded-lg p-2 text-left hover:bg-amber-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" aria-label={`${d.label}: sensitivity ${fmt(l)} to ${fmt(hgh)}. Edit this assumption.`}>
                         <div className="mb-0.5 flex items-center justify-between text-[11px]"><span className="text-slatey-400">{d.label}</span><span className="font-mono text-slatey-500">{fmt(l)} … {fmt(hgh)}</span></div>
                         <div className="relative h-4 w-full">
                           <div className="absolute top-0.5 h-3 rounded bg-amber-400/80" style={{ left: `${pct(l)}%`, width: `${Math.max(1.5, pct(hgh) - pct(l))}%` }} />
                         </div>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>
-                <p className="mt-2 text-[11px] text-slatey-500">Dashed line = base NPV {fmt(baseNpv)}. Widest bar = the driver that most moves the case.</p>
+                <p className="mt-2 text-[11px] text-slatey-500">Dashed line = base NPV {fmt(baseNpv)}. Widest bar = the driver that most moves the case. Select a row to focus its assumption.</p>
               </div>
             </Panel>
 
@@ -195,9 +197,9 @@ export function RoiBuilder() {
                 <Badge tone={fundTone}>{fundable}</Badge>
               </div>
               <h2 className="text-lg font-semibold text-ink">AI initiative, {H}-year business case</h2>
-              <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 text-center">
                 <div><p className="text-[11px] text-slatey-500">NPV (range)</p><p className="font-mono text-sm font-semibold text-ink">{fmt(rangeLow)} to {fmt(rangeHigh)}</p></div>
-                <div><p className="text-[11px] text-slatey-500">IRR</p><p className="font-mono text-sm font-semibold text-ink">{Math.round(baseIrr * 100)}%</p></div>
+                <div><p className="text-[11px] text-slatey-500">IRR</p><p className="font-mono text-sm font-semibold text-ink">{irrLabel}</p></div>
                 <div><p className="text-[11px] text-slatey-500">Payback</p><p className="font-mono text-sm font-semibold text-ink">{pb ? `${pb.toFixed(1)} yr` : ">3 yr"}</p></div>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-slatey-300">
@@ -226,18 +228,9 @@ export function RoiBuilder() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a portfolio business case artifact. Real funding decisions would require finance validation, benefits ownership, implementation estimates, risk adjustments, and post launch value tracking.</p>
         </div>
-      </main>
+
       <ToastHost />
       <CommandPalette commands={paletteCommands} />
-    </div>
-  );
-}
-
-function Slider({ label, value, min, max, step, onChange, fmt }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; fmt: (v: number) => string }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">{label}</label><span className="font-mono text-xs font-semibold text-ink">{fmt(value)}</span></div>
-      <input type="range" aria-label={label} min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className="w-full accent-amber-500" />
-    </div>
+    </InstrumentShell>
   );
 }

@@ -93,9 +93,9 @@ const labPreset: Partial<Config> = {
         sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
-        "fade-in": { "0%": { opacity: "0", transform: "translateY(6px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+        "fade-in": { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
       },
-      animation: { "fade-in": "fade-in 0.4s ease-out both" },
+      animation: { "fade-in": "fade-in var(--motion-disclosure, 180ms) ease-out both" },
     },
   },
 };

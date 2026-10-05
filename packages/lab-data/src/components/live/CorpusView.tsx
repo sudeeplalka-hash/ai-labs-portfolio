@@ -19,7 +19,8 @@ import { analyzeCorpus, type CorpusReport, type DupPair } from "@data/lib/prep/c
 import { recomputeCorpus, type FindingStatus } from "@data/lib/prep/findings";
 import { deriveDuplicateSets, setIdForPair } from "@data/lib/prep/resolution";
 import { DuplicateResolution, type SetResolution } from "./DuplicateResolution";
-import { CorpusAtlas3D } from "./CorpusAtlas3D";
+import { OptionalCorpusAtlas } from "./OptionalCorpusAtlas";
+import { Provenance } from "@labs/design-system";
 import { TopicGroups } from "./TopicGroups";
 import { CleaningProof } from "./CleaningProof";
 import type { ProofResult } from "@data/lib/prep/proof";
@@ -79,8 +80,14 @@ export function CorpusView() {
   const [topicLabels, setTopicLabels] = useState<Record<string, string>>({});
   const [lastProof, setLastProof] = useState<{ r: ProofResult; preview: boolean } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const job = useRef(0);
+  const analysisTimer = useRef<ReturnType<typeof setTimeout>>();
+  const [atlasOpen, setAtlasOpen] = useState(false);
+  useEffect(() => () => { job.current++; clearTimeout(analysisTimer.current); }, []);
 
   const analyze = useCallback((ins: Input[], pid: ProfileId) => {
+    const token = ++job.current;
+    clearTimeout(analysisTimer.current);
     setRunning(true);
     setInputs(ins);
     setStatuses({});
@@ -88,8 +95,9 @@ export function CorpusView() {
     setTopicLabels({});
     setLastProof(null);
     setFocusSetId(null);
-    // brief async so the loading state paints
-    setTimeout(() => {
+    // Yield to paint without adding pretend computation time. Obsolete jobs cannot publish.
+    analysisTimer.current = setTimeout(() => {
+      if (token !== job.current) return;
       const rep = analyzeCorpus(ins, pid);
       setReport(rep);
       setRunning(false);
@@ -109,16 +117,19 @@ export function CorpusView() {
           missingPct: f.report.profile.kind === "tabular" ? Math.round(f.report.profile.missingPct) : undefined,
         })),
       );
-    }, 300);
+    }, 0);
   }, []);
 
   const loadSampleCorpus = () => {
     const ins = CORPUS_SAMPLES.map((s) => ({ name: s.name, text: s.content, size: s.content.length }));
     setSelectedId(null);
+    setParseErrors([]);
     analyze(ins, profileId);
   };
 
   const onFiles = (list: FileList) => {
+    const token = ++job.current;
+    clearTimeout(analysisTimer.current);
     const arr = Array.from(list);
     setSelectedId(null);
     setParseErrors([]);
@@ -135,6 +146,7 @@ export function CorpusView() {
           })),
       ),
     ).then((results) => {
+      if (token !== job.current) return;
       const ins = results.filter((r) => r.ok).map((r) => (r as { input: Input }).input);
       const errs = results.filter((r) => !r.ok).map((r) => (r as { message: string }).message);
       setParseErrors(errs);
@@ -147,14 +159,21 @@ export function CorpusView() {
   };
 
   const changeProfile = (id: ProfileId) => {
+    job.current++;
+    clearTimeout(analysisTimer.current);
+    setRunning(false);
     setProfileId(id);
     setStatuses({});
     setResolutions({});
     setTopicLabels({});
+    setLastProof(null);
     if (inputs) setReport(analyzeCorpus(inputs, id));
   };
 
   const reset = () => {
+    job.current++;
+    clearTimeout(analysisTimer.current);
+    setRunning(false);
     setInputs(null);
     setReport(null);
     setSelectedId(null);
@@ -200,6 +219,14 @@ export function CorpusView() {
   const stepProfile = !!report;
   const stepResolve = stepProfile && sets.every((s2) => s2.id in resolutions);
   const stepHandoff = stepResolve && !!adjusted && !adjusted.findings.some((f) => f.status === "open" && f.level === "critical");
+  const openFindings = adjusted?.findings.filter((finding) => finding.status === "open") ?? [];
+  const openCriticals = openFindings.filter((finding) => finding.level === "critical").length;
+  const fullyApproved = !!adjusted?.activeFiles.length && adjusted.activeFiles.every((file) => file.gate.gate === "Approved");
+  const nextStep = openCriticals > 0
+    ? { href: "#corpus-findings", label: `Resolve ${openCriticals} critical finding${openCriticals === 1 ? "" : "s"}` }
+    : !stepResolve ? { href: "#corpus-resolution", label: "Resolve duplicate and version sets" }
+    : !fullyApproved ? { href: "#corpus-findings", label: "Review findings keeping files below the approval gate" }
+    : { href: "#corpus-proof", label: "Check before/after proof, then export the readiness dossier" };
 
   // Proof inputs (Phase 5).
   const excludedNames = new Set(
@@ -336,13 +363,22 @@ export function CorpusView() {
 
   return (
     <div className="space-y-6">
+      <Provenance mode="Deterministic browser analysis" input={inputs ? `${inputs.length} supplied or sample files` : "Load the bundled sample or choose local files"} method={`${getProfile(profileId).name} rule profile`} note="Files are parsed in this browser. Fix actions update the modeled readiness ledger; the original files are unchanged. The gate is an assessment, not a production approval." />
+      {report && adjusted && !running && <section aria-label="Corpus checkpoint" className="z-20 rounded-xl border border-primary/25 bg-white p-4 shadow-card lg:sticky lg:top-24">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div><h2 className="font-semibold text-ink">{fullyApproved ? "All active files clear the modeled gate" : "Corpus needs review"}</h2><p className="mt-1 text-sm text-slatey-300"><strong className="tabular-nums">{adjusted.health.readyPct}% ready</strong> · baseline {report.health.readyPct}% · {adjusted.health.readyPct - report.health.readyPct >= 0 ? "+" : ""}{adjusted.health.readyPct - report.health.readyPct} percentage points · {openFindings.length} open findings</p></div>
+          <a href={nextStep.href} className="rounded-lg bg-primary-soft px-3 py-2 text-sm font-semibold text-primary-dark">Next: {nextStep.label}</a>
+        </div>
+        <p className="mt-2 text-xs text-slatey-400">Average score: {report.health.avgScore} baseline → {adjusted.health.avgScore} current. {adjusted.health.excluded ?? 0} excluded; readiness uses the remaining active files.</p>
+        {selected && <p role="status" className="mt-2 text-xs text-slatey-400">Selected: {selected.name} · score {report.files.find((file) => file.id === selected.id)?.score ?? selected.score} baseline → {selected.score} current · {selected.excluded ? "Excluded" : selected.gate.gate}. <a className="text-primary underline" href="#corpus-files">Inspect file</a></p>}
+      </section>}
       {/* Top row: intake on the left, corpus health + guided pass on the right.
           Everything below spans the full content width — the pipeline sections
           (board, backlog, atlas, topics, proof, tray) need the room. */}
       <div className="grid gap-6 lg:grid-cols-3">
       {/* LEFT: intake */}
       <div className="space-y-6 lg:col-span-1">
-        <Panel>
+        <Panel id="corpus-intake">
           <SectionHeader title="Build a corpus" description="Profile many files at once" icon={UploadCloud} />
           <button
             onClick={loadSampleCorpus}
@@ -363,7 +399,7 @@ export function CorpusView() {
               if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
             }}
             className={cn(
-              "block cursor-pointer rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors",
+              "block cursor-pointer rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors focus-within:ring-2 focus-within:ring-primary",
               dragOver ? "border-primary bg-primary-soft" : "border-line bg-slate-50/60 hover:bg-slate-50",
             )}
           >
@@ -378,7 +414,7 @@ export function CorpusView() {
               type="file"
               multiple
               accept={CORPUS_UPLOAD_ACCEPT}
-              className="hidden"
+              className="sr-only"
               onChange={(e) => e.target.files && onFiles(e.target.files)}
             />
           </label>
@@ -411,7 +447,7 @@ export function CorpusView() {
       {/* RIGHT of the top row: health + guided pass */}
       <div className="space-y-6 lg:col-span-2">
         {!report && !running && <EmptyCorpus onLoad={loadSampleCorpus} />}
-        {running && <div className="panel p-10 text-center text-sm text-slatey-300">Analyzing corpus…</div>}
+        {running && <div role="status" className="panel p-10 text-center text-sm text-slatey-300">Analyzing corpus…</div>}
 
         {report && adjusted && (
           <>
@@ -427,9 +463,10 @@ export function CorpusView() {
             {/* Guided corpus pass (Phase 5): the three-beat path through the lab. */}
             <ol className="flex flex-wrap items-center gap-2 text-[11px]" aria-label="Guided corpus pass">
               {[
-                { n: 1, label: "Profile the corpus", done: stepProfile, href: "#corpus-board" },
-                { n: 2, label: "Resolve duplicates & versions", done: stepResolve, href: "#corpus-resolution" },
-                { n: 3, label: "Clear criticals & hand off", done: stepHandoff, href: "#corpus-board" },
+                { n: 1, label: "Intake", done: stepProfile, href: "#corpus-intake" },
+                { n: 2, label: "Inspect findings", done: openFindings.length === 0, href: "#corpus-findings" },
+                { n: 3, label: "Apply fixes & resolve copies", done: stepResolve && openCriticals === 0, href: "#corpus-resolution" },
+                { n: 4, label: "Review approved corpus", done: fullyApproved, href: "#corpus-board" },
               ].map((st) => (
                 <li key={st.n}>
                   <a
@@ -484,8 +521,15 @@ export function CorpusView() {
             />
           </div>
 
+          <div id="corpus-findings" className="scroll-mt-40">
+            <RemediationBacklog findings={adjusted.findings} selectedId={selectedId} onSelectFile={setSelectedId} onSetStatus={(key, status) => setStatuses((current) => ({ ...current, [key]: status }))} />
+          </div>
             <div className="grid gap-6 lg:grid-cols-5">
               <Panel className="lg:col-span-3">
+                <details onToggle={(event) => setAtlasOpen(event.currentTarget.open)}>
+                  <summary className="cursor-pointer py-2 font-semibold text-ink">Explore the optional corpus atlas</summary>
+                  <p className="mb-3 text-xs leading-relaxed text-slatey-400">The readiness board, findings and file list provide all selections and fixes. The atlas adds spatial context using the same selected file.</p>
+                {atlasOpen && <>
                 <div className="flex items-start justify-between gap-2">
                   <SectionHeader title="Corpus atlas" description="Distance = content similarity (PCA), click an edge to resolve its set" icon={Boxes} />
                   <div className="inline-flex shrink-0 rounded-lg border border-line bg-white p-0.5" role="group" aria-label="Atlas view mode">
@@ -507,7 +551,8 @@ export function CorpusView() {
                   </div>
                 </div>
                 {atlasMode === "3d" && adjusted.activeFiles.length >= 4 ? (
-                  <CorpusAtlas3D
+                  <OptionalCorpusAtlas
+                    onFallback={() => setAtlasMode("2d")}
                     files={adjusted.activeFiles}
                     pairs={adjusted.activePairs}
                     selectedId={selectedId}
@@ -535,6 +580,8 @@ export function CorpusView() {
                     Language mix (heuristic, prose files): {report.languages.map((l) => `${l.label} \u00d7${l.files}`).join(" \u00b7 ")}
                   </p>
                 )}
+                </>}
+                </details>
               </Panel>
 
               <div id="corpus-resolution" className="scroll-mt-24 lg:col-span-2">
@@ -554,11 +601,6 @@ export function CorpusView() {
                 />
               </div>
             </div>
-
-            <RemediationBacklog
-              findings={adjusted.findings}
-              onSetStatus={(key, status) => setStatuses((m) => ({ ...m, [key]: status }))}
-            />
 
             <TopicGroups
               topics={report.topics}
@@ -584,7 +626,7 @@ export function CorpusView() {
 
 
             {/* File tray */}
-            <Panel>
+            <Panel id="corpus-files" className="scroll-mt-40">
               <SectionHeader title="Files in this corpus" description="Click a file to inspect its gate and issues" icon={Layers} />
               {selected && (
                 <div className="mb-4 rounded-lg border border-primary/20 bg-primary-soft/40 p-3">
@@ -611,6 +653,7 @@ export function CorpusView() {
                   <button
                     key={f.id}
                     onClick={() => setSelectedId(f.id)}
+                    aria-pressed={selectedId === f.id}
                     className={cn(
                       "rounded-lg border p-3 text-left transition-colors",
                       f.id === selectedId ? "border-primary/40 bg-primary-soft/40" : "border-line bg-white hover:bg-slate-50",

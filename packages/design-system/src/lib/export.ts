@@ -122,12 +122,16 @@ export function pickTextFile(accept = "application/json,.json"): Promise<string 
     const input = document.createElement("input");
     input.type = "file";
     input.accept = accept;
+    input.style.display = "none";
+    document.body.appendChild(input);
+    const finish = (value: string | null) => { input.remove(); resolve(value); };
+    input.oncancel = () => finish(null);
     input.onchange = () => {
       const file = input.files?.[0];
-      if (!file) { resolve(null); return; }
+      if (!file) { finish(null); return; }
       const reader = new FileReader();
-      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : null);
-      reader.onerror = () => resolve(null);
+      reader.onload = () => finish(typeof reader.result === "string" ? reader.result : null);
+      reader.onerror = () => finish(null);
       reader.readAsText(file);
     };
     input.click();

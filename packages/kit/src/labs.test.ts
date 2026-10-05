@@ -28,6 +28,12 @@ describe("labHref", () => {
   it("falls back to / for an unknown lab", () => {
     expect(labHref("NOPE")).toBe("/");
   });
+  it("keeps the legacy contact-center saved ID reachable through the canonical link", () => {
+    const href = labHref("EL-01", "el01-contact center-assist");
+    expect(href).toBe("/engagement/adoption/?uc=el01-contact-center-assist");
+    const id = new URL(href, "https://portfolio.example").searchParams.get("uc");
+    expect(ALL_USE_CASES.find((uc) => uc.id === id)?.title).toBe("Agent assist for 900 servicing reps");
+  });
 });
 
 describe("STORYLINES integrity", () => {

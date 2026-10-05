@@ -1,75 +1,37 @@
-// The five flagship "executive decision cases" shown at the top of the Competency
-// Map. Split into its own module to keep CompetencyMap.tsx small. Self-contained:
-// depends only on next/link, one lucide icon, and the LabEntry type.
-
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { progress, type LabEntry } from "@labs/kit";
-
-const HERO_PROOF: Record<string, { proves: string; depth: string; cta: string }> = {
-  "GAP-03": {
-    proves: "Multiagent architecture economics",
-    depth: "Whether additional agents create enough quality lift to justify higher orchestration cost and execution time, translating an impressive technical pattern into an architecture, economics, and operating model decision.",
-    cta: "Review the orchestration economics case",
-  },
-  "GAP-07": {
-    proves: "Architecture and protocol decision making",
-    depth: "Which protocol best fits a given integration pattern, including the runner up and the condition that would change the recommendation, turning protocol selection into transparent technology strategy rather than a trend driven preference.",
-    cta: "Review the protocol strategy case",
-  },
-  "C3-5": {
-    proves: "Business case rigor",
-    depth: "Whether a single initiative should be funded, deferred, or reshaped, built on an NPV range instead of a point estimate, with payback, sensitivity analysis showing which assumption the case actually hinges on, and a steering ready verdict.",
-    cta: "Review the funding decision case",
-  },
-  "C3-1": {
-    proves: "Capital allocation under risk",
-    depth: "Which initiatives deserve funding, which should pause, and which should be stopped before they consume more capital, framing AI investment as a governed capital allocation problem, not a list of promising ideas.",
-    cta: "Explore the portfolio strategy dashboard",
-  },
-  "EL-01": {
-    proves: "Adoption and change readiness",
-    depth: "Whether to scale, scale with conditions, or hold until adoption risks are addressed, connecting adoption, trust, workflow fit, sponsorship, training, and incentives to the actual scale decision.",
-    cta: "Review the adoption strategy decision",
-  },
+import { GAP07_USE_CASES, progress, type LabEntry } from "@labs/kit";
+import { evaluate, type PKey } from "@labs/engines";
+const LABEL: Record<PKey, string> = { fc: "Function calling", mcp: "MCP", a2a: "A2A", hybrid: "MCP + A2A" };
+const BEATS: Record<string, string[]> = {
+ "GAP-03": ["One request", "Actual handoffs", "Cost / quality verdict"],
+ "GAP-07": ["Six criteria", "Four protocols", "One explainable choice"],
+ "C3-5": ["Assumption", "Cash flow", "Fund or defer"],
+ "C3-1": ["Initiative", "Constraint", "Capital allocation"],
+ "EL-01": ["Readiness", "Gating factor", "Next intervention"]
 };
-
 export function HeroCaseStudies({ labs }: { labs: LabEntry[] }) {
-  // Remainder is computed from the registry, never hardcoded. The five featured cases
-  // are themselves catalog labs, so the rest of the catalog is total minus what shows here.
-  const otherCount = progress().total - labs.length;
-  return (
-    <section id="cases" className="mb-9 mt-8 scroll-mt-24">
-      <div className="flex items-baseline justify-between gap-3">
-        <div>
-          <p className="eyebrow text-primary">Executive decision cases</p>
-          <h2 className="mt-1 text-xl font-semibold tracking-tight text-ink">Start with the five executive decision cases</h2>
-        </div>
-        <span className="hidden shrink-0 text-xs text-slatey-500 sm:block">~10 minutes &middot; the other {otherCount} show range</span>
-      </div>
-      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-        These five artifacts show the portfolio at its strongest: multiagent economics, architecture and protocol
-        strategy, capital allocation, business case rigor, and adoption readiness. Each case turns a technical or
-        operating question into a decision a senior leader would need to make before scaling AI work.
-      </p>
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        {labs.map((l) => {
-          const h = HERO_PROOF[l.id];
-          if (!h) return null;
-          return (
-            <Link key={l.id} href={l.href ?? "#"} className="group flex flex-col rounded-xl border border-line bg-white p-4 shadow-card transition hover:border-primary/40 hover:shadow-lg">
-              <div className="flex items-center gap-2">
-                <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-primary">{l.id}</span>
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{h.proves}</span>
-              </div>
-              <h3 className="mt-1.5 text-base font-semibold text-ink group-hover:text-primary">{l.title}</h3>
-              <p className="mt-0.5 text-xs font-medium text-slatey-300">{l.decision}</p>
-              <p className="mt-2 text-xs leading-relaxed text-slatey-400">{h.depth}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">{h.cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" /></span>
-            </Link>
-          );
-        })}
-      </div>
-    </section>
-  );
+ const sample = GAP07_USE_CASES[0];
+ const result = evaluate(sample.payload.answers);
+ const ranked = (Object.entries(result.scores) as [PKey, number][]).sort((a,b)=>b[1]-a[1]);
+ return <section id="cases" className="mb-10 mt-10 scroll-mt-24">
+  <p className="eyebrow text-primary">Five decisions. Inspectable evidence.</p>
+  <h2 className="mt-2 text-2xl font-semibold tracking-tight">Start with a choice, then challenge it.</h2>
+  <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slatey-400">Open a case, change an assumption, and see why the recommendation holds or changes. The other {progress().total-labs.length} artifacts show the wider range.</p>
+  <div className="mt-6 grid gap-5 lg:grid-cols-[1.15fr_1fr]">
+   <article className="rounded-2xl border border-line bg-ink p-6 text-white md:p-8">
+    <div className="flex flex-wrap items-center gap-2 text-xs"><span className="rounded-full border border-white/30 px-2 py-1">Featured case · Architecture</span><span className="text-amber-200">SIMULATED · published scoring model</span></div>
+    <h3 className="mt-5 text-2xl font-semibold leading-tight">Why this protocol, and what would change the call?</h3>
+    <p className="mt-3 text-sm leading-relaxed text-slate-300">{sample.title}</p>
+    <div className="mt-6 rounded-xl border border-white/20 bg-white/5 p-4">
+      <p className="text-xs text-slate-300">Recommendation at the supplied scenario</p>
+      <p className="mt-1 text-2xl font-semibold">{LABEL[result.primary]}</p>
+      <div className="mt-4 space-y-3">{ranked.map(([key,score])=><div key={key}><div className="flex items-baseline justify-between gap-2 text-xs"><span>{LABEL[key]}</span><span className="font-mono">{score.toFixed(2)} points</span></div><div className="mt-1 h-1.5 rounded bg-white/15" aria-hidden><div className="h-full rounded bg-blue-300" style={{width:`${score / ranked[0][1]*100}%`}} /></div></div>)}</div>
+      <p className="mt-4 text-xs leading-relaxed text-slate-300">Runner-up: {LABEL[result.runnerUp]}. Lead: {(result.scores[result.primary]-result.scores[result.runnerUp]).toFixed(2)} points. Scores express model fit, not a probability of success.</p>
+    </div>
+    <Link href={`/agents/protocol-selection?uc=${sample.id}`} className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-ink">Challenge this recommendation <ArrowRight size={16}/></Link>
+   </article>
+   <div className="grid gap-3">{labs.filter(l=>l.id!=="GAP-07").map(l=><Link href={l.href!} key={l.id} className="group rounded-xl border border-line bg-white p-5 transition hover:border-primary/50 hover:shadow-card"><div className="flex flex-wrap items-center gap-2 text-[11px] text-slatey-400"><span className="font-mono text-primary">{l.id}</span><span>{l.live}</span></div><h3 className="mt-2 text-base font-semibold group-hover:text-primary">{l.title}</h3><p className="mt-2 text-sm text-slatey-400">{l.problem}</p><div className="mt-3 flex flex-wrap items-center gap-2 text-xs">{BEATS[l.id]?.map((beat,i)=><span key={beat} className="inline-flex items-center gap-2">{i>0&&<ArrowRight size={12} aria-hidden/>}<span className="rounded bg-canvas px-2 py-1">{beat}</span></span>)}</div></Link>)}</div>
+  </div>
+ </section>;
 }

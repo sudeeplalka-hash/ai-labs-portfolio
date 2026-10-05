@@ -2,17 +2,20 @@
 
 import { useEffect, useRef } from "react";
 import { useProgram } from "@labs/program-core";
+import { usePageVisible } from "@labs/design-system";
 import { getSessions, getCorpusBacklog, getCorpusExclusions, getCorpusTopics } from "@data/lib/live/session";
 
 // Writes the real Data lab result into ProgramState.data so Realize/Deploy can
 // read it. Reuses the Data lab's own session store, no duplicated logic.
 export function DataSliceWriter() {
   const { update, hydrated } = useProgram();
+  const visible = usePageVisible();
   const last = useRef<string>("");
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !visible) return;
     const sync = () => {
+      if (document.visibilityState === "hidden") return;
       const ss = getSessions();
       if (!ss.length) return;
       const readiness = Math.round(ss.reduce((a, s) => a + (s.score ?? 0), 0) / ss.length);
@@ -32,7 +35,7 @@ export function DataSliceWriter() {
     sync();
     const id = setInterval(sync, 3000);
     return () => clearInterval(id);
-  }, [hydrated, update]);
+  }, [hydrated, update, visible]);
 
   return null;
 }

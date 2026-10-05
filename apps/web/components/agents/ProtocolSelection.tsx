@@ -10,7 +10,9 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, svgElementToPng, downloadText, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, svgElementToPng, downloadText, type ExportAction, type Command } from "@labs/design-system";
+import { ProtocolChange } from "./ProtocolChange";
+import { EvidenceTable } from "./AgentExperience";
 import { PROTOCOL_STATS, PROTOCOL_STATS_AS_OF, GAP07_USE_CASES, LABS } from "@labs/kit";
 import { sensitivity as protocolSensitivity, bespokeCost, protocolCost, crossoverConsumers, protocolAffinity, affinityRadar, whyNotOthers, recommendationCard, explainRecommendation, type ProtocolAxis } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
@@ -46,6 +48,15 @@ const QUESTIONS: { key: string; q: string; opts: string[] }[] = [
 interface Weights { scale: number; coordination: number; governance: number; simplicity: number }
 const DEFAULT_WEIGHTS: Weights = { scale: 1, coordination: 1, governance: 1, simplicity: 1 };
 
+function validatedScenario(answers: unknown, weights: unknown) {
+  if (!answers || typeof answers !== "object" || !QUESTIONS.every(({ key }) => Number.isInteger((answers as Record<string, unknown>)[key]) && [0, 1, 2].includes((answers as Record<string, number>)[key]))) throw new Error("All six answers must be 0, 1, or 2.");
+  if (weights !== undefined && (!weights || typeof weights !== "object" || Array.isArray(weights))) throw new Error("Weights must be an object.");
+  const source = (weights ?? {}) as Record<string, unknown>;
+  const candidate = Object.fromEntries(Object.entries(DEFAULT_WEIGHTS).map(([key, value]) => [key, source[key] ?? value])) as unknown as Weights;
+  if (!Object.keys(DEFAULT_WEIGHTS).every((key) => typeof candidate[key as keyof Weights] === "number" && Number.isFinite(candidate[key as keyof Weights]) && candidate[key as keyof Weights] >= 0 && candidate[key as keyof Weights] <= 2)) throw new Error("Weights must be numbers from 0 to 2.");
+  return { answers: Object.fromEntries(QUESTIONS.map(({ key }) => [key, (answers as Record<string, number>)[key]])), weights: candidate };
+}
+
 function evaluate(a: Record<string, number>, W: Weights) {
   const { q1, q2, q3, q4, q5, q6 } = a;
   const mcp = (q1 * 1.6 + q5 * 1.1) * W.scale + q2 * 1.1 + q4 * 1.0 * W.governance;
@@ -66,7 +77,7 @@ const AXES: ProtocolAxis[] = [
   { key: "q5", label: "Reuse" },
   { key: "q6", label: "Simplicity" },
 ];
-const PROTO_COLOR: Record<PKey, string> = { fc: "#94a3b8", mcp: "#0d9488", a2a: "#6366f1", hybrid: "#f59e0b" };
+const PROTO_COLOR: Record<PKey, string> = { fc: "#52647a", mcp: "#087e72", a2a: "#5144c9", hybrid: "#a76509" };
 
 const SYS_COUNT = [2, 7, 15];
 const CON_COUNT = [1, 4, 12];
@@ -86,6 +97,12 @@ export function ProtocolSelection() {
   const [weights, setWeights] = useState<Weights>(DEFAULT_WEIGHTS);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const W = weights;
+  const [baseline, setBaseline] = useState(() => ({ answers: { ...ans }, weights: { ...weights } }));
+  const baselineResult = evaluate(baseline.answers, baseline.weights);
+  const changedInputs = [
+    ...QUESTIONS.filter((question) => baseline.answers[question.key] !== ans[question.key]).map((question) => `${question.q} ${question.opts[baseline.answers[question.key]]} → ${question.opts[ans[question.key]]}`),
+    ...(Object.keys(W) as (keyof Weights)[]).filter((key) => W[key] !== baseline.weights[key]).map((key) => `${key} weight: ${baseline.weights[key].toFixed(1)} → ${W[key].toFixed(1)}`),
+  ];
   const edited = JSON.stringify(W) !== JSON.stringify(DEFAULT_WEIGHTS);
   const router = useRouter();
   const cardRef = useRef<SVGSVGElement>(null);
@@ -95,17 +112,20 @@ export function ProtocolSelection() {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
     try {
-      const cfg = JSON.parse(atob(raw)) as { ans?: Record<string, number>; w?: Partial<Weights> };
-      if (cfg.ans) setAns(cfg.ans);
-      if (cfg.w) { const w = cfg.w; setWeights({ scale: w.scale ?? 1, coordination: w.coordination ?? 1, governance: w.governance ?? 1, simplicity: w.simplicity ?? 1 }); }
-    } catch { /* ignore malformed link */ }
+      const cfg = JSON.parse(atob(raw)) as { ans?: unknown; w?: unknown; baseline?: { answers?: unknown; weights?: unknown } };
+      const valid = validatedScenario(cfg.ans, cfg.w);
+      const restoredBaseline = cfg.baseline ? validatedScenario(cfg.baseline.answers, cfg.baseline.weights) : null;
+      setAns(valid.answers); setWeights(valid.weights); setActiveUcId(null);
+      if (restoredBaseline) setBaseline(restoredBaseline);
+    } catch { toast("Shared scenario is invalid. The current scenario is kept; choose a use case or import a valid export."); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const shareScenario = () => {
-    const cfg = btoa(JSON.stringify({ ans, w: W }));
+    const cfg = btoa(JSON.stringify({ ans, w: W, baseline }));
     const params = new URLSearchParams(window.location.search);
     params.set("cfg", cfg);
+    params.delete("uc");
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
@@ -144,7 +164,7 @@ export function ProtocolSelection() {
     toast("Protocol scores exported as CSV");
   };
   const exportScenario = () => {
-    downloadJson("protocol-scenario", { version: 1, answers: ans, weights: W });
+    downloadJson("protocol-scenario", { version: 1, mode: "SIMULATED", answers: ans, weights: W, scores, primary, runnerUp, baseline });
     toast("Scenario exported as JSON");
   };
   const exportCard = () => {
@@ -161,14 +181,13 @@ export function ProtocolSelection() {
     const text = await pickTextFile();
     if (!text) return;
     try {
-      const cfg = parseScenarioJson<{ answers?: Record<string, number>; weights?: Partial<Weights> }>(text);
-      if (cfg.answers) setAns(cfg.answers);
-      if (cfg.weights) {
-        const w = cfg.weights;
-        setWeights({ scale: w.scale ?? 1, coordination: w.coordination ?? 1, governance: w.governance ?? 1, simplicity: w.simplicity ?? 1 });
-      }
+      const cfg = parseScenarioJson<{ answers?: unknown; weights?: unknown; baseline?: { answers?: unknown; weights?: unknown } }>(text);
+      const valid = validatedScenario(cfg.answers, cfg.weights);
+      const restoredBaseline = cfg.baseline ? validatedScenario(cfg.baseline.answers, cfg.baseline.weights) : null;
+      setAns(valid.answers); setWeights(valid.weights); setActiveUcId(null);
+      if (restoredBaseline) setBaseline(restoredBaseline);
       toast("Scenario imported");
-    } catch { toast("That file isn't a valid scenario"); }
+    } catch { toast("Invalid scenario. Use all six answers (0–2) and weights (0–2). Current inputs are kept."); }
   };
   const exportActions: ExportAction[] = [
     { id: "csv", label: "Protocol scores as CSV", hint: "All four, with fit %", onSelect: exportCsv },
@@ -190,37 +209,16 @@ export function ProtocolSelection() {
   ];
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">GAP-07</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Protocol Selection Lab</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02", asOf: PROTOCOL_STATS_AS_OF }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Protocol selection is a technology strategy decision. This artifact evaluates function calling, MCP, A2A, and
-            hybrid patterns against the shape of the integration rather than the popularity of the protocol.
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {PROTOCOL_STATS.map((s) => <Badge key={s.key} tone="slate">{s.value} {s.label}</Badge>)}
-          </div>
-        </div>
-
+    <InstrumentShell title="Protocol Selection Lab" eyebrow="GAP-07 · Agent architecture" description="See why a protocol leads and which input would change the recommendation."
+      breadcrumbs={[{ label: "Portfolio", href: "/" }, { label: "Agent architecture", href: "/#collections" }, { label: "Protocol Selection Lab" }]}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Current questionnaire answers and weights"} method="Weighted decision model; no production protocol benchmark" note="Illustrative results support review; they do not establish a production outcome." />}>
+        <DecisionSummary title={`${PROTO[primary].label} leads this decision model`} explanation={`${PROTO[primary].blurb} This is the highest weighted score for the six answers currently selected; inspect the actual flip conditions below.`} metrics={[{ label: "Leading score", value: scores[primary].toFixed(1) }, { label: "Runner-up", value: PROTO[runnerUp].label }, { label: "Score margin", value: (scores[primary] - scores[runnerUp]).toFixed(1) }]} />
         <UseCaseRail useCases={GAP07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
         <CaseStudy problem="Different protocols optimize different problems. Function calling can be simpler for narrow workflows, MCP can standardize tools across consumers, A2A can support agent coordination, and hybrid approaches may be required when the enterprise environment has multiple integration surfaces." approach="The model scores a protocol recommendation across weighted criteria and shows the runner up, the sensitivity of the recommendation, and the condition that would flip the decision." why="This connects architecture choice to standardization, reusability, delivery speed, change cost, governance, and operating complexity." metric="The fit scores and the flip conditions: which single input change would change the recommendation." tradeoff="Broadening scope raises value but lowers feasibility; the radar shows function calling and MCP as mirror opposites on tool breadth, you choose where on that curve to sit." outcome="A protocol recommendation you can defend in a design review, with the runner up and the exact condition that would flip it, exportable as a one page card." />
 
         <LabToolbar>
-          <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Tune how much each signal counts">
+          <ToolbarButton onClick={() => setDrawerOpen(true)} title="Tune how much each signal counts">
             <SlidersHorizontal className="h-3.5 w-3.5" /> Weights
             {edited && <span className="ml-1 rounded bg-white/25 px-1 py-px text-[10px] font-bold uppercase tracking-wide">your model</span>}
           </ToolbarButton>
@@ -236,19 +234,20 @@ export function ProtocolSelection() {
           <ExportMenu actions={exportActions} />
         </LabToolbar>
 
+        <ProtocolChange rows={(Object.keys(PROTO) as PKey[]).map((key) => ({ key, label: PROTO[key].label, color: PROTO_COLOR[key], score: scores[key], baseline: baselineResult.scores[key] }))} changes={changedInputs} baselineWinner={PROTO[baselineResult.primary].label} currentWinner={PROTO[primary].label} onPin={() => setBaseline({ answers: { ...ans }, weights: { ...W } })} />
         <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
           {/* Questions */}
           <Panel className="space-y-3">
             {QUESTIONS.map((qu) => (
-              <div key={qu.key}>
-                <p className="mb-1 text-xs font-medium text-slatey-400">{qu.q}</p>
-                <div className="flex gap-1">
+              <fieldset key={qu.key} className={changedInputs.length && baseline.answers[qu.key] !== ans[qu.key] ? "rounded-lg border-l-4 border-primary bg-primary/5 p-3" : ""}>
+                <legend className="mb-2 text-sm font-medium text-slatey-300">{qu.q}</legend>
+                <div className="flex flex-wrap gap-2">
                   {qu.opts.map((o, i) => (
-                    <button key={o} onClick={() => setAnswer(qu.key, i)}
-                      className={`flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${ans[qu.key] === i ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{o}</button>
+                    <button key={o} aria-pressed={ans[qu.key] === i} onClick={() => setAnswer(qu.key, i)}
+                      className={`min-h-11 min-w-[8rem] flex-1 rounded-md border px-3 py-2 text-xs font-medium transition ${ans[qu.key] === i ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{o}</button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
             ))}
           </Panel>
 
@@ -264,7 +263,7 @@ export function ProtocolSelection() {
               <p className="mt-2 text-sm leading-relaxed text-slatey-300">{PROTO[primary].rationale}</p>
 
               <div className="mt-3 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                <span className="font-semibold">Runner up: {PROTO[runnerUp].label}.</span> Flips to primary if {DRIVER[runnerUp]}.
+                <span className="font-semibold">Runner up: {PROTO[runnerUp].label}.</span> Inspect the calculated single-answer flip conditions below; a general preference is not a guaranteed flip.
               </div>
               <div className="mt-3">
                 <p className="stat-label mb-1">Why not the others</p>
@@ -305,7 +304,7 @@ export function ProtocolSelection() {
                   <svg ref={cardRef} viewBox="0 0 440 250" className="w-full" role="img" aria-label={`Recommendation card: ${card.primaryLabel}, ${card.confidence} call.`}>
                     <rect x="0" y="0" width="440" height="250" rx="14" fill="#ffffff" stroke="#e4e7eb" />
                     <rect x="0" y="0" width="440" height="5" fill={PROTO_COLOR[card.primary]} />
-                    <text x="24" y="40" fontSize="10.5" letterSpacing="1.5" fill="#94a3b8">PROTOCOL RECOMMENDATION</text>
+                    <text x="24" y="40" fontSize="10.5" letterSpacing="1.5" fill="#52647a">PROTOCOL RECOMMENDATION</text>
                     <text x="24" y="68" fontSize="23" fontWeight="700" fill="#152433">{card.primaryLabel}</text>
                     <text x="24" y="90" fontSize="11" fontWeight="600" fill={confColor}>&#9679; {card.confidence} call &middot; +{card.margin.toFixed(1)} over {card.runnerUpLabel}</text>
                     {card.bars.map((b, i) => {
@@ -315,11 +314,11 @@ export function ProtocolSelection() {
                           <text x="24" y={y + 11} fontSize="11" fontWeight={b.primary ? 600 : 400} fill={b.primary ? "#152433" : "#64748b"}>{b.label}</text>
                           <rect x="170" y={y + 2} width={bw} height="12" rx="6" fill="#eef1f4" />
                           <rect x="170" y={y + 2} width={Math.max(2, (bw * b.pct) / 100)} height="12" rx="6" fill={PROTO_COLOR[b.key]} opacity={b.primary ? 1 : 0.5} />
-                          <text x={170 + bw + 8} y={y + 11} fontSize="10" fill="#94a3b8">{b.pct}%</text>
+                          <text x={170 + bw + 8} y={y + 11} fontSize="10" fill="#52647a">{b.pct}%</text>
                         </g>
                       );
                     })}
-                    <text x="24" y="240" fontSize="9" fill="#b6bdc6">Protocol Selection Lab &middot; deterministic scoring over your inputs</text>
+                    <text x="24" y="240" fontSize="9" fill="#52647a">Protocol Selection Lab &middot; deterministic scoring over your inputs</text>
                   </svg>
                 );
               })()}
@@ -372,6 +371,7 @@ export function ProtocolSelection() {
               <p className="mt-1 text-[10px] text-slatey-500">Outer = the dimension favors that protocol; the dashed mid ring is neutral; inside it the dimension argues against. Moves with your weights.</p>
             </Panel>
 
+            <details className="rounded-xl border border-line bg-white p-4"><summary className="cursor-pointer font-semibold">Read protocol responsiveness values</summary><EvidenceTable caption="Protocol responsiveness by decision dimension" headers={["Protocol", ...AXES.map((axis) => axis.label)]} rows={(Object.keys(PROTO) as PKey[]).map((key) => [PROTO[key].label, ...radar[key].map((value) => `${value.toFixed(1)} / 100`)])} /></details>
             <Panel>
               <p className="stat-label mb-2">Producers × consumers</p>
               <div className="flex items-center gap-3 text-xs">
@@ -473,8 +473,7 @@ export function ProtocolSelection() {
         </Drawer>
         <ToastHost />
         <CommandPalette commands={paletteCommands} />
-      </main>
-    </div>
+    </InstrumentShell>
   );
 }
 

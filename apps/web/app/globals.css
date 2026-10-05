@@ -1,2 +1,28 @@
 /* The whole platform's styles = the shared design system (one source of DNA). */
 @import "../../../packages/design-system/src/styles/globals.css";
+
+/* Content-specific contracts; shared tokens remain the design-system authority. */
+.catalog-card { content-visibility: auto; contain-intrinsic-size: auto 215px; }
+[id^="evidence-"]:target { outline: 2px solid var(--color-primary, #1f6fc4); outline-offset: 3px; }
+main, main > *, [class*="grid"] > * { min-width: 0; }
+.recharts-responsive-container { min-width: 0 !important; }
+.recharts-cartesian-axis-tick-value, .recharts-legend-item-text { fill: #475569; font-size: 11px; }
+pre { max-width: 100%; overflow-x: auto; tab-size: 2; }
+@media(max-width: 639px) {
+  input[type="text"], input[type="search"], input[type="number"], textarea, select { font-size: 16px; }
+  .recharts-surface { max-width: 100%; }
+}
+@media print {
+  @page { size: A4; margin: 14mm; }
+  html, body { background: white !important; color: #152433 !important; }
+  .no-print, dialog, [role="dialog"], button, input[type="range"] { display: none !important; }
+  main, article { max-width: none !important; padding: 0 !important; }
+  h1,h2,h3,h4 { break-after: avoid; }
+  p,li,dl { orphans: 3; widows: 3; }
+  section, figure, tr, .panel { break-inside: avoid; }
+  details > * { display: block !important; }
+  details::details-content { display: block; content-visibility: visible; }
+  [class*="overflow"] { overflow: visible !important; max-height: none !important; }
+  .catalog-card { content-visibility: visible; }
+  a { text-decoration: underline; }
+}

@@ -15,3 +15,6 @@ __pycache__/
 .venv/
 venv/
 .pytest_cache/
+
+# Local package-manager caches are not source artifacts.
+.pnpm-store/

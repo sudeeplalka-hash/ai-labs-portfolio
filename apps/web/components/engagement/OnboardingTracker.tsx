@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
-import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL09_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 interface Resource { key: string; role: string; loc: "Onshore" | "Offshore"; access: number }
@@ -61,83 +62,73 @@ export function OnboardingTracker() {
   const carryPre = resources.reduce((a, r) => a + ttp(Math.min(r.access, 5)) * rate(r.loc), 0);
   const current = pre ? carryPre : carryFull;
   const savings = carryFull - carryPre;
-  const maxDays = 60;
+  const maxDays = Math.max(60, ...rows.map((row) => row.days));
 
   const spofs = ktAreas.filter((a) => (kt[a.area] ? a.bus + 1 : a.bus) < 2).length;
 
+  const savedState = { view, pre, kt };
+  const scenarioLink = useScenarioLink({ id: "EL-09", state: savedState, activeId: activeUcId,
+    restore: (s) => { setView(s.view); setPre(s.pre); setKt(s.kt); },
+    validate: (v): v is typeof savedState => validateScenario(v, { view: oneOf(["onboard","kt"]), pre: bool, kt: (v) => recordOf(v,[true,false]) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-09</span>
-        </div>
-      </header>
+    <InstrumentShell title="Onboarding and knowledge transfer" eyebrow="Operating model & engagement" description="Separate avoidable access delay from the ramp, and plan continuity before people leave."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-09" }]}
+      decision={<DecisionSummary title={view === "onboard" ? `${blocked} resources blocked on access` : `${spofs} modeled single points of failure`} explanation={view === "onboard" ? `Average productive day ${avg}. ${pre ? "Pre-provisioned access is modeled." : `Pre-provisioning could reduce carrying cost by ${fmt(savings)}.`}` : "A scheduled transfer models one additional backup; it is not evidence of completed knowledge transfer."} nextAction={view === "onboard" ? "Compare access delay above the seven-day norm with the unchanged 35-day ramp." : "Plan a named backup and validate the transfer before treating the risk as closed."} tone={view === "onboard" ? (blocked ? "caution" : "positive") : (spofs ? "caution" : "positive")} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL09_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Access delays, unclear ramp expectations, and undocumented senior knowledge create hidden cost. Technology strategy professionals need to know which roles are blocked, what preprovisioning saves, and where knowledge has a single point of failure." approach="The tracker models onboarding timelines, access delays, ramp time, carrying cost, and knowledge transfer coverage. It highlights blocked resources and bus factor risks." why="This connects onboarding to cost, margin, delivery continuity, vendor mobilization, and operational readiness." metric="Time to productive; KT items captured before roll off." tradeoff="Speed of ramp versus the depth of knowledge transfer captured." outcome="The onboarding critical path plus the KT captured before the senior leaves." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Onboarding and Knowledge Transfer Tracker</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A resource can be assigned before they are productive. This artifact treats onboarding as a critical path
-            problem and knowledge transfer as a delivery continuity control.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL09_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Access delays, unclear ramp expectations, and undocumented senior knowledge create hidden cost. Technology strategy professionals need to know which roles are blocked, what preprovisioning saves, and where knowledge has a single point of failure." approach="The tracker models onboarding timelines, access delays, ramp time, carrying cost, and knowledge transfer coverage. It highlights blocked resources and bus factor risks." why="This connects onboarding to cost, margin, delivery continuity, vendor mobilization, and operational readiness." metric="Time to productive; KT items captured before roll off." tradeoff="Speed of ramp versus the depth of knowledge transfer captured." outcome="The onboarding critical path plus the KT captured before the senior leaves." />
+    >
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {(["onboard", "kt"] as const).map((v) => (
-            <button key={v} onClick={() => setView(v)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${v === view ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{v === "onboard" ? "Onboarding" : "Knowledge transfer"}</button>
+            <button key={v} aria-pressed={v === view} onClick={() => setView(v)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${v === view ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{v === "onboard" ? "Onboarding" : "Knowledge transfer"}</button>
           ))}
         </div>
 
         {view === "onboard" ? (
           <>
             <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-              <KpiCard label="Avg time to productive" value={`${avg} d`} tone={avg > 42 ? "risk" : "watch"} interpretation="Access + ramp" />
+              <KpiCard label="Avg time to productive" value={`${avg} d`} tone={avg > 42 ? "risk" : "watch"} interpretation="35-day ramp + excess access delay" />
               <KpiCard label="Blocked on access" value={`${blocked}/${resources.length}`} tone={blocked > 0 ? "critical" : "healthy"} interpretation="Access > 14 days" />
               <KpiCard label="Ramp carrying cost" value={fmt(current)} tone="watch" interpretation="Cost before productive" />
               <KpiCard label="Compression saves" value={fmt(savings)} tone={savings > 0 ? "healthy" : "neutral"} interpretation="Pre provision access" />
             </div>
 
             <Panel className="mb-4">
-              <div className="mb-3 flex items-center justify-between">
-                <p className="stat-label">30 / 60 / 90 ramp <span className="font-normal text-slatey-500">· access = the longest pole</span></p>
-                <button onClick={() => setPre((v) => !v)} className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition ${pre ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{pre ? "Access pre-provisioned" : "Pre-provision access"}</button>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <p className="stat-label">Time to productive <span className="font-normal text-slatey-500">· one shared day scale</span></p>
+                <button aria-pressed={pre} onClick={() => setPre((v) => !v)} className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition ${pre ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{pre ? "Access pre-provisioned" : "Pre-provision access"}</button>
               </div>
               <div className="space-y-2">
                 {rows.map((r) => (
-                  <div key={r.key} className="grid grid-cols-[8.5rem_1fr_auto] items-center gap-3">
+                  <div key={r.key} className="grid min-w-0 grid-cols-1 items-center gap-2 rounded-lg border border-line p-3 sm:grid-cols-[8.5rem_minmax(0,1fr)_auto]">
                     <div className="min-w-0"><p className="truncate text-xs font-medium text-ink">{r.role}</p><p className="text-[10px] text-slatey-500">{r.loc}</p></div>
                     <div>
                       <div className="flex h-4 w-full overflow-hidden rounded bg-slate-100">
-                        <div className={`${r.blocked ? "bg-rose-500" : "bg-amber-400"} h-full`} style={{ width: `${(r.access / maxDays) * 100}%` }} title={`Access ${r.access}d`} />
+                        <div className={`${r.blocked ? "bg-rose-500" : "bg-amber-400"} h-full`} style={{ width: `${(Math.max(0, r.access - 7) / maxDays) * 100}%` }} title={`Excess access delay ${Math.max(0, r.access - 7)} days`} />
                         <div className="h-full bg-teal-500" style={{ width: `${(RAMP / maxDays) * 100}%` }} title={`Ramp ${RAMP}d`} />
                       </div>
-                      <p className="mt-0.5 text-[10px] text-slatey-500">access {r.access}d + ramp {RAMP}d → productive day {r.days}</p>
+                      <p className="mt-0.5 text-[10px] text-slatey-500">access {r.access}d → {Math.max(0, r.access - 7)}d beyond the 7-day norm + {RAMP}d ramp = productive day {r.days}</p>
                     </div>
-                    <div className="w-24 text-right">{r.blocked ? <Badge tone="rose">blocked</Badge> : <span className="font-mono text-xs text-slatey-400">{r.days}d</span>}</div>
+                    <div className="text-left sm:text-right">{r.blocked ? <Badge tone="rose">blocked</Badge> : <span className="font-mono text-xs text-slatey-400">{r.days}d</span>}</div>
                   </div>
                 ))}
               </div>
               <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-slatey-500">
-                <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-amber-400" /> Access (norm)</span>
-                <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-rose-500" /> Access (blocked)</span>
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-amber-400" /> Excess access delay</span>
+                <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-rose-500" /> Excess delay · blocked</span>
                 <span className="inline-flex items-center gap-1"><span className="h-2 w-3 rounded-sm bg-teal-500" /> Ramp</span>
               </div>
             </Panel>
 
             <InsightCard title="Access is the pole nobody manages" tone={blocked > 0 ? "warn" : "success"}>
               {blocked > 0
-                ? <>Two offshore hires can&apos;t touch the work for three weeks, not because of training, but because credentials aren&apos;t provisioned. Pre provisioning access before day one saves <span className="font-semibold">{fmt(savings)}</span> in ramp carrying cost and pulls productivity forward two weeks.</>
-                : <>With access pre provisioned, ramps start on day one, carrying cost drops to {fmt(current)}. That&apos;s the cheapest margin lever in mobilization.</>}
+                ? <>{blocked} resources exceed the 14-day access threshold. Pre-provisioning caps access at five days and saves <span className="font-semibold">{fmt(savings)}</span> in modeled ramp carrying cost.</>
+                : <>With access inside the seven-day norm, modeled time to productive is 35 days and carrying cost is {fmt(current)}. That&apos;s the cheapest margin lever in mobilization.</>}
             </InsightCard>
           </>
         ) : (
@@ -152,18 +143,18 @@ export function OnboardingTracker() {
                   const spof = bus < 2;
                   return (
                     <div key={a.area} className={`flex items-center gap-3 rounded-lg border p-2.5 ${spof ? "border-rose-200 bg-rose-50/50" : "border-line"}`}>
-                      <div className="min-w-0 flex-1"><p className="text-xs font-medium text-ink">{a.area}</p><p className="text-[10px] text-slatey-500">bus factor {bus}{spof && " · single point of failure"}</p></div>
+                      <div className="min-w-0 flex-1"><p className="text-xs font-medium text-ink">{a.area}</p><p className="text-[10px] text-slatey-500">modeled bus factor {bus}{spof && " · single point of failure"}</p></div>
                       {spof && <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />}
-                      <button onClick={() => setKt((c) => ({ ...c, [a.area]: !c[a.area] }))} className={`rounded-md border px-2 py-1 text-[11px] font-semibold transition ${on ? "border-emerald-500 bg-emerald-500 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{on ? "KT scheduled" : "Schedule KT"}</button>
+                      <button aria-pressed={on} aria-label={`${a.area}: ${on ? "remove" : "schedule"} knowledge transfer`} onClick={() => setKt((c) => ({ ...c, [a.area]: !c[a.area] }))} className={`rounded-md border px-2 py-1 text-[11px] font-semibold transition ${on ? "border-emerald-500 bg-emerald-500 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{on ? "KT scheduled" : "Schedule KT"}</button>
                     </div>
                   );
                 })}
               </div>
             </Panel>
-            <InsightCard title={spofs > 0 ? `${spofs} single points of failure remain` : "No single points of failure"} tone={spofs > 0 ? "danger" : "success"}>
+            <InsightCard title={spofs > 0 ? `${spofs} modeled single points of failure remain` : "Backups planned for every area"} tone={spofs > 0 ? "danger" : "success"}>
               {spofs > 0
                 ? <>{spofs} area{spofs > 1 ? "s" : ""} still live only in one person&apos;s head. Schedule KT with a named backup for each before the last day, knowledge capture is risk mitigation, not a nice-to-have.</>
-                : <>Every area now has a backup. The departure is a transition, not a rupture.</>}
+                : <>Every area has a planned backup in this model. Verify the named recipient can perform the work before closing the transfer.</>}
             </InsightCard>
           </>
         )}
@@ -181,7 +172,7 @@ export function OnboardingTracker() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled onboarding and KT tracker. Real use would require access systems data, role plans, training status, manager validation, KT artifacts, and resource calendars.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }

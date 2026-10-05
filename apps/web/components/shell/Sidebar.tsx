@@ -80,7 +80,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </span>
       </Link>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+      <nav aria-label="Program stages" className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4">
         <Link
           href="/story"
           onClick={onNavigate}
@@ -176,7 +176,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                         {g.items.map((c, i) => {
                           const act = childActive(s.href, c, i);
                           const cls = cn(
-                            "block truncate rounded-md px-2.5 py-1 text-[12.5px] transition-colors",
+                            "block break-words rounded-md px-2.5 py-2 text-[12.5px] leading-snug transition-colors",
                             act ? "bg-sky-400/15 font-medium text-white" : "text-slate-400 hover:bg-white/[0.06] hover:text-slate-200",
                           );
                           // Hash links (Deploy/Realize in-page sections) use a plain anchor so the

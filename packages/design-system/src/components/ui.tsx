@@ -8,7 +8,7 @@ import { formatStampDate, isStale, type Freshness, type LiveMode } from "@labs/k
 
 /* ---------------- Panel ---------------- */
 export function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <section className={cn("panel p-5 animate-fade-in", className)}>{children}</section>;
+  return <section className={cn("panel min-w-0 p-4 sm:p-5", className)}>{children}</section>;
 }
 
 /* ---------------- SectionHeader ---------------- */
@@ -68,8 +68,8 @@ export function EmptyState({ message }: { message: string }) {
 
 /* ---------------- ScoreBar ---------------- */
 export function ScoreBar({
-  value, max = 100, target, mode = "higher-better", className,
-}: { value: number; max?: number; target?: number; mode?: "higher-better" | "lower-better"; className?: string }) {
+  value, max = 100, target, mode = "higher-better", className, label,
+}: { value: number; max?: number; target?: number; mode?: "higher-better" | "lower-better"; className?: string; label?: string }) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
   let color = "bg-emerald-500";
   if (mode === "higher-better") {
@@ -85,9 +85,10 @@ export function ScoreBar({
     else if (value > target) color = "bg-amber-500";
   }
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full", className)} aria-hidden={label ? undefined : true}>
+      {label && <span className="sr-only">{label}: {value} of {max}{target !== undefined ? `; target ${target}` : ""}</span>}
       <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100">
-        <div className={cn("h-full rounded-full transition-all duration-500", color)} style={{ width: `${pct}%` }} />
+        <div className={cn("h-full rounded-full transition-[width] duration-200 motion-reduce:transition-none", color)} style={{ width: `${pct}%` }} />
         {target !== undefined && (
           <div className="absolute top-0 h-full w-px bg-ink/40" style={{ left: `${Math.min(100, (target / max) * 100)}%` }} title={`Target ${target}`} />
         )}
@@ -168,11 +169,11 @@ export function KpiCard({
   spark?: number[]; trend?: KpiTrend;
 }) {
   return (
-    <div className="panel panel-hover relative flex flex-col gap-2 p-4 pt-[18px] animate-fade-in">
+    <div className="panel panel-hover relative flex min-w-0 flex-col gap-2 p-4 pt-[18px]">
       <span className={cn("absolute inset-x-0 top-0 h-1 rounded-t-xl", KPI_ACCENT[tone])} />
       <div className="flex items-center gap-1.5">
         <span className="stat-label">{label}</span>
-        {tooltip && <MetricTooltip text={tooltip} />}
+        {tooltip && <MetricTooltip text={tooltip} label={label} />}
         {spark && <span className="ml-auto"><Sparkline data={spark} tone={tone} /></span>}
       </div>
       <div className="flex items-end gap-1.5">
@@ -198,7 +199,7 @@ export function LabToolbar({ children, className }: { children: React.ReactNode;
 }
 
 export function ToolbarButton({
-  onClick, children, active = false, title, className,
+  onClick, children, active, title, className,
 }: {
   onClick?: () => void; children: React.ReactNode; active?: boolean; title?: string; className?: string;
 }) {
@@ -221,7 +222,7 @@ export function PageIntro({
   eyebrow?: string; title: string; icon?: React.ComponentType<{ className?: string }>; children?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 animate-fade-in">
+    <div className="mb-6">
       {eyebrow && <p className="eyebrow mb-1">{eyebrow}</p>}
       <div className="flex items-center gap-2.5">
         {Icon && (
@@ -273,7 +274,7 @@ export function LiveBadge({ mode, className }: { mode: LiveMode; className?: str
         className,
       )}
     >
-      <Radio className={cn("h-3 w-3", isLive && "animate-pulse")} />
+      <Radio aria-hidden className="h-3 w-3" />
       {mode}
     </span>
   );

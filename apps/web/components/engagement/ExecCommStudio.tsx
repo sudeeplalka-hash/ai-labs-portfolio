@@ -10,11 +10,12 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp } from "@labs/design-system";
 import { EL10_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 import { SCENARIOS, healthIndex, type Scenario } from "./portfolioData";
@@ -183,34 +184,22 @@ export function ExecCommStudio() {
       scenario: `${scenario.label} · ${artifact.label} · for ${audience.label}`,
     });
 
+  const savedState = { scenarioKey, art, aud };
+  const scenarioLink = useScenarioLink({ id: "EL-10", state: savedState, activeId: activeUcId,
+    restore: (s) => { setScenarioKey(s.scenarioKey); setArt(s.art); setAud(s.aud); },
+    validate: (v): v is typeof savedState => validateScenario(v, { scenarioKey: oneOf(SCENARIOS.map((s) => s.key)), art: oneOf(ARTIFACTS.map((a) => a.key)), aud: oneOf(AUDIENCES.map((a) => a.key)) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink">
-            <ArrowLeft className="h-4 w-4" /> Portfolio
-          </Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-10</span>
-        </div>
-      </header>
+    <InstrumentShell title="Executive communication" eyebrow="Operating model & engagement" description="Create a pre-read that makes the decision and the ask explicit for the audience."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-10" }]}
+      decision={<DecisionSummary title={statusHeadline} explanation={`${decisions.length} decision asks and ${highRisks.length} high risks in ${scenario.label}.`} nextAction={`Review the ${artifact.label.toLowerCase()} for ${audience.label}; preserve open risks when downloading.`} tone={red ? "caution" : "neutral"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL10_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Different stakeholders need the same delivery facts framed differently. A CIO may need risk and strategic implication, a sponsor may need adoption and value, and procurement may need commercial and vendor exposure." approach="The studio consumes shared delivery data and generates executive artifacts such as weekly updates, steering pre reads, and QBR outlines, each organized around status, decisions, risks, mitigations, and asks." why="This connects delivery communication to decision speed, sponsor confidence, stakeholder alignment, risk escalation, and executive operating rhythm." metric="Whether a decision is actually asked; audience fit of the framing." tradeoff="A comfortable status update versus forcing an uncomfortable but necessary decision." outcome="The decision to force this week, framed per audience." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Executive Communication Decision Studio</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Executive communication should not only report status. It should clarify what changed, what decision is needed,
-            what risk is being managed, and what action is being requested. Every draft here ends in an <span className="font-semibold text-ink">ask</span>.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL10_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Different stakeholders need the same delivery facts framed differently. A CIO may need risk and strategic implication, a sponsor may need adoption and value, and procurement may need commercial and vendor exposure." approach="The studio consumes shared delivery data and generates executive artifacts such as weekly updates, steering pre reads, and QBR outlines, each organized around status, decisions, risks, mitigations, and asks." why="This connects delivery communication to decision speed, sponsor confidence, stakeholder alignment, risk escalation, and executive operating rhythm." metric="Whether a decision is actually asked; audience fit of the framing." tradeoff="A comfortable status update versus forcing an uncomfortable but necessary decision." outcome="The decision to force this week, framed per audience." />
+    >
 
         {/* Controls */}
         <div className="mb-4 grid gap-3 md:grid-cols-3">
@@ -244,9 +233,11 @@ export function ExecCommStudio() {
           <span>· Burn {scenario.burnVariance >= 0 ? "+" : ""}{scenario.burnVariance}% vs plan</span>
         </div>
 
+        <nav aria-label="Pre-read sections" className="mb-4 flex flex-wrap gap-2">{orderedKeys.map((key) => <a key={key} href={`#exec-${key}`} className="rounded-lg border border-line bg-white px-3 py-2 text-sm text-primary">{SECTION[key].title}</a>)}</nav>
+        <p className="mb-4 text-sm text-slatey-400">Preview below is the content used by the Markdown download. Changing audience changes emphasis and order; open risks remain in the pre-read.</p>
         {/* Generated artifact */}
         <Panel className="p-0">
-          <div className="flex items-start justify-between gap-3 border-b border-line bg-slate-50 px-5 py-3">
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line bg-slate-50 px-5 py-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{artifact.label} · {scenario.label}</p>
               <p className="mt-0.5 text-sm text-slatey-400"><span className="font-medium text-ink">For {audience.label}.</span> {audience.frame}</p>
@@ -257,7 +248,7 @@ export function ExecCommStudio() {
             {orderedKeys.map((k) => {
               const sec = SECTION[k];
               return (
-                <section key={k} className="px-5 py-4">
+                <section key={k} id={`exec-${k}`} className="scroll-mt-24 px-4 py-4 sm:px-5">
                   <h2 className="text-sm font-semibold text-ink">{sec.title}</h2>
                   <p className="mb-2 mt-0.5 text-[11px] italic text-slatey-500">Talk track, {talk[k]}</p>
                   {sec.node}
@@ -289,8 +280,8 @@ export function ExecCommStudio() {
             <span className="font-semibold text-slatey-400">Limitations:</span> this artifact uses modeled portfolio data and generated framing. Real executive communication requires current facts, stakeholder context, political judgment, and review by the accountable delivery lead.
           </p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 
@@ -305,7 +296,7 @@ function Control({ label, children }: { label: string; children: ReactNode }) {
 
 function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button onClick={onClick}
+    <button aria-pressed={on} onClick={onClick}
       className={`rounded-md border px-2.5 py-1 text-xs font-medium transition ${on ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>
       {children}
     </button>

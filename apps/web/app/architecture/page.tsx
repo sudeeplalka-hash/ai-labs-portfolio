@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+import { routeMetadata, BUILD_ID } from "@/lib/site";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ContractLoop, SimulationBoundary } from "@/components/reviewer/Reviewer";
 
-export const metadata: Metadata = { title: "Architecture & Implementation Notes" };
+export const metadata = routeMetadata("Architecture and implementation", "Inspect the static application architecture, lifecycle contracts and explicit simulation boundaries.", "/architecture");
 
 const ARCH = [
   "Next.js 14 App Router, static export (no server runtime)",
@@ -23,6 +23,13 @@ const REAL = [
   "Realize ROI engine: leakage, risk discount, payback, NPV",
 ];
 
+const CONTRACTS = [
+  { name: "Data readiness", from: "Data → Build", href: "/data/corpus", fields: ["approvedSources / blockedSources", "ingestionReadyPercent", "sensitivityRestrictions", "remediationEntries"], effect: "Source decisions constrain retrieval and remain visible in downstream evidence." },
+  { name: "Evaluated build", from: "Build → Deploy / Operate", href: "/build", fields: ["selectedModel / retrievalMode", "evalRunId / datasetVersion", "failedGates / knownFailureModes", "costEstimate / latencyEstimateMs"], effect: "The evaluated configuration carries its failed gates and release recommendation with it." },
+  { name: "Operational evidence", from: "Deploy / Operate → Govern", href: "/operate", fields: ["sloStatus / driftRisk", "versionLineage", "regressionFindings", "rollbackReadiness / incidentSummary"], effect: "Quality and operational signals support a reviewable release decision." },
+  { name: "Governance decision", from: "Govern → Realize", href: "/govern", fields: ["tier / decision", "evidenceUsed / releaseBlockers", "approvalConditions / owner", "nextReviewDate / auditReadiness"], effect: "Open risk and approval conditions remain attached when assessing value." },
+];
+
 export default function Page() {
   return (
     <div className="space-y-8">
@@ -32,7 +39,7 @@ export default function Page() {
         {/* <h2>: the AppShell Header owns this page's <h1>. */}
         <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">Architecture &amp; how it&rsquo;s built</h2>
         <p className="mt-3 max-w-3xl text-base leading-relaxed text-slatey-300">
-          AI Command Center is an enterprise AI program operating system, a portfolio command center that shows enterprise AI
+          The portfolio and its command-center variant share one application that demonstrates enterprise AI
           delivery mechanics without confidential data or cloud infrastructure.
         </p>
       </header>
@@ -43,6 +50,7 @@ export default function Page() {
       </section>
 
       <ContractLoop />
+      <section aria-labelledby="contract-inspector"><h3 id="contract-inspector" className="text-xl font-semibold text-ink">Inspect a handoff contract</h3><p className="mt-2 text-sm text-slatey-400">Open a stage to see the source-backed field names, why the contract matters and where to inspect the producing instrument.</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{CONTRACTS.map((contract) => <details key={contract.name} className="rounded-xl border border-line bg-white p-4"><summary className="cursor-pointer font-semibold text-ink">{contract.name}<span className="mt-1 block text-xs font-normal text-slatey-500">{contract.from}</span></summary><p className="mt-3 text-sm text-slatey-400">{contract.effect}</p><ul className="mt-3 space-y-2 text-xs">{contract.fields.map((field) => <li key={field} className="break-words rounded bg-slate-50 p-2 font-mono text-ink">{field}</li>)}</ul><Link href={contract.href} className="mt-3 inline-block text-sm font-medium text-primary underline">Open the producing instrument</Link></details>)}</div><p className="mt-3 text-xs text-slatey-500">Contracts defined in the shared program-core model. Build identity: {BUILD_ID}. Contract fields describe the data shape; they do not certify production integrations.</p></section>
 
       <section className="rounded-xl border border-line bg-white p-5 shadow-card">
         <p className="eyebrow">What is real logic</p>
@@ -64,7 +72,7 @@ export default function Page() {
             { l: "Governance layer", d: "controls, findings, evidence, decisions" },
             { l: "Business layer", d: "adoption, ROI, leakage, risk adjusted value" },
           ].map((r, i) => (
-            <div key={r.l} className={"flex items-center gap-3 rounded-lg border border-line p-2.5 " + (i === 4 ? "bg-primary/[0.05]" : "bg-slate-50/50")}>
+            <div key={r.l} className={"flex flex-wrap items-center gap-3 rounded-lg border border-line p-2.5 " + (i === 4 ? "bg-primary/[0.05]" : "bg-slate-50/50")}>
               <span className="font-mono text-[11px] text-slatey-500">{String(i + 1).padStart(2, "0")}</span>
               <span className="text-sm font-semibold text-ink">{r.l}</span>
               <span className="text-[12px] text-slatey-400">{r.d}</span>

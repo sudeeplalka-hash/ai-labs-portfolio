@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { ProgramProvider } from "@labs/program-core";
 import { AppShell } from "@/components/shell/AppShell";
+import { StoryJourney } from "@/components/map/StoryJourney";
 import { CURRENT_SITE } from "@/lib/site";
 
 // Site identity comes from the build-time SITE flag (lib/site.ts). On the portfolio
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         <ProgramProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell><StoryJourney />{children}</AppShell>
         </ProgramProvider>
         {/* Vercel Web Analytics: cookieless page-view counts. No-ops (404s the
             script, silently) on non-Vercel hosts and local dev; enable per

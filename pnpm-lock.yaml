@@ -157,6 +157,9 @@ importers:
 
   packages/lab-data:
     dependencies:
+      '@labs/design-system':
+        specifier: workspace:*
+        version: link:../design-system
       '@labs/kit':
         specifier: workspace:*
         version: link:../kit
@@ -268,6 +271,9 @@ importers:
 
   packages/lab-governance:
     dependencies:
+      '@labs/design-system':
+        specifier: workspace:*
+        version: link:../design-system
       clsx:
         specifier: '*'
         version: 2.1.1

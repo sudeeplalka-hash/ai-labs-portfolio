@@ -11,7 +11,7 @@ import { useProgramSource, STORY_MAP, storyNeighbors, type StageKey } from "@lab
 // orientation. Mount it directly under a stage's PageIntro; one header per
 // page, the question asked once.
 export function StageThread({ stage }: { stage: StageKey }) {
-  const { src, hydrated } = useProgramSource();
+  const { src, hydrated, isDemo } = useProgramSource();
   if (!hydrated) return null;
   const beat = STORY_MAP[stage];
   if (!beat) return null;
@@ -19,7 +19,7 @@ export function StageThread({ stage }: { stage: StageKey }) {
 
   return (
     <div className="-mt-3 mb-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 border-b border-line/70 pb-2.5">
-      <p className="min-w-0 text-[12px] leading-relaxed text-slatey-400">{beat.soWhat(src)}</p>
+      <div className="min-w-0"><p className="text-[12px] leading-relaxed text-slatey-400">{beat.soWhat(src)}</p><p className="mt-1 text-xs leading-relaxed text-slatey-500"><span className="font-semibold">{isDemo ? 'Curated sample program' : 'Current browser program'}.</span> {({ frame: 'Opportunity scores are computed from the stated framing assumptions.', data: 'Readiness uses local file checks and the selected rule profile.', build: 'Check the evaluator result for its actual generation mode and evidence.', deploy: 'Capacity, cost and release readiness are modeled from the program inputs.', govern: 'Current-program gates are computed separately from the broader sample registry.', realize: 'Economic outcomes are projections from the stated costs, adoption and quality.', operate: 'The incident series is seeded and deterministic; it is not live telemetry.' })[stage]}</p></div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-slatey-400">
         {prev ? (
           <Link href={prev.href} className="inline-flex items-center gap-1 hover:text-primary">

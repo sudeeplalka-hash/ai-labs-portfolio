@@ -4,6 +4,7 @@
   "private": true,
   "description": "Data lab, assess the fuel: profile sources, clear sensitive data, preview chunking, and score readiness. Consumed by apps/web via the @data alias.",
   "dependencies": {
+    "@labs/design-system": "workspace:*",
     "@labs/kit": "workspace:*",
     "@labs/program-core": "workspace:*"
   },

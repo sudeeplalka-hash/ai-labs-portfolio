@@ -8,11 +8,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL06_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Path = "none" | "build" | "hire" | "partner";
@@ -57,42 +58,32 @@ export function TalentPlanner() {
 
   const preset = (p: Exclude<Path, "none">) => setPaths(Object.fromEntries(gaps.map((r) => [r.key, p])));
 
+  const savedState = { paths };
+  const scenarioLink = useScenarioLink({ id: "EL-06", state: savedState, activeId: activeUcId,
+    restore: (s) => { setPaths(s.paths); },
+    validate: (v): v is typeof savedState => validateScenario(v, { paths: (v) => recordOf(v, ["none","build","hire","partner"]) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-06</span>
-        </div>
-      </header>
+    <InstrumentShell title="Talent and capability pathway" eyebrow="Operating model & engagement" description="Choose how to close each capability gap and inspect the modeled readiness timeline."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-06" }]}
+      decision={<DecisionSummary title={openGaps ? `${openGaps} gaps have no pathway` : `Modeled team readiness in ${teamMonths} months`} explanation={`Current coverage ${readyNow}%; modeled coverage after selected pathways ${readyAfter}%. Outcomes are projected, not achieved.`} nextAction="Choose build, hire or partner per capability; review the latest completion date against the pace of change." tone={openGaps ? "caution" : "positive"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL06_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Agentic and enterprise AI work requires new combinations of context engineering, orchestration, evaluation, LLMOps, governance, and domain translation. Training alone does not close every gap, and some gaps require hiring or partnership." approach="The planner assesses current and target capability coverage, exposes gaps, and models build, hire, or partner pathways with time to ready implications." why="This connects AI strategy to workforce planning, capability maturity, delivery risk, budget, and operating model change." metric="Skill gap per role; time to productive per pathway." tradeoff="Building is slow but sticky; hiring is fast but costly; partnering is quick but external." outcome="The build/hire/partner pathway per role, with time to productive." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Talent and Upskilling Pathway Planner</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? activeUc.oneLiner : "AI platforms can evolve faster than enterprise teams. This artifact compares current capability coverage against target needs and maps the pathway to readiness."} Build is cheap but slow, hire is
-            permanent but pricey, and partner is fast but rented.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL06_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Agentic and enterprise AI work requires new combinations of context engineering, orchestration, evaluation, LLMOps, governance, and domain translation. Training alone does not close every gap, and some gaps require hiring or partnership." approach="The planner assesses current and target capability coverage, exposes gaps, and models build, hire, or partner pathways with time to ready implications." why="This connects AI strategy to workforce planning, capability maturity, delivery risk, budget, and operating model change." metric="Skill gap per role; time to productive per pathway." tradeoff="Building is slow but sticky; hiring is fast but costly; partnering is quick but external." outcome="The build/hire/partner pathway per role, with time to productive." />
+    >
 
         <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-          <KpiCard label="Readiness now" value={`${readyNow}%`} tone={readyNow >= 70 ? "watch" : "risk"} interpretation="Avg coverage vs target" />
-          <KpiCard label="Readiness after plan" value={`${readyAfter}%`} tone="healthy" interpretation="If gaps closed" />
+          <KpiCard label="Readiness now" value={`${readyNow}%`} tone={readyNow >= 70 ? "watch" : "risk"} interpretation="Average current capability score" />
+          <KpiCard label="Readiness after plan" value={`${readyAfter}%`} tone="healthy" interpretation="After selected pathways" />
           <KpiCard label="Open gaps" value={`${openGaps}/${gaps.length}`} tone={openGaps > 0 ? "critical" : "healthy"} interpretation="No pathway chosen" />
           <KpiCard label="Time to ready" value={teamMonths !== null ? `${teamMonths} mo` : "N/A"} tone={teamMonths !== null && teamMonths > stackMonths ? "risk" : "watch"} interpretation={`Stack moved in ${stackMonths} mo`} />
         </div>
 
         <Panel>
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <p className="stat-label">Capability gap <span className="font-normal text-slatey-500">· current → target</span></p>
             <div className="flex gap-1">
               {(["build", "hire", "partner"] as const).map((p) => (
@@ -102,7 +93,7 @@ export function TalentPlanner() {
           </div>
           <div className="space-y-3">
             {rows.map((r) => (
-              <div key={r.key} className="grid grid-cols-[11rem_1fr_auto] items-center gap-3">
+              <div key={r.key} className="grid min-w-0 grid-cols-1 items-center gap-2 rounded-lg border border-line p-3 sm:grid-cols-[11rem_minmax(0,1fr)_auto]">
                 <span className="text-xs font-medium text-ink">{r.label}</span>
                 <div>
                   <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100">
@@ -111,12 +102,12 @@ export function TalentPlanner() {
                   </div>
                   <p className="mt-0.5 text-[10px] text-slatey-500">{r.current} → {r.target}{r.gap > 0 ? ` · gap ${r.gap}` : " · met"}</p>
                 </div>
-                <div className="w-44 text-right">
+                <div className="min-w-0 text-left sm:text-right">
                   {r.gap > 0 ? (
                     <div className="inline-flex items-center gap-1">
                       {(["build", "hire", "partner"] as const).map((p) => (
-                        <button key={p} onClick={() => setPaths((c) => ({ ...c, [r.key]: c[r.key] === p ? "none" : p }))}
-                          className={`rounded border px-1.5 py-0.5 text-[10px] font-medium transition ${r.p === p ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{PATH_LABEL[p]}</button>
+                        <button key={p} aria-pressed={r.p === p} aria-label={`${r.label}: ${PATH_LABEL[p]}, ${PATH_MO[p]} months`} onClick={() => setPaths((c) => ({ ...c, [r.key]: c[r.key] === p ? "none" : p }))}
+                          className={`min-h-10 rounded border px-2 py-1 text-xs font-medium transition ${r.p === p ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{PATH_LABEL[p]}</button>
                       ))}
                       {r.p !== "none" && <span className="ml-1 font-mono text-[10px] text-slatey-500">{r.mo}mo</span>}
                     </div>
@@ -133,7 +124,8 @@ export function TalentPlanner() {
           <p className="stat-label mb-2">The stack moves faster than the team</p>
           <div className="space-y-2 text-xs">
             <TimeBar label={stackLabel} months={stackMonths} max={26} color="bg-primary" />
-            <TimeBar label="Team ready (this plan)" months={teamMonths ?? 24} max={26} color={teamMonths !== null && teamMonths <= stackMonths ? "bg-emerald-500" : "bg-rose-500"} note={teamMonths === null ? "close every gap to compute" : undefined} />
+            {teamMonths !== null ? <TimeBar label="Team ready (this plan)" months={teamMonths} max={Math.max(26, stackMonths)} color={teamMonths <= stackMonths ? "bg-emerald-500" : "bg-rose-500"} /> : <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900">Choose a pathway for all {openGaps} open gaps to calculate team readiness. No completion date is assumed.</p>}
+            {gaps.filter((row) => row.p !== "none").map((row) => <TimeBar key={row.key} label={`${row.label} · ${row.p}`} months={row.mo} max={Math.max(26, stackMonths)} color="bg-teal-500" />)}
           </div>
         </Panel>
 
@@ -158,17 +150,17 @@ export function TalentPlanner() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled capability planner. Real workforce planning would require role inventory, skills assessment, hiring market data, vendor strategy, budget, and manager validation.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 
 function TimeBar({ label, months, max, color, note }: { label: string; months: number; max: number; color: string; note?: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="w-40 shrink-0 text-slatey-400">{label}</span>
+    <div className="grid min-w-0 grid-cols-1 items-center gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_4rem]">
+      <span className="text-slatey-400">{label}</span>
       <div className="h-3 flex-1 overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(100, (months / max) * 100)}%` }} /></div>
-      <span className="w-24 text-right font-mono text-[11px] text-slatey-500">{note ?? `${months} mo`}</span>
+      <span className="text-right font-mono text-[11px] text-slatey-500">{note ?? `${months} mo`}</span>
     </div>
   );
 }

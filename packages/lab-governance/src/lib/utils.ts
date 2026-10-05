@@ -35,6 +35,16 @@ export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
+/** Reporting windows are calendar dates in UTC, unlike local event timestamps. */
+export function formatReportingDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+
+/** API confidence is a fraction; all result and audit views use this scale. */
+export function confidencePercent(fraction: number) {
+  return `${Math.round(fraction * 100)}%`;
+}
+
 export function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }

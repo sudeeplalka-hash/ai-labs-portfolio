@@ -16,8 +16,8 @@ export const ROLES: { id: Role; label: string; blurb: string }[] = [
 ];
 
 const PERMISSIONS: Record<Role, string[]> = {
-  admin: ['playground:run', 'usecase:create', 'review:act', 'audit:verify', 'evidence:generate'],
-  analyst: ['playground:run', 'usecase:create'],
+  admin: ['playground:run', 'usecase:create', 'usecase:rescore', 'policy:toggle', 'review:act', 'audit:verify', 'evidence:generate'],
+  analyst: ['playground:run', 'usecase:create', 'usecase:rescore'],
   reviewer: ['review:act', 'playground:run'],
   auditor: ['audit:verify', 'evidence:generate'],
 };
@@ -28,12 +28,13 @@ const listeners = new Set<() => void>();
 
 function readRole(): Role {
   if (typeof window === 'undefined') return current;
-  return (localStorage.getItem(KEY) as Role) || current;
+  try { const saved = localStorage.getItem(KEY); return ROLES.some((role) => role.id === saved) ? saved as Role : current; }
+  catch { return current; }
 }
 
 export function setRole(r: Role): void {
   current = r;
-  if (typeof window !== 'undefined') localStorage.setItem(KEY, r);
+  if (typeof window !== 'undefined') { try { localStorage.setItem(KEY, r); } catch { /* Session-only role remains usable when persistence is unavailable. */ } }
   listeners.forEach((l) => l());
 }
 

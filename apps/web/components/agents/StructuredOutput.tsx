@@ -4,12 +4,13 @@
 // Messy text → schema-validated JSON. A hard sample fails validation (wrong type /
 // missing required), triggers a corrective retry, and passes, the trace is the
 // point. Where outputs feed a system of record, the validation gate is not optional.
-// LIVE ready (host endpoint → real model); ships deterministic + honestly badged.
+// Authored illustrative outputs only; no model endpoint is called.
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ShieldCheck, XCircle, CheckCircle2, Database } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, usePlayback, useInViewport, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { ExplanationControls, EvidenceTable, CodeEvidence } from "./AgentExperience";
 import { GAP04_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
@@ -79,46 +80,35 @@ export function StructuredOutput() {
     : SAMPLES.find((x) => x.key === key)!;
   const [text, setText] = useState(s.raw);
   const [ran, setRan] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const stageVisible = useInViewport(stageRef, "0px");
+  const playback = usePlayback({ steps: s.hard ? 3 : 1, intervalMs: 1700, initiallyComplete: false, visible: stageVisible });
+  const changedFields = s.attempt1 ? Object.keys(s.final).filter((field) => JSON.stringify((s.attempt1 as Record<string, unknown>)[field]) !== JSON.stringify((s.final as Record<string, unknown>)[field])) : [];
+  const [selectedField, setSelectedField] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
 
-  const onSample = (k: string) => { setKey(k); setActiveUcId(null); setText(SAMPLES.find((x) => x.key === k)!.raw); setRan(false); };
+  const onSample = (k: string) => { setKey(k); setActiveUcId(null); setText(SAMPLES.find((x) => x.key === k)!.raw); setRan(false); playback.reset(); setSelectedField(null); setNotice(""); };
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? GAP04_USE_CASES.find((u) => u.id === id) : null;
     setText(uc ? uc.payload.raw : SAMPLES[0].raw);
-    setRan(false);
+    if (!uc) setKey(SAMPLES[0].key);
+    setRan(false); playback.reset(); setSelectedField(null); setNotice("");
   };
   const edited = text.trim() !== s.raw.trim();
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">GAP-04</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Structured Output Reliability Gate</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02", note: "Authored illustrative extraction" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Getting JSON from a model is not the same as producing system ready output. This artifact shows the
-            validation gate required when model output flows into systems of record, workflow engines, or operational decisions.
-          </p>
-        </div>
-
+    <InstrumentShell title="Structured Output Reliability Gate" eyebrow="GAP-04 · Agent architecture" description="Follow one authored output from a schema failure to a corrected field."
+      breadcrumbs={[{ label: "Portfolio", href: "/" }, { label: "Agent architecture", href: "/#collections" }, { label: "Structured Output Reliability Gate" }]}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Default illustrative scenario"} method="Authored extraction; no live model or record write" note="Illustrative results support review; they do not establish a production outcome." />}>
+        <DecisionSummary title={s.hard ? "A failed field must be repaired before the gate opens" : "This authored output passes the supplied schema"} explanation="Inspect the exact fields and validation errors. Editing source text does not run a model, and no record is written." metrics={[{ label: "Schema fields", value: s.schema.length }, { label: "Changed fields in retry", value: changedFields.length }, { label: "Source state", value: edited ? "Custom draft · not extracted" : "Supplied example" }]} />
         <UseCaseRail useCases={GAP04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
         <CaseStudy problem="Enterprise systems cannot absorb malformed writes because a model response looked plausible. Structured output requires schema validation, error handling, corrective retry, and a clear decision about when to stop automation and escalate." approach="The artifact runs representative tasks through a schema validation workflow. It shows where raw model output fails, how a corrective retry repairs it, and what tradeoff the retry introduces." why="This connects model behavior to operational reliability, auditability, downstream system integrity, and the cost of failed automation." metric="Schema valid rate at the gate; repair success rate; escapes downstream." tradeoff="A strict gate adds retries and latency; a loose one lets bad data write to systems of record." outcome="A clear answer on where to place the validation gate and how strict to make it." />
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           {!activeUc && SAMPLES.map((x) => (
-            <button key={x.key} onClick={() => onSample(x.key)}
+            <button key={x.key} aria-pressed={x.key === key} onClick={() => onSample(x.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${x.key === key ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{x.label}{x.hard && " ⚠"}</button>
           ))}
         </div>
@@ -128,18 +118,18 @@ export function StructuredOutput() {
           <div className="space-y-4">
             <Panel>
               <p className="stat-label mb-2">Raw input</p>
-              <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} className="w-full rounded-lg border border-line bg-white p-2.5 text-xs text-slatey-300 outline-none focus:border-teal-500/50" />
+              <textarea aria-label="Source text for authored extraction example" value={text} onChange={(e) => { setText(e.target.value); setRan(false); playback.pause(); }} rows={5} className="w-full rounded-lg border border-line bg-white p-2.5 text-xs text-slatey-300 outline-none focus:border-teal-500/50" />
               <div className="mt-2 flex items-center gap-3">
-                <button onClick={() => setRan(true)} className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700">Extract <ArrowRight className="h-3.5 w-3.5" /></button>
-                {edited && <span className="text-[11px] text-slatey-500">Extractions are authored per sample; custom text would need a live model (roadmap).</span>}
-              </div>
+                <button onClick={() => { if (edited) { setNotice("This viewer cannot extract custom text. Your draft is kept; restore the supplied example to inspect its authored result."); return; } setNotice(""); setRan(true); playback.replay(); }} className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700">Inspect example <ArrowRight className="h-3.5 w-3.5" /></button>
+                {edited && <button type="button" className="min-h-11 rounded border border-line px-3 text-xs font-semibold" onClick={() => { setText(s.raw); setRan(false); playback.reset(); setNotice(""); }}>Restore example text</button>}
+              </div><p role="status" className="mt-2 text-sm text-amber-800">{notice}</p>
             </Panel>
             <Panel>
               <p className="stat-label mb-2">Target schema</p>
               <ul className="space-y-1 font-mono text-[11px]">
                 {s.schema.map((f) => (
                   <li key={f.name} className="flex items-center justify-between gap-2 border-b border-line pb-1 last:border-0">
-                    <span className="text-ink">{f.name}</span>
+                    <button type="button" aria-pressed={selectedField === f.name} className={`min-h-11 rounded px-2 text-left font-semibold ${selectedField === f.name ? "bg-primary text-white" : "text-ink"}`} onClick={() => { playback.pause(); setSelectedField(f.name); }}>{f.name}</button>
                     <span className="text-slatey-500">{f.type}{f.required && <span className="ml-1 text-rose-500">*</span>}</span>
                   </li>
                 ))}
@@ -149,19 +139,21 @@ export function StructuredOutput() {
           </div>
 
           {/* Trace */}
-          <div className="space-y-3">
+          <div className="space-y-3" ref={stageRef}>
+            {ran && <ExplanationControls playback={playback} count={s.hard ? 3 : 1} label="Authored schema validation" />}
+            {selectedField && <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm"><p className="font-semibold">Field: {selectedField}</p><p>First attempt: {JSON.stringify((s.attempt1 as Record<string, unknown> | undefined)?.[selectedField]) ?? "not supplied separately"}</p><p>Accepted example: {JSON.stringify((s.final as Record<string, unknown>)[selectedField]) ?? "absent"}</p></div>}
             {!ran ? (
-              <Panel><p className="text-sm text-slatey-500">Press Extract to run the sample through the schema gate.</p></Panel>
+              <Panel><p className="text-sm text-slatey-500">Select Inspect example to inspect the supplied extraction. Custom drafts are never presented as extracted output.</p></Panel>
             ) : (
               <>
                 {s.hard && s.attempt1 && (
                   <>
-                    <AttemptCard n={1} valid={false} json={s.attempt1} errors={s.errors} />
-                    <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800"><span className="font-semibold">Corrective retry:</span> {s.retryNote}</div>
-                    <AttemptCard n={2} valid json={s.final} />
+                    {playback.index >= 1 && <AttemptCard n={1} valid={false} json={s.attempt1} errors={s.errors} />}
+                    {playback.index >= 2 && <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"><span className="font-semibold">Corrective retry:</span> {s.retryNote}</div>}
+                    {playback.index >= 3 && <AttemptCard n={2} valid json={s.final} />}
                   </>
                 )}
-                {!s.hard && <AttemptCard n={1} valid json={s.final} />}
+                {!s.hard && playback.index >= 1 && <AttemptCard n={1} valid json={s.final} />}
               </>
             )}
 
@@ -179,6 +171,7 @@ export function StructuredOutput() {
           </div>
         </div>
 
+        <details className="mt-4 rounded-xl border border-line bg-white p-4"><summary className="cursor-pointer font-semibold">Read the complete supplied field comparison</summary><EvidenceTable caption="Authored extraction values — not an extraction of edited text" headers={["Field", "First attempt", "Accepted example", "Change"]} rows={s.schema.map((field) => [field.name, JSON.stringify((s.attempt1 as Record<string, unknown> | undefined)?.[field.name]) ?? "No separate attempt", JSON.stringify((s.final as Record<string, unknown>)[field.name]) ?? "Absent", changedFields.includes(field.name) ? "Repaired" : "Unchanged / first pass"]) } /></details>
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Place a validation gate before any model output writes to a system of record." lift="Raises system ready output reliability through schema enforcement and corrective retry." measure="Validation pass rate, retry rate, failed write prevention, latency added, escalation rate." />
           <InsightCard title="The retry is the reliability" tone="info">
@@ -197,8 +190,7 @@ export function StructuredOutput() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this model demonstrates validation behavior with authored tasks. Production use would require real schema contracts, logging, retry policies, exception handling, and system integration.</p>
         </div>
-      </main>
-    </div>
+    </InstrumentShell>
   );
 }
 
@@ -209,7 +201,7 @@ function AttemptCard({ n, valid, json, errors }: { n: number; valid: boolean; js
         {valid ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <XCircle className="h-4 w-4 text-rose-600" />}
         <p className={`text-xs font-semibold ${valid ? "text-emerald-700" : "text-rose-700"}`}>Attempt {n} · {valid ? "valid, passes the gate" : "invalid, blocked"}</p>
       </div>
-      <pre className="overflow-x-auto rounded-lg border border-line bg-ink p-3 font-mono text-[11px] leading-relaxed text-slate-100">{JSON.stringify(json, null, 2)}</pre>
+      <CodeEvidence title={`Attempt ${n} JSON`} value={json} />
       {errors && errors.length > 0 && (
         <ul className="mt-2 space-y-0.5 text-[11px] text-rose-700">
           {errors.map((e, i) => <li key={i} className="flex gap-1.5"><span>✕</span><span className="font-mono">{e}</span></li>)}

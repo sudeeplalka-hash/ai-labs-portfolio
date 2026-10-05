@@ -148,6 +148,9 @@ export interface EvalRun {
 }
 
 export interface EvidenceReport {
+  source_mode?: string;
+  source_case_ids?: string[];
+  coverage_note?: string;
   id: string;
   title: string;
   period_start: string;

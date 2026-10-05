@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL07_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { EvidenceTable, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -73,6 +74,7 @@ const RFPS: Rfp[] = [
 ];
 
 export function RfpWarRoom() {
+  const [selectedReq, setSelectedReq] = useState(0);
   const [rfpKey, setRfpKey] = useState(RFPS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL07_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
@@ -125,37 +127,28 @@ export function RfpWarRoom() {
   const onGenerate = () =>
     downloadMarkdown(`bid-memo-${rfp.key}`, buildBidMemo(), { scenario: rfp.label });
 
+  const selectedRequirement = rfp.requirements[Math.min(selectedReq, rfp.requirements.length - 1)];
+  const savedState = { rfpKey, selectedReq };
+  const scenarioLink = useScenarioLink({ id: "EL-07", state: savedState, activeId: activeUcId,
+    restore: (s) => { setRfpKey(s.rfpKey); setSelectedReq(s.selectedReq); },
+    validate: (v): v is typeof savedState => validateScenario(v, { rfpKey: oneOf(RFPS.map((r) => r.key)), selectedReq: (v) => Number.isInteger(v) && bounded(0,100)(v) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-07</span>
-        </div>
-      </header>
+    <InstrumentShell title="RFP and bid decision" eyebrow="Operating model & engagement" description="Connect evidence coverage to the pursuit economics before committing a bid."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-07" }]}
+      decision={<DecisionSummary title={bid ? "Bid — subject to evidence closure" : "No bid at these assumptions"} explanation={`Pursuit score ${portfolio}/100; margin ${rfp.marginPct}% versus ${rfp.marginFloor}% floor. Requirements coverage ${coverage}%.`} nextAction={bid ? "Inspect partial or missing requirement evidence before submitting a response." : "Revisit fit, capacity or margin before committing delivery effort."} tone={bid ? "positive" : "caution"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL07_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Pursuing weak fit work consumes senior capacity, compresses delivery teams, and creates margin pressure. A disciplined bid decision weighs fit, win probability, capacity, margin, requirement coverage, and the quality of the story." approach="The war room decomposes an RFP into a compliance matrix, evaluates response strength, applies bid criteria, and produces a bid or no bid memo." why="This connects commercial strategy to delivery capacity, margin protection, proposal quality, and opportunity selection." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no bid call plus where to strengthen the response if you bid." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">RFP and Bid Decision War Room</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A strong pursuit discipline is not measured only by the opportunities a team chases. It is also measured by
-            the opportunities it declines. This artifact turns RFP response work into a structured bid or no bid decision.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL07_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Pursuing weak fit work consumes senior capacity, compresses delivery teams, and creates margin pressure. A disciplined bid decision weighs fit, win probability, capacity, margin, requirement coverage, and the quality of the story." approach="The war room decomposes an RFP into a compliance matrix, evaluates response strength, applies bid criteria, and produces a bid or no bid memo." why="This connects commercial strategy to delivery capacity, margin protection, proposal quality, and opportunity selection." metric="The composite bid score; the weakest response section." tradeoff="Chasing a marginal bid versus keeping capacity for a better one." outcome="A bid/no bid call plus where to strengthen the response if you bid." />
+    >
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
             {RFPS.map((r) => (
-              <button key={r.key} onClick={() => setRfpKey(r.key)}
+              <button key={r.key} aria-pressed={r.key === rfpKey} onClick={() => setRfpKey(r.key)}
                 className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${r.key === rfpKey ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{r.label}</button>
             ))}
           </div>
@@ -169,7 +162,9 @@ export function RfpWarRoom() {
           </div>
         </Panel>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <Panel className="mb-4"><div className="flex flex-wrap items-center justify-between gap-3"><h2 className="text-base font-semibold text-ink">Evidence to close before the bid</h2><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => { const next = rfp.requirements.findIndex((r, i) => i > selectedReq && r.status !== "met"); setSelectedReq(next >= 0 ? next : Math.max(0, rfp.requirements.findIndex((r) => r.status !== "met"))); }}>Next evidence gap</button></div><p className="mt-3 font-medium text-ink">{selectedRequirement.text}</p><dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3"><div><dt className="text-slatey-500">Accountable owner</dt><dd>{selectedRequirement.owner}</dd></div><div><dt className="text-slatey-500">Available evidence</dt><dd>{selectedRequirement.evidence}</dd></div><div><dt className="text-slatey-500">Authored evidence status</dt><dd>{selectedRequirement.status}</dd></div></dl><p className="mt-3 text-xs text-slatey-500">{selectedRequirement.status === "met" ? "Confirm the evidence is current and approved for this pursuit." : "Ask the named owner to close the missing evidence before treating this requirement as covered."}</p></Panel>
+
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           {/* Compliance matrix */}
           <Panel className="overflow-x-auto">
             <p className="stat-label mb-2">Compliance matrix <span className="font-normal text-slatey-500">· {coverage}% covered</span></p>
@@ -178,7 +173,7 @@ export function RfpWarRoom() {
               <tbody>
                 {rfp.requirements.map((r, i) => (
                   <tr key={i}>
-                    <td className="font-medium text-ink">{r.text}</td>
+                    <th scope="row" className="text-left font-medium text-ink"><button aria-pressed={selectedReq === i} className="rounded px-1 py-2 text-left text-primary underline" onClick={() => setSelectedReq(i)}>{r.text}</button></th>
                     <td>{r.owner}</td>
                     <td className="text-slatey-400">{r.evidence}</td>
                     <td><Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge></td>
@@ -189,7 +184,7 @@ export function RfpWarRoom() {
           </Panel>
 
           {/* Bid/no bid */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Panel>
               <div className="flex items-center justify-between">
                 <p className="stat-label">Bid / no bid</p>
@@ -247,8 +242,8 @@ export function RfpWarRoom() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled pursuit artifact. Real bid decisions would require client context, competitive intelligence, delivery estimates, pricing review, legal input, and executive judgment.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 

@@ -7,16 +7,17 @@
 // rejected at the contract boundary. MCP is just a disciplined contract; this
 // reads the wire. SIMULATED (frames are constructed deterministically).
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Wrench, FileText, MessageSquare, Share2, RotateCcw, Eye, X } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, copyToClipboard, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, usePlayback, useInViewport, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, copyToClipboard, type ExportAction, type Command } from "@labs/design-system";
 import { GAP01_USE_CASES, LABS } from "@labs/kit";
 import { diffManifests, validateToolDef, manifestWithTool, lifecycleFrames, traceToJson } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { CaseStudy } from "../reviewer/CaseStudy";
+import { ExplanationControls, CodeEvidence, EvidenceTable } from "./AgentExperience";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type ArgType = "string" | "number" | "enum";
@@ -74,7 +75,7 @@ export function McpPlayground() {
   useUseCaseDeepLink(GAP01_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const sys: System = activeUc
     ? { key: activeUc.id, label: activeUc.payload.label, blurb: activeUc.payload.blurb, tools: activeUc.payload.tools, resources: activeUc.payload.resources, prompts: activeUc.payload.prompts }
-    : SYSTEMS.find((s) => s.key === sysKey)!;
+    : (SYSTEMS.find((s) => s.key === sysKey) ?? SYSTEMS[0]);
   const [tab, setTab] = useState<"tools" | "resources" | "prompts">("tools");
   const [customTools, setCustomTools] = useState<Tool[]>([]);
   const allTools = customTools.length ? [...sys.tools, ...customTools] : sys.tools;
@@ -90,6 +91,11 @@ export function McpPlayground() {
   const [malformed, setMalformed] = useState(false);
   const [history, setHistory] = useState<Call[]>([]);
   const [viewCallId, setViewCallId] = useState<number | null>(null);
+  const stageRef = useRef<HTMLElement>(null);
+  const stageVisible = useInViewport(stageRef, "0px");
+  const wire = usePlayback({ steps: 3, intervalMs: 1400, initiallyComplete: false, visible: stageVisible });
+  const selectedCall = history.find((call) => call.id === viewCallId) ?? history[0];
+  const responseError = selectedCall?.frames.find((frame) => frame.error)?.body as { error?: { message?: string; data?: { param?: string } } } | undefined;
 
   // systems × consumers crossover
   const [nSys, setNSys] = useState(8);
@@ -123,21 +129,23 @@ export function McpPlayground() {
     const args: Record<string, string | number> = {};
     for (const a of tool.args) args[a.name] = a.type === "number" ? Number(argVals[a.name]) : argVals[a.name];
 
-    // malformed injection: break the first numeric field's type
+    // Inject one typed boundary failure, including tools with no numeric argument.
     const numArg = tool.args.find((a) => a.type === "number");
-    if (malformed && numArg) args[numArg.name] = `${argVals[numArg.name] || "50"}-GBP` as unknown as string;
+    const injectedArg = malformed ? (numArg ?? tool.args[0]) : undefined;
+    if (injectedArg) args[injectedArg.name] = injectedArg.type === "number" ? `${argVals[injectedArg.name] || "50"}-GBP` : 42;
 
     const request = { jsonrpc: "2.0", id, method: "tools/call", params: { name: tool.name, arguments: args } };
 
     // validate
     const missing = tool.args.find((a) => a.required && !String(argVals[a.name] ?? "").trim());
-    const badNum = malformed && numArg ? numArg : tool.args.find((a) => a.type === "number" && argVals[a.name] !== "" && Number.isNaN(Number(argVals[a.name])));
+    const badNum = malformed && numArg ? numArg : tool.args.find((a) => a.type === "number" && argVals[a.name] !== "" && !Number.isFinite(Number(argVals[a.name])));
+    const badEnum = tool.args.find((a) => a.type === "enum" && a.enumVals?.length && !a.enumVals.includes(argVals[a.name]));
 
     const reqFrame: Frame = { dir: "req", body: request, note: "The client asks the server to run one named tool with typed arguments, nothing else is on the wire." };
     let frames: Frame[]; let isError: boolean;
-    if (missing || badNum) {
-      const field = missing?.name ?? badNum!.name;
-      const message = missing ? `Missing required parameter: ${field}` : `Invalid type for parameter '${field}': expected number`;
+    if (missing || badNum || badEnum || injectedArg) {
+      const field = missing?.name ?? badNum?.name ?? badEnum?.name ?? injectedArg!.name;
+      const message = missing ? `Missing required parameter: ${field}` : badEnum ? `Invalid value for '${field}': choose ${badEnum.enumVals!.join(", ")}` : badNum ? `Invalid type for parameter '${field}': expected a finite number` : `Invalid type for parameter '${field}': expected ${injectedArg!.type}`;
       const error = { jsonrpc: "2.0", id, error: { code: -32602, message, data: { param: field } } };
       frames = [reqFrame, { dir: "res", body: error, note: "Bad arguments are rejected at the contract boundary with a typed JSON RPC error (-32602), not a 500, not a hallucinated answer.", error: true }];
       isError = true;
@@ -147,10 +155,10 @@ export function McpPlayground() {
       isError = false;
     }
     // Byte size is real (serialized frames); latency is a deterministic pseudo-figure, labeled as illustrative in the log.
-    const bytes = frames.reduce((n, f) => n + JSON.stringify(f.body).length, 0);
+    const bytes = frames.reduce((n, f) => n + new TextEncoder().encode(JSON.stringify(f.body)).length, 0);
     const ms = 38 + tool.name.length * 3 + Object.keys(argVals).length * 7;
     setHistory((h) => [{ id, tool: tool.name, sysLabel: sys.label, frames, error: isError, ms, bytes }, ...h]);
-    setViewCallId(id);
+    setViewCallId(id); wire.complete();
   };
 
   const addTool = () => {
@@ -171,24 +179,38 @@ export function McpPlayground() {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
     try {
-      const cfg = JSON.parse(atob(raw)) as { sys?: string; tool?: string; args?: Record<string, string>; nSys?: number; nCon?: number; tab?: "tools" | "resources" | "prompts"; ann?: boolean; mal?: boolean };
-      if (cfg.sys) setSysKey(cfg.sys);
+      const decoded = new TextDecoder().decode(Uint8Array.from(atob(raw), (character) => character.charCodeAt(0)));
+      const cfg = JSON.parse(decoded) as { sys?: string; uc?: string; tool?: string; args?: Record<string, string>; custom?: { name: string; description: string; args: Arg[] }[]; nSys?: number; nCon?: number; tab?: "tools" | "resources" | "prompts"; ann?: boolean; mal?: boolean };
+      const sharedUseCase = cfg.uc ? GAP01_USE_CASES.find((item) => item.id === cfg.uc) : undefined;
+      const sharedSystem = SYSTEMS.find((item) => item.key === cfg.sys) ?? SYSTEMS[0];
+      setActiveUcId(sharedUseCase?.id ?? null);
+      const restored: Tool[] = [];
+      for (const candidate of Array.isArray(cfg.custom) ? cfg.custom : []) {
+        const checked = validateToolDef(candidate, [...(sharedUseCase?.payload.tools ?? sharedSystem.tools).map((item) => item.name), ...restored.map((item) => item.name)]);
+        if (!checked.ok || !checked.def) throw new Error("Invalid shared custom tool");
+        const definition = checked.def;
+        restored.push({ name: definition.name, description: definition.description, args: definition.args as Arg[], result: (args) => ({ ok: true, tool: definition.name, arguments: args, note: "custom tool — deterministic echo of your typed arguments" }) });
+      }
+      setCustomTools(restored);
+      if (cfg.sys && SYSTEMS.some((system) => system.key === cfg.sys)) setSysKey(cfg.sys);
       if (cfg.tool) setToolName(cfg.tool);
-      if (cfg.args) setArgVals(cfg.args);
-      if (typeof cfg.nSys === "number") setNSys(cfg.nSys);
-      if (typeof cfg.nCon === "number") setNCon(cfg.nCon);
-      if (cfg.tab) setTab(cfg.tab);
+      if (cfg.args && typeof cfg.args === "object" && Object.values(cfg.args).every((value) => typeof value === "string")) setArgVals(cfg.args);
+      if (typeof cfg.nSys === "number" && Number.isFinite(cfg.nSys)) setNSys(Math.max(1, Math.min(30, cfg.nSys)));
+      if (typeof cfg.nCon === "number" && Number.isFinite(cfg.nCon)) setNCon(Math.max(1, Math.min(30, cfg.nCon)));
+      if (cfg.tab && ["tools", "resources", "prompts"].includes(cfg.tab)) setTab(cfg.tab);
       if (typeof cfg.ann === "boolean") setAnnotate(cfg.ann);
       if (typeof cfg.mal === "boolean") setMalformed(cfg.mal);
-    } catch { /* ignore malformed link */ }
+    } catch { toast("Shared setup could not be fully restored. Reset the playground or choose a supplied scenario."); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const router = useRouter();
   const shareScenario = () => {
-    const cfg = btoa(JSON.stringify({ sys: sysKey, tool: toolName, args: argVals, nSys, nCon, tab, ann: annotate, mal: malformed }));
+    const serialized = JSON.stringify({ sys: sysKey, uc: activeUcId, tool: toolName, args: argVals, custom: customTools.map(({ name, description, args }) => ({ name, description, args })), nSys, nCon, tab, ann: annotate, mal: malformed });
+    const cfg = btoa(Array.from(new TextEncoder().encode(serialized), (byte) => String.fromCharCode(byte)).join(""));
     const params = new URLSearchParams(window.location.search);
     params.set("cfg", cfg);
+    if (activeUcId) params.set("uc", activeUcId); else params.delete("uc");
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
@@ -231,32 +253,20 @@ export function McpPlayground() {
   const mcp = nSys + nCon;
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">GAP-01</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">MCP Server Contract Workbench</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            MCP is not a magic layer. It is an integration contract. This artifact shows how a shared protocol can reduce
-            bespoke connector work as the number of tools and agent consumers grows.
-          </p>
-        </div>
-
+    <InstrumentShell title="MCP Integration Workbench" eyebrow="GAP-01 · Agent architecture" description="Inspect a typed request, its validation boundary and the exact response."
+      breadcrumbs={[{ label: "Portfolio", href: "/" }, { label: "Agent architecture", href: "/#collections" }, { label: "MCP Integration Workbench" }]}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Default illustrative scenario"} method="Mock server manifests and deterministic JSON-RPC responses" note="Illustrative results support review; they do not establish a production outcome." />}>
+        <DecisionSummary title={selectedCall ? selectedCall.error ? `Call #${selectedCall.id} stopped at the contract boundary` : `Call #${selectedCall.id} returned a structured response` : "Send one typed request to inspect its contract"} explanation={responseError?.error?.message ?? "Requests and responses are computed locally against mock manifests. Inspect a saved call without changing the current composer."} metrics={[{ label: "Server", value: selectedCall?.sysLabel ?? sys.label }, { label: "Tool", value: selectedCall?.tool ?? tool.name }, { label: "Calls inspected", value: history.length }]} />
         <UseCaseRail useCases={GAP01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
         <CaseStudy problem="Enterprise agent programs often stall because every new tool requires custom integration work. When systems and agent consumers multiply, point to point integration becomes an operating burden that MCP can reduce when the integration surface is large enough." approach="The workbench shows a modeled MCP client interacting with server manifests, tools, resources, prompts, structured requests, typed errors, and the initialization handshake, making the protocol contract and its integration tradeoff visible rather than claiming production MCP coverage." why="This artifact connects protocol design to delivery speed, integration cost, change failure risk, and operating maintainability, showing why integration strategy matters before agent work scales across teams." metric="The crossover in the producers×consumers chart: the consumer count at which the shared protocol becomes cheaper than bespoke glue." tradeoff="A protocol layer is overhead for a tiny surface (a few tools, one consumer). The lab shows exactly where the surface is large enough that standardizing pays." outcome="A defensible recommendation to adopt (or not adopt) MCP for a given integration surface, with the crossover math and honest failure modes on the wire, not a slide asserting it." />
 
+        <section ref={stageRef} className={selectedCall ? "mb-4 rounded-xl border border-primary/30 bg-primary/5 p-4" : ""} aria-label="Request validation explanation">{selectedCall && <>
+          <p className="text-sm font-semibold">Call #{selectedCall.id} · {selectedCall.tool} · the same request throughout</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">{["1. Request", "2. Validate", selectedCall.error ? "3. Typed error" : "3. Response"].map((label, index) => <button type="button" key={label} aria-pressed={wire.index === index + 1} onClick={() => { wire.pause(); wire.setIndex(index + 1); }} className={`min-h-11 rounded-lg border p-3 text-left text-sm ${wire.index === index + 1 ? "border-primary bg-primary text-white" : "border-line bg-white text-ink"}`}>{label}</button>)}</div>
+          <p className="mt-3 text-sm">{wire.index === 1 ? "The client supplies one named tool and typed arguments; the request keeps its identity in the response." : wire.index === 2 ? selectedCall.error ? `Rejected field: ${responseError?.error?.data?.param ?? "see typed error"}. ${responseError?.error?.message ?? "Validation failed."}` : "Required fields and numeric types passed this mock contract." : selectedCall.error ? "The response is a JSON-RPC -32602 error. Correct the rejected field and send again; no tool result is accepted." : "The response uses the same request ID and returns the authored tool result. No external system was changed."}</p>
+          <ExplanationControls playback={wire} count={3} label="Wire explanation" />
+        </>}</section>
         <LabToolbar>
           <ToolbarButton onClick={shareScenario} title="Copy a link that reproduces this exact call">
             <Share2 className="h-3.5 w-3.5" /> Share
@@ -275,7 +285,7 @@ export function McpPlayground() {
 
         <div className="mb-5 flex flex-wrap items-center gap-2">
           {!activeUc && SYSTEMS.map((s) => (
-            <button key={s.key} onClick={() => onSystem(s.key)}
+            <button key={s.key} aria-pressed={s.key === sysKey} onClick={() => onSystem(s.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${s.key === sysKey ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{s.label}</button>
           ))}
           <span className="text-[11px] text-slatey-500">{sys.blurb}</span>
@@ -307,9 +317,9 @@ export function McpPlayground() {
           {/* Manifest */}
           <Panel>
             <p className="stat-label mb-2">Server manifest <span className="font-normal text-slatey-500">· {sys.label}</span></p>
-            <div className="mb-3 flex gap-1.5">
+            <div className="mb-3 flex flex-wrap gap-1.5">
               {TABS.map(({ key, label, Icon }) => (
-                <button key={key} onClick={() => setTab(key)}
+                <button key={key} aria-pressed={tab === key} onClick={() => setTab(key)}
                   className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition ${tab === key ? "border-teal-600 bg-teal-50 text-teal-700" : "border-line text-slatey-400 hover:text-ink"}`}>
                   <Icon className="h-3.5 w-3.5" /> {label} · {key === "tools" ? allTools.length : key === "resources" ? sys.resources.length : sys.prompts.length}
                 </button>
@@ -319,7 +329,7 @@ export function McpPlayground() {
             {tab === "tools" && (
               <div className="space-y-2">
                 {allTools.map((t) => (
-                  <button key={t.name} onClick={() => onTool(t.name)}
+                  <button key={t.name} aria-pressed={t.name === toolName} onClick={() => onTool(t.name)}
                     className={`block w-full rounded-lg border p-2.5 text-left transition ${t.name === toolName ? "border-teal-600 bg-teal-50/60" : "border-line hover:border-teal-500/40"}`}>
                     <p className="font-mono text-xs font-semibold text-ink">{t.name}<span className="ml-1 font-sans font-normal text-slatey-500">({t.args.map((a) => a.name).join(", ")})</span>{customTools.some((c) => c.name === t.name) && <span className="ml-1 rounded bg-teal-100 px-1 py-0.5 align-middle text-[9px] font-semibold text-teal-700">custom</span>}</p>
                     <p className="mt-0.5 text-[11px] text-slatey-400">{t.description}</p>
@@ -422,9 +432,8 @@ export function McpPlayground() {
                         {f.dir === "req"
                           ? <span className="text-slatey-500">→ request <span className="font-normal normal-case">#{viewCall.id} · {viewCall.tool}</span></span>
                           : <span className={f.error ? "text-rose-600" : "text-teal-700"}>← response{f.error ? " · error" : ""}</span>}
-                        <button onClick={() => { copyToClipboard(JSON.stringify(f.body, null, 2)); toast("Frame copied"); }} className="ml-auto rounded border border-line px-1.5 py-0.5 text-[10px] font-medium normal-case text-slatey-400 hover:text-ink">copy</button>
                       </div>
-                      <pre className={`overflow-x-auto rounded-lg border p-3 font-mono text-[11px] leading-relaxed ${f.error ? "border-rose-200 bg-rose-50 text-rose-900" : "border-line bg-ink text-slate-100"}`}>{JSON.stringify(f.body, null, 2)}</pre>
+                      <CodeEvidence title={`Call ${viewCall.id} ${f.dir === "req" ? "request" : "response"}`} value={f.body} />
                       {annotate && <p className="mt-1 text-[11px] italic text-slatey-500">{f.note}</p>}
                     </div>
                   ))}
@@ -443,7 +452,7 @@ export function McpPlayground() {
                     const on = c.id === (viewCallId ?? history[0].id);
                     return (
                       <li key={c.id}>
-                        <button onClick={() => setViewCallId(c.id)} className={`flex w-full items-center gap-2 rounded-md border px-2 py-1 text-left text-[11px] transition ${on ? "border-teal-500 bg-teal-50/60" : "border-line hover:border-teal-500/40"}`}>
+                        <button aria-pressed={c.id === selectedCall?.id} onClick={() => { setViewCallId(c.id); wire.complete(); }} className={`flex min-h-11 w-full flex-wrap items-center gap-2 rounded-md border px-2 py-2 text-left text-xs transition ${on ? "border-teal-500 bg-teal-50/60" : "border-line hover:border-teal-500/40"}`}>
                           <span className="font-mono text-slatey-500">#{c.id}</span>
                           <span className="font-mono font-semibold text-ink">{c.tool}</span>
                           <Badge tone={c.error ? "rose" : "emerald"}>{c.error ? "error" : "ok"}</Badge>
@@ -492,8 +501,7 @@ export function McpPlayground() {
         </div>
         <ToastHost />
         <CommandPalette commands={paletteCommands} />
-      </main>
-    </div>
+    </InstrumentShell>
   );
 }
 

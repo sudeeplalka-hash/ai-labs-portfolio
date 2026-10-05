@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@data/components/common/PageIntro";
 import { CorpusView } from "@data/components/live/CorpusView";
 
-export const metadata = { title: "Corpus Builder" };
+export const metadata = {
+  ...routeMetadata("Corpus Builder", "Inspect corpus builder through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/data/corpus"), title: "Corpus Builder" };
 
 export default function Page() {
   return (

@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { LABS, progress } from "@labs/kit";
+
 // Single build-time switch that lets ONE codebase power TWO deploys.
 //
 //   NEXT_PUBLIC_SITE=command-center → ai-labs.sudeeplalka.com  (the AI Program Command Center)
@@ -48,7 +51,7 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
     titleDefault: "Sudeep Lalka: Technology Strategy & AI Artifacts",
     titleTemplate: "%s · Sudeep Lalka",
     description:
-      "A portfolio of 25 interactive AI artifacts that turn the architecture, economics, governance, and adoption decisions behind enterprise AI into tools that actually run. Strategy you can open, pressure-test, and take into the boardroom.",
+      `A portfolio of ${progress().shipped} shipped catalog artifacts, plus the enterprise AI lifecycle. Explore the architecture, economics, governance and adoption decisions through working scenarios and inspectable models.`,
     homeTitle: "Sudeep Lalka: Technology Strategy & AI Artifacts",
     attribution: "Technology Strategy & AI Artifacts · portfolio.sudeeplalka.com",
     ogImage: "/og-portfolio.png",
@@ -56,3 +59,28 @@ export const SITE_CONFIG: Record<SiteId, SiteConfig> = {
 };
 
 export const CURRENT_SITE = SITE_CONFIG[SITE];
+
+/** Source revision of the experience upgrade; never used as a data verification date. */
+export const EXPERIENCE_REVISION = "2026-10-05";
+export const BUILD_ID = process.env.NEXT_PUBLIC_BUILD_SHA ?? process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local preview";
+
+/** Public source-backed routes. Redirect aliases, settings and create forms are omitted. */
+export const PUBLIC_ROUTES = [...new Set([
+  "/", "/lifecycle", "/industries", "/storylines", "/story", "/story/brief", "/architecture", "/roadmap", "/changelog",
+  "/frame", "/frame/guide", "/data", "/data/guide", "/data/overview", "/data/corpus", "/data/pipeline",
+  "/build", "/build/guide", "/build/overview", "/build/dataset", "/build/retrieval", "/build/answers", "/build/traces",
+  "/build/model", "/build/evaluations", "/build/failures", "/build/quality-gates", "/build/agents", "/build/training", "/build/internals",
+  "/deploy", "/deploy/guide", "/govern", "/govern/guide", "/govern/live", "/govern/risk", "/govern/readiness", "/govern/maturity", "/govern/value",
+  "/govern/use-cases", "/govern/playground", "/govern/policies", "/govern/evals", "/govern/review-queue", "/govern/audit-logs", "/govern/evidence", "/govern/brief", "/govern/docs", "/govern/arcade",
+  "/realize", "/realize/guide", "/operate", "/operate/guide",
+  ...LABS.filter((lab) => lab.status === "shipped" && lab.href?.startsWith("/")).map((lab) => lab.href as string),
+])];
+
+export function routeMetadata(title: string, description: string, path: string): Metadata {
+  const url = `${CURRENT_SITE.domain}${path}`;
+  return {
+    title, description, alternates: { canonical: url },
+    openGraph: { title, description, url, type: "website", siteName: CURRENT_SITE.titleDefault, images: [{ url: CURRENT_SITE.ogImage, width: 1200, height: 630, alt: title }] },
+    twitter: { card: "summary_large_image", title, description, images: [CURRENT_SITE.ogImage] },
+  };
+}

@@ -9,7 +9,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Brain, Wrench, Eye, XOctagon, Radar, LifeBuoy, CheckCircle2, Play, StepForward, RotateCcw, type LucideIcon } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, usePlayback, useInViewport, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { ExplanationControls, EvidenceTable } from "./AgentExperience";
 import { GAP02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
@@ -106,41 +107,22 @@ export function LoopInspector() {
   useUseCaseDeepLink(GAP02_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
   const selectUseCase = (id: string | null) => setActiveUcId(id);
   const trace = activeUc ? activeUc.payload.base : buildTrace(arch, fail);
-  const [step, setStep] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => { setStep(0); setPlaying(false); if (timer.current) clearInterval(timer.current); }, [arch, fail, activeUcId]);
-  useEffect(() => {
-    if (!playing) return;
-    timer.current = setInterval(() => setStep((s) => { if (s >= trace.length) { if (timer.current) clearInterval(timer.current); setPlaying(false); return s; } return s + 1; }), 750);
-    return () => { if (timer.current) clearInterval(timer.current); };
-  }, [playing, trace.length]);
-
+  const stageRef = useRef<HTMLDivElement>(null);
+  const stageVisible = useInViewport(stageRef, "0px");
+  const playback = usePlayback({ steps: trace.length, intervalMs: 1100, initiallyComplete: false, visible: stageVisible });
+  const step = playback.index;
+  const resetPlayback = playback.reset;
+  useEffect(() => { resetPlayback(); }, [arch, fail, activeUcId, resetPlayback]);
+  const currentStep = trace[Math.max(0, step - 1)];
+  const failure = trace.find((event) => event.role === "failure");
+  const recovery = trace.find((event) => event.role === "recover");
   const shown = trace.slice(0, step);
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">GAP-02</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Agent Failure and Recovery Inspector</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? `${activeUc.payload.taskLine} Step the loop and watch the characteristic failure, its detection signal, and the recovery policy fire.` : "An agent is not only a reasoning loop. It is a system that can fail through tool errors, loops, malformed arguments, missing context, and overloaded memory. This artifact shows how those failures appear and what must exist around the agent to catch and recover from them."}
-          </p>
-        </div>
-
+    <InstrumentShell title="Agent Failure and Recovery Inspector" eyebrow="GAP-02 · Agent architecture" description="Inspect the failure, the signal that detects it and the policy that recovers."
+      breadcrumbs={[{ label: "Portfolio", href: "/" }, { label: "Agent architecture", href: "/#collections" }, { label: "Agent Failure and Recovery Inspector" }]}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Default illustrative scenario"} method="Authored trace; no tools are executed" note="Illustrative results support review; they do not establish a production outcome." />}>
+        <DecisionSummary title={failure ? `${failure.label}: inspect the control that catches it` : "Inspect the complete happy-path trace"} explanation={recovery?.detail ?? "No failure is injected. Choose a failure to inspect its detection and recovery policy."} metrics={[{ label: "Trace events", value: trace.length }, { label: "Selected event", value: step ? `${step} · ${currentStep.role}` : "Not started" }]} />
         <UseCaseRail useCases={GAP02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
         <CaseStudy problem="Enterprise teams often discuss agents as if autonomy is the main decision. The more important decision is whether the organization has the harness required to observe, interrupt, retry, escalate, or roll back agent behavior when it drifts." approach="The inspector steps through single agent, orchestrator worker, and evaluator optimizer patterns. For each architecture, it shows how specific failures are detected, what recovery policy applies, and what latency or operational overhead the control introduces." why="This connects agent architecture to reliability, control cost, incident exposure, and the support model required to operate autonomous workflows safely." metric="Failure classes caught vs escaped; harness coverage of the taxonomy." tradeoff="A richer harness costs money and latency; an un instrumented failure reaches a system of record." outcome="A defensible observability harness budget tied to the failure modes that actually occur." />
@@ -151,7 +133,7 @@ export function LoopInspector() {
             <p className="stat-label mb-2">Architecture</p>
             <div className="flex flex-wrap gap-1.5">
               {ARCHES.map((a) => (
-                <button key={a.key} onClick={() => setArch(a.key)} className={`rounded-md border px-2.5 py-1 text-xs font-medium transition ${arch === a.key ? "border-teal-600 bg-teal-600 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{a.label}</button>
+                <button key={a.key} aria-pressed={arch === a.key} onClick={() => setArch(a.key)} className={`rounded-md border px-2.5 py-1 text-xs font-medium transition ${arch === a.key ? "border-teal-600 bg-teal-600 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{a.label}</button>
               ))}
             </div>
           </Panel>
@@ -159,29 +141,24 @@ export function LoopInspector() {
             <p className="stat-label mb-2">Inject failure</p>
             <div className="flex flex-wrap gap-1.5">
               {FAIL_OPTS.map((f) => (
-                <button key={f.key} onClick={() => setFail(f.key)} className={`rounded-md border px-2.5 py-1 text-xs font-medium transition ${fail === f.key ? (f.key === "none" ? "border-teal-600 bg-teal-600 text-white" : "border-rose-500 bg-rose-500 text-white") : "border-line text-slatey-400 hover:text-ink"}`}>{f.label}</button>
+                <button key={f.key} aria-pressed={fail === f.key} onClick={() => setFail(f.key)} className={`rounded-md border px-2.5 py-1 text-xs font-medium transition ${fail === f.key ? (f.key === "none" ? "border-teal-600 bg-teal-600 text-white" : "border-rose-500 bg-rose-500 text-white") : "border-line text-slatey-400 hover:text-ink"}`}>{f.label}</button>
               ))}
             </div>
           </Panel>
         </div>
         )}
 
-        <div className="mb-3 flex items-center gap-2">
-          <button onClick={() => setPlaying((p) => !p)} className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-white hover:bg-ink/90"><Play className="h-3.5 w-3.5" /> {playing ? "Pause" : "Play"}</button>
-          <button onClick={() => setStep((s) => Math.min(trace.length, s + 1))} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-slatey-400 hover:text-ink"><StepForward className="h-3.5 w-3.5" /> Step</button>
-          <button onClick={() => { setStep(0); setPlaying(false); }} className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-xs font-semibold text-slatey-400 hover:text-ink"><RotateCcw className="h-3.5 w-3.5" /> Reset</button>
-          <span className="ml-auto font-mono text-[11px] text-slatey-500">{Math.min(step, trace.length)}/{trace.length}</span>
-        </div>
-
+        <div ref={stageRef}><ExplanationControls playback={playback} count={trace.length} label="Authored agent trace" /></div>
+        {step > 0 && <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-4"><p className="text-sm font-semibold">Selected event {step}: {currentStep.role}</p><p className="mt-1 break-words text-sm">{currentStep.detail ?? currentStep.label}</p></div>}
         <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
           <Panel>
-            {shown.length === 0 ? <p className="text-sm text-slatey-500">Press Play or Step to run the trace.</p> : (
+            {shown.length === 0 ? <p className="text-sm text-slatey-500">Press Play explanation or Step to inspect the authored trace. No tool is executed.</p> : (
               <ol className="space-y-2">
                 {shown.map((s, i) => {
                   const m = ROLE_META[s.role];
                   const Icon = m.icon;
                   return (
-                    <li key={i} className={`rounded-lg border p-2.5 ${m.ring}`}>
+                    <li key={i} className={`rounded-lg border p-2.5 ${m.ring} ${step === i + 1 ? "ring-2 ring-primary/40" : ""}`}><button type="button" className="mb-2 min-h-11 rounded border border-line px-3 text-xs font-semibold" aria-pressed={step === i + 1} onClick={() => { playback.pause(); playback.setIndex(i + 1); }}>Inspect event {i + 1}</button>
                       <div className="flex items-center gap-1.5">
                         <Icon className={`h-4 w-4 ${m.tone}`} />
                         <span className={`text-[11px] font-semibold uppercase tracking-wide ${m.tone}`}>{s.role === "detect" ? "detection" : s.role}</span>
@@ -206,6 +183,7 @@ export function LoopInspector() {
           </Panel>
         </div>
 
+        <details className="mt-4 rounded-xl border border-line bg-white p-4"><summary className="cursor-pointer font-semibold">Read the full trace without playback</summary><EvidenceTable caption="Complete authored trace" headers={["Event", "Type", "Explanation"]} rows={trace.map((event, i) => [i + 1, event.role, event.detail ?? event.label])} /></details>
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Size the observability and recovery harness to the actual failure modes of the chosen architecture." lift="Reduces uncontrolled agent behavior by pairing each failure mode with a detection signal and recovery policy." measure="Failure detection time, recovery success rate, escalation rate, repeat failure rate, incident cost." />
           <InsightCard title="Failure injection is the whole point" tone="info">
@@ -222,7 +200,6 @@ export function LoopInspector() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this artifact models representative failure paths. A production environment would require live traces, tool telemetry, policy enforcement, alert routing, and incident management integration.</p>
         </div>
-      </main>
-    </div>
+    </InstrumentShell>
   );
 }

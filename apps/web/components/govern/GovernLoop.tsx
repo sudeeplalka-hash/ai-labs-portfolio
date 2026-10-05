@@ -6,19 +6,20 @@
 // governance.decision back to shared state for Realize. Falls back to a polished
 // sample prompt when no initiative is loaded. The existing cockpit renders below.
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   useProgramSource,
   selectGovernInputs, deriveGovernanceDecision, deriveGovernanceScorecard,
-  deriveOpenFindings, deriveRequiredControls, buildAuditEvidencePack, auditPackToText,
+  deriveOpenFindings, deriveRequiredControls, buildAuditEvidencePack,
   deriveDecisionBreakdown,
   type GovLevel, type Severity, type DecisionBreakdown,
 } from "@labs/program-core";
-import { Panel, SectionHeader, Badge } from "@labs/design-system";
+import { Panel, SectionHeader, Badge, CopyButton, Provenance } from "@labs/design-system";
+import { assessProgramEvidence } from "@gov/lib/program-evidence";
 import { RegulatoryMap } from "@/components/govern/RegulatoryMap";
 import {
-  ShieldCheck, ClipboardCheck, AlertTriangle, ListChecks, FileText, ArrowRight, Copy, Check, Gavel, Printer,
+  ShieldCheck, ClipboardCheck, AlertTriangle, ListChecks, FileText, ArrowRight, Gavel, Printer,
 } from "lucide-react";
 
 const lvlTone = (l: GovLevel): "emerald" | "amber" | "rose" => (l === "good" ? "emerald" : l === "warn" ? "amber" : "rose");
@@ -37,7 +38,18 @@ export function GovernLoop() {
   const controls = useMemo(() => deriveRequiredControls(src), [src]);
   const pack = useMemo(() => buildAuditEvidencePack(src), [src]);
   const breakdown = useMemo(() => deriveDecisionBreakdown(src), [src]);
-  const [copied, setCopied] = useState(false);
+  const coverage = assessProgramEvidence({ ...g, hasDataHandoff: Boolean(src.data?.handoff), hasBuildContract: Boolean(src.rag?.contract), hasOperateEvidence: Boolean(src.deploy?.evidence) });
+  const missing = Object.entries(coverage.dimensions).filter(([, dimension]) => !dimension.assessed);
+  const decisionLabel = coverage.complete ? decision.decision : "Pending evidence";
+  const packDimensions: Record<string, keyof typeof coverage.dimensions> = { strategy: "usecase", data: "data", build: "build", operate: "ops" };
+  const displayPack = pack.map(section => {
+    const dimension = packDimensions[section.key] && coverage.dimensions[packDimensions[section.key]];
+    if (dimension && !dimension.assessed) return { ...section, items: [{ label: "Assessment", value: "Not assessed" }, { label: "Missing record", value: dimension.missing }] };
+    if (section.key === "governance" && !coverage.complete) return { ...section, items: [{ label: "Decision", value: "Pending evidence" }, { label: "Missing sources", value: missing.map(([, item]) => item.source).join("; ") }] };
+    if (section.key === "strategy") return { ...section, items: section.items.map(item => (item.label === "Human review" && g.humanReviewRequired === undefined) || (item.label === "Audit evidence" && g.auditEvidenceRequired === undefined) ? { ...item, value: "Not recorded" } : item) };
+    return section;
+  });
+  const packText = `${isDemo ? "Curated sample program" : "Current browser program"} — modeled governance evidence. Missing records are not clearance.\n\n${displayPack.map(section => `${section.label}\n${section.items.map(item => `${item.label}: ${item.value}`).join("\n")}`).join("\n\n")}`;
 
   // Persist the governance decision for Realize, safe effect keyed on inputs.
   const sig = JSON.stringify({
@@ -52,33 +64,37 @@ export function GovernLoop() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sig, hydrated, isLiveMode, g.hasLive]);
 
-  const copyPack = () => {
-    try { navigator.clipboard?.writeText(auditPackToText(src)); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard blocked */ }
-  };
-
   // R1.1: the banner derives from the SAME source (src) as the sidebar and the
   // stepper. In Demo mode src is the curated archetype, so the banner names it
   // instead of claiming no initiative exists while the rail shows one.
-  const loaded = g.hasLive;
+  const loaded = coverage.loaded;
+
+  if (!loaded) return (
+    <Panel>
+      <SectionHeader eyebrow="Current program" title="Governance not assessed" icon={ShieldCheck} action={<Badge tone="slate">Not assessed</Badge>} />
+      <p className="text-sm text-slatey-400">No framed initiative is loaded. A governance decision needs recorded Strategy, Data, Build and Operate evidence. The separate registry below contains sample records.</p>
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{Object.entries(coverage.dimensions).map(([key, dimension]) => <li key={key} className="rounded-lg border border-line p-3"><p className="text-sm font-semibold text-ink">{dimension.source}</p><p className="mt-1 text-xs text-slatey-400">Not assessed — {dimension.missing}</p></li>)}</ul>
+      <Link href="/frame" className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark"><ArrowRight className="h-4 w-4" /> Frame an initiative</Link>
+    </Panel>
+  );
 
   return (
     <div className="space-y-6">
       {/* 1, Banner */}
-      {loaded ? (
         <div className="rounded-xl border border-primary/25 bg-primary/[0.04] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
               <span className="text-[11px] font-semibold uppercase tracking-wide text-primary-dark">
-                {isDemo ? "Demo initiative · curated sample" : "Live initiative loaded"}
+                {isDemo ? "Curated sample program" : "Current browser program"}
               </span>
             </div>
-            <Badge tone={decTone(decision.decision)}>{decision.decision}</Badge>
+            <Badge tone={coverage.complete ? decTone(decision.decision) : "slate"}>{decisionLabel}</Badge>
           </div>
           <h3 className="mt-1 text-lg font-semibold text-ink">{g.initiativeName}</h3>
           <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-            <div><p className="stat-label">Pattern</p><p className="font-medium text-ink">{g.primaryAiPattern}</p></div>
-            <div><p className="stat-label">Governance tier</p><Badge tone={lvlTone(g.governanceTier === "Critical" || g.governanceTier === "High" ? "bad" : g.governanceTier === "Medium" ? "warn" : "good")}>{g.governanceTier}</Badge></div>
+            <div><p className="stat-label">Pattern</p><p className="font-medium text-ink">{g.primaryAiPattern ?? "Not recorded"}</p></div>
+            <div><p className="stat-label">Governance tier</p><Badge tone={g.governanceTier ? lvlTone(g.governanceTier === "Critical" || g.governanceTier === "High" ? "bad" : g.governanceTier === "Medium" ? "warn" : "good") : "slate"}>{g.governanceTier ?? "Not assessed"}</Badge></div>
             <div><p className="stat-label">Operational criticality</p><p className="font-medium text-ink">{g.operationalCriticality ?? "N/A"}</p></div>
             <div><p className="stat-label">Release status</p><p className="font-medium text-ink">{g.releaseRecommendation ?? "pending Operate"}</p></div>
           </div>
@@ -88,39 +104,34 @@ export function GovernLoop() {
             {g.auditEvidenceRequired && <span>Audit evidence required</span>}
           </div>
         </div>
-      ) : (
-        <div className="rounded-xl border border-dashed border-line bg-slate-50/60 p-5">
-          <p className="text-sm font-semibold text-ink">No live initiative loaded</p>
-          <p className="mt-1 text-sm text-slatey-400">Govern is showing sample governance data. Create or load an initiative in Strategy &amp; Planning to activate live, evidence based governance for your initiative.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link href="/frame" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary-dark"><ArrowRight className="h-4 w-4" /> Go to Strategy &amp; Planning</Link>
-            <span className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-2 text-sm text-slatey-400">Continue with sample governance data below</span>
-          </div>
-        </div>
-      )}
 
       {/* 2, Scorecard */}
+      <Provenance mode={isDemo ? "Curated sample program" : "Current browser program"} input="Recorded lifecycle contracts" method="Deterministic governance rules" note="These are planning assessments, not production telemetry or external audit approval. Missing stage evidence remains not assessed." />
       <Panel>
-        <SectionHeader eyebrow="Live governance scorecard" title="Where this initiative stands, by evidence" icon={ShieldCheck} />
+        <SectionHeader eyebrow="Program governance scorecard" title="Where this initiative stands, by recorded evidence" icon={ShieldCheck} />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {scorecard.map((d) => (
+          {scorecard.map((d) => {
+            const dimension = coverage.dimensions[d.key as keyof typeof coverage.dimensions];
+            return (
             <div key={d.key} className="flex flex-col rounded-xl border border-line bg-white p-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-1">
                 <p className="text-xs font-semibold text-ink">{d.dimension}</p>
-                <Badge tone={lvlTone(d.level)}>{d.status}</Badge>
+                <Badge tone={dimension.assessed ? lvlTone(d.level) : "slate"}>{dimension.assessed ? d.status : "Not assessed"}</Badge>
               </div>
-              <p className="mt-1 text-[11px] leading-relaxed text-slatey-400">{d.why}</p>
-              {d.findings.length > 0 && <ul className="mt-1.5 space-y-0.5 text-[11px] text-slatey-500">{d.findings.slice(0, 3).map((f, i) => <li key={i}>· {f}</li>)}</ul>}
+              <p className="mt-1 text-[11px] leading-relaxed text-slatey-400">{dimension.assessed ? d.why : dimension.missing}</p>
+              {dimension.assessed && d.findings.length > 0 && <ul className="mt-1.5 space-y-0.5 text-[11px] text-slatey-500">{d.findings.slice(0, 3).map((f, i) => <li key={i}>· {f}</li>)}</ul>}
+              {!dimension.assessed && <Link href={dimension.href} className="mt-2 text-xs font-semibold text-primary underline">Record evidence</Link>}
               <p className="mt-auto pt-2 text-[10px] uppercase tracking-wide text-slatey-500">{d.source}</p>
             </div>
-          ))}
+          ); })}
         </div>
       </Panel>
 
       {/* 3, Decision panel */}
       <Panel>
-        <SectionHeader eyebrow="Governance decision" title="Approve, restrict, or block: from the evidence" icon={Gavel}
-          action={<Badge tone={decTone(decision.decision)}>{decision.decision}</Badge>} />
+        <SectionHeader eyebrow="Modeled governance decision" title="Decision and evidence coverage" icon={Gavel}
+          action={<Badge tone={coverage.complete ? decTone(decision.decision) : "slate"}>{decisionLabel}</Badge>} />
+        {!coverage.complete ? <div className="rounded-lg border border-line bg-slate-50 p-4"><p className="text-sm font-semibold text-ink">Complete the missing assessments before interpreting a governance score.</p><ul className="mt-2 space-y-2 text-sm text-slatey-400">{missing.map(([key, dimension]) => <li key={key}><Link href={dimension.href} className="text-primary underline">{dimension.source}</Link>: {dimension.missing}</li>)}</ul><p className="mt-3 text-xs text-slatey-500">Controls and findings below are provisional outputs from the inputs already recorded.</p></div> : <>
         <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
           <div className="flex flex-col items-center justify-center rounded-xl border border-line bg-slate-50/60 p-4 text-center">
             <p className="stat-label">Governance score</p>
@@ -156,6 +167,7 @@ export function GovernLoop() {
             </ul>
           </div>
         </div>
+        </>}
       </Panel>
 
       {/* 3.5, Regulatory orientation (EU AI Act + NIST AI RMF) */}
@@ -163,8 +175,8 @@ export function GovernLoop() {
 
       {/* 4, Required controls */}
       <Panel>
-        <SectionHeader eyebrow="Required controls" title="Controls generated from live evidence" icon={ListChecks} />
-        {controls.length === 0 ? <p className="text-sm text-slatey-400">No mandatory controls triggered by current evidence.</p> : (
+        <SectionHeader eyebrow="Required controls" title={coverage.complete ? "Controls from recorded inputs" : "Provisional controls from recorded inputs"} icon={ListChecks} />
+        {controls.length === 0 ? <p className="text-sm text-slatey-400">No controls were triggered by the recorded inputs. {coverage.complete ? "Review applicability with the responsible owner." : "Missing evidence may introduce additional requirements."}</p> : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead><tr className="border-b border-line text-[11px] uppercase tracking-wide text-slatey-500">
@@ -187,7 +199,7 @@ export function GovernLoop() {
       {/* 5, Open findings */}
       <Panel>
         <SectionHeader eyebrow="Open governance findings" title="What must be resolved, and by whom" icon={AlertTriangle} />
-        {findings.length === 0 ? <p className="text-sm text-emerald-700">No open findings. Evidence supports proceeding.</p> : (
+        {findings.length === 0 ? <p className="text-sm text-slatey-400">No findings were generated from the recorded inputs. {coverage.complete ? "This does not certify production readiness." : "Unassessed stages still require evidence; no clearance is implied."}</p> : (
           <div className="grid gap-3 lg:grid-cols-3">{findings.map((f, i) => (
             <div key={i} className="flex flex-col rounded-xl border border-line bg-white p-4">
               <div className="flex items-center justify-between"><Badge tone={sevTone(f.severity)}>{f.severity}</Badge><span className="text-[11px] text-slatey-400">{f.status}</span></div>
@@ -205,27 +217,27 @@ export function GovernLoop() {
 
       {/* 6, Audit evidence pack */}
       <Panel>
-        <SectionHeader eyebrow="Audit evidence pack" title="A defensible, traceable record" icon={FileText}
+        <SectionHeader eyebrow="Program evidence summary" title="Recorded inputs and explicit gaps" icon={FileText}
           action={
             <div className="no-print flex flex-wrap gap-2">
-              <button onClick={copyPack} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-medium text-slatey-300 hover:bg-slate-50">{copied ? <><Check className="h-3.5 w-3.5 text-emerald-600" /> Copied</> : <><Copy className="h-3.5 w-3.5" /> Copy evidence summary</>}</button>
+              <CopyButton text={packText} label="Copy evidence summary" />
               <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-white px-3 py-1.5 text-xs font-medium text-slatey-300 hover:bg-slate-50"><Printer className="h-3.5 w-3.5" /> Print / save PDF</button>
               <Link href="/realize" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark"><ArrowRight className="h-3.5 w-3.5" /> Continue to Realize</Link>
             </div>
           } />
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {pack.map((sec) => (
+          {displayPack.map((sec) => (
             <div key={sec.key} className="rounded-xl border border-line bg-white p-3">
               <p className="text-[11px] font-semibold uppercase tracking-wide text-primary-dark">{sec.label}</p>
               <dl className="mt-1.5 space-y-1 text-[11px] leading-relaxed">
                 {sec.items.map((it, i) => (
-                  <div key={i} className="flex justify-between gap-2"><dt className="shrink-0 text-slatey-500">{it.label}</dt><dd className="text-right font-medium text-ink">{it.value}</dd></div>
+                  <div key={i} className="flex flex-wrap justify-between gap-2"><dt className="text-slatey-500">{it.label}</dt><dd className="min-w-0 break-words font-medium text-ink">{it.value}</dd></div>
                 ))}
               </dl>
             </div>
           ))}
         </div>
-        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slatey-500"><ClipboardCheck className="h-3.5 w-3.5" /> The governance decision is saved to shared state and consumed by Realize as a risk input.</p>
+        <p className="mt-3 flex items-center gap-1.5 text-[11px] text-slatey-500"><ClipboardCheck className="h-3.5 w-3.5" /> Modeled outputs are planning inputs. This summary does not approve production deployment.</p>
       </Panel>
     </div>
   );

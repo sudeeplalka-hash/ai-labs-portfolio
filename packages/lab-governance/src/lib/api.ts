@@ -11,6 +11,7 @@
 import demoRaw from './demo-data.json';
 import * as gov from './governance';
 import { generateLive } from './llm';
+import { buildEvidenceReport } from './evidence-report';
 import type {
   ExecutiveMetrics, UseCase, Policy, PlaygroundResponse, EvalSuite, EvalRun,
   EvalResult, AuditEvent, PromptEvent, ReviewItem, EvidenceReport, AuditVerify, EvalCompare,
@@ -93,6 +94,7 @@ const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
 const ucState: UseCase[] = clone(demo.useCases);
 const policyState: Policy[] = clone(demo.policies);
 const reviewState: ReviewItem[] = clone(demo.reviewQueue);
+const promptState: PromptEvent[] = clone(demo.promptEvents);
 const evidenceState: EvidenceReport[] = demo.sampleReport ? [clone(demo.sampleReport), ...clone(demo.evidence)] : clone(demo.evidence);
 const resolve = <T>(v: T): Promise<T> => Promise.resolve(v);
 
@@ -232,6 +234,7 @@ const staticApi: typeof liveApi = {
       const uc = ucState.find((u) => u.id === data.use_case_id) || ucState[0];
       const live = await generateLive(data.prompt);
       const res = gov.runGovernance(data.prompt, uc, live ?? undefined);
+      promptState.unshift({ id: res.prompt_event_id, use_case_id: uc.id, prompt: data.prompt, decision: res.decision, severity: res.severity, risk_score: res.risk_score, risk_level: res.risk_level, confidence: res.confidence, audit_status: 'browser-session record; outside embedded hash chain', review_status: res.review_item_id ? 'pending' : 'not_required', latency_ms: res.latency_ms, created_at: res.created_at });
       if (res.review_item_id) {
         const now = new Date().toISOString();
         reviewState.unshift({
@@ -255,7 +258,7 @@ const staticApi: typeof liveApi = {
   audit: {
     events: () => resolve(demo.auditEvents),
     promptEvents: (params?: { decision?: string; use_case_id?: string; limit?: number }) => resolve(
-      demo.promptEvents.filter((e) => (!params?.decision || e.decision === params.decision) && (!params?.use_case_id || e.use_case_id === params.use_case_id)),
+      promptState.filter((e) => (!params?.decision || e.decision === params.decision) && (!params?.use_case_id || e.use_case_id === params.use_case_id)).slice(0, params?.limit ?? promptState.length),
     ),
     verify: () => resolve(demo.auditVerify),
   },
@@ -266,7 +269,7 @@ const staticApi: typeof liveApi = {
     get: (id: string) => resolve(reviewState.find((r) => r.id === id) as ReviewItem),
     action: (id: string, data: { action: string; reviewer: string; notes?: string; edited_response?: string }) => {
       const r = reviewState.find((x) => x.id === id);
-      if (r) { r.status = REVIEW_ACTIONS[data.action] || r.status; r.reviewed_by = data.reviewer; r.reviewed_at = new Date().toISOString(); r.reviewer_notes = data.notes; if (data.edited_response) r.edited_response = data.edited_response; }
+      if (r) { r.status = REVIEW_ACTIONS[data.action] || r.status; r.reviewed_by = data.reviewer; r.reviewed_at = new Date().toISOString(); r.reviewer_notes = data.notes; if (data.edited_response) r.edited_response = data.edited_response; const event = promptState.find(item => item.id === r.prompt_event_id); if (event) event.review_status = r.status; }
       return resolve(r as ReviewItem);
     },
     stats: () => resolve(demo.reviewStats),
@@ -275,16 +278,9 @@ const staticApi: typeof liveApi = {
     list: () => resolve(evidenceState),
     get: (id: string) => resolve(evidenceState.find((r) => r.id === id) as EvidenceReport),
     create: (data: unknown) => {
-      const d = (data || {}) as { title?: string; generated_by?: string };
+      const d = (data || {}) as Parameters<typeof buildEvidenceReport>[0];
       const now = new Date().toISOString();
-      const rep: EvidenceReport = {
-        id: `rep-${Date.now()}`, title: d.title || 'AI Governance Evidence Report', period_start: now, period_end: now,
-        generated_by: d.generated_by || 'Demo User', status: 'draft',
-        content_markdown: demo.sampleReport?.content_markdown || '# AI Governance Evidence Report\n\nGenerated in static demo mode.',
-        completeness_score: 100, sections: ['risk_posture', 'policies', 'runtime', 'evals', 'human_review', 'audit'],
-        use_case_count: ucState.length, policy_count: policyState.length, prompt_event_count: demo.promptEvents.length,
-        eval_run_count: demo.evalSuites.length, review_item_count: reviewState.length, created_at: now, updated_at: now,
-      };
+      const rep = buildEvidenceReport(d, { useCases: ucState, policies: policyState, events: promptState, reviews: reviewState, audit: demo.auditVerify }, now);
       evidenceState.unshift(rep);
       return resolve(rep);
     },

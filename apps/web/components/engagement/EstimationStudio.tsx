@@ -11,11 +11,12 @@ import { useRouter } from "next/navigation";
 import { pertEstimate, marginPct as engineMargin } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
 import { EL08_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { EvidenceTable, Delta, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -161,33 +162,24 @@ export function EstimationStudio() {
     })),
   ];
 
+  const savedState = { ucKey, method, scopeOn };
+  const scenarioLink = useScenarioLink({ id: "EL-08", state: savedState, activeId: activeUcId,
+    restore: (s) => { setUcKey(s.ucKey); setMethod(s.method); setScopeOn(s.scopeOn); },
+    validate: (v): v is typeof savedState => validateScenario(v, { ucKey: oneOf(USE_CASES.map((u) => u.key)), method: oneOf(["bottomup","analogous","pert"]), scopeOn: bool }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-08</span>
-          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
-        </div>
-      </header>
+    <InstrumentShell title="Estimation and scope control" eyebrow="Operating model & engagement" description="Compare methods, name the uncertainty and make the scope consequence explicit."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-08" }]}
+      decision={<DecisionSummary title={`${effort} person-weeks · ${method === "pert" ? "PERT" : method} basis`} explanation={`Methods differ by ${spread} person-weeks. ${scopeOn ? `The scope change adds ${changeWeeks} person-weeks; absorbed margin ${absorbedMargin.toFixed(0)}% versus ${baselineMargin.toFixed(0)}% baseline.` : "The original scope is selected."}`} nextAction={scopeOn ? "Review the change receipt and price the added work before accepting it." : "Inspect the method assumptions, then stress the scope change."} tone={scopeOn && absorbedMargin < baselineMargin ? "caution" : "neutral"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL08_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="A single point estimate can create false confidence. Senior delivery requires a range, a confidence level, a clear commitment point, and a disciplined approach to scope change." approach="The studio compares bottom up, analogous, and PERT estimates, then models staffing, schedule, confidence levels, and change control impact." why="This connects estimation to delivery confidence, margin protection, client expectation management, and commercial governance." metric="The P80 commit; gross margin under a scope change." tradeoff="Absorbing scope silently protects the relationship but drops margin; a change order holds margin but is a harder conversation." outcome="A defensible committed estimate plus the change control impact of moving scope." />}
+      actions={<ExportMenu actions={exportActions} />}
+    >
+        <Panel className="mb-5"><h2 className="text-base font-semibold text-ink">Scope change receipt</h2><div className="mt-3 grid gap-3 sm:grid-cols-3"><div className="rounded-lg bg-slate-50 p-3 text-sm">Effort: {baseEffort} → {effort} person-weeks</div><div className="rounded-lg bg-slate-50 p-3 text-sm">Schedule: {duration(baseEffort)} → {duration(effort)} weeks</div><div className="rounded-lg bg-slate-50 p-3 text-sm">Absorbed margin: {baselineMargin.toFixed(1)}% → {absorbedMargin.toFixed(1)}%</div></div><p className="mt-3 text-sm text-slatey-400">{scopeOn ? `The selected change adds ${changeWeeks} person-weeks. Pricing the full scope preserves modeled margin at ${coMargin.toFixed(1)}%.` : "No change is applied. Switch on the scope change below to compare its cost, schedule and margin before accepting it."}</p><EvidenceTable caption="Estimation methods on the same original scope" headings={["Method", "Person-weeks", "Difference from selected basis"]} rows={Object.entries(totals).map(([key,value]) => [key === "pert" ? "PERT mean" : key, value, <Delta key={key} value={value - baseEffort} />])} /><p className="mt-2 text-xs text-slatey-500">PERT uncertainty and method disagreement are different signals. The selected method sets the base; the scope receipt adds the same defined work package.</p></Panel>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Estimation and Scope Control Studio</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            AI estimates often fail where uncertainty is highest: data discovery, evaluation, integration, and change
-            control. This artifact compares estimation methods and shows how scope movement affects margin and schedule.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL08_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="A single point estimate can create false confidence. Senior delivery requires a range, a confidence level, a clear commitment point, and a disciplined approach to scope change." approach="The studio compares bottom up, analogous, and PERT estimates, then models staffing, schedule, confidence levels, and change control impact." why="This connects estimation to delivery confidence, margin protection, client expectation management, and commercial governance." metric="The P80 commit; gross margin under a scope change." tradeoff="Absorbing scope silently protects the relationship but drops margin; a change order holds margin but is a harder conversation." outcome="A defensible committed estimate plus the change control impact of moving scope." />
 
         {!activeUc && (
           <div className="mb-5 flex flex-wrap gap-2">
@@ -199,7 +191,7 @@ export function EstimationStudio() {
         )}
 
         {/* Three methods */}
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid min-w-0 items-start gap-3 md:grid-cols-3">
           <MethodCard on={method === "bottomup"} onClick={() => setMethod("bottomup")} title="Bottom-up" weeks={bottomUp}>
             <ul className="mt-2 space-y-0.5 text-[11px] text-slatey-400">
               {uc.wbs.map((t) => (
@@ -253,7 +245,7 @@ export function EstimationStudio() {
           <Panel>
             <div className="mb-2 flex items-center justify-between">
               <p className="stat-label">Change control</p>
-              <button onClick={() => setScopeOn((v) => !v)} className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition ${scopeOn ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{scopeOn ? "Scope change applied" : "Apply scope change"}</button>
+              <button aria-pressed={scopeOn} onClick={() => setScopeOn((v) => !v)} className={`rounded-md border px-2.5 py-1 text-xs font-semibold transition ${scopeOn ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{scopeOn ? "Scope change applied" : "Apply scope change"}</button>
             </div>
             <p className="text-xs text-slatey-400">{uc.change.label}, <span className="font-mono">+{changeWeeks}w</span>, concentrated in data + eval.</p>
 
@@ -287,10 +279,10 @@ export function EstimationStudio() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a portfolio estimation model. Real estimation would require delivery history, client scope, technical discovery, staffing rates, vendor constraints, and commercial review.</p>
         </div>
-      </main>
+
       <ToastHost />
       <CommandPalette commands={paletteCommands} />
-    </div>
+    </InstrumentShell>
   );
 }
 

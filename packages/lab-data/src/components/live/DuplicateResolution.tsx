@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { scrollToElement } from "@labs/design-system";
 import { GitMerge, Check, Undo2, ShieldAlert, Copy, Layers } from "lucide-react";
 import type { DuplicateSet } from "@data/lib/prep/resolution";
 import { Panel } from "@data/components/common/Panel";
@@ -40,7 +41,7 @@ export function DuplicateResolution({
   const refs = useRef<Record<string, HTMLLIElement | null>>({});
   useEffect(() => {
     if (focusSetId && refs.current[focusSetId]) {
-      refs.current[focusSetId]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      scrollToElement(refs.current[focusSetId] ?? null, { block: "nearest" });
     }
   }, [focusSetId]);
 

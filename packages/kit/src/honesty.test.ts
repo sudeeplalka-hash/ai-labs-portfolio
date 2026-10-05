@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assertUseCases, coverageFrom, INDUSTRIES, firstHand, studied, type UseCase } from "./industries";
+import { assertUseCases, coverageFrom, INDUSTRIES, firstHand, studied, normalizeUseCaseId, type UseCase } from "./industries";
 import { ALL_USE_CASES, USE_CASE_COVERAGE, USE_CASES_BY_LAB } from "./use-cases";
 
 const validUc = (over: Partial<UseCase> = {}): UseCase => ({
@@ -11,6 +11,15 @@ const validUc = (over: Partial<UseCase> = {}): UseCase => ({
 describe("assertUseCases, honesty enforced at load", () => {
   it("accepts a well-formed use case", () => {
     expect(() => assertUseCases([validUc()])).not.toThrow();
+  });
+  it("rejects IDs that cannot be used directly as static route segments", () => {
+    expect(() => assertUseCases([validUc({ id: "el01-contact center-assist" })])).toThrow(/URL-safe/);
+    expect(() => assertUseCases([validUc({ id: "path/segment" })])).toThrow(/URL-safe/);
+  });
+  it("normalizes the legacy saved ID without changing canonical or unknown IDs", () => {
+    expect(normalizeUseCaseId("el01-contact center-assist")).toBe("el01-contact-center-assist");
+    expect(normalizeUseCaseId("el01-contact-center-assist")).toBe("el01-contact-center-assist");
+    expect(normalizeUseCaseId("unknown case")).toBe("unknown case");
   });
   it("throws when sources is empty", () => {
     expect(() => assertUseCases([validUc({ sources: [] })])).toThrow(/sources/);

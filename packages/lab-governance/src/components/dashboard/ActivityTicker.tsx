@@ -1,8 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useRef } from 'react';
+import { PlaybackControls, useInViewport, usePlayback } from '@labs/design-system';
 import { DecisionBadge } from '@gov/components/shared/Badge';
 
-const POOL = [
+const EXAMPLES = [
   { uc: 'Finance Portfolio Assistant', decision: 'ALLOW', text: 'Variance summary requested' },
   { uc: 'Customer Dispute Assistant', decision: 'REDACT', text: 'PII detected in a dispute note' },
   { uc: 'Finance Portfolio Assistant', decision: 'ESCALATE', text: 'Credit line recommendation requested' },
@@ -12,38 +13,21 @@ const POOL = [
   { uc: 'Agentic Workflow Assistant', decision: 'ESCALATE', text: 'Bulk data export held for review' },
   { uc: 'Finance Portfolio Assistant', decision: 'BLOCK', text: 'Prompt injection attempt blocked' },
 ];
-interface Ev { id: number; uc: string; decision: string; text: string; t: string }
 
 export function ActivityTicker() {
-  const [events, setEvents] = useState<Ev[]>(() => POOL.slice(0, 5).map((e, i) => ({ ...e, id: i, t: `${(i + 1) * 7}s ago` })));
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    let n = 1000;
-    const id = setInterval(() => {
-      const e = POOL[Math.floor(Math.random() * POOL.length)];
-      setEvents((prev) => [{ ...e, id: n++, t: 'just now' }, ...prev.slice(0, 4)]);
-    }, 3500);
-    return () => clearInterval(id);
-  }, []);
-  return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-card">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="relative flex h-2 w-2" aria-hidden="true">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-        </span>
-        <p className="text-sm font-semibold text-slate-700">Live governance activity</p>
-      </div>
-      <div className="space-y-1.5" aria-live="polite" aria-label="Recent governance decisions">
-        {events.map((e) => (
-          <div key={e.id} className="flex items-center gap-3 text-sm">
-            <DecisionBadge decision={e.decision} />
-            <span className="text-slate-700 flex-1 truncate">{e.text}</span>
-            <span className="text-xs text-slate-400 hidden sm:inline truncate max-w-[180px]">{e.uc}</span>
-            <span className="text-xs text-slate-400 w-16 text-right shrink-0">{e.t}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  const ref = useRef<HTMLElement>(null);
+  const visible = useInViewport(ref);
+  const playback = usePlayback({ steps: EXAMPLES.length, intervalMs: 1100, visible });
+  return <section ref={ref} aria-label="Illustrative governance decisions" className="rounded-xl border border-slate-200 bg-white p-4 shadow-card sm:p-5">
+    <h3 className="font-semibold text-slate-900">Decision examples</h3>
+    <p className="mt-1 text-sm text-slate-500">Illustrative records show how each control responds. These are fixed examples, not a live activity feed.</p>
+    <div className="my-4"><PlaybackControls playback={playback} steps={EXAMPLES.length} label="Explore decision examples" /></div>
+    <ol className="divide-y divide-slate-100">
+      {EXAMPLES.slice(0, playback.index).map((event, index) => <li key={`${event.uc}-${event.decision}`} className="grid gap-1 py-3 sm:grid-cols-[auto_1fr] sm:gap-x-4">
+        <div className="flex items-center gap-2"><span className="text-xs tabular-nums text-slate-500">{index + 1}.</span><DecisionBadge decision={event.decision} /></div>
+        <div><p className="text-sm text-slate-700">{event.text}</p><p className="mt-1 text-xs text-slate-500">{event.uc}</p></div>
+      </li>)}
+    </ol>
+    {playback.index === 0 && <p className="text-sm text-slate-500">Choose Step, Play or Show outcome to explore the recorded examples.</p>}
+  </section>;
 }

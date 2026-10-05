@@ -1,3 +1,6 @@
+"use client";
+import { useEffect, useState } from "react";
+import { storyStepHref } from "./StoryJourney";
 // Storylines, the "follow one program end-to-end" view. The labs are instruments;
 // this is the operator using them in sequence on a single program. Each step links
 // (and deep-links via ?uc=) into the relevant lab. Pure presentational; data lives
@@ -5,7 +8,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Compass } from "lucide-react";
-import { STORYLINES, LAB_ROUTES, labHref, INDUSTRIES, type Storyline } from "@labs/kit";
+import { STORYLINES, LAB_ROUTES, INDUSTRIES, type Storyline } from "@labs/kit";
 
 export function Storylines() {
   return (
@@ -37,6 +40,7 @@ export function Storylines() {
           ))}
         </div>
 
+        <div className="mt-8 rounded-xl bg-ink p-6 text-white"><h2 className="text-lg font-semibold">Discuss the decisions behind the tools</h2><p className="mt-2 text-sm text-slate-300">For technology strategy, AI delivery, and operating model conversations.</p><a className="mt-4 inline-flex rounded-lg bg-white px-4 py-2 text-sm font-semibold text-ink" href="mailto:sudeeplalka@gmail.com">Email Sudeep Lalka →</a></div>
         <p className="mt-10 border-t border-line pt-4 text-xs text-slatey-500">
           Every step is a real, working lab. Nothing here is a mockup. Steps marked with an industry chip open that lab
           preloaded to the named use case. Explore the same instruments by industry in the{" "}
@@ -50,8 +54,10 @@ export function Storylines() {
 function StorylineCard({ story }: { story: Storyline }) {
   const ind = INDUSTRIES[story.industry];
   const fh = story.provenance.kind === "firsthand";
+  const [resume,setResume]=useState(0);
+  useEffect(()=>{try{const step=Number(localStorage.getItem(`portfolio-story:${story.id}`));if(step>0&&step<=story.steps.length)setResume(step);}catch{}},[story.id,story.steps.length]);
   return (
-    <section className="overflow-hidden rounded-2xl border bg-white" style={{ borderColor: `${ind.accent}33`, borderLeftWidth: 4, borderLeftColor: ind.accent }}>
+    <section id={story.id} className="scroll-mt-24 overflow-hidden rounded-2xl border bg-white" style={{ borderColor: `${ind.accent}33`, borderLeftWidth: 4, borderLeftColor: ind.accent }}>
       {/* Header */}
       <div className="border-b border-line px-5 py-4" style={{ background: `${ind.accent}0a` }}>
         <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -70,6 +76,7 @@ function StorylineCard({ story }: { story: Storyline }) {
         <p className="mt-2 font-mono text-[11px] text-slatey-500">{story.steps.length} stages · {ind.label}</p>
       </div>
 
+      {resume>0&&<Link className="mx-5 mt-4 inline-flex rounded-lg bg-ink px-4 py-2 text-sm text-white" href={storyStepHref(story.id,resume-1)}>Continue at step {resume}</Link>}
       {/* Timeline */}
       <ol className="relative px-5 py-4">
         {story.steps.map((step, i) => {
@@ -92,7 +99,7 @@ function StorylineCard({ story }: { story: Storyline }) {
               <div className="min-w-0 flex-1 pb-1">
                 <p className="text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{step.stage}</p>
                 <Link
-                  href={labHref(step.labId, step.ucId)}
+                  href={storyStepHref(story.id,i)}
                   className="group mt-0.5 block rounded-lg border border-line px-3 py-2.5 transition hover:border-ink/30 hover:bg-slate-50"
                 >
                   <div className="flex items-center gap-2">

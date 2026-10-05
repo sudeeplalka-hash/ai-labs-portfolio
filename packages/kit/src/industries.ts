@@ -76,6 +76,11 @@ export type Provenance =
 export const firstHand: Provenance = { kind: "firsthand", ownerSignedOff: true };
 export const studied: Provenance = { kind: "studied" };
 
+// Preserve saved links and scenario files authored before the URL-safe ID repair.
+export function normalizeUseCaseId(id: string): string {
+  return id === "el01-contact center-assist" ? "el01-contact-center-assist" : id;
+}
+
 // A use case: an industry-agnostic analyst brief + a lab-specific payload that
 // reconfigures the lab's existing engine via its applyUseCase(payload) adapter.
 export interface UseCase<Payload = unknown> {
@@ -99,6 +104,8 @@ export interface UseCase<Payload = unknown> {
 // Every use case file runs its list through this.
 export function assertUseCases<P>(list: UseCase<P>[]): UseCase<P>[] {
   for (const uc of list) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(uc.id))
+      throw new Error(`[use cases] ${uc.id}: 'id' must be a URL-safe lowercase slug.`);
     if (!uc.sources || uc.sources.length === 0)
       throw new Error(`[use cases] ${uc.id}: 'sources' is required (≥1 entry).`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(uc.lastVerified))

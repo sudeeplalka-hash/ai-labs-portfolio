@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { ModelSelectionView } from "@rag/components/model-selection/ModelSelectionView";
 
-export const metadata = { title: "Model Fit" };
+export const metadata = {
+  ...routeMetadata("Model Fit", "Inspect model fit through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/model"), title: "Model Fit" };
 
 export default function ModelFitPage() {
   return (

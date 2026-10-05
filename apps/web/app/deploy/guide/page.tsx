@@ -1,8 +1,10 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { Rocket, SlidersHorizontal, Gauge, Workflow, Activity, AlertTriangle } from "lucide-react";
 import { LabGuide } from "@/components/shell/LabGuide";
 
-export const metadata: Metadata = { title: "Guide · AI Ops" };
+export const metadata: Metadata = {
+  ...routeMetadata("Guide \u00b7 AI Ops", "Inspect guide \u00b7 ai ops through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/deploy/guide"), title: "Guide · AI Ops" };
 
 export default function Page() {
   return (

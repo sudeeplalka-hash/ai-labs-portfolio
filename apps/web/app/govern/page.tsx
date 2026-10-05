@@ -1,10 +1,12 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { GovernGate } from "@/components/shell/GovernGate";
 import { GovernLoop } from "@/components/govern/GovernLoop";
 import { NextStageCTA } from "@/components/lifecycle/NextStageCTA";
 import ExecutiveCockpit from "@gov/components/ExecutiveCockpit";
 
-export const metadata: Metadata = { title: "Govern" };
+export const metadata: Metadata = {
+  ...routeMetadata("Govern", "Inspect govern through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/govern"), title: "Govern" };
 
 export default function Page() {
   return (

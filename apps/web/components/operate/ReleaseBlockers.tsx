@@ -19,7 +19,7 @@ export function ReleaseBlockers() {
     return (
       <div className="flex items-center gap-2 rounded-xl border border-emerald-600/25 bg-emerald-50/60 px-4 py-2.5 text-sm text-emerald-800">
         <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
-        <span><b>No release blockers.</b> Every gate, readiness check, and critical finding currently passes.</span>
+        <span><b>No modeled release blocker is recorded.</b> This result covers the current program inputs and checks; it does not certify a production release.</span>
       </div>
     );
   }

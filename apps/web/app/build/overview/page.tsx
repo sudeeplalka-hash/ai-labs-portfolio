@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import { Activity, ShieldAlert } from "lucide-react";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { DataSourceToggle } from "@rag/components/live-views/DataSourceToggle";
@@ -56,7 +57,8 @@ function ExecutiveOverviewDemo() {
   );
 }
 
-export const metadata = { title: "Executive Overview" };
+export const metadata = {
+  ...routeMetadata("Executive Overview", "Inspect executive overview through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/overview"), title: "Executive Overview" };
 
 export default function ExecutiveOverviewPage() {
   return (

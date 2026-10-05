@@ -1,8 +1,10 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { ShieldCheck, FolderOpen, FileCode2, ShieldHalf, Swords, Users, ClipboardCheck } from "lucide-react";
 import { LabGuide } from "@/components/shell/LabGuide";
 
-export const metadata: Metadata = { title: "Guide · Govern" };
+export const metadata: Metadata = {
+  ...routeMetadata("Guide \u00b7 Govern", "Inspect guide \u00b7 govern through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/govern/guide"), title: "Guide · Govern" };
 
 export default function Page() {
   return (

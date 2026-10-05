@@ -2,6 +2,8 @@
 // labId → display name + route + collection. Both the Industry Atlas and the
 // Storylines resolve labs through this, so a renamed route can't drift between them.
 
+import { normalizeUseCaseId } from "./industries";
+
 export interface LabRoute {
   name: string;
   href: string;
@@ -43,7 +45,7 @@ export const LAB_ROUTES: Record<string, LabRoute> = {
 export function labHref(labId: string, ucId?: string): string {
   const route = LAB_ROUTES[labId];
   if (!route) return "/";
-  return ucId ? `${route.href}/?uc=${ucId}` : route.href;
+  return ucId ? `${route.href}/?uc=${encodeURIComponent(normalizeUseCaseId(ucId))}` : route.href;
 }
 
 // ---------------------------------------------------------------------------

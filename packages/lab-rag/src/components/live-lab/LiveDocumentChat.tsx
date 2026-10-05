@@ -16,6 +16,8 @@ interface Props {
   sampleQuestions: string[];
   latestQuestion?: string;
   latestAnswer?: GeneratedLiveAnswer;
+  historicalDocument?: string;
+  currentDocument?: string;
   onAsk: (q: string) => void;
 }
 
@@ -25,23 +27,23 @@ const STAGES: { id: QueryStage; label: string; icon: React.ComponentType<{ class
   { id: "evaluating", label: "Evaluating", icon: Brain },
 ];
 
-export function LiveDocumentChat({ ready, isAnswering, queryStage, sampleQuestions, latestQuestion, latestAnswer, onAsk }: Props) {
+export function LiveDocumentChat({ ready, isAnswering, queryStage, sampleQuestions, latestQuestion, latestAnswer, historicalDocument, currentDocument, onAsk }: Props) {
   const [input, setInput] = useState("");
   const submit = (q: string) => {
     if (!q.trim() || isAnswering || !ready) return;
     onAsk(q.trim());
-    setInput("");
+    // Retain the question so a failed API/evaluation can be retried.
   };
   const order: QueryStage[] = ["retrieving", "generating", "evaluating"];
   const cur = queryStage ? order.indexOf(queryStage) : -1;
 
   return (
     <Panel className="flex flex-col">
-      <SectionHeader title="Ask the document" description="The evaluator scores every answer below." icon={MessageSquare} />
+      <SectionHeader title={historicalDocument ? "Saved question and answer" : "Ask the document"} description={historicalDocument ? `Saved run: ${historicalDocument}. ${currentDocument ? `New questions use the current document: ${currentDocument}.` : "Load a document to ask a new question."}` : "The evaluator scores every answer below."} icon={MessageSquare} />
 
       {/* Conversation area */}
       <div className="min-h-[150px] flex-1">
-        {!ready ? (
+        {!ready && !latestQuestion ? (
           <div className="flex h-full items-center gap-2 rounded-lg border border-dashed border-line bg-slate-50 p-4">
             <Lock className="h-4 w-4 shrink-0 text-slatey-500" />
             <p className="text-sm text-slatey-400">Load a document on the left, then ask a question here.</p>
@@ -72,8 +74,9 @@ export function LiveDocumentChat({ ready, isAnswering, queryStage, sampleQuestio
                 <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-ink">
                   <Bot className="h-4 w-4 text-white" />
                 </span>
-                <div className="max-w-[92%] rounded-lg rounded-bl-sm border border-line bg-white px-3 py-2 text-sm leading-relaxed text-slatey-200">
-                  {latestAnswer.answer}
+                <div id="rag-answer" tabIndex={-1} className="min-w-0 max-w-[92%] scroll-mt-24 rounded-lg rounded-bl-sm border border-line bg-white px-3 py-2 text-sm leading-relaxed text-slatey-200">
+                  {latestAnswer.answer.split(/(\[C\d+\])/g).map((part,i) => /^\[C\d+\]$/.test(part) && latestAnswer.citations.includes(part.slice(1,-1)) ? <a key={i} className="rounded bg-blue-50 px-1 font-semibold text-primary underline" href={`#evidence-${part.slice(1,-1)}`}>{part}</a> : <span key={i}>{part}</span>)}
+                  <div className="mt-3 flex flex-wrap gap-2" aria-label="Answer evidence">{latestAnswer.citations.map(c=><a key={c} href={`#evidence-${c}`} className="rounded border border-line px-2 py-1 text-xs text-primary">Inspect {c}</a>)}</div>
                   <div className="mt-2 flex items-center gap-1.5 border-t border-slate-100 pt-1.5">
                     <EngineBadge mode={latestAnswer.mode} label={latestAnswer.engineLabel} size="xs" />
                     {latestAnswer.engineLabel && (
@@ -84,7 +87,7 @@ export function LiveDocumentChat({ ready, isAnswering, queryStage, sampleQuestio
               </div>
             )}
             {isAnswering && (
-              <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/[0.05] px-3 py-2">
+              <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/20 bg-primary/[0.05] px-3 py-2">
                 {STAGES.map((st, i) => {
                   const done = i < cur;
                   const active = i === cur;
@@ -119,11 +122,12 @@ export function LiveDocumentChat({ ready, isAnswering, queryStage, sampleQuestio
         className="mt-3 flex gap-2"
       >
         <input
+          aria-label="Question about your document"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={ready ? "Ask a question…" : "Load a document first"}
           disabled={!ready || isAnswering}
-          className="flex-1 rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink placeholder:text-slatey-500 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:bg-slate-50 disabled:opacity-60"
+          className="min-w-0 flex-1 rounded-lg border border-line bg-white px-3 py-2.5 text-sm text-ink placeholder:text-slatey-500 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:bg-slate-50 disabled:opacity-60"
         />
         <button
           type="submit"

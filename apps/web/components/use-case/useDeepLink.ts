@@ -7,6 +7,7 @@
 // param is absent or unknown, so the lab just opens at its default.
 
 import { useEffect, useRef } from "react";
+import { normalizeUseCaseId } from "@labs/kit";
 
 export function useUseCaseDeepLink(validIds: string[], onSelect: (id: string) => void) {
   const ran = useRef(false);
@@ -18,7 +19,8 @@ export function useUseCaseDeepLink(validIds: string[], onSelect: (id: string) =>
   useEffect(() => {
     if (ran.current || typeof window === "undefined") return;
     ran.current = true;
-    const uc = new URLSearchParams(window.location.search).get("uc");
+    const raw = new URLSearchParams(window.location.search).get("uc");
+    const uc = raw ? normalizeUseCaseId(raw) : null;
     if (uc && ids.current.includes(uc)) cb.current(uc);
   }, []);
 }

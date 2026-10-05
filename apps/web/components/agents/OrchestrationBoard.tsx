@@ -2,19 +2,16 @@
 
 // GAP-03 · Multiagent Orchestration Board (Collection 2 · toolkit · flagship).
 // Supervisor decomposes a goal → agents coordinate over A2A-style messages with
-// visible task-lifecycle states → result assembles → a running cost/latency/quality
-// meter compares this run to a single agent baseline. The meter is the judgment
-// layer: multiagent is a tradeoff, not a party trick.
-//
-// LIVE ready: when a host model endpoint is configured (NEXT_PUBLIC_AGENT_ENDPOINT)
-// the run goes real; with none set it replays a dignified CACHED run, labeled as
-// such, never fake-streamed as if live (§B2 / §A4.4).
+// visible task-lifecycle states → result assembles. Complete authored outcomes
+// compare quality, cost, and latency; optional playback explains the handoffs.
+// No model endpoint is called and playback time is never model latency.
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Search, BarChart3, PenLine, ShieldAlert, Bot, Play, Share2, RotateCcw, Gauge, type LucideIcon } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, usePlayback, useInViewport, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { ExplanationControls, EvidenceTable, CodeEvidence } from "./AgentExperience";
 import { LIVE_MODEL, GAP03_USE_CASES, LABS } from "@labs/kit";
 import { agentTimeline, messageFrames, baselineVsMulti } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
@@ -91,44 +88,30 @@ export function OrchestrationBoard() {
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP03_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
   useUseCaseDeepLink(GAP03_USE_CASES.map((u) => u.id), (id) => selectUseCase(id));
-  const preset: Preset = activeUc ? { key: activeUc.id, label: activeUc.title, ...activeUc.payload } : PRESETS.find((p) => p.key === presetKey)!;
+  const preset: Preset = activeUc ? { key: activeUc.id, label: activeUc.title, ...activeUc.payload } : (PRESETS.find((p) => p.key === presetKey) ?? PRESETS[0]);
   const A = preset.agents.length;
   const frames = messageFrames(preset.messages, preset.agents, preset.goal);
 
-  const [runId, setRunId] = useState(0);
-  const [progress, setProgress] = useState(-1); // -1 idle · 0..A running · >A done
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [speed, setSpeed] = useState(1); // replay speed: 0.5× / 1× / 2×
+  const stageRef = useRef<HTMLDivElement>(null);
+  const stageVisible = useInViewport(stageRef, "0px");
+  const playback = usePlayback({ steps: A + 2, intervalMs: BASE_STEP_MS, initiallyComplete: false, visible: stageVisible });
+  const progress = playback.index - 1;
+  const speed = playback.speed;
+  const setSpeed = playback.setSpeed;
   const [inspected, setInspected] = useState<number | null>(null);
-  const stepMs = Math.round(BASE_STEP_MS / speed);
-
-  useEffect(() => {
-    if (runId === 0) return;
-    setProgress(0);
-    timer.current = setInterval(() => {
-      setProgress((p) => {
-        if (p >= A + 1) { if (timer.current) clearInterval(timer.current); return p; }
-        return p + 1;
-      });
-    }, stepMs);
-    return () => { if (timer.current) clearInterval(timer.current); };
-    // stepMs intentionally omitted: speed applies to the next run, not mid-run.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runId, A]);
-
-  const onPreset = (k: string) => { setPresetKey(k); setActiveUcId(null); setProgress(-1); setRunId(0); setInspected(null); if (timer.current) clearInterval(timer.current); };
-  const selectUseCase = (id: string | null) => { setActiveUcId(id); setProgress(-1); setRunId(0); setInspected(null); if (timer.current) clearInterval(timer.current); };
-  const run = () => setRunId((r) => r + 1);
-  const cycleSpeed = () => setSpeed((s) => (s === 1 ? 2 : s === 2 ? 0.5 : 1));
-
+  const onPreset = (key: string) => { setPresetKey(key); setActiveUcId(null); playback.reset(); setInspected(null); };
+  const selectUseCase = (id: string | null) => { setActiveUcId(id); playback.reset(); setInspected(null); };
+  const run = playback.replay;
+  const cycleSpeed = () => setSpeed(speed === 1 ? 2 : speed === 2 ? 0.5 : 1);
+  const selectEvent = (index: number) => { playback.pause(); playback.setIndex(index + 1); setInspected(index > 0 && index <= A ? index - 1 : null); };
   // Restore a shared run setup (?cfg=) once on mount.
   useEffect(() => {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
     try {
       const cfg = JSON.parse(atob(raw)) as { p?: string; sp?: number };
-      if (cfg.p) setPresetKey(cfg.p);
-      if (typeof cfg.sp === "number") setSpeed(cfg.sp);
+      if (cfg.p && PRESETS.some((preset) => preset.key === cfg.p)) setPresetKey(cfg.p);
+      if (typeof cfg.sp === "number" && [0.5, 1, 2].includes(cfg.sp)) setSpeed(cfg.sp);
     } catch { /* ignore malformed link */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -138,6 +121,7 @@ export function OrchestrationBoard() {
     const cfg = btoa(JSON.stringify({ p: activeUc ? undefined : presetKey, sp: speed }));
     const params = new URLSearchParams(window.location.search);
     params.set("cfg", cfg);
+    if (activeUcId) params.set("uc", activeUcId); else params.delete("uc");
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
     if (navigator.clipboard?.writeText) {
@@ -157,7 +141,7 @@ export function OrchestrationBoard() {
     toast("Run metrics exported as CSV");
   };
   const exportRun = () => {
-    downloadJson(`orchestration-${presetKey}`, { version: 1, preset: presetKey, goal: preset.goal, speed, single: preset.single, multi: preset.multi, assembled: preset.assembled });
+    downloadJson(`orchestration-${presetKey}`, { version: 1, preset: preset.key, useCaseId: activeUcId, mode: "SIMULATED", revealedSteps: playback.index, goal: preset.goal, speed, single: preset.single, multi: preset.multi, assembled: preset.assembled });
     toast("Run exported as JSON");
   };
   const exportActions: ExportAction[] = [
@@ -165,7 +149,7 @@ export function OrchestrationBoard() {
     { id: "json", label: "Export run (JSON)", hint: "Setup + assembled result", onSelect: exportRun },
   ];
   const paletteCommands: Command[] = [
-    { id: "act-run", label: "Run / re run", group: "action", keywords: "start orchestration", run },
+    { id: "act-run", label: "Replay authored explanation", group: "action", keywords: "start orchestration", run },
     { id: "act-speed", label: "Cycle replay speed", group: "action", run: cycleSpeed },
     { id: "act-share", label: "Copy share link", group: "action", keywords: "permalink url", run: shareScenario },
     { id: "act-reset", label: "Reset the board", group: "action", run: resetLab },
@@ -178,48 +162,27 @@ export function OrchestrationBoard() {
 
   const idle = progress === -1;
   const done = progress > A;
-  const agentStatus = (i: number): "idle" | "working" | "done" => idle ? "idle" : progress > i ? "done" : progress === i ? "working" : "idle";
+  const agentStatus = (i: number): "idle" | "working" | "done" => idle ? "idle" : progress > i + 1 ? "done" : progress === i + 1 ? "working" : "idle";
 
   const qualityDelta = Math.round((preset.multi.quality / preset.single.quality - 1) * 100);
   const costMult = (preset.multi.costUsd / preset.single.costUsd).toFixed(1);
   const h2h = baselineVsMulti(preset.single, preset.multi);
-  const frac = idle ? 0 : Math.min(progress, A) / A; // fraction of the run complete, drives the live meter
-  const singleFrac = idle ? 0 : Math.min(1, frac * (preset.multi.latencyS / preset.single.latencyS)); // single agent is faster → finishes first
   const timeline = agentTimeline(preset.agents.map((a) => a.role), preset.multi.latencyS);
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">GAP-03</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Multiagent Orchestration Economics Board</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02", note: "Authored illustrative run" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Multiagent systems can improve output quality, but they are not free. This artifact makes the tradeoff explicit
-            by comparing quality lift against cost and latency multiples relative to a simpler baseline.
-          </p>
-          <p className="mt-1 text-[11px] text-slatey-500">Authored, deterministic run, the steps and the cost/latency/quality figures are hand built to teach the tradeoff, not captured from a live model. A real model variant is on the roadmap.</p>
-        </div>
-
+    <InstrumentShell title="Multiagent Orchestration Board" eyebrow="GAP-03 · Agent architecture" description="Follow a task across agent handoffs, then compare the quality gain with its cost."
+      breadcrumbs={[{ label: "Portfolio", href: "/" }, { label: "Agent architecture", href: "/#collections" }, { label: "Multiagent Orchestration Board" }]}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Default illustrative scenario"} method="Authored A2A-style trace and illustrative metrics; no live model calls" note="Illustrative results support review; they do not establish a production outcome." />}>
+        <DecisionSummary title={h2h.verdict} explanation="Compare the complete authored outcome first, then inspect how this task is handed off. Playback speed is not model latency." metrics={[{ label: "Quality change", value: `${preset.multi.quality - preset.single.quality} model points` }, { label: "Cost multiple", value: `${costMult}×` }, { label: "Latency multiple", value: `${(preset.multi.latencyS / preset.single.latencyS).toFixed(1)}×` }]} />
         <UseCaseRail useCases={GAP03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
         <CaseStudy problem="The enterprise question is not whether multiagent workflows are technically possible. The question is whether the quality gain is worth the added coordination, runtime, observability, and cost." approach="The board shows multiple role agents coordinating through a modeled agent to agent workflow. It tracks how decomposition, role specialization, critique, and synthesis affect the final result and the economics of producing it." why="This connects architecture design to financial impact, service level expectations, user experience, and operational complexity." metric="The head to head scorecard: quality delta vs the single agent baseline and the cost and latency multiples, the ratio, not the demo, is the decision." tradeoff="More agents raise quality and cost and latency together; the single agent baseline finishes first at lower quality. The lab makes that tension literal." outcome="A per task class verdict on whether multiagent is worth it, with the tradeoff quantified, the judgment a delivery leader is accountable for." />
 
         <LabToolbar>
-          <ToolbarButton onClick={run} active title="Run / re run the orchestration">
-            <Play className="h-3.5 w-3.5" /> {idle ? "Run" : "Re-run"}
+          <ToolbarButton onClick={run} title="Replay the authored orchestration explanation">
+            <Play className="h-3.5 w-3.5" /> {idle ? "Play explanation" : "Replay explanation"}
           </ToolbarButton>
-          <ToolbarButton onClick={cycleSpeed} title="Replay speed for the next run">
+          <ToolbarButton onClick={cycleSpeed} title="Change explanation playback speed">
             <Gauge className="h-3.5 w-3.5" /> {speed}× speed
           </ToolbarButton>
           <ToolbarButton onClick={shareScenario} title="Copy a link to this run setup">
@@ -234,9 +197,10 @@ export function OrchestrationBoard() {
           <ExportMenu actions={exportActions} />
         </LabToolbar>
 
+        <div ref={stageRef}><ExplanationControls playback={playback} count={A + 2} label="Authored orchestration" /></div>
         <div className="mb-5 flex flex-wrap items-center gap-2">
           {!activeUc && PRESETS.map((p) => (
-            <button key={p.key} onClick={() => onPreset(p.key)}
+            <button key={p.key} aria-pressed={p.key === presetKey} onClick={() => onPreset(p.key)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${p.key === presetKey ? "border-teal-600 bg-teal-600 text-white" : "border-line bg-white text-slatey-400 hover:border-teal-500/40 hover:text-ink"}`}>{p.label}</button>
           ))}
         </div>
@@ -246,6 +210,11 @@ export function OrchestrationBoard() {
           <span className="text-ink">{preset.goal}</span>
         </div>
 
+        <section className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-4" aria-label="Current task handoff">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">Task {preset.key} · one persistent request</p>
+          <p className="mt-1 font-semibold text-ink">{idle ? "Ready to inspect" : done ? "Assembly complete in this authored trace" : progress === 0 ? "Supervisor decomposes the task" : `${preset.agents[progress - 1]?.role}: ${preset.agents[progress - 1]?.task}`}</p>
+          <div className="mt-3 flex flex-wrap gap-2">{timeline.map((event, index) => <button key={event.label} type="button" aria-pressed={progress === index} className={`min-h-11 rounded-lg border px-3 py-2 text-sm ${progress === index ? "border-primary bg-primary text-white" : "border-line bg-white text-ink"}`} onClick={() => selectEvent(index)}>{index + 1}. {event.label}</button>)}</div>
+        </section>
         <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           {/* Orchestration */}
           <div className="space-y-3">
@@ -253,7 +222,7 @@ export function OrchestrationBoard() {
               <Bot className={`h-5 w-5 ${!idle && progress === 0 ? "text-white" : "text-ink"}`} />
               <div>
                 <p className={`text-sm font-semibold ${!idle && progress === 0 ? "text-white" : "text-ink"}`}>Supervisor</p>
-                <p className={`text-[11px] ${!idle && progress === 0 ? "text-slate-300" : "text-slatey-500"}`}>{idle ? "Idle, press Run" : progress === 0 ? "Decomposing goal into subtasks…" : done ? "Assembled the final result" : "Coordinating agents…"}</p>
+                <p className={`text-[11px] ${!idle && progress === 0 ? "text-slate-300" : "text-slatey-500"}`}>{idle ? "Ready to explain" : progress === 0 ? "Selected: goal decomposition" : done ? "Selected: final authored result" : "Selected: agent coordination"}</p>
               </div>
             </div>
 
@@ -262,12 +231,12 @@ export function OrchestrationBoard() {
                 const st = agentStatus(i);
                 const Icon = ROLE_ICON[a.role];
                 return (
-                  <div key={a.role} className={`rounded-lg border p-3 transition ${st === "working" ? "border-amber-400 bg-amber-50" : st === "done" ? "border-emerald-300 bg-white" : "border-line bg-white opacity-70"}`}>
+                  <div key={a.role} className={`rounded-lg border p-3 transition ${st === "working" ? "border-amber-400 bg-amber-50" : st === "done" ? "border-emerald-300 bg-white" : "border-line bg-white"}`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5"><Icon className="h-4 w-4 text-teal-700" /><p className="text-sm font-semibold text-ink">{a.role}</p></div>
                       <Badge tone={st === "done" ? "emerald" : st === "working" ? "amber" : "slate"}>{st === "working" ? "working" : st === "done" ? "completed" : "idle"}</Badge>
                     </div>
-                    <p className="mt-1 text-[11px] text-slatey-500">{a.task}</p>
+                    <p className="mt-1 text-sm text-slatey-400">{a.task}</p><button type="button" className="mt-2 min-h-11 rounded border border-line px-3 text-xs font-semibold" aria-pressed={progress === i + 1} onClick={() => selectEvent(i + 1)}>Inspect handoff</button>
                     {st === "done" && <p className="mt-1.5 rounded bg-slate-50 px-2 py-1 text-[11px] text-slatey-300">{a.output}</p>}
                   </div>
                 );
@@ -279,14 +248,14 @@ export function OrchestrationBoard() {
               {idle ? <p className="text-xs text-slatey-500">No messages yet.</p> : (
                 <>
                   <ul className="space-y-1 font-mono text-[11px]">
-                    {preset.messages.slice(0, Math.max(0, Math.min(progress + 1, preset.messages.length))).map((m, i) => (
+                    {preset.messages.slice(0, Math.max(0, Math.min(progress, preset.messages.length))).map((m, i) => (
                       <li key={i}>
-                        <button type="button" onClick={() => setInspected(inspected === i ? null : i)}
-                          className={`flex w-full items-center gap-2 rounded px-1 py-0.5 text-left transition hover:bg-slate-50 ${inspected === i ? "bg-slate-50 ring-1 ring-teal-500/30" : ""}`}
+                        <button type="button" onClick={() => { playback.pause(); setInspected(inspected === i ? null : i); }}
+                          className={`flex min-h-11 w-full flex-wrap items-center gap-2 rounded px-2 py-2 text-left transition hover:bg-slate-50 ${inspected === i ? "bg-slate-50 ring-1 ring-teal-500/30" : ""}`}
                           aria-expanded={inspected === i} aria-label={`Inspect A2A frame: ${m.from} to ${m.to}, ${m.label}`}>
                           <span className="text-slatey-500">{m.from}</span><span className="text-teal-700">→</span><span className="text-slatey-500">{m.to}</span>
                           <span className="text-ink">{m.label}</span>
-                          <Badge tone="emerald" className="ml-auto">completed</Badge>
+                          <Badge tone="slate" className="ml-auto">{i < progress - 1 ? "inspected handoff" : "current handoff"}</Badge>
                         </button>
                       </li>
                     ))}
@@ -315,23 +284,12 @@ export function OrchestrationBoard() {
                 <ul className="space-y-1.5 text-sm text-slatey-300">
                   {preset.assembled.map((b, i) => <li key={i} className="flex gap-2"><span className="font-semibold text-teal-700">•</span><span>{b}</span></li>)}
                 </ul>
-              ) : <p className="text-sm text-slatey-500">{idle ? "Run the orchestration to assemble a result." : "Assembling…"}</p>}
+              ) : <p className="text-sm text-slatey-500">Choose Assemble or Show all to inspect the authored final result. It is also available in the complete timeline below.</p>}
             </Panel>
 
             <Panel>
               <p className="stat-label mb-2">Multiagent vs single agent</p>
-              {!idle && (
-                <div className="mb-3 rounded-md bg-slate-50 px-3 py-2">
-                  <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Run cost so far</span><span className="font-mono font-semibold text-ink">${(preset.multi.costUsd * frac).toFixed(3)}<span className="text-slatey-500"> / ${preset.multi.costUsd.toFixed(3)}</span></span></div>
-                  <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-teal-600 transition-all duration-300" style={{ width: `${frac * 100}%` }} /></div>
-                  <div className="mt-1.5 flex items-center justify-between text-[11px]"><span className="text-slatey-500">Elapsed</span><span className="font-mono text-ink">{(preset.multi.latencyS * frac).toFixed(1)}s / {preset.multi.latencyS}s</span></div>
-                  <div className="mt-2 border-t border-line pt-2">
-                    <div className="flex items-center justify-between text-[11px]"><span className="text-slatey-500">Baseline (single agent)</span><span className="font-mono text-ink">{singleFrac >= 1 ? "done" : `${(preset.single.latencyS * singleFrac).toFixed(1)}s / ${preset.single.latencyS}s`}</span></div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-200"><div className="h-full rounded-full bg-slate-400 transition-all duration-300" style={{ width: `${singleFrac * 100}%` }} /></div>
-                    {singleFrac >= 1 && !done && <p className="mt-1 text-[10px] text-slatey-500">Single agent already finished, at {preset.single.quality} quality vs {preset.multi.quality} for multi.</p>}
-                  </div>
-                </div>
-              )}
+              <p className="mb-3 text-sm text-slatey-400">These are complete illustrative outcome values. The explanation does not accrue real cost or measure elapsed model time.</p>
               <Compare label="Quality" single={`${preset.single.quality}`} multi={`${preset.multi.quality}`} sVal={preset.single.quality} mVal={preset.multi.quality} betterHigh />
               <Compare label="Cost / run" single={`$${preset.single.costUsd.toFixed(3)}`} multi={`$${preset.multi.costUsd.toFixed(3)}`} sVal={preset.single.costUsd} mVal={preset.multi.costUsd} />
               <Compare label="Latency" single={`${preset.single.latencyS}s`} multi={`${preset.multi.latencyS}s`} sVal={preset.single.latencyS} mVal={preset.multi.latencyS} />
@@ -382,6 +340,10 @@ export function OrchestrationBoard() {
           </div>
         </div>
 
+        <details className="mt-4 rounded-xl border border-line bg-white p-4"><summary className="cursor-pointer font-semibold">Read the complete timeline and result</summary>
+          <EvidenceTable caption="Authored task timeline" headers={["Stage", "Illustrative duration", "Task/output"]} rows={timeline.map((event) => [event.label, `${event.durationS.toFixed(2)} seconds`, preset.agents.find((agent) => agent.role === event.label)?.output ?? (event.label === "Decompose" ? preset.goal : preset.assembled.join(" "))])} />
+          <CodeEvidence title="Complete authored result" value={{ task: preset.key, mode: "SIMULATED", single: preset.single, multi: preset.multi, result: preset.assembled }} />
+        </details>
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Use multiagent orchestration only when the quality lift justifies the cost and latency multiple." lift="Improves output quality for tasks that benefit from decomposition, critique, and role specialization." measure="Quality lift, cost multiple, latency multiple, rework reduction, user acceptance." />
           <InsightCard title="When multiagent is worth it" tone="info">
@@ -400,8 +362,7 @@ export function OrchestrationBoard() {
         </div>
         <ToastHost />
         <CommandPalette commands={paletteCommands} />
-      </main>
-    </div>
+    </InstrumentShell>
   );
 }
 

@@ -47,7 +47,7 @@ export function ChunkExplorer({
         {filters.map((f) => (
           <button
             key={f.id}
-            onClick={() => setFilter(f.id)}
+            aria-pressed={filter===f.id} onClick={() => setFilter(f.id)}
             className={cn(
               "rounded-md px-2.5 py-1 text-sm font-medium transition-colors",
               filter === f.id ? "bg-primary/10 text-primary ring-1 ring-inset ring-accent/30" : "text-slatey-400 hover:text-ink",
@@ -77,7 +77,7 @@ export function ChunkExplorer({
                     : "border-line bg-navy-850/40",
                 )}
               >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-mono text-[11px] text-slatey-400">{c.id}</span>
                   <div className="flex items-center gap-1.5">
                     {r && <span className="rounded bg-accent/15 px-1.5 py-0.5 text-xs font-medium text-accent-cyan">retrieved · {r.relevanceScore.toFixed(2)}</span>}
@@ -85,7 +85,7 @@ export function ChunkExplorer({
                   </div>
                 </div>
                 {c.heading && <p className="mt-1 text-sm font-semibold text-slatey-300">{c.heading}</p>}
-                <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-slatey-400">{c.text}</p>
+                <details className="mt-2"><summary className="cursor-pointer text-sm text-primary">Read complete passage</summary><p className="mt-2 text-sm leading-relaxed text-slatey-400">{c.text}</p></details>
                 <p className="mt-1.5 text-xs text-slatey-600">{c.characterCount} chars · ~{c.estimatedTokens} tokens</p>
               </div>
             );

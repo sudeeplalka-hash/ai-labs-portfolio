@@ -1,0 +1,32 @@
+{
+  "at": "2026-10-05T07:34:05.395Z",
+  "method": "Evaluated current TypeScript source in separate module loads for both NEXT_PUBLIC_SITE values. Checks metadata helper and sitemap source; not a build, browser or deployed-domain assertion.",
+  "results": [
+    {
+      "identity": "portfolio",
+      "domain": "https://portfolio.sudeeplalka.com",
+      "titleDefault": "Sudeep Lalka: Technology Strategy & AI Artifacts",
+      "homeTitle": "Sudeep Lalka: Technology Strategy & AI Artifacts",
+      "ogImage": "/og-portfolio.png",
+      "sitemapCount": 146,
+      "canonical": "https://portfolio.sudeeplalka.com/business/portfolio",
+      "allSitemapOriginsMatch": true,
+      "unique": true,
+      "legacyAliasesIncluded": false,
+      "status": "passed"
+    },
+    {
+      "identity": "command-center",
+      "domain": "https://ai-labs.sudeeplalka.com",
+      "titleDefault": "AI Program Command Center",
+      "homeTitle": "AI Program Command Center: one initiative, end to end",
+      "ogImage": "/og-command-center.png",
+      "sitemapCount": 146,
+      "canonical": "https://ai-labs.sudeeplalka.com/business/portfolio",
+      "allSitemapOriginsMatch": true,
+      "unique": true,
+      "legacyAliasesIncluded": false,
+      "status": "passed"
+    }
+  ]
+}

@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@data/components/common/PageIntro";
 import { TechnicalDashboard } from "@data/components/dashboard/TechnicalDashboard";
 
-export const metadata = { title: "Technical Pipeline" };
+export const metadata = {
+  ...routeMetadata("Technical Pipeline", "Inspect technical pipeline through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/data/pipeline"), title: "Technical Pipeline" };
 
 export default function Page() {
   return (

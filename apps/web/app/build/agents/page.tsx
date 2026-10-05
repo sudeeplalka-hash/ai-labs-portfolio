@@ -1,9 +1,11 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { Workflow } from "lucide-react";
 import { PageIntro } from "@labs/design-system";
 import { AgentTooling } from "@/components/build/AgentTooling";
 
-export const metadata: Metadata = { title: "Agents & Tools" };
+export const metadata: Metadata = {
+  ...routeMetadata("Agents & Tools", "Inspect agents & tools through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/agents"), title: "Agents & Tools" };
 
 export default function Page() {
   return (

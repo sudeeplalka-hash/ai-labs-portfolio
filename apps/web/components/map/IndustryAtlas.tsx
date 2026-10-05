@@ -5,10 +5,11 @@
 // what actually ships. Rows = industries (sorted by depth); each use case links to
 // its lab. Filter by industry to answer "show me everything you've done in X".
 
-import { useState } from "react";
+import { useDiscovery } from "./useDiscovery";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import {
+  LABS,
   INDUSTRIES,
   USE_CASE_COVERAGE,
   ALL_USE_CASES,
@@ -16,36 +17,11 @@ import {
   type IndustryKey,
 } from "@labs/kit";
 
-// labId → route + display name (the Atlas links each scenario to its lab).
-const LAB_META: Record<string, { name: string; href: string; collection: string }> = {
-  "GAP-01": { name: "MCP Server Contract Workbench", href: "/agents/mcp-playground", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-02": { name: "Agent Failure and Recovery Inspector", href: "/agents/loop-inspector", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-03": { name: "Multiagent Orchestration Economics Board", href: "/agents/orchestration", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-04": { name: "Structured Output Reliability Gate", href: "/agents/structured-output", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-05": { name: "Context and Memory Strategy Evaluator", href: "/agents/context-memory", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-06": { name: "Token Economics Simulator", href: "/agents/cost-simulator", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-07": { name: "Protocol Selection Decision Model", href: "/agents/protocol-selection", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "GAP-08": { name: "Human Review and Autonomy Control Simulator", href: "/agents/hitl", collection: "Agent Architecture and Protocol Strategy Artifacts" },
-  "C3-1": { name: "AI Portfolio Capital Allocation Dashboard", href: "/business/portfolio", collection: "AI Investment Strategy and Portfolio Governance" },
-  "C3-2": { name: "Build, Buy, or Fine Tune Decision Evaluator", href: "/business/build-buy", collection: "AI Investment Strategy and Portfolio Governance" },
-  "C3-3": { name: "Inference Run Rate Forecaster", href: "/business/cost-forecaster", collection: "AI Investment Strategy and Portfolio Governance" },
-  "C3-4": { name: "Vendor Selection and Concentration Risk Monitor", href: "/business/vendor-monitor", collection: "AI Investment Strategy and Portfolio Governance" },
-  "C3-5": { name: "AI Business Case and ROI Builder", href: "/business/roi-builder", collection: "AI Investment Strategy and Portfolio Governance" },
-  "EL-01": { name: "Adoption Readiness Decision Instrument", href: "/engagement/adoption", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-02": { name: "Stakeholder and Sponsor Alignment Cockpit", href: "/engagement/stakeholders", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-03": { name: "Capacity and Skills Coverage Planner", href: "/engagement/capacity", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-04": { name: "Delivery Health and RAID Radar", href: "/engagement/raid-radar", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-05": { name: "AI Compliance Readiness Navigator", href: "/engagement/compliance", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-06": { name: "Talent and Upskilling Pathway Planner", href: "/engagement/talent", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-07": { name: "RFP and Bid Decision War Room", href: "/engagement/rfp", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-08": { name: "Estimation and Scope Control Studio", href: "/engagement/estimation", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-09": { name: "Onboarding and Knowledge Transfer Tracker", href: "/engagement/onboarding", collection: "Operating Model and Transformation Leadership Artifacts" },
-  "EL-10": { name: "Executive Communication Decision Studio", href: "/engagement/exec-comms", collection: "Operating Model and Transformation Leadership Artifacts" },
-};
-
 export function IndustryAtlas() {
-  const [filter, setFilter] = useState<IndustryKey | null>(null);
-  const [firstHandOnly, setFirstHandOnly] = useState(false);
+  const { values, update, remember } = useDiscovery(["industry", "firsthand"]);
+  const filter = (values.industry || null) as IndustryKey | null;
+  const firstHandOnly = values.firsthand === "1";
+  const setFilter = (industry: IndustryKey | null) => update({ industry: industry ?? "" });
   const cov = USE_CASE_COVERAGE;
 
   const industryKeys = (Object.keys(cov.byIndustry) as IndustryKey[]).sort(
@@ -87,6 +63,7 @@ export function IndustryAtlas() {
         {/* Industry filter */}
         <div className="mb-5 flex flex-wrap gap-1.5">
           <button
+            aria-pressed={filter === null}
             onClick={() => setFilter(null)}
             className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
               filter === null ? "border-ink bg-ink text-white" : "border-line bg-white text-slatey-400 hover:text-ink"
@@ -95,7 +72,7 @@ export function IndustryAtlas() {
             All industries
           </button>
           <button
-            onClick={() => setFirstHandOnly((v) => !v)}
+            onClick={() => update({ firsthand: firstHandOnly ? "" : "1" })}
             aria-pressed={firstHandOnly}
             className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
               firstHandOnly ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"
@@ -103,12 +80,13 @@ export function IndustryAtlas() {
           >
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-current" /> Firsthand only
           </button>
-          {visible.map((k) => {
+          {industryKeys.map((k) => {
             const ind = INDUSTRIES[k];
             const on = filter === k;
             return (
               <button
                 key={k}
+                aria-pressed={on}
                 onClick={() => setFilter(on ? null : k)}
                 className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${on ? "text-white" : "bg-white text-slatey-400 hover:text-ink"}`}
                 style={on ? { background: ind.accent, borderColor: ind.accent } : { borderColor: `${ind.accent}44` }}
@@ -121,6 +99,8 @@ export function IndustryAtlas() {
           })}
         </div>
 
+        <p role="status" className="mb-4 text-sm text-slatey-400">{shown.reduce((n,k)=>n+ALL_USE_CASES.filter(uc=>uc.industry===k&&(!firstHandOnly||uc.provenance.kind==="firsthand")).length,0)} scenarios · {filter ? INDUSTRIES[filter]?.label ?? filter : "All industries"}{firstHandOnly ? " · Firsthand only" : ""}</p>
+        {shown.length===0&&<div className="mb-6 rounded-xl border border-line bg-white p-6"><h2 className="font-semibold">No firsthand scenarios in this industry yet</h2><p className="mt-2 text-sm text-slatey-400">Studied examples are still available. Keep this industry and include them, or explore all firsthand work.</p><div className="mt-4 flex flex-wrap gap-3"><button className="rounded-lg bg-ink px-4 py-2 text-sm text-white" onClick={()=>update({firsthand:""})}>Include studied scenarios</button><button className="rounded-lg border border-line px-4 py-2 text-sm" onClick={()=>setFilter(null)}>All industries</button></div></div>}
         {/* Coverage grid */}
         <div className="grid gap-4 md:grid-cols-2">
           {shown.map((k) => {
@@ -141,18 +121,18 @@ export function IndustryAtlas() {
                 </div>
                 <ul className="space-y-1.5">
                   {cases.map((uc) => {
-                    const lab = LAB_META[uc.labId];
+                    const lab = LABS.find((entry) => entry.id === uc.labId);
                     const fh = uc.provenance.kind === "firsthand";
                     return (
                       <li key={uc.id}>
                         <Link
-                          href={labHref(uc.labId, uc.id)}
+                          id={`industry-${uc.id}`} onClick={() => remember(`industry-${uc.id}`)} href={labHref(uc.labId, uc.id)}
                           className="group flex items-start gap-2 rounded-md border border-line px-2.5 py-1.5 transition hover:border-ink/30 hover:bg-slate-50"
                         >
                           <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: fh ? ind.accent : "#cbd5e1" }} title={fh ? "firsthand" : "studied"} />
                           <span className="min-w-0">
                             <span className="block text-[13px] font-medium leading-tight text-ink">{uc.title}</span>
-                            <span className="block text-[11px] text-slatey-500">{lab?.name ?? uc.labId} · {uc.oneLiner}</span>
+                            <span className="block text-[11px] text-slatey-500">{lab?.title ?? uc.labId} · {uc.oneLiner}</span>
                           </span>
                         </Link>
                       </li>

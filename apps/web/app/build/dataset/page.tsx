@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { GoldenDatasetView } from "@rag/components/dataset/GoldenDatasetView";
 
-export const metadata = { title: "Golden Dataset" };
+export const metadata = {
+  ...routeMetadata("Golden Dataset", "Inspect golden dataset through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/dataset"), title: "Golden Dataset" };
 
 export default function DatasetPage() {
   return (

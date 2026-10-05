@@ -1,0 +1,3226 @@
+{
+  "base": "http://localhost:3101",
+  "startedAt": "2026-10-05T07:05:28.935Z",
+  "method": "HTTP GET with full response body; concurrency 2. Checks routing, status, server-rendered title/canonical and source metadata only. No browser interaction or visual assertions.",
+  "templateCount": 84,
+  "results": [
+    {
+      "template": "/",
+      "route": "/",
+      "source": "apps/web/app/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Sudeep Lalka: Technology Strategy &amp; AI Artifacts",
+      "canonical": "https://portfolio.sudeeplalka.com/",
+      "bytes": 90400,
+      "durationMs": 7638
+    },
+    {
+      "template": "/agents/context-memory",
+      "route": "/agents/context-memory",
+      "source": "apps/web/app/agents/context-memory/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-05 · Context and Memory Strategy Evaluator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/context-memory/",
+      "bytes": 33445,
+      "durationMs": 9044
+    },
+    {
+      "template": "/agents/cost-simulator",
+      "route": "/agents/cost-simulator",
+      "source": "apps/web/app/agents/cost-simulator/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-06 · Token Economics Simulator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/cost-simulator/",
+      "bytes": 43824,
+      "durationMs": 5917
+    },
+    {
+      "template": "/agents/hitl",
+      "route": "/agents/hitl",
+      "source": "apps/web/app/agents/hitl/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-08 · Human Review and Autonomy Control Simulator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/hitl/",
+      "bytes": 48071,
+      "durationMs": 4297
+    },
+    {
+      "template": "/agents/mcp-playground",
+      "route": "/agents/mcp-playground",
+      "source": "apps/web/app/agents/mcp-playground/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-01 · MCP Server Contract Workbench · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/mcp-playground/",
+      "bytes": 40609,
+      "durationMs": 4522
+    },
+    {
+      "template": "/agents/loop-inspector",
+      "route": "/agents/loop-inspector",
+      "source": "apps/web/app/agents/loop-inspector/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-02 · Agent Failure and Recovery Inspector · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/loop-inspector/",
+      "bytes": 31914,
+      "durationMs": 4534
+    },
+    {
+      "template": "/agents/protocol-selection",
+      "route": "/agents/protocol-selection",
+      "source": "apps/web/app/agents/protocol-selection/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-07 · Protocol Selection Decision Model · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/protocol-selection/",
+      "bytes": 55542,
+      "durationMs": 449
+    },
+    {
+      "template": "/agents/orchestration",
+      "route": "/agents/orchestration",
+      "source": "apps/web/app/agents/orchestration/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-03 · Multiagent Orchestration Economics Board · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/orchestration/",
+      "bytes": 49017,
+      "durationMs": 459
+    },
+    {
+      "template": "/agents/structured-output",
+      "route": "/agents/structured-output",
+      "source": "apps/web/app/agents/structured-output/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-04 · Structured Output Reliability Gate · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/structured-output/",
+      "bytes": 33425,
+      "durationMs": 4523
+    },
+    {
+      "template": "/architecture",
+      "route": "/architecture",
+      "source": "apps/web/app/architecture/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Architecture and implementation · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/architecture/",
+      "bytes": 73513,
+      "durationMs": 4525
+    },
+    {
+      "template": "/build",
+      "route": "/build",
+      "source": "apps/web/app/build/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Build · RAG · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/",
+      "bytes": 31096,
+      "durationMs": 7758
+    },
+    {
+      "template": "/build/agents",
+      "route": "/build/agents",
+      "source": "apps/web/app/build/agents/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Agents &amp; Tools · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/agents/",
+      "bytes": 87901,
+      "durationMs": 7949
+    },
+    {
+      "template": "/build/dataset",
+      "route": "/build/dataset",
+      "source": "apps/web/app/build/dataset/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Golden Dataset · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/dataset/",
+      "bytes": 89980,
+      "durationMs": 5903
+    },
+    {
+      "template": "/build/answers",
+      "route": "/build/answers",
+      "source": "apps/web/app/build/answers/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Answer Quality · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/answers/",
+      "bytes": 102237,
+      "durationMs": 6164
+    },
+    {
+      "template": "/build/evaluations",
+      "route": "/build/evaluations",
+      "source": "apps/web/app/build/evaluations/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Evaluation Runs · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/evaluations/",
+      "bytes": 48059,
+      "durationMs": 8204
+    },
+    {
+      "template": "/build/failures",
+      "route": "/build/failures",
+      "source": "apps/web/app/build/failures/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Failure Analysis · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/failures/",
+      "bytes": 69324,
+      "durationMs": 8209
+    },
+    {
+      "template": "/build/guide",
+      "route": "/build/guide",
+      "source": "apps/web/app/build/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Build · RAG · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/guide/",
+      "bytes": 64176,
+      "durationMs": 7303
+    },
+    {
+      "template": "/build/internals",
+      "route": "/build/internals",
+      "source": "apps/web/app/build/internals/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Under the Hood · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/internals/",
+      "bytes": 107436,
+      "durationMs": 7372
+    },
+    {
+      "template": "/build/model",
+      "route": "/build/model",
+      "source": "apps/web/app/build/model/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Model Fit · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/model/",
+      "bytes": 97615,
+      "durationMs": 9450
+    },
+    {
+      "template": "/build/overview",
+      "route": "/build/overview",
+      "source": "apps/web/app/build/overview/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Executive Overview · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/overview/",
+      "bytes": 120526,
+      "durationMs": 9357
+    },
+    {
+      "template": "/build/retrieval",
+      "route": "/build/retrieval",
+      "source": "apps/web/app/build/retrieval/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Retrieval Quality · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/retrieval/",
+      "bytes": 98100,
+      "durationMs": 7130
+    },
+    {
+      "template": "/build/quality-gates",
+      "route": "/build/quality-gates",
+      "source": "apps/web/app/build/quality-gates/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Quality Gates · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/quality-gates/",
+      "bytes": 73641,
+      "durationMs": 7184
+    },
+    {
+      "template": "/build/traces",
+      "route": "/build/traces",
+      "source": "apps/web/app/build/traces/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Query Trace Explorer · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/traces/",
+      "bytes": 56319,
+      "durationMs": 7169
+    },
+    {
+      "template": "/build/training",
+      "route": "/build/training",
+      "source": "apps/web/app/build/training/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Training Readiness · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/training/",
+      "bytes": 55596,
+      "durationMs": 7168
+    },
+    {
+      "template": "/builds/eval-bench",
+      "route": "/builds/eval-bench",
+      "source": "apps/web/app/builds/eval-bench/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "LB-03 · Model Evaluation &amp; Threshold Economics · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/builds/eval-bench/",
+      "bytes": 51706,
+      "durationMs": 5312
+    },
+    {
+      "template": "/business/build-buy",
+      "route": "/business/build-buy",
+      "source": "apps/web/app/business/build-buy/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-2 · Build, Buy, or Fine Tune Decision Evaluator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/build-buy/",
+      "bytes": 34906,
+      "durationMs": 5319
+    },
+    {
+      "template": "/business/cost-forecaster",
+      "route": "/business/cost-forecaster",
+      "source": "apps/web/app/business/cost-forecaster/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-3 · Inference Run Rate Forecaster · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/cost-forecaster/",
+      "bytes": 38676,
+      "durationMs": 5857
+    },
+    {
+      "template": "/business/portfolio",
+      "route": "/business/portfolio",
+      "source": "apps/web/app/business/portfolio/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-1 · AI Portfolio Capital Allocation Dashboard · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/portfolio/",
+      "bytes": 50115,
+      "durationMs": 5846
+    },
+    {
+      "template": "/business/vendor-monitor",
+      "route": "/business/vendor-monitor",
+      "source": "apps/web/app/business/vendor-monitor/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-4 · Vendor Selection and Concentration Risk Monitor · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/vendor-monitor/",
+      "bytes": 32042,
+      "durationMs": 8029
+    },
+    {
+      "template": "/business/roi-builder",
+      "route": "/business/roi-builder",
+      "source": "apps/web/app/business/roi-builder/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-5 · AI Business Case and ROI Builder · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/roi-builder/",
+      "bytes": 38683,
+      "durationMs": 8036
+    },
+    {
+      "template": "/data",
+      "route": "/data",
+      "source": "apps/web/app/data/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Data · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/",
+      "bytes": 28829,
+      "durationMs": 8087
+    },
+    {
+      "template": "/changelog",
+      "route": "/changelog",
+      "source": "apps/web/app/changelog/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Changelog · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/changelog/",
+      "bytes": 44739,
+      "durationMs": 8319
+    },
+    {
+      "template": "/data/corpus",
+      "route": "/data/corpus",
+      "source": "apps/web/app/data/corpus/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Corpus Builder · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/corpus/",
+      "bytes": 35914,
+      "durationMs": 20612
+    },
+    {
+      "template": "/data/guide",
+      "route": "/data/guide",
+      "source": "apps/web/app/data/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Prep &amp; Guidelines Guide · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/guide/",
+      "bytes": 81471,
+      "durationMs": 20659
+    },
+    {
+      "template": "/data/overview",
+      "route": "/data/overview",
+      "source": "apps/web/app/data/overview/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Executive Overview · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/overview/",
+      "bytes": 51819,
+      "durationMs": 9291
+    },
+    {
+      "template": "/data/pipeline",
+      "route": "/data/pipeline",
+      "source": "apps/web/app/data/pipeline/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Technical Pipeline · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/pipeline/",
+      "bytes": 51120,
+      "durationMs": 9021
+    },
+    {
+      "template": "/deploy",
+      "route": "/deploy",
+      "source": "apps/web/app/deploy/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Deploy · AI Ops · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/deploy/",
+      "bytes": 28831,
+      "durationMs": 9689
+    },
+    {
+      "template": "/deploy/guide",
+      "route": "/deploy/guide",
+      "source": "apps/web/app/deploy/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · AI Ops · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/deploy/guide/",
+      "bytes": 56123,
+      "durationMs": 9713
+    },
+    {
+      "template": "/engagement/capacity",
+      "route": "/engagement/capacity",
+      "source": "apps/web/app/engagement/capacity/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-03 · Capacity and Skills Coverage Planner · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/capacity/",
+      "bytes": 33826,
+      "durationMs": 6562
+    },
+    {
+      "template": "/engagement/adoption",
+      "route": "/engagement/adoption",
+      "source": "apps/web/app/engagement/adoption/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-01 · Adoption Readiness Decision Instrument · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/adoption/",
+      "bytes": 55423,
+      "durationMs": 6574
+    },
+    {
+      "template": "/engagement/compliance",
+      "route": "/engagement/compliance",
+      "source": "apps/web/app/engagement/compliance/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-05 · AI Compliance Readiness Navigator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/compliance/",
+      "bytes": 38010,
+      "durationMs": 8826
+    },
+    {
+      "template": "/engagement/estimation",
+      "route": "/engagement/estimation",
+      "source": "apps/web/app/engagement/estimation/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-08 · Estimation and Scope Control Studio · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/estimation/",
+      "bytes": 34814,
+      "durationMs": 8829
+    },
+    {
+      "template": "/engagement/onboarding",
+      "route": "/engagement/onboarding",
+      "source": "apps/web/app/engagement/onboarding/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-09 · Onboarding and Knowledge Transfer Tracker · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/onboarding/",
+      "bytes": 33191,
+      "durationMs": 10385
+    },
+    {
+      "template": "/engagement/exec-comms",
+      "route": "/engagement/exec-comms",
+      "source": "apps/web/app/engagement/exec-comms/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-10 · Executive Communication Decision Studio · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/exec-comms/",
+      "bytes": 35676,
+      "durationMs": 10403
+    },
+    {
+      "template": "/engagement/raid-radar",
+      "route": "/engagement/raid-radar",
+      "source": "apps/web/app/engagement/raid-radar/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-04 · Delivery Health and RAID Radar · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/raid-radar/",
+      "bytes": 44743,
+      "durationMs": 14597
+    },
+    {
+      "template": "/engagement/rfp",
+      "route": "/engagement/rfp",
+      "source": "apps/web/app/engagement/rfp/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-07 · RFP and Bid Decision War Room · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/rfp/",
+      "bytes": 34030,
+      "durationMs": 14600
+    },
+    {
+      "template": "/engagement/stakeholders",
+      "route": "/engagement/stakeholders",
+      "source": "apps/web/app/engagement/stakeholders/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-02 · Stakeholder and Sponsor Alignment Cockpit · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/stakeholders/",
+      "bytes": 41533,
+      "durationMs": 283
+    },
+    {
+      "template": "/engagement/talent",
+      "route": "/engagement/talent",
+      "source": "apps/web/app/engagement/talent/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-06 · Talent and Upskilling Pathway Planner · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/talent/",
+      "bytes": 35906,
+      "durationMs": 9794
+    },
+    {
+      "template": "/frame",
+      "route": "/frame",
+      "source": "apps/web/app/frame/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Strategy &amp; Planning · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/frame/",
+      "bytes": 110634,
+      "durationMs": 9522
+    },
+    {
+      "template": "/govern",
+      "route": "/govern",
+      "source": "apps/web/app/govern/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/",
+      "bytes": 32128,
+      "durationMs": 7605
+    },
+    {
+      "template": "/frame/guide",
+      "route": "/frame/guide",
+      "source": "apps/web/app/frame/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Strategy &amp; Planning · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/frame/guide/",
+      "bytes": 58597,
+      "durationMs": 7653
+    },
+    {
+      "template": "/govern/audit-logs",
+      "route": "/govern/audit-logs",
+      "source": "apps/web/app/govern/audit-logs/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Audit log explorer · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/audit-logs/",
+      "bytes": 37173,
+      "durationMs": 7529
+    },
+    {
+      "template": "/govern/arcade",
+      "route": "/govern/arcade",
+      "source": "apps/web/app/govern/arcade/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Risk and control scenarios · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/arcade/",
+      "bytes": 40831,
+      "durationMs": 7574
+    },
+    {
+      "template": "/govern/brief",
+      "route": "/govern/brief",
+      "source": "apps/web/app/govern/brief/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance executive brief · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/brief/",
+      "bytes": 35885,
+      "durationMs": 7692
+    },
+    {
+      "template": "/govern/docs",
+      "route": "/govern/docs",
+      "source": "apps/web/app/govern/docs/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance documentation · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/docs/",
+      "bytes": 48305,
+      "durationMs": 7693
+    },
+    {
+      "template": "/govern/evidence",
+      "route": "/govern/evidence",
+      "source": "apps/web/app/govern/evidence/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Evidence packet · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/evidence/",
+      "bytes": 34339,
+      "durationMs": 7784
+    },
+    {
+      "template": "/govern/evals",
+      "route": "/govern/evals",
+      "source": "apps/web/app/govern/evals/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance evaluations · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/evals/",
+      "bytes": 34377,
+      "durationMs": 7794
+    },
+    {
+      "template": "/govern/live",
+      "route": "/govern/live",
+      "source": "apps/web/app/govern/live/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance evidence loop · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/live/",
+      "bytes": 39120,
+      "durationMs": 21370
+    },
+    {
+      "template": "/govern/guide",
+      "route": "/govern/guide",
+      "source": "apps/web/app/govern/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Govern · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/guide/",
+      "bytes": 63513,
+      "durationMs": 21381
+    },
+    {
+      "template": "/govern/maturity",
+      "route": "/govern/maturity",
+      "source": "apps/web/app/govern/maturity/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance maturity · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/maturity/",
+      "bytes": 41259,
+      "durationMs": 15456
+    },
+    {
+      "template": "/govern/playground",
+      "route": "/govern/playground",
+      "source": "apps/web/app/govern/playground/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Policy playground · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/playground/",
+      "bytes": 37149,
+      "durationMs": 15454
+    },
+    {
+      "template": "/govern/readiness",
+      "route": "/govern/readiness",
+      "source": "apps/web/app/govern/readiness/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance readiness · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/readiness/",
+      "bytes": 42948,
+      "durationMs": 6439
+    },
+    {
+      "template": "/govern/policies",
+      "route": "/govern/policies",
+      "source": "apps/web/app/govern/policies/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Policy controls · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/policies/",
+      "bytes": 34318,
+      "durationMs": 6446
+    },
+    {
+      "template": "/govern/review-queue",
+      "route": "/govern/review-queue",
+      "source": "apps/web/app/govern/review-queue/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Human review queue · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/review-queue/",
+      "bytes": 35636,
+      "durationMs": 13938
+    },
+    {
+      "template": "/govern/realize",
+      "route": "/govern/realize",
+      "source": "apps/web/app/govern/realize/page.tsx",
+      "legacyRedirectTarget": "/realize",
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Realize · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/realize/",
+      "bytes": 33131,
+      "durationMs": 13947
+    },
+    {
+      "template": "/govern/settings",
+      "route": "/govern/settings",
+      "source": "apps/web/app/govern/settings/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Model and connection settings · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/settings/",
+      "bytes": 36540,
+      "durationMs": 13130,
+      "metadataInitially": false
+    },
+    {
+      "template": "/govern/risk",
+      "route": "/govern/risk",
+      "source": "apps/web/app/govern/risk/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Risk intelligence · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/risk/",
+      "bytes": 34294,
+      "durationMs": 13141
+    },
+    {
+      "template": "/govern/simulator",
+      "route": "/govern/simulator",
+      "source": "apps/web/app/govern/simulator/page.tsx",
+      "legacyRedirectTarget": "/govern",
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Simulator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/",
+      "bytes": 33171,
+      "durationMs": 8749
+    },
+    {
+      "template": "/govern/tour",
+      "route": "/govern/tour",
+      "source": "apps/web/app/govern/tour/page.tsx",
+      "legacyRedirectTarget": "/govern",
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Tour · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/",
+      "bytes": 33061,
+      "durationMs": 8745
+    },
+    {
+      "template": "/govern/use-cases",
+      "route": "/govern/use-cases",
+      "source": "apps/web/app/govern/use-cases/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance use-case registry · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/use-cases/",
+      "bytes": 35783,
+      "durationMs": 17104
+    },
+    {
+      "template": "/govern/use-cases/[id]",
+      "route": "/govern/use-cases/11111111-1111-1111-1111-111111111111",
+      "source": "apps/web/app/govern/use-cases/[id]/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Modeled governance use case",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/use-cases/11111111-1111-1111-1111-111111111111/",
+      "bytes": 34756,
+      "durationMs": 18900,
+      "metadataInitially": false
+    },
+    {
+      "template": "/govern/value",
+      "route": "/govern/value",
+      "source": "apps/web/app/govern/value/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance value · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/value/",
+      "bytes": 40713,
+      "durationMs": 4742
+    },
+    {
+      "template": "/govern/use-cases/new",
+      "route": "/govern/use-cases/new",
+      "source": "apps/web/app/govern/use-cases/new/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Create a modeled use case",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/use-cases/new/",
+      "bytes": 39171,
+      "durationMs": 6547,
+      "metadataInitially": false
+    },
+    {
+      "template": "/industries",
+      "route": "/industries",
+      "source": "apps/web/app/industries/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Industry Atlas · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/industries/",
+      "bytes": 77206,
+      "durationMs": 6994
+    },
+    {
+      "template": "/industries/uc/[id]",
+      "route": "/industries/uc/c31-retail-bank",
+      "source": "apps/web/app/industries/uc/[id]/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 500,
+      "title": null,
+      "canonical": null,
+      "bytes": 4628,
+      "durationMs": 21884
+    },
+    {
+      "template": "/lifecycle",
+      "route": "/lifecycle",
+      "source": "apps/web/app/lifecycle/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Enterprise AI Lifecycle · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/lifecycle/",
+      "bytes": 53562,
+      "durationMs": 16760
+    },
+    {
+      "template": "/operate",
+      "route": "/operate",
+      "source": "apps/web/app/operate/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Operate · Day Two Observability · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/operate/",
+      "bytes": 27920,
+      "durationMs": 15112
+    },
+    {
+      "template": "/operate/guide",
+      "route": "/operate/guide",
+      "source": "apps/web/app/operate/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Operate · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/operate/guide/",
+      "bytes": 58221,
+      "durationMs": 13255
+    },
+    {
+      "template": "/realize",
+      "route": "/realize",
+      "source": "apps/web/app/realize/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Realize · Business Outcome · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/realize/",
+      "bytes": 29831,
+      "durationMs": 11108
+    },
+    {
+      "template": "/realize/guide",
+      "route": "/realize/guide",
+      "source": "apps/web/app/realize/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Realize · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/realize/guide/",
+      "bytes": 59983,
+      "durationMs": 11113
+    },
+    {
+      "template": "/story",
+      "route": "/story",
+      "source": "apps/web/app/story/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Storyline · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/story/",
+      "bytes": 26780,
+      "durationMs": 7421
+    },
+    {
+      "template": "/roadmap",
+      "route": "/roadmap",
+      "source": "apps/web/app/roadmap/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Product roadmap · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/roadmap/",
+      "bytes": 50081,
+      "durationMs": 7444
+    },
+    {
+      "template": "/story/brief",
+      "route": "/story/brief",
+      "source": "apps/web/app/story/brief/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Board Brief · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/story/brief/",
+      "bytes": 27311,
+      "durationMs": 7353
+    },
+    {
+      "template": "/storylines",
+      "route": "/storylines",
+      "source": "apps/web/app/storylines/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Storylines · one program, end to end · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/storylines/",
+      "bytes": 52210,
+      "durationMs": 7349
+    }
+  ],
+  "completedAt": "2026-10-05T07:11:58.650Z",
+  "summary": {
+    "successful": 84,
+    "failed": 0,
+    "sourceMetadata": 84,
+    "canonicals": 84,
+    "legacyRedirects": 3
+  },
+  "initialSummary": {
+    "successful": 83,
+    "failed": 1,
+    "sourceMetadata": 81,
+    "canonicals": 83,
+    "legacyRedirects": 3
+  },
+  "scenarioSweep": {
+    "startedAt": "2026-10-05T07:33:01.664Z",
+    "generatedIdCount": 69,
+    "method": "HTTP GET of every ID emitted by the industry scenario registry, concurrency 2; no visual or interaction assertion.",
+    "results": [
+      {
+        "id": "gap01-healthcare-ehr",
+        "route": "/industries/uc/gap01-healthcare-ehr",
+        "status": 200,
+        "title": "Wrap an EHR (FHIR R4) for a care agent · Healthcare · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap01-healthcare-ehr/",
+        "durationMs": 387
+      },
+      {
+        "id": "gap01-retail-oms",
+        "route": "/industries/uc/gap01-retail-oms",
+        "status": 200,
+        "title": "Order management + returns as tools · Retail &amp; e commerce · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap01-retail-oms/",
+        "durationMs": 260
+      },
+      {
+        "id": "gap01-manufacturing-mes",
+        "route": "/industries/uc/gap01-manufacturing-mes",
+        "status": 200,
+        "title": "MES / historian, read only across OT/IT · Manufacturing · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap01-manufacturing-mes/",
+        "durationMs": 121
+      },
+      {
+        "id": "gap02-insurance-fnol",
+        "route": "/industries/uc/gap02-insurance-fnol",
+        "status": 200,
+        "title": "FNOL triage, the validation gate as fraud control · Insurance · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap02-insurance-fnol/",
+        "durationMs": 127
+      },
+      {
+        "id": "gap02-cyber-soc-triage",
+        "route": "/industries/uc/gap02-cyber-soc-triage",
+        "status": 200,
+        "title": "SOC alert triage, breaking the flapping alert loop · Cybersecurity · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap02-cyber-soc-triage/",
+        "durationMs": 129
+      },
+      {
+        "id": "gap02-telecom-noc",
+        "route": "/industries/uc/gap02-telecom-noc",
+        "status": 200,
+        "title": "NOC incident correlation, 503 under load · Telecom · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap02-telecom-noc/",
+        "durationMs": 150
+      },
+      {
+        "id": "gap03-legal-msa-swarm",
+        "route": "/industries/uc/gap03-legal-msa-swarm",
+        "status": 200,
+        "title": "Contract review swarm on an MSA · Legal · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap03-legal-msa-swarm/",
+        "durationMs": 117
+      },
+      {
+        "id": "gap03-pharma-phase2-ci",
+        "route": "/industries/uc/gap03-pharma-phase2-ci",
+        "status": 200,
+        "title": "Competitive intel brief on a Phase II readout · Pharma &amp; life sciences · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap03-pharma-phase2-ci/",
+        "durationMs": 136
+      },
+      {
+        "id": "gap03-capmkts-research-swarm",
+        "route": "/industries/uc/gap03-capmkts-research-swarm",
+        "status": 200,
+        "title": "Equity research swarm on an investment thesis · Capital markets · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap03-capmkts-research-swarm/",
+        "durationMs": 126
+      },
+      {
+        "id": "gap04-healthcare-rcm",
+        "route": "/industries/uc/gap04-healthcare-rcm",
+        "status": 200,
+        "title": "Clinical note → claim codes · Healthcare · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap04-healthcare-rcm/",
+        "durationMs": 145
+      },
+      {
+        "id": "gap04-logistics-exception",
+        "route": "/industries/uc/gap04-logistics-exception",
+        "status": 200,
+        "title": "Carrier email → shipment exception · Logistics &amp; supply chain · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap04-logistics-exception/",
+        "durationMs": 140
+      },
+      {
+        "id": "gap04-realestate-lease",
+        "route": "/industries/uc/gap04-realestate-lease",
+        "status": 200,
+        "title": "Commercial lease → key terms · Real estate / proptech · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap04-realestate-lease/",
+        "durationMs": 142
+      },
+      {
+        "id": "gap05-saas-support-thread",
+        "route": "/industries/uc/gap05-saas-support-thread",
+        "status": 200,
+        "title": "A 40-turn support thread across two sessions · Technology / SaaS · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap05-saas-support-thread/",
+        "durationMs": 131
+      },
+      {
+        "id": "gap05-legal-ediscovery",
+        "route": "/industries/uc/gap05-legal-ediscovery",
+        "status": 200,
+        "title": "50k document e discovery under budget · Legal · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap05-legal-ediscovery/",
+        "durationMs": 115
+      },
+      {
+        "id": "gap05-wealth-continuity",
+        "route": "/industries/uc/gap05-wealth-continuity",
+        "status": 200,
+        "title": "Client goals across quarterly reviews · Capital markets · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap05-wealth-continuity/",
+        "durationMs": 125
+      },
+      {
+        "id": "gap06-retail-sku-copy",
+        "route": "/industries/uc/gap06-retail-sku-copy",
+        "status": 200,
+        "title": "Refresh copy for 4M SKUs · Retail &amp; e commerce · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap06-retail-sku-copy/",
+        "durationMs": 129
+      },
+      {
+        "id": "gap06-telecom-call-summaries",
+        "route": "/industries/uc/gap06-telecom-call-summaries",
+        "status": 200,
+        "title": "Summarize 1.2M care calls a month · Telecom · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap06-telecom-call-summaries/",
+        "durationMs": 137
+      },
+      {
+        "id": "gap06-adtech-variants",
+        "route": "/industries/uc/gap06-adtech-variants",
+        "status": 200,
+        "title": "30 creative variants × thousands of campaigns · Marketing &amp; adtech · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap06-adtech-variants/",
+        "durationMs": 160
+      },
+      {
+        "id": "gap07-bank-hybrid",
+        "route": "/industries/uc/gap07-bank-hybrid",
+        "status": 200,
+        "title": "Enterprise bank, MCP core + A2A · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap07-bank-hybrid/",
+        "durationMs": 131
+      },
+      {
+        "id": "gap07-startup-fc",
+        "route": "/industries/uc/gap07-startup-fc",
+        "status": 200,
+        "title": "Startup, two tools, ship this quarter · Technology / SaaS · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap07-startup-fc/",
+        "durationMs": 125
+      },
+      {
+        "id": "gap07-supplychain-a2a",
+        "route": "/industries/uc/gap07-supplychain-a2a",
+        "status": 200,
+        "title": "Supply chain, cross org agent negotiation · Logistics &amp; supply chain · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap07-supplychain-a2a/",
+        "durationMs": 138
+      },
+      {
+        "id": "gap08-lending-credit",
+        "route": "/industries/uc/gap08-lending-credit",
+        "status": 200,
+        "title": "Credit decisions, autonomy by fair lending risk · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap08-lending-credit/",
+        "durationMs": 136
+      },
+      {
+        "id": "gap08-content-moderation",
+        "route": "/industries/uc/gap08-content-moderation",
+        "status": 200,
+        "title": "Content moderation, the throughput vs harm curve · Media &amp; entertainment · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap08-content-moderation/",
+        "durationMs": 129
+      },
+      {
+        "id": "gap08-clinical-orders",
+        "route": "/industries/uc/gap08-clinical-orders",
+        "status": 200,
+        "title": "Clinical orders, acuity as the autonomy dial · Healthcare · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap08-clinical-orders/",
+        "durationMs": 112
+      },
+      {
+        "id": "c31-retail-bank",
+        "route": "/industries/uc/c31-retail-bank",
+        "status": 200,
+        "title": "A retail bank&#x27;s AI book · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-retail-bank/",
+        "durationMs": 121
+      },
+      {
+        "id": "c31-health-system",
+        "route": "/industries/uc/c31-health-system",
+        "status": 200,
+        "title": "A health system&#x27;s AI book · Healthcare · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-health-system/",
+        "durationMs": 119
+      },
+      {
+        "id": "c31-manufacturer",
+        "route": "/industries/uc/c31-manufacturer",
+        "status": 200,
+        "title": "A manufacturer&#x27;s AI book · Manufacturing · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-manufacturer/",
+        "durationMs": 112
+      },
+      {
+        "id": "c32-legal-contract-analysis",
+        "route": "/industries/uc/c32-legal-contract-analysis",
+        "status": 200,
+        "title": "Contract analysis: buy, build, or fine tune? · Legal · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c32-legal-contract-analysis/",
+        "durationMs": 113
+      },
+      {
+        "id": "c32-media-localization",
+        "route": "/industries/uc/c32-media-localization",
+        "status": 200,
+        "title": "High volume localization at scale · Media &amp; entertainment · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c32-media-localization/",
+        "durationMs": 126
+      },
+      {
+        "id": "c32-bank-fraud-model",
+        "route": "/industries/uc/c32-bank-fraud-model",
+        "status": 200,
+        "title": "Fraud model: build or buy? · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c32-bank-fraud-model/",
+        "durationMs": 122
+      },
+      {
+        "id": "c33-consumer-social-chat",
+        "route": "/industries/uc/c33-consumer-social-chat",
+        "status": 200,
+        "title": "A chat feature at tens of millions of DAU · Technology / SaaS · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c33-consumer-social-chat/",
+        "durationMs": 118
+      },
+      {
+        "id": "c33-insurance-claims-docs",
+        "route": "/industries/uc/c33-insurance-claims-docs",
+        "status": 200,
+        "title": "Document heavy claims processing · Insurance · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c33-insurance-claims-docs/",
+        "durationMs": 123
+      },
+      {
+        "id": "c33-telecom-noc-assistant",
+        "route": "/industries/uc/c33-telecom-noc-assistant",
+        "status": 200,
+        "title": "Network ops assistant across NOCs · Telecom · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c33-telecom-noc-assistant/",
+        "durationMs": 119
+      },
+      {
+        "id": "c34-pharma-regulated-vendor",
+        "route": "/industries/uc/c34-pharma-regulated-vendor",
+        "status": 200,
+        "title": "Regulated research LLM vendor · Pharma &amp; life sciences · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c34-pharma-regulated-vendor/",
+        "durationMs": 126
+      },
+      {
+        "id": "c34-education-ferpa-vendor",
+        "route": "/industries/uc/c34-education-ferpa-vendor",
+        "status": 200,
+        "title": "Ed tech vendor under FERPA/COPPA · Education · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c34-education-ferpa-vendor/",
+        "durationMs": 134
+      },
+      {
+        "id": "c34-public-sector-sovereignty",
+        "route": "/industries/uc/c34-public-sector-sovereignty",
+        "status": 200,
+        "title": "Vendor under data sovereignty rules · Public sector · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c34-public-sector-sovereignty/",
+        "durationMs": 115
+      },
+      {
+        "id": "c35-education-tutoring",
+        "route": "/industries/uc/c35-education-tutoring",
+        "status": 200,
+        "title": "AI tutoring rollout across a district · Education · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c35-education-tutoring/",
+        "durationMs": 118
+      },
+      {
+        "id": "c35-manufacturing-defect",
+        "route": "/industries/uc/c35-manufacturing-defect",
+        "status": 200,
+        "title": "Defect detection rollout on the line · Manufacturing · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c35-manufacturing-defect/",
+        "durationMs": 125
+      },
+      {
+        "id": "c35-travel-irops",
+        "route": "/industries/uc/c35-travel-irops",
+        "status": 200,
+        "title": "Airline irregular ops automation · Travel &amp; hospitality · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c35-travel-irops/",
+        "durationMs": 127
+      },
+      {
+        "id": "el01-hospital-scribe",
+        "route": "/industries/uc/el01-hospital-scribe",
+        "status": 200,
+        "title": "Ambient scribe for 2,000 clinicians · Healthcare · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el01-hospital-scribe/",
+        "durationMs": 164
+      },
+      {
+        "id": "el01-contact-center-assist",
+        "route": "/industries/uc/el01-contact-center-assist",
+        "status": 200,
+        "title": "Agent assist for 900 servicing reps · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el01-contact-center-assist/",
+        "durationMs": 167
+      },
+      {
+        "id": "el01-utilities-field-copilot",
+        "route": "/industries/uc/el01-utilities-field-copilot",
+        "status": 200,
+        "title": "Technician copilot on service trucks · Energy &amp; utilities · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el01-utilities-field-copilot/",
+        "durationMs": 292
+      },
+      {
+        "id": "el02-public-sector-citizen-services",
+        "route": "/industries/uc/el02-public-sector-citizen-services",
+        "status": 200,
+        "title": "Citizen services automation program · Public sector · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el02-public-sector-citizen-services/",
+        "durationMs": 356
+      },
+      {
+        "id": "el02-pharma-rd-discovery",
+        "route": "/industries/uc/el02-pharma-rd-discovery",
+        "status": 200,
+        "title": "R&amp;D discovery informatics program · Pharma &amp; life sciences · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el02-pharma-rd-discovery/",
+        "durationMs": 200
+      },
+      {
+        "id": "el02-capital-markets-wealth-platform",
+        "route": "/industries/uc/el02-capital-markets-wealth-platform",
+        "status": 200,
+        "title": "Wealth platform advisor assist program · Capital markets · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el02-capital-markets-wealth-platform/",
+        "durationMs": 126
+      },
+      {
+        "id": "el03-consulting-delivery-pod",
+        "route": "/industries/uc/el03-consulting-delivery-pod",
+        "status": 200,
+        "title": "Global SI delivery pod across engagements · Consulting &amp; prof. services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el03-consulting-delivery-pod/",
+        "durationMs": 120
+      },
+      {
+        "id": "el03-hrtech-feature-team",
+        "route": "/industries/uc/el03-hrtech-feature-team",
+        "status": 200,
+        "title": "HR tech AI feature team · HR &amp; talent · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el03-hrtech-feature-team/",
+        "durationMs": 112
+      },
+      {
+        "id": "el03-bank-ai-coe",
+        "route": "/industries/uc/el03-bank-ai-coe",
+        "status": 200,
+        "title": "Bank AI Center of Excellence · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el03-bank-ai-coe/",
+        "durationMs": 124
+      },
+      {
+        "id": "el04-insurance-claims",
+        "route": "/industries/uc/el04-insurance-claims",
+        "status": 200,
+        "title": "Claims automation program, the drift hides · Insurance · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el04-insurance-claims/",
+        "durationMs": 146
+      },
+      {
+        "id": "el04-energy-grid",
+        "route": "/industries/uc/el04-energy-grid",
+        "status": 200,
+        "title": "Grid forecasting program, the hidden dependency · Energy &amp; utilities · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el04-energy-grid/",
+        "durationMs": 132
+      },
+      {
+        "id": "el04-ecommerce-personalization",
+        "route": "/industries/uc/el04-ecommerce-personalization",
+        "status": 200,
+        "title": "Personalization program, adoption reverses · Retail &amp; e commerce · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el04-ecommerce-personalization/",
+        "durationMs": 103
+      },
+      {
+        "id": "el05-lending-credit-decisioning",
+        "route": "/industries/uc/el05-lending-credit-decisioning",
+        "status": 200,
+        "title": "Credit / loan eligibility decisioning · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el05-lending-credit-decisioning/",
+        "durationMs": 113
+      },
+      {
+        "id": "el05-hiring-resume-screening",
+        "route": "/industries/uc/el05-hiring-resume-screening",
+        "status": 200,
+        "title": "Resume screening / candidate ranking · HR &amp; talent · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el05-hiring-resume-screening/",
+        "durationMs": 119
+      },
+      {
+        "id": "el05-healthcare-clinical-decision-support",
+        "route": "/industries/uc/el05-healthcare-clinical-decision-support",
+        "status": 200,
+        "title": "Clinical decision support / triage · Healthcare · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el05-healthcare-clinical-decision-support/",
+        "durationMs": 106
+      },
+      {
+        "id": "el06-bank-ai-coe",
+        "route": "/industries/uc/el06-bank-ai-coe",
+        "status": 200,
+        "title": "Bank AI Center of Excellence upskilling · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el06-bank-ai-coe/",
+        "durationMs": 108
+      },
+      {
+        "id": "el06-manufacturer-plant-floor",
+        "route": "/industries/uc/el06-manufacturer-plant-floor",
+        "status": 200,
+        "title": "Plant floor AI capability build · Manufacturing · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el06-manufacturer-plant-floor/",
+        "durationMs": 128
+      },
+      {
+        "id": "el06-creative-agency-genai",
+        "route": "/industries/uc/el06-creative-agency-genai",
+        "status": 200,
+        "title": "Creative agency genAI upskilling · Marketing &amp; adtech · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el06-creative-agency-genai/",
+        "durationMs": 127
+      },
+      {
+        "id": "el07-public-sector-benefits",
+        "route": "/industries/uc/el07-public-sector-benefits",
+        "status": 200,
+        "title": "Benefits eligibility AI platform bid · Public sector · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el07-public-sector-benefits/",
+        "durationMs": 117
+      },
+      {
+        "id": "el07-cybersecurity-soc-nobid",
+        "route": "/industries/uc/el07-cybersecurity-soc-nobid",
+        "status": 200,
+        "title": "Autonomous SOC triage, the disciplined no bid · Cybersecurity · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el07-cybersecurity-soc-nobid/",
+        "durationMs": 110
+      },
+      {
+        "id": "el07-retail-peak-personalization",
+        "route": "/industries/uc/el07-retail-peak-personalization",
+        "status": 200,
+        "title": "Peak season personalization bid · Retail &amp; e commerce · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el07-retail-peak-personalization/",
+        "durationMs": 111
+      },
+      {
+        "id": "el08-insurance-claims-triage",
+        "route": "/industries/uc/el08-insurance-claims-triage",
+        "status": 200,
+        "title": "Claims triage &amp; extraction estimate · Insurance · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el08-insurance-claims-triage/",
+        "durationMs": 115
+      },
+      {
+        "id": "el08-pharma-evidence-synthesis",
+        "route": "/industries/uc/el08-pharma-evidence-synthesis",
+        "status": 200,
+        "title": "Evidence synthesis assistant estimate · Pharma &amp; life sciences · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el08-pharma-evidence-synthesis/",
+        "durationMs": 124
+      },
+      {
+        "id": "el08-realestate-valuation-copilot",
+        "route": "/industries/uc/el08-realestate-valuation-copilot",
+        "status": 200,
+        "title": "Valuation &amp; underwriting copilot estimate · Real estate / proptech · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el08-realestate-valuation-copilot/",
+        "durationMs": 129
+      },
+      {
+        "id": "el09-global-si-pod-mobilization",
+        "route": "/industries/uc/el09-global-si-pod-mobilization",
+        "status": 200,
+        "title": "Global SI delivery pod mobilization · Consulting &amp; prof. services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el09-global-si-pod-mobilization/",
+        "durationMs": 119
+      },
+      {
+        "id": "el09-travel-program-mobilization",
+        "route": "/industries/uc/el09-travel-program-mobilization",
+        "status": 200,
+        "title": "Travel program mobilization · Travel &amp; hospitality · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el09-travel-program-mobilization/",
+        "durationMs": 143
+      },
+      {
+        "id": "el09-fintech-feature-mobilization",
+        "route": "/industries/uc/el09-fintech-feature-mobilization",
+        "status": 200,
+        "title": "Fintech feature team mobilization · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el09-fintech-feature-mobilization/",
+        "durationMs": 141
+      },
+      {
+        "id": "el10-bank-board-qbr",
+        "route": "/industries/uc/el10-bank-board-qbr",
+        "status": 200,
+        "title": "Board QBR on the AI program · Financial services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el10-bank-board-qbr/",
+        "durationMs": 115
+      },
+      {
+        "id": "el10-profservices-partner",
+        "route": "/industries/uc/el10-profservices-partner",
+        "status": 200,
+        "title": "Partner update on the firm&#x27;s AI capability · Consulting &amp; prof. services · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el10-profservices-partner/",
+        "durationMs": 119
+      },
+      {
+        "id": "el10-manufacturer-plant",
+        "route": "/industries/uc/el10-manufacturer-plant",
+        "status": 200,
+        "title": "Plant leadership update tying AI to OEE · Manufacturing · Sudeep Lalka",
+        "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el10-manufacturer-plant/",
+        "durationMs": 105
+      }
+    ],
+    "completedAt": "2026-10-05T07:33:06.648Z",
+    "summary": {
+      "successful": 69,
+      "failed": 0,
+      "canonicals": 69
+    }
+  },
+  "rechecks": [
+    {
+      "reason": "Static-param route rechecked after removing redundant dynamicParams flag and restarting the local dev server",
+      "id": "c31-retail-bank",
+      "route": "/industries/uc/c31-retail-bank",
+      "status": 200,
+      "title": "A retail bank&#x27;s AI book · Financial services · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-retail-bank/",
+      "durationMs": 84,
+      "at": "2026-10-05T07:25:24.768Z"
+    },
+    {
+      "reason": "Static-param route rechecked after removing redundant dynamicParams flag and restarting the local dev server",
+      "id": "c31-retail-bank",
+      "route": "/industries/uc/c31-retail-bank",
+      "status": 200,
+      "title": "A retail bank&#x27;s AI book · Financial services · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-retail-bank/",
+      "durationMs": 121,
+      "at": "2026-10-05T07:33:06.648Z"
+    }
+  ],
+  "sitemap": {
+    "status": 200,
+    "urlCount": 146,
+    "unique": true,
+    "allIndustryIdsIncluded": true,
+    "legacyAliasesIncluded": [],
+    "domains": [
+      "https://portfolio.sudeeplalka.com"
+    ]
+  },
+  "scenarioSweepHistory": [
+    {
+      "startedAt": "2026-10-05T07:25:06.910Z",
+      "generatedIdCount": 69,
+      "method": "HTTP GET of every ID emitted by the industry scenario registry, concurrency 2; no visual or interaction assertion.",
+      "results": [
+        {
+          "id": "gap01-healthcare-ehr",
+          "route": "/industries/uc/gap01-healthcare-ehr",
+          "status": 200,
+          "title": "Wrap an EHR (FHIR R4) for a care agent · Healthcare · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap01-healthcare-ehr/",
+          "durationMs": 3759
+        },
+        {
+          "id": "gap01-retail-oms",
+          "route": "/industries/uc/gap01-retail-oms",
+          "status": 200,
+          "title": "Order management + returns as tools · Retail &amp; e commerce · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap01-retail-oms/",
+          "durationMs": 3626
+        },
+        {
+          "id": "gap01-manufacturing-mes",
+          "route": "/industries/uc/gap01-manufacturing-mes",
+          "status": 200,
+          "title": "MES / historian, read only across OT/IT · Manufacturing · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap01-manufacturing-mes/",
+          "durationMs": 151
+        },
+        {
+          "id": "gap02-insurance-fnol",
+          "route": "/industries/uc/gap02-insurance-fnol",
+          "status": 200,
+          "title": "FNOL triage, the validation gate as fraud control · Insurance · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap02-insurance-fnol/",
+          "durationMs": 146
+        },
+        {
+          "id": "gap02-cyber-soc-triage",
+          "route": "/industries/uc/gap02-cyber-soc-triage",
+          "status": 200,
+          "title": "SOC alert triage, breaking the flapping alert loop · Cybersecurity · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap02-cyber-soc-triage/",
+          "durationMs": 105
+        },
+        {
+          "id": "gap02-telecom-noc",
+          "route": "/industries/uc/gap02-telecom-noc",
+          "status": 200,
+          "title": "NOC incident correlation, 503 under load · Telecom · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap02-telecom-noc/",
+          "durationMs": 106
+        },
+        {
+          "id": "gap03-legal-msa-swarm",
+          "route": "/industries/uc/gap03-legal-msa-swarm",
+          "status": 200,
+          "title": "Contract review swarm on an MSA · Legal · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap03-legal-msa-swarm/",
+          "durationMs": 110
+        },
+        {
+          "id": "gap03-pharma-phase2-ci",
+          "route": "/industries/uc/gap03-pharma-phase2-ci",
+          "status": 200,
+          "title": "Competitive intel brief on a Phase II readout · Pharma &amp; life sciences · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap03-pharma-phase2-ci/",
+          "durationMs": 110
+        },
+        {
+          "id": "gap03-capmkts-research-swarm",
+          "route": "/industries/uc/gap03-capmkts-research-swarm",
+          "status": 200,
+          "title": "Equity research swarm on an investment thesis · Capital markets · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap03-capmkts-research-swarm/",
+          "durationMs": 113
+        },
+        {
+          "id": "gap04-healthcare-rcm",
+          "route": "/industries/uc/gap04-healthcare-rcm",
+          "status": 200,
+          "title": "Clinical note → claim codes · Healthcare · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap04-healthcare-rcm/",
+          "durationMs": 112
+        },
+        {
+          "id": "gap04-logistics-exception",
+          "route": "/industries/uc/gap04-logistics-exception",
+          "status": 200,
+          "title": "Carrier email → shipment exception · Logistics &amp; supply chain · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap04-logistics-exception/",
+          "durationMs": 109
+        },
+        {
+          "id": "gap04-realestate-lease",
+          "route": "/industries/uc/gap04-realestate-lease",
+          "status": 200,
+          "title": "Commercial lease → key terms · Real estate / proptech · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap04-realestate-lease/",
+          "durationMs": 109
+        },
+        {
+          "id": "gap05-saas-support-thread",
+          "route": "/industries/uc/gap05-saas-support-thread",
+          "status": 200,
+          "title": "A 40-turn support thread across two sessions · Technology / SaaS · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap05-saas-support-thread/",
+          "durationMs": 100
+        },
+        {
+          "id": "gap05-legal-ediscovery",
+          "route": "/industries/uc/gap05-legal-ediscovery",
+          "status": 200,
+          "title": "50k document e discovery under budget · Legal · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap05-legal-ediscovery/",
+          "durationMs": 102
+        },
+        {
+          "id": "gap05-wealth-continuity",
+          "route": "/industries/uc/gap05-wealth-continuity",
+          "status": 200,
+          "title": "Client goals across quarterly reviews · Capital markets · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap05-wealth-continuity/",
+          "durationMs": 107
+        },
+        {
+          "id": "gap06-retail-sku-copy",
+          "route": "/industries/uc/gap06-retail-sku-copy",
+          "status": 200,
+          "title": "Refresh copy for 4M SKUs · Retail &amp; e commerce · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap06-retail-sku-copy/",
+          "durationMs": 107
+        },
+        {
+          "id": "gap06-telecom-call-summaries",
+          "route": "/industries/uc/gap06-telecom-call-summaries",
+          "status": 200,
+          "title": "Summarize 1.2M care calls a month · Telecom · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap06-telecom-call-summaries/",
+          "durationMs": 105
+        },
+        {
+          "id": "gap06-adtech-variants",
+          "route": "/industries/uc/gap06-adtech-variants",
+          "status": 200,
+          "title": "30 creative variants × thousands of campaigns · Marketing &amp; adtech · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap06-adtech-variants/",
+          "durationMs": 105
+        },
+        {
+          "id": "gap07-bank-hybrid",
+          "route": "/industries/uc/gap07-bank-hybrid",
+          "status": 200,
+          "title": "Enterprise bank, MCP core + A2A · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap07-bank-hybrid/",
+          "durationMs": 105
+        },
+        {
+          "id": "gap07-startup-fc",
+          "route": "/industries/uc/gap07-startup-fc",
+          "status": 200,
+          "title": "Startup, two tools, ship this quarter · Technology / SaaS · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap07-startup-fc/",
+          "durationMs": 105
+        },
+        {
+          "id": "gap07-supplychain-a2a",
+          "route": "/industries/uc/gap07-supplychain-a2a",
+          "status": 200,
+          "title": "Supply chain, cross org agent negotiation · Logistics &amp; supply chain · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap07-supplychain-a2a/",
+          "durationMs": 143
+        },
+        {
+          "id": "gap08-lending-credit",
+          "route": "/industries/uc/gap08-lending-credit",
+          "status": 200,
+          "title": "Credit decisions, autonomy by fair lending risk · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap08-lending-credit/",
+          "durationMs": 141
+        },
+        {
+          "id": "gap08-content-moderation",
+          "route": "/industries/uc/gap08-content-moderation",
+          "status": 200,
+          "title": "Content moderation, the throughput vs harm curve · Media &amp; entertainment · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap08-content-moderation/",
+          "durationMs": 105
+        },
+        {
+          "id": "gap08-clinical-orders",
+          "route": "/industries/uc/gap08-clinical-orders",
+          "status": 200,
+          "title": "Clinical orders, acuity as the autonomy dial · Healthcare · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/gap08-clinical-orders/",
+          "durationMs": 111
+        },
+        {
+          "id": "c31-retail-bank",
+          "route": "/industries/uc/c31-retail-bank",
+          "status": 200,
+          "title": "A retail bank&#x27;s AI book · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-retail-bank/",
+          "durationMs": 84
+        },
+        {
+          "id": "c31-health-system",
+          "route": "/industries/uc/c31-health-system",
+          "status": 200,
+          "title": "A health system&#x27;s AI book · Healthcare · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-health-system/",
+          "durationMs": 111
+        },
+        {
+          "id": "c31-manufacturer",
+          "route": "/industries/uc/c31-manufacturer",
+          "status": 200,
+          "title": "A manufacturer&#x27;s AI book · Manufacturing · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-manufacturer/",
+          "durationMs": 106
+        },
+        {
+          "id": "c32-legal-contract-analysis",
+          "route": "/industries/uc/c32-legal-contract-analysis",
+          "status": 200,
+          "title": "Contract analysis: buy, build, or fine tune? · Legal · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c32-legal-contract-analysis/",
+          "durationMs": 115
+        },
+        {
+          "id": "c32-media-localization",
+          "route": "/industries/uc/c32-media-localization",
+          "status": 200,
+          "title": "High volume localization at scale · Media &amp; entertainment · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c32-media-localization/",
+          "durationMs": 111
+        },
+        {
+          "id": "c32-bank-fraud-model",
+          "route": "/industries/uc/c32-bank-fraud-model",
+          "status": 200,
+          "title": "Fraud model: build or buy? · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c32-bank-fraud-model/",
+          "durationMs": 133
+        },
+        {
+          "id": "c33-consumer-social-chat",
+          "route": "/industries/uc/c33-consumer-social-chat",
+          "status": 200,
+          "title": "A chat feature at tens of millions of DAU · Technology / SaaS · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c33-consumer-social-chat/",
+          "durationMs": 120
+        },
+        {
+          "id": "c33-insurance-claims-docs",
+          "route": "/industries/uc/c33-insurance-claims-docs",
+          "status": 200,
+          "title": "Document heavy claims processing · Insurance · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c33-insurance-claims-docs/",
+          "durationMs": 151
+        },
+        {
+          "id": "c33-telecom-noc-assistant",
+          "route": "/industries/uc/c33-telecom-noc-assistant",
+          "status": 200,
+          "title": "Network ops assistant across NOCs · Telecom · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c33-telecom-noc-assistant/",
+          "durationMs": 166
+        },
+        {
+          "id": "c34-pharma-regulated-vendor",
+          "route": "/industries/uc/c34-pharma-regulated-vendor",
+          "status": 200,
+          "title": "Regulated research LLM vendor · Pharma &amp; life sciences · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c34-pharma-regulated-vendor/",
+          "durationMs": 152
+        },
+        {
+          "id": "c34-education-ferpa-vendor",
+          "route": "/industries/uc/c34-education-ferpa-vendor",
+          "status": 200,
+          "title": "Ed tech vendor under FERPA/COPPA · Education · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c34-education-ferpa-vendor/",
+          "durationMs": 165
+        },
+        {
+          "id": "c34-public-sector-sovereignty",
+          "route": "/industries/uc/c34-public-sector-sovereignty",
+          "status": 200,
+          "title": "Vendor under data sovereignty rules · Public sector · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c34-public-sector-sovereignty/",
+          "durationMs": 165
+        },
+        {
+          "id": "c35-education-tutoring",
+          "route": "/industries/uc/c35-education-tutoring",
+          "status": 200,
+          "title": "AI tutoring rollout across a district · Education · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c35-education-tutoring/",
+          "durationMs": 150
+        },
+        {
+          "id": "c35-manufacturing-defect",
+          "route": "/industries/uc/c35-manufacturing-defect",
+          "status": 200,
+          "title": "Defect detection rollout on the line · Manufacturing · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c35-manufacturing-defect/",
+          "durationMs": 141
+        },
+        {
+          "id": "c35-travel-irops",
+          "route": "/industries/uc/c35-travel-irops",
+          "status": 200,
+          "title": "Airline irregular ops automation · Travel &amp; hospitality · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c35-travel-irops/",
+          "durationMs": 149
+        },
+        {
+          "id": "el01-hospital-scribe",
+          "route": "/industries/uc/el01-hospital-scribe",
+          "status": 200,
+          "title": "Ambient scribe for 2,000 clinicians · Healthcare · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el01-hospital-scribe/",
+          "durationMs": 126
+        },
+        {
+          "id": "el01-utilities-field-copilot",
+          "route": "/industries/uc/el01-utilities-field-copilot",
+          "status": 200,
+          "title": "Technician copilot on service trucks · Energy &amp; utilities · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el01-utilities-field-copilot/",
+          "durationMs": 1087
+        },
+        {
+          "id": "el02-public-sector-citizen-services",
+          "route": "/industries/uc/el02-public-sector-citizen-services",
+          "status": 200,
+          "title": "Citizen services automation program · Public sector · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el02-public-sector-citizen-services/",
+          "durationMs": 1736
+        },
+        {
+          "id": "el01-contact center-assist",
+          "route": "/industries/uc/el01-contact center-assist",
+          "status": 500,
+          "title": null,
+          "canonical": null,
+          "durationMs": 6454
+        },
+        {
+          "id": "el02-pharma-rd-discovery",
+          "route": "/industries/uc/el02-pharma-rd-discovery",
+          "status": 200,
+          "title": "R&amp;D discovery informatics program · Pharma &amp; life sciences · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el02-pharma-rd-discovery/",
+          "durationMs": 4590
+        },
+        {
+          "id": "el02-capital-markets-wealth-platform",
+          "route": "/industries/uc/el02-capital-markets-wealth-platform",
+          "status": 200,
+          "title": "Wealth platform advisor assist program · Capital markets · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el02-capital-markets-wealth-platform/",
+          "durationMs": 1364
+        },
+        {
+          "id": "el03-consulting-delivery-pod",
+          "route": "/industries/uc/el03-consulting-delivery-pod",
+          "status": 200,
+          "title": "Global SI delivery pod across engagements · Consulting &amp; prof. services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el03-consulting-delivery-pod/",
+          "durationMs": 639
+        },
+        {
+          "id": "el03-hrtech-feature-team",
+          "route": "/industries/uc/el03-hrtech-feature-team",
+          "status": 200,
+          "title": "HR tech AI feature team · HR &amp; talent · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el03-hrtech-feature-team/",
+          "durationMs": 415
+        },
+        {
+          "id": "el03-bank-ai-coe",
+          "route": "/industries/uc/el03-bank-ai-coe",
+          "status": 200,
+          "title": "Bank AI Center of Excellence · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el03-bank-ai-coe/",
+          "durationMs": 347
+        },
+        {
+          "id": "el04-insurance-claims",
+          "route": "/industries/uc/el04-insurance-claims",
+          "status": 200,
+          "title": "Claims automation program, the drift hides · Insurance · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el04-insurance-claims/",
+          "durationMs": 309
+        },
+        {
+          "id": "el04-energy-grid",
+          "route": "/industries/uc/el04-energy-grid",
+          "status": 200,
+          "title": "Grid forecasting program, the hidden dependency · Energy &amp; utilities · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el04-energy-grid/",
+          "durationMs": 233
+        },
+        {
+          "id": "el04-ecommerce-personalization",
+          "route": "/industries/uc/el04-ecommerce-personalization",
+          "status": 200,
+          "title": "Personalization program, adoption reverses · Retail &amp; e commerce · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el04-ecommerce-personalization/",
+          "durationMs": 249
+        },
+        {
+          "id": "el05-lending-credit-decisioning",
+          "route": "/industries/uc/el05-lending-credit-decisioning",
+          "status": 200,
+          "title": "Credit / loan eligibility decisioning · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el05-lending-credit-decisioning/",
+          "durationMs": 259
+        },
+        {
+          "id": "el05-hiring-resume-screening",
+          "route": "/industries/uc/el05-hiring-resume-screening",
+          "status": 200,
+          "title": "Resume screening / candidate ranking · HR &amp; talent · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el05-hiring-resume-screening/",
+          "durationMs": 261
+        },
+        {
+          "id": "el05-healthcare-clinical-decision-support",
+          "route": "/industries/uc/el05-healthcare-clinical-decision-support",
+          "status": 200,
+          "title": "Clinical decision support / triage · Healthcare · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el05-healthcare-clinical-decision-support/",
+          "durationMs": 261
+        },
+        {
+          "id": "el06-bank-ai-coe",
+          "route": "/industries/uc/el06-bank-ai-coe",
+          "status": 200,
+          "title": "Bank AI Center of Excellence upskilling · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el06-bank-ai-coe/",
+          "durationMs": 399
+        },
+        {
+          "id": "el06-manufacturer-plant-floor",
+          "route": "/industries/uc/el06-manufacturer-plant-floor",
+          "status": 200,
+          "title": "Plant floor AI capability build · Manufacturing · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el06-manufacturer-plant-floor/",
+          "durationMs": 378
+        },
+        {
+          "id": "el06-creative-agency-genai",
+          "route": "/industries/uc/el06-creative-agency-genai",
+          "status": 200,
+          "title": "Creative agency genAI upskilling · Marketing &amp; adtech · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el06-creative-agency-genai/",
+          "durationMs": 227
+        },
+        {
+          "id": "el07-public-sector-benefits",
+          "route": "/industries/uc/el07-public-sector-benefits",
+          "status": 200,
+          "title": "Benefits eligibility AI platform bid · Public sector · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el07-public-sector-benefits/",
+          "durationMs": 208
+        },
+        {
+          "id": "el07-cybersecurity-soc-nobid",
+          "route": "/industries/uc/el07-cybersecurity-soc-nobid",
+          "status": 200,
+          "title": "Autonomous SOC triage, the disciplined no bid · Cybersecurity · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el07-cybersecurity-soc-nobid/",
+          "durationMs": 236
+        },
+        {
+          "id": "el07-retail-peak-personalization",
+          "route": "/industries/uc/el07-retail-peak-personalization",
+          "status": 200,
+          "title": "Peak season personalization bid · Retail &amp; e commerce · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el07-retail-peak-personalization/",
+          "durationMs": 226
+        },
+        {
+          "id": "el08-insurance-claims-triage",
+          "route": "/industries/uc/el08-insurance-claims-triage",
+          "status": 200,
+          "title": "Claims triage &amp; extraction estimate · Insurance · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el08-insurance-claims-triage/",
+          "durationMs": 188
+        },
+        {
+          "id": "el08-pharma-evidence-synthesis",
+          "route": "/industries/uc/el08-pharma-evidence-synthesis",
+          "status": 200,
+          "title": "Evidence synthesis assistant estimate · Pharma &amp; life sciences · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el08-pharma-evidence-synthesis/",
+          "durationMs": 190
+        },
+        {
+          "id": "el08-realestate-valuation-copilot",
+          "route": "/industries/uc/el08-realestate-valuation-copilot",
+          "status": 200,
+          "title": "Valuation &amp; underwriting copilot estimate · Real estate / proptech · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el08-realestate-valuation-copilot/",
+          "durationMs": 190
+        },
+        {
+          "id": "el09-global-si-pod-mobilization",
+          "route": "/industries/uc/el09-global-si-pod-mobilization",
+          "status": 200,
+          "title": "Global SI delivery pod mobilization · Consulting &amp; prof. services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el09-global-si-pod-mobilization/",
+          "durationMs": 154
+        },
+        {
+          "id": "el09-travel-program-mobilization",
+          "route": "/industries/uc/el09-travel-program-mobilization",
+          "status": 200,
+          "title": "Travel program mobilization · Travel &amp; hospitality · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el09-travel-program-mobilization/",
+          "durationMs": 142
+        },
+        {
+          "id": "el09-fintech-feature-mobilization",
+          "route": "/industries/uc/el09-fintech-feature-mobilization",
+          "status": 200,
+          "title": "Fintech feature team mobilization · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el09-fintech-feature-mobilization/",
+          "durationMs": 293
+        },
+        {
+          "id": "el10-bank-board-qbr",
+          "route": "/industries/uc/el10-bank-board-qbr",
+          "status": 200,
+          "title": "Board QBR on the AI program · Financial services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el10-bank-board-qbr/",
+          "durationMs": 294
+        },
+        {
+          "id": "el10-profservices-partner",
+          "route": "/industries/uc/el10-profservices-partner",
+          "status": 200,
+          "title": "Partner update on the firm&#x27;s AI capability · Consulting &amp; prof. services · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el10-profservices-partner/",
+          "durationMs": 153
+        },
+        {
+          "id": "el10-manufacturer-plant",
+          "route": "/industries/uc/el10-manufacturer-plant",
+          "status": 200,
+          "title": "Plant leadership update tying AI to OEE · Manufacturing · Sudeep Lalka",
+          "canonical": "https://portfolio.sudeeplalka.com/industries/uc/el10-manufacturer-plant/",
+          "durationMs": 978
+        }
+      ],
+      "completedAt": "2026-10-05T07:25:24.767Z",
+      "summary": {
+        "successful": 68,
+        "failed": 1,
+        "canonicals": 68
+      }
+    }
+  ],
+  "sitemapHistory": [
+    {
+      "status": 500,
+      "urlCount": 0,
+      "unique": true,
+      "allIndustryIdsIncluded": false,
+      "legacyAliasesIncluded": [],
+      "domains": []
+    }
+  ],
+  "resolvedResults": [
+    {
+      "template": "/",
+      "route": "/",
+      "source": "apps/web/app/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Sudeep Lalka: Technology Strategy &amp; AI Artifacts",
+      "canonical": "https://portfolio.sudeeplalka.com/",
+      "bytes": 90400,
+      "durationMs": 7638
+    },
+    {
+      "template": "/agents/context-memory",
+      "route": "/agents/context-memory",
+      "source": "apps/web/app/agents/context-memory/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-05 · Context and Memory Strategy Evaluator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/context-memory/",
+      "bytes": 33445,
+      "durationMs": 9044
+    },
+    {
+      "template": "/agents/cost-simulator",
+      "route": "/agents/cost-simulator",
+      "source": "apps/web/app/agents/cost-simulator/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-06 · Token Economics Simulator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/cost-simulator/",
+      "bytes": 43824,
+      "durationMs": 5917
+    },
+    {
+      "template": "/agents/hitl",
+      "route": "/agents/hitl",
+      "source": "apps/web/app/agents/hitl/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-08 · Human Review and Autonomy Control Simulator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/hitl/",
+      "bytes": 48071,
+      "durationMs": 4297
+    },
+    {
+      "template": "/agents/mcp-playground",
+      "route": "/agents/mcp-playground",
+      "source": "apps/web/app/agents/mcp-playground/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-01 · MCP Server Contract Workbench · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/mcp-playground/",
+      "bytes": 40609,
+      "durationMs": 4522
+    },
+    {
+      "template": "/agents/loop-inspector",
+      "route": "/agents/loop-inspector",
+      "source": "apps/web/app/agents/loop-inspector/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-02 · Agent Failure and Recovery Inspector · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/loop-inspector/",
+      "bytes": 31914,
+      "durationMs": 4534
+    },
+    {
+      "template": "/agents/protocol-selection",
+      "route": "/agents/protocol-selection",
+      "source": "apps/web/app/agents/protocol-selection/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-07 · Protocol Selection Decision Model · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/protocol-selection/",
+      "bytes": 55542,
+      "durationMs": 449
+    },
+    {
+      "template": "/agents/orchestration",
+      "route": "/agents/orchestration",
+      "source": "apps/web/app/agents/orchestration/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-03 · Multiagent Orchestration Economics Board · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/orchestration/",
+      "bytes": 49017,
+      "durationMs": 459
+    },
+    {
+      "template": "/agents/structured-output",
+      "route": "/agents/structured-output",
+      "source": "apps/web/app/agents/structured-output/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "GAP-04 · Structured Output Reliability Gate · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/agents/structured-output/",
+      "bytes": 33425,
+      "durationMs": 4523
+    },
+    {
+      "template": "/architecture",
+      "route": "/architecture",
+      "source": "apps/web/app/architecture/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Architecture and implementation · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/architecture/",
+      "bytes": 73513,
+      "durationMs": 4525
+    },
+    {
+      "template": "/build",
+      "route": "/build",
+      "source": "apps/web/app/build/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Build · RAG · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/",
+      "bytes": 31096,
+      "durationMs": 7758
+    },
+    {
+      "template": "/build/agents",
+      "route": "/build/agents",
+      "source": "apps/web/app/build/agents/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Agents &amp; Tools · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/agents/",
+      "bytes": 87901,
+      "durationMs": 7949
+    },
+    {
+      "template": "/build/dataset",
+      "route": "/build/dataset",
+      "source": "apps/web/app/build/dataset/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Golden Dataset · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/dataset/",
+      "bytes": 89980,
+      "durationMs": 5903
+    },
+    {
+      "template": "/build/answers",
+      "route": "/build/answers",
+      "source": "apps/web/app/build/answers/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Answer Quality · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/answers/",
+      "bytes": 102237,
+      "durationMs": 6164
+    },
+    {
+      "template": "/build/evaluations",
+      "route": "/build/evaluations",
+      "source": "apps/web/app/build/evaluations/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Evaluation Runs · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/evaluations/",
+      "bytes": 48059,
+      "durationMs": 8204
+    },
+    {
+      "template": "/build/failures",
+      "route": "/build/failures",
+      "source": "apps/web/app/build/failures/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Failure Analysis · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/failures/",
+      "bytes": 69324,
+      "durationMs": 8209
+    },
+    {
+      "template": "/build/guide",
+      "route": "/build/guide",
+      "source": "apps/web/app/build/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Build · RAG · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/guide/",
+      "bytes": 64176,
+      "durationMs": 7303
+    },
+    {
+      "template": "/build/internals",
+      "route": "/build/internals",
+      "source": "apps/web/app/build/internals/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Under the Hood · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/internals/",
+      "bytes": 107436,
+      "durationMs": 7372
+    },
+    {
+      "template": "/build/model",
+      "route": "/build/model",
+      "source": "apps/web/app/build/model/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Model Fit · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/model/",
+      "bytes": 97615,
+      "durationMs": 9450
+    },
+    {
+      "template": "/build/overview",
+      "route": "/build/overview",
+      "source": "apps/web/app/build/overview/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Executive Overview · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/overview/",
+      "bytes": 120526,
+      "durationMs": 9357
+    },
+    {
+      "template": "/build/retrieval",
+      "route": "/build/retrieval",
+      "source": "apps/web/app/build/retrieval/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Retrieval Quality · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/retrieval/",
+      "bytes": 98100,
+      "durationMs": 7130
+    },
+    {
+      "template": "/build/quality-gates",
+      "route": "/build/quality-gates",
+      "source": "apps/web/app/build/quality-gates/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Quality Gates · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/quality-gates/",
+      "bytes": 73641,
+      "durationMs": 7184
+    },
+    {
+      "template": "/build/traces",
+      "route": "/build/traces",
+      "source": "apps/web/app/build/traces/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Query Trace Explorer · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/traces/",
+      "bytes": 56319,
+      "durationMs": 7169
+    },
+    {
+      "template": "/build/training",
+      "route": "/build/training",
+      "source": "apps/web/app/build/training/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Training Readiness · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/build/training/",
+      "bytes": 55596,
+      "durationMs": 7168
+    },
+    {
+      "template": "/builds/eval-bench",
+      "route": "/builds/eval-bench",
+      "source": "apps/web/app/builds/eval-bench/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "LB-03 · Model Evaluation &amp; Threshold Economics · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/builds/eval-bench/",
+      "bytes": 51706,
+      "durationMs": 5312
+    },
+    {
+      "template": "/business/build-buy",
+      "route": "/business/build-buy",
+      "source": "apps/web/app/business/build-buy/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-2 · Build, Buy, or Fine Tune Decision Evaluator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/build-buy/",
+      "bytes": 34906,
+      "durationMs": 5319
+    },
+    {
+      "template": "/business/cost-forecaster",
+      "route": "/business/cost-forecaster",
+      "source": "apps/web/app/business/cost-forecaster/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-3 · Inference Run Rate Forecaster · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/cost-forecaster/",
+      "bytes": 38676,
+      "durationMs": 5857
+    },
+    {
+      "template": "/business/portfolio",
+      "route": "/business/portfolio",
+      "source": "apps/web/app/business/portfolio/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-1 · AI Portfolio Capital Allocation Dashboard · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/portfolio/",
+      "bytes": 50115,
+      "durationMs": 5846
+    },
+    {
+      "template": "/business/vendor-monitor",
+      "route": "/business/vendor-monitor",
+      "source": "apps/web/app/business/vendor-monitor/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-4 · Vendor Selection and Concentration Risk Monitor · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/vendor-monitor/",
+      "bytes": 32042,
+      "durationMs": 8029
+    },
+    {
+      "template": "/business/roi-builder",
+      "route": "/business/roi-builder",
+      "source": "apps/web/app/business/roi-builder/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "C3-5 · AI Business Case and ROI Builder · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/business/roi-builder/",
+      "bytes": 38683,
+      "durationMs": 8036
+    },
+    {
+      "template": "/data",
+      "route": "/data",
+      "source": "apps/web/app/data/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Data · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/",
+      "bytes": 28829,
+      "durationMs": 8087
+    },
+    {
+      "template": "/changelog",
+      "route": "/changelog",
+      "source": "apps/web/app/changelog/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Changelog · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/changelog/",
+      "bytes": 44739,
+      "durationMs": 8319
+    },
+    {
+      "template": "/data/corpus",
+      "route": "/data/corpus",
+      "source": "apps/web/app/data/corpus/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Corpus Builder · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/corpus/",
+      "bytes": 35914,
+      "durationMs": 20612
+    },
+    {
+      "template": "/data/guide",
+      "route": "/data/guide",
+      "source": "apps/web/app/data/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Prep &amp; Guidelines Guide · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/guide/",
+      "bytes": 81471,
+      "durationMs": 20659
+    },
+    {
+      "template": "/data/overview",
+      "route": "/data/overview",
+      "source": "apps/web/app/data/overview/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Executive Overview · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/overview/",
+      "bytes": 51819,
+      "durationMs": 9291
+    },
+    {
+      "template": "/data/pipeline",
+      "route": "/data/pipeline",
+      "source": "apps/web/app/data/pipeline/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Technical Pipeline · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/data/pipeline/",
+      "bytes": 51120,
+      "durationMs": 9021
+    },
+    {
+      "template": "/deploy",
+      "route": "/deploy",
+      "source": "apps/web/app/deploy/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Deploy · AI Ops · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/deploy/",
+      "bytes": 28831,
+      "durationMs": 9689
+    },
+    {
+      "template": "/deploy/guide",
+      "route": "/deploy/guide",
+      "source": "apps/web/app/deploy/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · AI Ops · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/deploy/guide/",
+      "bytes": 56123,
+      "durationMs": 9713
+    },
+    {
+      "template": "/engagement/capacity",
+      "route": "/engagement/capacity",
+      "source": "apps/web/app/engagement/capacity/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-03 · Capacity and Skills Coverage Planner · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/capacity/",
+      "bytes": 33826,
+      "durationMs": 6562
+    },
+    {
+      "template": "/engagement/adoption",
+      "route": "/engagement/adoption",
+      "source": "apps/web/app/engagement/adoption/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-01 · Adoption Readiness Decision Instrument · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/adoption/",
+      "bytes": 55423,
+      "durationMs": 6574
+    },
+    {
+      "template": "/engagement/compliance",
+      "route": "/engagement/compliance",
+      "source": "apps/web/app/engagement/compliance/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-05 · AI Compliance Readiness Navigator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/compliance/",
+      "bytes": 38010,
+      "durationMs": 8826
+    },
+    {
+      "template": "/engagement/estimation",
+      "route": "/engagement/estimation",
+      "source": "apps/web/app/engagement/estimation/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-08 · Estimation and Scope Control Studio · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/estimation/",
+      "bytes": 34814,
+      "durationMs": 8829
+    },
+    {
+      "template": "/engagement/onboarding",
+      "route": "/engagement/onboarding",
+      "source": "apps/web/app/engagement/onboarding/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-09 · Onboarding and Knowledge Transfer Tracker · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/onboarding/",
+      "bytes": 33191,
+      "durationMs": 10385
+    },
+    {
+      "template": "/engagement/exec-comms",
+      "route": "/engagement/exec-comms",
+      "source": "apps/web/app/engagement/exec-comms/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-10 · Executive Communication Decision Studio · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/exec-comms/",
+      "bytes": 35676,
+      "durationMs": 10403
+    },
+    {
+      "template": "/engagement/raid-radar",
+      "route": "/engagement/raid-radar",
+      "source": "apps/web/app/engagement/raid-radar/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-04 · Delivery Health and RAID Radar · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/raid-radar/",
+      "bytes": 44743,
+      "durationMs": 14597
+    },
+    {
+      "template": "/engagement/rfp",
+      "route": "/engagement/rfp",
+      "source": "apps/web/app/engagement/rfp/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-07 · RFP and Bid Decision War Room · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/rfp/",
+      "bytes": 34030,
+      "durationMs": 14600
+    },
+    {
+      "template": "/engagement/stakeholders",
+      "route": "/engagement/stakeholders",
+      "source": "apps/web/app/engagement/stakeholders/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-02 · Stakeholder and Sponsor Alignment Cockpit · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/stakeholders/",
+      "bytes": 41533,
+      "durationMs": 283
+    },
+    {
+      "template": "/engagement/talent",
+      "route": "/engagement/talent",
+      "source": "apps/web/app/engagement/talent/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "EL-06 · Talent and Upskilling Pathway Planner · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/engagement/talent/",
+      "bytes": 35906,
+      "durationMs": 9794
+    },
+    {
+      "template": "/frame",
+      "route": "/frame",
+      "source": "apps/web/app/frame/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Strategy &amp; Planning · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/frame/",
+      "bytes": 110634,
+      "durationMs": 9522
+    },
+    {
+      "template": "/govern",
+      "route": "/govern",
+      "source": "apps/web/app/govern/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/",
+      "bytes": 32128,
+      "durationMs": 7605
+    },
+    {
+      "template": "/frame/guide",
+      "route": "/frame/guide",
+      "source": "apps/web/app/frame/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Strategy &amp; Planning · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/frame/guide/",
+      "bytes": 58597,
+      "durationMs": 7653
+    },
+    {
+      "template": "/govern/audit-logs",
+      "route": "/govern/audit-logs",
+      "source": "apps/web/app/govern/audit-logs/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Audit log explorer · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/audit-logs/",
+      "bytes": 37173,
+      "durationMs": 7529
+    },
+    {
+      "template": "/govern/arcade",
+      "route": "/govern/arcade",
+      "source": "apps/web/app/govern/arcade/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Risk and control scenarios · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/arcade/",
+      "bytes": 40831,
+      "durationMs": 7574
+    },
+    {
+      "template": "/govern/brief",
+      "route": "/govern/brief",
+      "source": "apps/web/app/govern/brief/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance executive brief · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/brief/",
+      "bytes": 35885,
+      "durationMs": 7692
+    },
+    {
+      "template": "/govern/docs",
+      "route": "/govern/docs",
+      "source": "apps/web/app/govern/docs/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance documentation · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/docs/",
+      "bytes": 48305,
+      "durationMs": 7693
+    },
+    {
+      "template": "/govern/evidence",
+      "route": "/govern/evidence",
+      "source": "apps/web/app/govern/evidence/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Evidence packet · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/evidence/",
+      "bytes": 34339,
+      "durationMs": 7784
+    },
+    {
+      "template": "/govern/evals",
+      "route": "/govern/evals",
+      "source": "apps/web/app/govern/evals/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance evaluations · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/evals/",
+      "bytes": 34377,
+      "durationMs": 7794
+    },
+    {
+      "template": "/govern/live",
+      "route": "/govern/live",
+      "source": "apps/web/app/govern/live/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance evidence loop · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/live/",
+      "bytes": 39120,
+      "durationMs": 21370
+    },
+    {
+      "template": "/govern/guide",
+      "route": "/govern/guide",
+      "source": "apps/web/app/govern/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Govern · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/guide/",
+      "bytes": 63513,
+      "durationMs": 21381
+    },
+    {
+      "template": "/govern/maturity",
+      "route": "/govern/maturity",
+      "source": "apps/web/app/govern/maturity/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance maturity · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/maturity/",
+      "bytes": 41259,
+      "durationMs": 15456
+    },
+    {
+      "template": "/govern/playground",
+      "route": "/govern/playground",
+      "source": "apps/web/app/govern/playground/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Policy playground · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/playground/",
+      "bytes": 37149,
+      "durationMs": 15454
+    },
+    {
+      "template": "/govern/readiness",
+      "route": "/govern/readiness",
+      "source": "apps/web/app/govern/readiness/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance readiness · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/readiness/",
+      "bytes": 42948,
+      "durationMs": 6439
+    },
+    {
+      "template": "/govern/policies",
+      "route": "/govern/policies",
+      "source": "apps/web/app/govern/policies/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Policy controls · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/policies/",
+      "bytes": 34318,
+      "durationMs": 6446
+    },
+    {
+      "template": "/govern/review-queue",
+      "route": "/govern/review-queue",
+      "source": "apps/web/app/govern/review-queue/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Human review queue · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/review-queue/",
+      "bytes": 35636,
+      "durationMs": 13938
+    },
+    {
+      "template": "/govern/realize",
+      "route": "/govern/realize",
+      "source": "apps/web/app/govern/realize/page.tsx",
+      "legacyRedirectTarget": "/realize",
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Realize · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/realize/",
+      "bytes": 33131,
+      "durationMs": 13947
+    },
+    {
+      "template": "/govern/settings",
+      "route": "/govern/settings",
+      "source": "apps/web/app/govern/settings/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Model and connection settings · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/settings/",
+      "bytes": 36540,
+      "durationMs": 13130,
+      "metadataInitially": false
+    },
+    {
+      "template": "/govern/risk",
+      "route": "/govern/risk",
+      "source": "apps/web/app/govern/risk/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Risk intelligence · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/risk/",
+      "bytes": 34294,
+      "durationMs": 13141
+    },
+    {
+      "template": "/govern/simulator",
+      "route": "/govern/simulator",
+      "source": "apps/web/app/govern/simulator/page.tsx",
+      "legacyRedirectTarget": "/govern",
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Simulator · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/",
+      "bytes": 33171,
+      "durationMs": 8749
+    },
+    {
+      "template": "/govern/tour",
+      "route": "/govern/tour",
+      "source": "apps/web/app/govern/tour/page.tsx",
+      "legacyRedirectTarget": "/govern",
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Govern · Tour · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/",
+      "bytes": 33061,
+      "durationMs": 8745
+    },
+    {
+      "template": "/govern/use-cases",
+      "route": "/govern/use-cases",
+      "source": "apps/web/app/govern/use-cases/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance use-case registry · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/use-cases/",
+      "bytes": 35783,
+      "durationMs": 17104
+    },
+    {
+      "template": "/govern/use-cases/[id]",
+      "route": "/govern/use-cases/11111111-1111-1111-1111-111111111111",
+      "source": "apps/web/app/govern/use-cases/[id]/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Modeled governance use case",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/use-cases/11111111-1111-1111-1111-111111111111/",
+      "bytes": 34756,
+      "durationMs": 18900,
+      "metadataInitially": false
+    },
+    {
+      "template": "/govern/value",
+      "route": "/govern/value",
+      "source": "apps/web/app/govern/value/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Governance value · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/value/",
+      "bytes": 40713,
+      "durationMs": 4742
+    },
+    {
+      "template": "/govern/use-cases/new",
+      "route": "/govern/use-cases/new",
+      "source": "apps/web/app/govern/use-cases/new/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Create a modeled use case",
+      "canonical": "https://portfolio.sudeeplalka.com/govern/use-cases/new/",
+      "bytes": 39171,
+      "durationMs": 6547,
+      "metadataInitially": false
+    },
+    {
+      "template": "/industries",
+      "route": "/industries",
+      "source": "apps/web/app/industries/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Industry Atlas · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/industries/",
+      "bytes": 77206,
+      "durationMs": 6994
+    },
+    {
+      "template": "/industries/uc/[id]",
+      "route": "/industries/uc/c31-retail-bank",
+      "source": "apps/web/app/industries/uc/[id]/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "A retail bank&#x27;s AI book · Financial services · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/industries/uc/c31-retail-bank/",
+      "bytes": 4628,
+      "durationMs": 121,
+      "reason": "Static-param route rechecked after removing redundant dynamicParams flag and restarting the local dev server",
+      "id": "c31-retail-bank",
+      "at": "2026-10-05T07:33:06.648Z",
+      "initialStatus": 500
+    },
+    {
+      "template": "/lifecycle",
+      "route": "/lifecycle",
+      "source": "apps/web/app/lifecycle/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Enterprise AI Lifecycle · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/lifecycle/",
+      "bytes": 53562,
+      "durationMs": 16760
+    },
+    {
+      "template": "/operate",
+      "route": "/operate",
+      "source": "apps/web/app/operate/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Operate · Day Two Observability · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/operate/",
+      "bytes": 27920,
+      "durationMs": 15112
+    },
+    {
+      "template": "/operate/guide",
+      "route": "/operate/guide",
+      "source": "apps/web/app/operate/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Operate · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/operate/guide/",
+      "bytes": 58221,
+      "durationMs": 13255
+    },
+    {
+      "template": "/realize",
+      "route": "/realize",
+      "source": "apps/web/app/realize/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Realize · Business Outcome · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/realize/",
+      "bytes": 29831,
+      "durationMs": 11108
+    },
+    {
+      "template": "/realize/guide",
+      "route": "/realize/guide",
+      "source": "apps/web/app/realize/guide/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Guide · Realize · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/realize/guide/",
+      "bytes": 59983,
+      "durationMs": 11113
+    },
+    {
+      "template": "/story",
+      "route": "/story",
+      "source": "apps/web/app/story/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Storyline · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/story/",
+      "bytes": 26780,
+      "durationMs": 7421
+    },
+    {
+      "template": "/roadmap",
+      "route": "/roadmap",
+      "source": "apps/web/app/roadmap/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Product roadmap · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/roadmap/",
+      "bytes": 50081,
+      "durationMs": 7444
+    },
+    {
+      "template": "/story/brief",
+      "route": "/story/brief",
+      "source": "apps/web/app/story/brief/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Board Brief · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/story/brief/",
+      "bytes": 27311,
+      "durationMs": 7353
+    },
+    {
+      "template": "/storylines",
+      "route": "/storylines",
+      "source": "apps/web/app/storylines/page.tsx",
+      "legacyRedirectTarget": null,
+      "metadataInSource": true,
+      "status": 200,
+      "title": "Storylines · one program, end to end · Sudeep Lalka",
+      "canonical": "https://portfolio.sudeeplalka.com/storylines/",
+      "bytes": 52210,
+      "durationMs": 7349
+    }
+  ],
+  "finalCoverageNote": "84 template GET checks, with explicit successful rechecks applied in resolvedResults; separate scenarioSweep checks all69 industry registry IDs. Original responses, previous scenario sweeps and sitemap failures are retained for traceability. HTTP checks do not verify client-side redirect behavior or interactive UI."
+}

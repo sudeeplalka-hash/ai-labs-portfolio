@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { caseHref, caseContextHref } from '@gov/lib/navigation';
 import { api } from '@gov/lib/api';
 import type { ReviewItem } from '@gov/lib/types';
 import { SeverityBadge, StatusBadge, DecisionBadge } from '@gov/components/shared/Badge';
@@ -23,39 +25,60 @@ export default function ReviewQueue() {
   const [statusFilter, setStatusFilter] = useState('');
   const [actioning, setActioning] = useState(false);
   const [notes, setNotes] = useState('');
+  const [error, setError] = useState('');
+  const [receipt, setReceipt] = useState('');
+  const [attempt, setAttempt] = useState(0);
+  const [caseId, setCaseId] = useState('');
   const role = useRole();
   const mayAct = can(role, 'review:act');
 
-  const load = () => {
+  useEffect(() => {
+    let current = true;
+    const context = new URLSearchParams(window.location.search);
+    const caseFilter = context.get('case') || '';
+    const eventFilter = context.get('event');
+    setCaseId(caseFilter);
     setLoading(true);
-    api.reviewQueue.list({ status: statusFilter || undefined }).then(setItems).finally(() => setLoading(false));
-  };
-
-  useEffect(() => { load(); }, [statusFilter]);
+    setError('');
+    api.reviewQueue.list({ status: statusFilter || undefined }).then((records) => {
+      if (!current) return;
+      const visible = records.filter((record) => !caseFilter || record.use_case_id === caseFilter);
+      setItems(visible);
+      setSelected((previous) => visible.find((record) => record.id === previous?.id || (!!eventFilter && record.prompt_event_id === eventFilter)) ?? null);
+    }).catch(() => { if (current) setError('Review items could not load. Retry to keep investigating.'); }).finally(() => { if (current) setLoading(false); });
+    return () => { current = false; };
+  }, [statusFilter, attempt]);
 
   const take = async (action: string) => {
-    if (!selected) return;
+    if (!selected || !mayAct || actioning || !['pending', 'in_review'].includes(selected.status)) return;
     setActioning(true);
+    setError(''); setReceipt('');
     try {
       const updated = await api.reviewQueue.action(selected.id, { action, reviewer: 'reviewer@corp.example.com', notes });
       setSelected(updated);
       setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
-    } finally { setActioning(false); }
+      setReceipt(`${ACTIONS.find((entry) => entry.key === action)?.label ?? action} recorded for review ${updated.id}. Status: ${updated.status}. ${process.env.NEXT_PUBLIC_STATIC_DEMO === '1' ? 'This change is kept in the current browser session only.' : 'The API confirmed this update.'}`);
+      setNotes('');
+    } catch { setError('The review action did not complete. Your notes are still available; retry when ready.'); }
+    finally { setActioning(false); }
   };
 
   const isOverdue = (item: ReviewItem) => item.sla_deadline && new Date(item.sla_deadline) < new Date() && item.status === 'pending';
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-8 space-y-6">
       <div>
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Governance</p>
         <h2 className="text-2xl font-bold text-slate-900 mt-1">Human Review Queue</h2>
         <p className="text-sm text-slate-500 mt-1">{items.filter(i => i.status === 'pending').length} items pending review</p>
       </div>
 
-      <div className="flex gap-2">
+      {caseId && <p className="text-sm text-slate-600">Showing reviews for <Link href={caseHref(caseId)} className="font-semibold text-primary underline">case {caseId}</Link>. <button onClick={() => { window.history.replaceState(window.history.state, '', '/govern/review-queue'); setAttempt((value) => value + 1); }} className="text-primary underline">All reviews</button></p>}
+      {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error} <button onClick={() => setAttempt((value) => value + 1)} className="font-semibold underline">Retry loading</button></p>}
+      {receipt && <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{receipt}</p>}
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Review status filter">
         {['', 'pending', 'in_review', 'approved', 'rejected', 'false_positive'].map(s => (
-          <button key={s} onClick={() => setStatusFilter(s)} className={`px-3 py-1 text-xs rounded-full border transition-colors ${statusFilter === s ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>
+          <button key={s} aria-pressed={statusFilter === s} onClick={() => setStatusFilter(s)} className={`px-3 py-2 text-xs rounded-full border transition-colors ${statusFilter === s ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'}`}>
             {s || 'All'}
           </button>
         ))}
@@ -66,7 +89,7 @@ export default function ReviewQueue() {
           <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="max-h-[680px] overflow-y-auto divide-y divide-slate-100">
               {items.map(item => (
-                <button key={item.id} onClick={() => { setSelected(item); setNotes(''); }} className={`w-full text-left px-4 py-3 hover:bg-slate-50 ${selected?.id === item.id ? 'bg-blue-50 border-l-2 border-blue-500' : ''} ${isOverdue(item) ? 'border-l-2 border-red-400' : ''}`}>
+                <button key={item.id} aria-pressed={selected?.id === item.id} onClick={() => { setSelected(item); setNotes(''); setReceipt(''); }} className={`w-full text-left px-4 py-3 hover:bg-slate-50 ${selected?.id === item.id ? 'bg-blue-50 border-l-2 border-blue-500' : ''} ${isOverdue(item) ? 'border-l-2 border-red-400' : ''}`}>
                   <div className="flex items-center justify-between mb-1">
                     <StatusBadge status={item.status} />
                     <div className="flex items-center gap-1.5">
@@ -85,6 +108,7 @@ export default function ReviewQueue() {
           <div className="lg:col-span-3">
             {selected ? (
               <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-5">
+                <nav aria-label="Review source records" className="flex flex-wrap gap-3 text-sm"><Link href={caseHref(selected.use_case_id)} className="text-primary underline">Originating case</Link><Link href={caseContextHref('/govern/audit-logs', selected.use_case_id, selected.prompt_event_id)} className="text-primary underline">Original audit event</Link></nav>
                 <div className="flex items-center gap-2 flex-wrap">
                   <StatusBadge status={selected.status} />
                   <SeverityBadge severity={selected.severity} />
@@ -121,7 +145,7 @@ export default function ReviewQueue() {
                 {selected.status === 'pending' || selected.status === 'in_review' ? (
                   mayAct ? (
                   <div className="space-y-3 border-t border-slate-100 pt-4">
-                    <textarea className="w-full border border-slate-200 rounded px-3 py-2 text-sm h-16 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add reviewer notes…" value={notes} onChange={e => setNotes(e.target.value)} />
+                    <label htmlFor="review-notes" className="block text-sm font-medium">Decision rationale</label><textarea id="review-notes" className="w-full border border-slate-200 rounded px-3 py-2 text-sm h-24 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add reviewer notes…" value={notes} onChange={e => setNotes(e.target.value)} />
                     <div className="flex flex-wrap gap-2">
                       {ACTIONS.map(a => (
                         <button key={a.key} onClick={() => take(a.key)} disabled={actioning} className={`px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50 ${a.style}`}>

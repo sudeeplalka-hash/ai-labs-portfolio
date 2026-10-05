@@ -56,7 +56,7 @@ function sectionLabel(stageKey: string, pathname: string): string | undefined {
   return undefined;
 }
 
-export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: React.RefObject<HTMLButtonElement | null> }) {
+export function Header({ onMenu, menuRef, menuOpen = false }: { onMenu?: () => void; menuRef?: React.RefObject<HTMLButtonElement | null>; menuOpen?: boolean }) {
   const { mode, setMode, state, demoArchetype, setDemoArchetype } = useProgram();
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -141,6 +141,7 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
       ref={menuRef as React.RefObject<HTMLButtonElement>}
       onClick={onMenu}
       aria-haspopup="dialog"
+      aria-expanded={menuOpen}
       className="mt-0.5 shrink-0 rounded-lg border border-line p-2 text-slatey-300 hover:bg-slate-100 lg:hidden"
       aria-label="Open navigation"
     >
@@ -182,7 +183,7 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
           you return. Transform and opacity only: both are compositor properties, so
           this animates off the main thread and never triggers layout.
           (prefers-reduced-motion is honoured globally in globals.css.) */}
-      {nav && (
+      {nav && pinned && (
         <div className="no-print sticky top-0 z-30 h-0 overflow-visible">
           <div
             className={cn(
@@ -190,7 +191,6 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
               "transition-[transform,opacity] duration-200 ease-out will-change-transform motion-reduce:transition-none",
               pinned ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0",
             )}
-            aria-hidden={!pinned}
           >
             <div className="mx-auto flex w-full max-w-[1440px] items-center px-5 py-2 md:px-8">
               <StageNavMini m={nav} title={title} />
@@ -216,11 +216,11 @@ export function Header({ onMenu, menuRef }: { onMenu?: () => void; menuRef?: Rea
         <div className="mx-auto w-full max-w-[1440px] px-5 py-3 md:px-8">
 
           {isPipeline && nav ? (
-            <div className="flex items-start gap-4">
+            <div className="flex min-w-0 flex-col items-start gap-4 lg:flex-row">
               {menuButton}
               {/* The divider separates two different KINDS of thing (who you are vs
                   where you can go), which is a divider earning its ink. */}
-              <div className="min-w-0 shrink-0 lg:w-[180px] lg:border-r lg:border-line lg:pr-5">
+              <div className="w-full min-w-0 lg:w-[180px] lg:shrink-0 lg:border-r lg:border-line lg:pr-5">
                 {titleBlock}
                 {controls && <div className="mt-2">{controls}</div>}
               </div>

@@ -11,11 +11,12 @@ import { useRouter } from "next/navigation";
 import { forecastRunRate, cliffSensitivity } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard, CommandPalette, ExportMenu, ToastHost, toast, downloadCsv, downloadJson, type ExportAction, type Command } from "@labs/design-system";
 import { C33_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { NumericControl, EvidenceTable, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "./DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 const CLUSTER_CAP_TOKENS = 2.5e9; // tokens/month per cluster at 100% utilization
@@ -27,6 +28,7 @@ const FRONTIER_PRICE = 18;
 const fmt = (v: number) => (v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v / 1000)}k`);
 
 export function InferenceForecaster() {
+  const [month, setMonth] = useState(1);
   const [startVol, setStartVol] = useState(500_000); // calls/mo
   const [growth, setGrowth] = useState(6); // %/mo
   const [tokensPerCall, setTokensPerCall] = useState(3000);
@@ -81,48 +83,36 @@ export function InferenceForecaster() {
     })),
   ];
 
+  const savedState = { startVol, growth, tokensPerCall, frontierShare, util, opsFte, month };
+  const scenarioLink = useScenarioLink({ id: "C3-3", state: savedState, activeId: activeUcId,
+    restore: (s) => { setStartVol(s.startVol); setGrowth(s.growth); setTokensPerCall(s.tokensPerCall); setFrontierShare(s.frontierShare); setUtil(s.util); setOpsFte(s.opsFte); setMonth(s.month); },
+    validate: (v): v is typeof savedState => validateScenario(v, { startVol: bounded(100000,5000000), growth: bounded(0,20), tokensPerCall: bounded(500,8000), frontierShare: bounded(0,100), util: bounded(20,100), opsFte: bounded(0.5,5), month: (v) => Number.isInteger(v) && bounded(1,24)(v) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">C3-3</span>
-          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
-        </div>
-      </header>
+    <InstrumentShell title="Inference run-rate forecaster" eyebrow="AI investment & economics" description="Inspect each month of API and self-host cost before making a platform commitment."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "C3-3" }]}
+      decision={<DecisionSummary title={cliff >= 0 ? `Self-host first undercuts API in month ${cliff + 1}` : "No monthly crossover in 24 months"} explanation={`24-month total: API ${fmt(apiCum)}; self-host ${fmt(selfCum)}. A monthly crossover does not by itself recover earlier spend.`} nextAction="Pin a month below, then test utilization and volume. Prices are explicit illustrative assumptions, not current vendor quotes." />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={C33_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="API usage offers flexibility, but cost scales with volume. Self hosting can reduce marginal cost after utilization reaches the right level, but it introduces fixed capacity, operations, infrastructure, and talent requirements, and the decision depends on utilization more than sticker price." approach="The forecaster projects API and self hosted costs across 24 months. It marks the crossover point and shows how growth, token volume, frontier model share, utilization, and staffing assumptions move the decision." why="This connects AI operating strategy to budget planning, unit economics, platform investment, infrastructure commitments, and cost governance." metric="The crossover month; 24-month cumulative cost each way." tradeoff="API is flexible pay per use; self host is fixed capacity that only amortizes past the crossover." outcome="The crossover month with the assumption that moves it most made explicit." />}
+      actions={<ExportMenu actions={exportActions} />}
+    >
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Inference Run Rate Forecaster</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Inference strategy is a run rate decision. This artifact compares API based usage and self hosted capacity
-            over time, then identifies where the economics cross and which assumption moves the crossover most. (Per-call economics live in{" "}
-            <Link href="/agents/cost-simulator" className="font-medium text-primary hover:underline">GAP-06</Link>.)
-          </p>
-        </div>
-
-        <UseCaseRail useCases={C33_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="API usage offers flexibility, but cost scales with volume. Self hosting can reduce marginal cost after utilization reaches the right level, but it introduces fixed capacity, operations, infrastructure, and talent requirements, and the decision depends on utilization more than sticker price." approach="The forecaster projects API and self hosted costs across 24 months. It marks the crossover point and shows how growth, token volume, frontier model share, utilization, and staffing assumptions move the decision." why="This connects AI operating strategy to budget planning, unit economics, platform investment, infrastructure commitments, and cost governance." metric="The crossover month; 24-month cumulative cost each way." tradeoff="API is flexible pay per use; self host is fixed capacity that only amortizes past the crossover." outcome="The crossover month with the assumption that moves it most made explicit." />
-
-        <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Inputs */}
-          <Panel className="space-y-4">
-            <Slider label="Starting volume" value={startVol} min={100000} max={5000000} step={100000} onChange={setStartVol} fmt={(v) => `${(v / 1e6).toFixed(1)}M/mo`} accent="amber" />
-            <Slider label="Monthly growth" value={growth} min={0} max={20} step={1} onChange={setGrowth} fmt={(v) => `${v}%`} accent="amber" />
-            <Slider label="Tokens / call" value={tokensPerCall} min={500} max={8000} step={100} onChange={setTokensPerCall} fmt={(v) => v.toLocaleString()} accent="amber" />
-            <Slider label="Share on frontier model" value={frontierShare} min={0} max={100} step={5} onChange={setFrontierShare} fmt={(v) => `${v}%`} accent="amber" />
-            <Slider label="Self host utilization" value={util} min={20} max={95} step={5} onChange={setUtil} fmt={(v) => `${v}%`} accent="teal" />
-            <Slider label="Ops headcount (FTE)" value={opsFte} min={0.5} max={5} step={0.5} onChange={setOpsFte} fmt={(v) => `${v}`} accent="teal" />
+          <Panel className="min-w-0 space-y-4">
+            <NumericControl label="Starting volume" value={startVol} min={100000} max={5000000} step={100000} onChange={setStartVol} format={(v) => `${(v / 1e6).toFixed(1)}M/mo`} />
+            <NumericControl label="Monthly growth" value={growth} min={0} max={20} step={1} onChange={setGrowth} format={(v) => `${v}%`} />
+            <NumericControl label="Tokens / call" value={tokensPerCall} min={500} max={8000} step={100} onChange={setTokensPerCall} format={(v) => v.toLocaleString()} />
+            <NumericControl label="Share on frontier model" value={frontierShare} min={0} max={100} step={5} onChange={setFrontierShare} format={(v) => `${v}%`} />
+            <NumericControl label="Self host utilization" value={util} min={20} max={95} step={5} onChange={setUtil} format={(v) => `${v}%`} />
+            <NumericControl label="Ops headcount (FTE)" value={opsFte} min={0.5} max={5} step={0.5} onChange={setOpsFte} format={(v) => `${v}`} />
           </Panel>
 
           {/* Chart + KPIs */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Panel>
               <div className="mb-2 flex items-center justify-between">
                 <p className="stat-label">Monthly run rate · 24 months</p>
@@ -132,16 +122,19 @@ export function InferenceForecaster() {
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[520px]" role="img" aria-label="API vs self-host monthly run rate over 24 months">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-0" role="img" aria-label="API vs self-host monthly run rate over 24 months">
                   <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#e4e7eb" />
                   <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#e4e7eb" />
-                  {cliff > 0 && (
+                  {cliff >= 0 && (
                     <g>
                       <line x1={xf(cliff)} y1={PAD} x2={xf(cliff)} y2={H - PAD} stroke="#152433" strokeDasharray="3 3" strokeOpacity="0.5" />
                       <circle cx={xf(cliff)} cy={yf(self[cliff])} r="4" fill="#152433" />
                       <text x={xf(cliff)} y={PAD - 6} textAnchor="middle" className="fill-ink" fontSize="11" fontWeight="600">cliff · mo {cliff + 1}</text>
                     </g>
                   )}
+                  <line x1={xf(month - 1)} x2={xf(month - 1)} y1={PAD} y2={H - PAD} stroke="#64748b" strokeDasharray="2 4" />
+                  <circle cx={xf(month - 1)} cy={yf(api[month - 1])} r="5" fill="#e24b4a" />
+                  <circle cx={xf(month - 1)} cy={yf(self[month - 1])} r="5" fill="#0d9488" />
                   <polyline points={poly(api)} fill="none" stroke="#e24b4a" strokeWidth="2.5" />
                   <polyline points={poly(self)} fill="none" stroke="#0d9488" strokeWidth="2.5" />
                   <text x={PAD} y={H - PAD + 14} className="fill-slate-400" fontSize="10">mo 1</text>
@@ -150,16 +143,19 @@ export function InferenceForecaster() {
                   <text x={PAD - 6} y={PAD + 4} textAnchor="end" className="fill-slate-400" fontSize="10">{fmt(maxY)}</text>
                 </svg>
               </div>
+              <NumericControl label="Inspect month" value={month} min={1} max={24} onChange={setMonth} format={(v) => `Month ${v}`} />
+              <div className="mt-3 rounded-lg border border-line bg-slate-50 p-3 text-sm" aria-live="polite"><strong>Month {month}:</strong> API {fmt(api[month - 1])}; self-host {fmt(self[month - 1])}. {api[month - 1] >= self[month - 1] ? "Self-host is lower" : "API is lower"} by {fmt(Math.abs(api[month - 1] - self[month - 1]))} for this month.</div>
+              <EvidenceTable caption="All 24 monthly values" headings={["Month", "API (USD/month)", "Self-host (USD/month)", "Lower monthly cost"]} rows={api.map((cost, i) => [i + 1, Math.round(cost).toLocaleString(), Math.round(self[i]).toLocaleString(), cost < self[i] ? "API" : "Self-host"])} />
             </Panel>
 
-            <div className="grid grid-cols-3 gap-3">
-              <KpiCard label="The cliff" value={cliff > 0 ? `Mo ${cliff + 1}` : "N/A"} tone={cliff > 0 ? "watch" : "healthy"} interpretation={cliff > 0 ? "Self-host undercuts API" : "Beyond 24 mo"} />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <KpiCard label="The cliff" value={cliff >= 0 ? `Mo ${cliff + 1}` : "N/A"} tone={cliff >= 0 ? "watch" : "healthy"} interpretation={cliff >= 0 ? "Self-host undercuts API" : "Beyond 24 mo"} />
               <KpiCard label="API · 24-mo total" value={fmt(apiCum)} tone="neutral" interpretation="Cumulative" />
               <KpiCard label="Self host · 24 mo total" value={fmt(selfCum)} tone="neutral" interpretation="Cumulative" />
             </div>
 
             <Panel>
-              <p className="stat-label mb-2">What pulls the break even forward <span className="font-normal text-slatey-500">· crossover under each single move</span></p>
+              <p className="stat-label mb-2">Crossover sensitivity <span className="font-normal text-slatey-500">· crossover under each single move</span></p>
               <ul className="space-y-1.5">
                 {sensitivity.map((lv) => (
                   <li key={lv.key} className="flex items-center justify-between gap-2 rounded-md border border-line px-2.5 py-1.5 text-xs">
@@ -172,16 +168,16 @@ export function InferenceForecaster() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed, earlier (green) means self host pays off sooner.</p>
+              <p className="mt-1.5 text-[10px] text-slatey-500">Each row recomputes the crossover with one assumption changed, earlier (green) means self-host monthly cost first undercuts API sooner; cumulative payback may differ.</p>
             </Panel>
           </div>
         </div>
 
         <div className="mt-6">
-          <InsightCard title={cliff > 0 ? `The cliff is at month ${cliff + 1}` : "No cliff inside 24 months"} tone={cliff > 0 ? "warn" : "success"}>
-            {cliff > 0
-              ? <>Below month {cliff + 1}, API&apos;s pay-per-use wins; above it, fixed capacity amortizes. Now drop utilization, the cliff slides right. Idle GPUs are the cost vendors leave out of the pitch.</>
-              : <>At these assumptions API stays cheaper for all 24 months. Raise growth or lower the frontier model share to bring a cliff into view, or accept that self host doesn&apos;t pay yet.</>}
+          <InsightCard title={cliff >= 0 ? `The cliff is at month ${cliff + 1}` : "No cliff inside 24 months"} tone={cliff >= 0 ? "warn" : "success"}>
+            {cliff >= 0
+              ? <>Self-host first undercuts API in month {cliff + 1}. Later cluster additions can reverse that ordering; inspect every month and the 24-month totals before treating the crossover as a commitment.</>
+              : <>At these assumptions API stays cheaper for all 24 months. Inspect volume, model mix and utilization independently; each can change the relative economics.</>}
           </InsightCard>
         </div>
 
@@ -198,18 +194,9 @@ export function InferenceForecaster() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this model uses simplified cost assumptions. Production forecasting would require current pricing, workload profiles, infrastructure benchmarks, reliability requirements, and finance approved cost allocation.</p>
         </div>
-      </main>
+
       <ToastHost />
       <CommandPalette commands={paletteCommands} />
-    </div>
-  );
-}
-
-function Slider({ label, value, min, max, step, onChange, fmt, accent }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; fmt: (v: number) => string; accent: "amber" | "teal" }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">{label}</label><span className="font-mono text-xs font-semibold text-ink">{fmt(value)}</span></div>
-      <input type="range" aria-label={label} min={min} max={max} step={step} value={value} onChange={(e) => onChange(Number(e.target.value))} className={`w-full ${accent === "amber" ? "accent-amber-500" : "accent-teal-600"}`} />
-    </div>
+    </InstrumentShell>
   );
 }

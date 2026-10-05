@@ -12,11 +12,12 @@ import { useRouter } from "next/navigation";
 import { deliveryHealth, sinkingGreen } from "@labs/engines";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, FreshnessStamp, CommandPalette, ExportMenu, ToastHost, toast, downloadJson, type ExportAction, type Command } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, TrendIndicator, KpiCard, InsightCard, LiveBadge, FreshnessStamp, CommandPalette, ExportMenu, ToastHost, toast, downloadJson, type ExportAction, type Command } from "@labs/design-system";
 import { EL04_USE_CASES, LABS } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { EvidenceTable, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadCsv, ArtifactButton } from "../artifact/artifact";
 import {
@@ -49,6 +50,7 @@ export function RaidRadar() {
   const idx = dh.index;
   const atRisk = dh.atRisk;
   const gaps = dh.gaps;
+  const exceptionRows = [...scenario.workstreams].sort((a, b) => Number(b.reported !== b.actual) - Number(a.reported !== a.actual) || Number(b.actual === "red") - Number(a.actual === "red"));
   const sinking = sinkingGreen(scenario.workstreams);
   const idxTone = idx >= 80 ? "healthy" : idx >= 60 ? "watch" : idx >= 40 ? "risk" : "critical";
 
@@ -78,35 +80,22 @@ export function RaidRadar() {
     })),
   ];
 
+  const savedState = { scenarioKey, selectedId };
+  const scenarioLink = useScenarioLink({ id: "EL-04", state: savedState, activeId: activeUcId,
+    restore: (s) => { setScenarioKey(s.scenarioKey); setSelectedId(s.selectedId); },
+    validate: (v): v is typeof savedState => validateScenario(v, { scenarioKey: oneOf(SCENARIOS.map((s) => s.key)), selectedId: shortString }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink">
-            <ArrowLeft className="h-4 w-4" /> Portfolio
-          </Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-04</span>
-          <div className="ml-auto"><ExportMenu actions={exportActions} /></div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Delivery Health and RAID Radar</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A steering board should not only report where workstreams stand. It should show where they are heading. This
-            artifact compares reported status against actual health and trajectory so the one that <span className="font-semibold text-ink">reads green but is sinking</span> cannot hide.
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL04_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Traditional RAG reporting can hide deterioration when teams report a comfortable snapshot. Technology strategy professionals need a trajectory view that prices in risks, issues, assumptions, dependencies, and trend direction." approach="The radar pairs reported status with actual health, trend, and RAID detail. It calculates a portfolio health index and highlights workstreams that appear green while declining." why="This connects delivery governance to transparency, escalation discipline, risk management, and executive decision quality." metric="Portfolio health index; reported vs actual gaps; the sinking green flags." tradeoff="A comfortable reported status versus the honest trajectory underneath it." outcome="The workstream that reads green but is sinking, surfaced before the next steering." />
+    <InstrumentShell title="Delivery health and RAID" eyebrow="Operating model & engagement" description="Find the exception hidden by a green status, then make the decision ask."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-04" }]}
+      decision={<DecisionSummary title={`${gaps} reported-versus-actual gaps`} explanation={`${atRisk} of ${scenario.workstreams.length} workstreams are at risk. Selected: ${selected.name}.`} nextAction={selected.brief.ask} tone={atRisk ? "caution" : "positive"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL04_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Traditional RAG reporting can hide deterioration when teams report a comfortable snapshot. Technology strategy professionals need a trajectory view that prices in risks, issues, assumptions, dependencies, and trend direction." approach="The radar pairs reported status with actual health, trend, and RAID detail. It calculates a portfolio health index and highlights workstreams that appear green while declining." why="This connects delivery governance to transparency, escalation discipline, risk management, and executive decision quality." metric="Portfolio health index; reported vs actual gaps; the sinking green flags." tradeoff="A comfortable reported status versus the honest trajectory underneath it." outcome="The workstream that reads green but is sinking, surfaced before the next steering." />}
+      actions={<ExportMenu actions={exportActions} />}
+    >
 
         <div className="mb-4 flex justify-end">
           <ArtifactButton label="Export RAID register (CSV)" onClick={onGenerateCsv} title="Download the RAID register as CSV" />
@@ -116,7 +105,7 @@ export function RaidRadar() {
           {!activeUc && SCENARIOS.map((s) => {
             const on = s.key === scenarioKey;
             return (
-              <button key={s.key} onClick={() => onScenario(s.key)}
+              <button key={s.key} aria-pressed={s.key === scenarioKey} onClick={() => onScenario(s.key)}
                 className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${on ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>
                 {s.label}
               </button>
@@ -152,14 +141,14 @@ export function RaidRadar() {
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <div className="space-y-3">
-              {scenario.workstreams.map((w) => {
+              {exceptionRows.map((w) => {
                 const gap = w.reported !== w.actual;
                 const on = w.id === selectedId;
                 return (
-                  <button key={w.id} onClick={() => setSelectedId(w.id)}
+                  <button key={w.id} aria-pressed={w.id === selectedId} onClick={() => setSelectedId(w.id)}
                     className={`w-full rounded-xl border bg-white p-4 text-left shadow-card transition hover:shadow-cardhover ${on ? "border-primary ring-1 ring-primary/30" : "border-line"}`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -186,7 +175,7 @@ export function RaidRadar() {
             </div>
 
             <Panel className="mt-4">
-              <p className="stat-label mb-2">Health × trajectory</p>
+              <p className="stat-label mb-2">Health × trajectory</p><p className="mb-3 text-xs text-slatey-500">Exceptions appear first in the list. Select any workstream to inspect its evidence and decision ask.</p>
               <div className="relative mx-auto h-40 w-full max-w-md rounded-lg border border-line bg-slate-50/60">
                 <span className="absolute left-1/2 top-1 -translate-x-1/2 text-[10px] text-slatey-500">improving ↑</span>
                 <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] text-slatey-500">↓ deteriorating</span>
@@ -201,18 +190,19 @@ export function RaidRadar() {
                   const dot = w.reported === "green" ? "bg-emerald-500" : w.reported === "amber" ? "bg-amber-500" : "bg-rose-500";
                   const sel = w.id === selectedId;
                   return (
-                    <button key={w.id} onClick={() => setSelectedId(w.id)} aria-label={`${w.name}: reported ${HEALTH_LABEL[w.reported]}, actual ${HEALTH_LABEL[w.actual]}`} title={w.name}
-                      className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left, top }}>
+                    <button key={w.id} aria-pressed={w.id === selectedId} onClick={() => setSelectedId(w.id)} aria-label={`${w.name}: reported ${HEALTH_LABEL[w.reported]}, actual ${HEALTH_LABEL[w.actual]}`} title={w.name}
+                      className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" style={{ left, top }}>
                       <span className={`block rounded-full ring-2 ring-white ${dot} ${sel ? "h-4 w-4" : "h-3 w-3"} ${w.reported !== w.actual ? "outline outline-2 outline-rose-500/60" : ""}`} />
                     </button>
                   );
                 })}
               </div>
+              <EvidenceTable caption="Health and trajectory values" headings={["Workstream", "Owner", "Reported", "Actual", "Trend", "Change (points)"]} rows={exceptionRows.map((w) => [<button key={w.id} className="text-left text-primary underline" onClick={() => setSelectedId(w.id)}>{w.name}</button>, w.owner, HEALTH_LABEL[w.reported], HEALTH_LABEL[w.actual], w.trend, w.delta])} />
               <p className="mt-2 text-[11px] text-slatey-500">Dot color = <span className="font-medium">reported</span> status; position = actual health × trend. A green dot in the shaded corner is the trap.</p>
             </Panel>
           </div>
 
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Panel>
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold text-ink">{selected.name}</h3>
@@ -272,10 +262,10 @@ export function RaidRadar() {
             <span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled delivery governance artifact. Real use would require current plan data, workstream updates, RAID ownership, dependency status, and leadership review cadence.
           </p>
         </div>
-      </main>
+
       <ToastHost />
       <CommandPalette commands={paletteCommands} />
-    </div>
+    </InstrumentShell>
   );
 }
 

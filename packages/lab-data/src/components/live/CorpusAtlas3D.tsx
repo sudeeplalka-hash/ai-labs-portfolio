@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useInViewport, usePageVisible, useReducedMotion } from "@labs/design-system";
 import { RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import type { CorpusFile, DupPair } from "@data/lib/prep/corpus";
 import type { AtlasHull } from "./CorpusStarMap";
@@ -97,6 +98,9 @@ export function CorpusAtlas3D({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const pageVisible = usePageVisible();
+  const inViewport = useInViewport(wrapRef);
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [hoverEdge, setHoverEdge] = useState<EdgeHit | null>(null);
   const [view, setView] = useState({ ...HOME });
@@ -421,18 +425,17 @@ export function CorpusAtlas3D({
     canvas.style.cursor = hoverId || hoverEdge ? "pointer" : "";
 
     // Pulse loop: only while a document is hovered, never otherwise.
-    const reduced =
-      typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (!hoverId || reduced) return;
+    if (!hoverId || reduced || !pageVisible || !inViewport) return;
     let raf = 0;
     const t0 = typeof performance !== "undefined" ? performance.now() : 0;
     const loop = (t: number) => {
-      draw(((t - t0) % 1200) / 1200);
-      raf = requestAnimationFrame(loop);
+      const elapsed = t - t0;
+      draw(Math.min(1, elapsed / 1200));
+      if (elapsed < 1200) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [files, pairs, hulls, selectedId, hoverId, hoverEdge, view, sizeTick]);
+  }, [files, pairs, hulls, selectedId, hoverId, hoverEdge, view, sizeTick, reduced, pageVisible, inViewport]);
 
   // Re-render on wrapper resize (the atlas card width changes with breakpoints).
   useEffect(() => {
@@ -462,12 +465,10 @@ export function CorpusAtlas3D({
     () => () => {
       if (motionRaf.current) cancelAnimationFrame(motionRaf.current);
     },
-    [],
+    [reduced, pageVisible, inViewport, sizeTick],
   );
 
   // ---- bounded, user-initiated motion (embedding-projector feel, no deps) ----
-  const reducedMotion = () =>
-    typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
   const stopMotion = () => {
     if (motionRaf.current) cancelAnimationFrame(motionRaf.current);
     motionRaf.current = 0;
@@ -475,7 +476,7 @@ export function CorpusAtlas3D({
   // Inertia: keep orbiting briefly after the drag lets go, decaying fast.
   const glide = () => {
     stopMotion();
-    if (reducedMotion()) return;
+    if (reduced || !pageVisible || !inViewport) return;
     if (performance.now() - vel.current.t > 90) return; // pointer had already stopped
     vel.current.vx = Math.max(-0.006, Math.min(0.006, vel.current.vx));
     vel.current.vy = Math.max(-0.004, Math.min(0.004, vel.current.vy));
@@ -502,7 +503,7 @@ export function CorpusAtlas3D({
   // Eased return to the home view instead of a hard jump.
   const resetView = () => {
     stopMotion();
-    if (reducedMotion()) {
+    if (reduced || !pageVisible || !inViewport) {
       setView({ ...HOME });
       return;
     }

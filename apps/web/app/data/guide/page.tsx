@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import {
   FileSearch,
   ScanLine,
@@ -15,7 +16,8 @@ import { SectionHeader } from "@data/components/common/SectionHeader";
 import { Badge } from "@data/components/common/Badge";
 import { RULEBOOK_LIST } from "@data/lib/prep/rulebook";
 
-export const metadata = { title: "Prep & Guidelines Guide" };
+export const metadata = {
+  ...routeMetadata("Prep & Guidelines Guide", "Inspect prep & guidelines guide through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/data/guide"), title: "Prep & Guidelines Guide" };
 
 const STEPS = [
   { n: "1", icon: FileSearch, title: "Ingest & decode", body: "Open the file safely and confirm it is readable UTF-8. Corrupt encodings, binary blobs, and unparseable JSON are caught before they poison anything downstream.", why: "Garbage in means garbage embeddings, and silent retrieval failures later." },

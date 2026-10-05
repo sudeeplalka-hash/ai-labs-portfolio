@@ -1,104 +1,37 @@
-// "The collection": the landing's browse section, an accordion by domain that
-// expands to a numbered executive index of that domain's artifacts, each row
-// showing the decision it enables and a LIVE/SIMULATED pill. Replaces the old
-// summary cards + poster shelves so every artifact appears exactly once. Static:
-// native <details> means it works with no client JS. All data from the registry.
-
+"use client";
 import Link from "next/link";
-import {
-  Workflow, Boxes, LineChart, Users, Cpu, ChevronRight, ArrowRight,
-  type LucideIcon,
-} from "lucide-react";
-import { labById, labsByCollection, type LabEntry, type Collection as Col } from "@labs/kit";
-
-type Accent = { chip: string; text: string; num: string };
-const ACCENT: Record<string, Accent> = {
-  blue: { chip: "bg-primary-soft", text: "text-primary", num: "text-primary" },
-  teal: { chip: "bg-teal-50", text: "text-teal-700", num: "text-teal-600" },
-  amber: { chip: "bg-amber-50", text: "text-amber-700", num: "text-amber-600" },
-  violet: { chip: "bg-violet-50", text: "text-violet-700", num: "text-violet-600" },
-  emerald: { chip: "bg-emerald-50", text: "text-emerald-700", num: "text-emerald-600" },
-};
-
-type DomainDef = { c: Col; title: string; tag: string; accent: keyof typeof ACCENT; icon: LucideIcon };
-const DOMAINS: DomainDef[] = [
-  { c: 1, title: "Enterprise AI Lifecycle", tag: "the working program spine", accent: "blue", icon: Workflow },
-  { c: 2, title: "Agent Architecture & Protocols", tag: "integration decision models", accent: "teal", icon: Boxes },
-  { c: 3, title: "AI Investment & Economics", tag: "capital, cost, ROI", accent: "amber", icon: LineChart },
-  { c: 4, title: "Operating Model & Adoption", tag: "governance, readiness, alignment", accent: "violet", icon: Users },
-  // Collection 5 (Live Builds) registers here but stays invisible until its
-  // first artifact lands in the registry — the section render is count-gated,
-  // so shipping LB-01 makes it appear with no further UI change.
-  { c: 5, title: "Live Builds", tag: "real models, real metrics", accent: "emerald", icon: Cpu },
-];
-
-// Collection 1 prepends the LIVE spine (C1); the others read straight from the registry.
-const labsFor = (c: Col): LabEntry[] =>
-  c === 1 ? ([labById("C1"), ...labsByCollection(1)].filter(Boolean) as LabEntry[]) : labsByCollection(c);
-
-function StatusPill({ live }: { live: LabEntry["live"] }) {
-  if (live === "LIVE") return <span className="shrink-0 rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-emerald-700">Live</span>;
-  if (live === "SIMULATED") return <span className="shrink-0 rounded bg-amber-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-amber-700">Simulated</span>;
-  if (live === "BYO-KEY") return <span className="shrink-0 rounded bg-sky-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-sky-700">BYO-key</span>;
-  if (live === "RECORDED") return <span className="shrink-0 rounded bg-indigo-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wide text-indigo-700">Recorded</span>;
-  return null;
-}
-
-function DomainSection({ def, defaultOpen }: { def: DomainDef; defaultOpen?: boolean }) {
-  const a = ACCENT[def.accent];
-  const Icon = def.icon;
-  const labs = labsFor(def.c);
-  return (
-    <details open={defaultOpen} className="group overflow-hidden rounded-xl border border-line bg-white">
-      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 [&::-webkit-details-marker]:hidden">
-        <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${a.chip}`}><Icon className={`h-4 w-4 ${a.text}`} aria-hidden /></span>
-        <span className="text-sm font-semibold text-ink md:text-base">{def.title}</span>
-        <span className="hidden font-mono text-[11px] text-slatey-500 sm:inline">{def.tag}</span>
-        <span className="ml-auto shrink-0 font-mono text-[11px] text-slatey-500">{def.c === 1 ? `${labs.length}-stage spine` : `${labs.length} artifacts`}</span>
-        <ChevronRight className="h-4 w-4 shrink-0 text-slatey-400 transition-transform duration-200 group-open:rotate-90" aria-hidden />
-      </summary>
-      <div className="border-t border-line">
-        <div className="grid grid-cols-[1.75rem_minmax(0,1fr)_auto] items-center gap-3.5 px-4 py-2 font-mono text-[9.5px] font-semibold uppercase tracking-wider text-slatey-400 sm:grid-cols-[1.75rem_minmax(0,34%)_minmax(0,1fr)_auto]">
-          <span aria-hidden />
-          <span>Artifact</span>
-          <span className="hidden sm:block">Decision it enables</span>
-          <span className="text-right">Status</span>
-        </div>
-        {labs.map((lab, i) => (
-          <Link
-            key={lab.id}
-            href={lab.href ?? "#"}
-            className="group/row grid grid-cols-[1.75rem_minmax(0,1fr)_auto] items-center gap-3.5 border-t border-line px-4 py-2.5 transition hover:bg-canvas sm:grid-cols-[1.75rem_minmax(0,34%)_minmax(0,1fr)_auto]"
-          >
-            <span className={`text-right font-mono text-[15px] font-bold tabular-nums ${a.num}`}>{String(i + 1).padStart(2, "0")}</span>
-            <span className="truncate text-[13px] font-semibold text-ink">{lab.title}</span>
-            <span className="hidden truncate text-[11.5px] text-slatey-500 sm:block">{lab.decision}</span>
-            <span className="flex items-center justify-end gap-2">
-              <StatusPill live={lab.live} />
-              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-slatey-300 transition group-hover/row:text-primary" aria-hidden />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </details>
-  );
-}
-
+import { ArrowRight, Search, X } from "lucide-react";
+import { LABS, ALL_USE_CASES, INDUSTRIES } from "@labs/kit";
+import { useDiscovery } from "./useDiscovery";
+const DOMAIN: Record<number, string> = { 1: "Enterprise AI lifecycle", 2: "Agent architecture", 3: "Investment & economics", 4: "People & adoption", 5: "Live builds" };
+const KEYS = ["q", "collection", "industry"] as const;
 export function CollectionIndex() {
-  return (
-    <section id="collections" className="mt-10 scroll-mt-24">
-      <div className="mb-4 flex items-baseline gap-2.5">
-        <h2 className="text-xl font-semibold tracking-tight text-ink">The collection</h2>
-        <span className="font-mono text-[11px] text-slatey-500">every artifact, and the decision it enables</span>
-      </div>
-      <div className="flex flex-col gap-3">
-        {DOMAINS.filter((d) => labsFor(d.c).length > 0).map((d, i) => <DomainSection key={d.c} def={d} defaultOpen={i === 0} />)}
-      </div>
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-[11px] text-slatey-500">
-        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden /> LIVE, runs for real</span>
-        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden /> SIMULATED, transparent deterministic logic</span>
-        <span className="inline-flex items-center gap-1.5"><span className="inline-block h-1.5 w-1.5 rounded-full bg-indigo-500" aria-hidden /> RECORDED, a real run captured and embedded</span>
-      </div>
-    </section>
-  );
+  const { values, update, remember } = useDiscovery(KEYS);
+  const { q = "", collection = "", industry = "" } = values;
+  const labs = LABS.filter((lab) => lab.collection > 0 && lab.status === "shipped" && lab.id !== "C1-backlog");
+  const results = labs.filter((lab) => (!collection || String(lab.collection) === collection)
+    && (!industry || ALL_USE_CASES.some((uc) => uc.labId === lab.id && uc.industry === industry))
+    && `${lab.title} ${lab.problem} ${lab.decision}`.toLowerCase().includes(q.toLowerCase().trim()));
+  return <section id="collections" className="mt-12 scroll-mt-24 pb-10" aria-labelledby="catalog-title">
+    <p className="eyebrow text-primary">Find the right instrument</p>
+    <h2 id="catalog-title" className="mt-2 text-2xl font-semibold tracking-tight">The collection</h2>
+    <p className="mt-2 max-w-2xl text-sm text-slatey-400">Search by the decision you need to make. Every artifact shows its execution mode and exposes its assumptions.</p>
+    <div className="my-5 grid gap-3 rounded-xl border border-line bg-white p-4 md:grid-cols-[2fr_1fr_1fr]">
+      <label className="text-xs font-semibold text-slatey-400">Search artifacts
+        <span className="mt-1 flex items-center gap-2 rounded-lg border border-line px-3"><Search size={16} aria-hidden /><input type="search" value={q} onChange={(e) => update({ q: e.target.value })} placeholder="Funding, protocol, readiness…" className="min-w-0 w-full bg-transparent py-3 text-sm text-ink outline-none" /></span>
+      </label>
+      <label className="text-xs font-semibold text-slatey-400">Decision domain<select value={collection} onChange={(e) => update({ collection: e.target.value })} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink"><option value="">All domains</option>{Object.entries(DOMAIN).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+      <label className="text-xs font-semibold text-slatey-400">Industry<select value={industry} onChange={(e) => update({ industry: e.target.value })} className="mt-1 block min-h-11 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink"><option value="">All industries</option>{Object.entries(INDUSTRIES).map(([id, item]) => <option key={id} value={id}>{item.label}</option>)}</select></label>
+    </div>
+    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs"><span role="status">{results.length} matching artifacts</span>{KEYS.filter((key) => values[key]).map((key) => <button key={key} onClick={() => update({ [key]: "" })} className="inline-flex min-h-9 items-center gap-2 rounded-full border border-line bg-white px-3" aria-label={`Remove ${key} filter: ${values[key]}`}>{key === "collection" ? DOMAIN[Number(values[key])] : values[key]}<X size={12} /></button>)}</div>
+    {results.length === 0 ? <div className="rounded-xl border border-dashed border-line bg-white p-6"><h3 className="font-semibold">No artifacts match these filters</h3><p className="mt-2 text-sm text-slatey-400">Keep your search and widen the domain or industry.</p><button onClick={() => update({ collection: "", industry: "" })} className="mt-4 rounded-lg bg-ink px-4 py-2 text-sm text-white">Clear domain and industry</button>{q && <button className="ml-3 text-sm underline" onClick={() => update({ q: "" })}>Clear search</button>}</div> : <div className="grid gap-3 md:grid-cols-2">
+      {results.map((lab) => <Link key={lab.id} id={`catalog-${lab.id}`} href={lab.href!} onClick={() => remember(`catalog-${lab.id}`)} className="catalog-card group flex min-w-0 flex-col rounded-xl border border-line bg-white p-5 transition hover:border-primary/50 hover:shadow-card">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="font-medium text-slatey-400">{DOMAIN[lab.collection]}</span><span className={`rounded-full border px-2 py-1 font-mono text-[10px] font-semibold ${lab.live === "LIVE" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : lab.live === "RECORDED" ? "border-indigo-200 bg-indigo-50 text-indigo-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}>{lab.live}</span></div>
+        <h3 className="mt-3 text-base font-semibold leading-snug group-hover:text-primary">{lab.title}</h3>
+        <p className="mt-2 text-sm leading-relaxed text-slatey-400">{lab.decision}</p>
+        <span className="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-primary">{lab.live === "RECORDED" ? "Inspect the recorded evidence" : "Open the instrument"}<ArrowRight size={15} aria-hidden /></span>
+      </Link>)}
+    </div>}
+    <p className="mt-4 text-xs leading-relaxed text-slatey-400">LIVE means real browser computation; SIMULATED means an explicit decision model; RECORDED means captured execution. Scenario provenance appears inside each instrument.</p>
+  </section>;
 }

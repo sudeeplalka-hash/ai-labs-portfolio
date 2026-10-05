@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { C34_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { EvidenceTable, NumericControl, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "./DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type CKey = "capability" | "security" | "roadmap" | "lockin" | "support" | "price";
@@ -38,6 +39,7 @@ const PRESETS: Record<string, Weights> = {
 const fmt = (v: number) => (v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : `$${Math.round(v / 1000)}k`);
 
 export function VendorMonitor() {
+  const [selectedVendor, setSelectedVendor] = useState(VENDORS[0].key);
   const [w, setW] = useState<Weights>(PRESETS.Balanced);
   const [view, setView] = useState<"scorecard" | "risk">("scorecard");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
@@ -49,7 +51,9 @@ export function VendorMonitor() {
     setW(uc ? uc.payload.weights : PRESETS.Balanced);
   };
 
-  const sumW = CRITERIA.reduce((a, c) => a + w[c.key], 0) || 1;
+  const rawWeightSum = CRITERIA.reduce((a, c) => a + w[c.key], 0);
+  const sumW = rawWeightSum || 1;
+  const inspected = VENDORS.find((v) => v.key === selectedVendor) ?? VENDORS[0];
   const scoreOf = (v: Vendor) => Math.round(CRITERIA.reduce((a, c) => a + w[c.key] * v.scores[c.key], 0) / sumW);
   const ranked = [...VENDORS].map((v) => ({ v, s: scoreOf(v) })).sort((a, b) => b.s - a.s);
   const top = ranked[0];
@@ -57,39 +61,29 @@ export function VendorMonitor() {
   const applyPreset = (name: string) => { setW(PRESETS[name]); setActiveUcId(null); };
   const setWeight = (k: CKey, val: number) => setW((cur) => ({ ...cur, [k]: val }));
 
+  const savedState = { w, view, selectedVendor };
+  const scenarioLink = useScenarioLink({ id: "C3-4", state: savedState, activeId: activeUcId,
+    restore: (s) => { setW(s.w); setView(s.view); setSelectedVendor(s.selectedVendor); },
+    validate: (v): v is typeof savedState => validateScenario(v, { selectedVendor: oneOf(VENDORS.map((v) => v.key)), w: (v) => validateScenario(v, Object.fromEntries(CRITERIA.map((c) => [c.key, bounded(0,40)]))), view: oneOf(["scorecard","risk"]) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">C3-4</span>
-        </div>
-      </header>
+    <InstrumentShell title="Vendor fit and exit exposure" eyebrow="AI investment & economics" description="Make the vendor choice with its concentration and switching cost visible."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "C3-4" }]}
+      decision={<DecisionSummary title={!rawWeightSum ? "Set at least one decision weight" : top.s === ranked[1].s ? `Tied lead: ${top.v.label} and ${ranked[1].v.label}` : `Leading fit: ${top.v.label}`} explanation={`Score ${top.s}/100, ${top.s - ranked[1].s} points ahead of ${ranked[1].v.label}. Exit exposure ${fmt(top.v.exitCost)}; concentration ${top.v.concentration}%.`} nextAction="Inspect a vendor, then vary the decision weights to test whether the ranking holds." tone={top.v.exitCost > 300000 ? "caution" : "neutral"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={C34_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="The best scoring vendor may also introduce lock in, concentration, or renewal exposure. Executive decisions need both views: which vendor fits the need and what it costs if the relationship, roadmap, or pricing changes." approach="The monitor compares vendor archetypes across capability, security, roadmap, lock in, support, and price. It then adds a risk view that shows concentration, renewal exposure, and estimated exit cost." why="This connects AI sourcing to procurement, third party risk, resiliency, cost exposure, roadmap dependency, and negotiating leverage." metric="Weighted vendor score; switching/exit cost exposure if the relationship sours." tradeoff="The best fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit cost exposure named up front." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Vendor Selection and Concentration Risk Monitor</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A vendor scorecard can identify the best fit, but it does not tell the full story. This artifact pairs weighted
-            selection criteria with concentration, renewal timing, and exit cost exposure.
-          </p>
-        </div>
+    >
 
-        <UseCaseRail useCases={C34_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="The best scoring vendor may also introduce lock in, concentration, or renewal exposure. Executive decisions need both views: which vendor fits the need and what it costs if the relationship, roadmap, or pricing changes." approach="The monitor compares vendor archetypes across capability, security, roadmap, lock in, support, and price. It then adds a risk view that shows concentration, renewal exposure, and estimated exit cost." why="This connects AI sourcing to procurement, third party risk, resiliency, cost exposure, roadmap dependency, and negotiating leverage." metric="Weighted vendor score; switching/exit cost exposure if the relationship sours." tradeoff="The best fit vendor may also be the biggest concentration risk." outcome="A vendor pick with the exit cost exposure named up front." />
-
-        <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Weights */}
           <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="stat-label">Weights</p>
-              <div className="flex gap-1">
+              <div className="flex flex-wrap gap-1">
                 {Object.keys(PRESETS).map((p) => (
                   <button key={p} onClick={() => applyPreset(p)} className="rounded border border-line px-1.5 py-0.5 text-[10px] font-medium text-slatey-400 hover:border-amber-400/50 hover:text-ink">{p}</button>
                 ))}
@@ -104,10 +98,10 @@ export function VendorMonitor() {
           </Panel>
 
           {/* Ranking / risk */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <div className="flex gap-1.5">
               {(["scorecard", "risk"] as const).map((vv) => (
-                <button key={vv} onClick={() => setView(vv)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition ${vv === view ? "border-amber-500 bg-amber-500 text-white" : "border-line bg-white text-slatey-400 hover:border-amber-400/50 hover:text-ink"}`}>{vv}</button>
+                <button key={vv} aria-pressed={view === vv} onClick={() => setView(vv)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition ${vv === view ? "border-amber-500 bg-amber-500 text-white" : "border-line bg-white text-slatey-400 hover:border-amber-400/50 hover:text-ink"}`}>{vv}</button>
               ))}
             </div>
 
@@ -115,11 +109,11 @@ export function VendorMonitor() {
               <Panel className="space-y-3">
                 {ranked.map(({ v, s }, i) => (
                   <div key={v.key} className={`rounded-lg border p-3 ${i === 0 ? "border-emerald-400 ring-1 ring-emerald-400/40" : "border-line"}`}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2"><span className="font-mono text-xs text-slatey-500">#{i + 1}</span><p className="text-sm font-semibold text-ink">{v.label}</p>{i === 0 && <Badge tone="emerald">Top pick</Badge>}</div>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2"><span className="font-mono text-xs text-slatey-500">#{i + 1}</span><p className="text-sm font-semibold text-ink">{v.label}</p>{i === 0 && rawWeightSum > 0 && <Badge tone="emerald">Leading score</Badge>}</div>
                       <span className="font-mono text-lg font-semibold text-ink">{s}</span>
                     </div>
-                    <p className="mt-0.5 text-[11px] text-slatey-500">{v.blurb}</p>
+                    <p className="mt-0.5 text-[11px] text-slatey-500">{v.blurb}</p><button className="mt-2 rounded-lg border border-line px-3 py-2 text-sm text-primary" aria-pressed={selectedVendor === v.key} onClick={() => setSelectedVendor(v.key)}>Inspect {v.label}</button>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${i === 0 ? "bg-emerald-500" : "bg-slate-400"}`} style={{ width: `${s}%` }} /></div>
                   </div>
                 ))}
@@ -145,8 +139,10 @@ export function VendorMonitor() {
           </div>
         </div>
 
+        <Panel className="mt-4"><h2 className="text-base font-semibold text-ink">{inspected.label}: fit and exit receipt</h2><p className="mt-2 text-sm text-slatey-400">Weighted score {scoreOf(inspected)}/100 · concentration {inspected.concentration}% · renewal in {inspected.renewal} months · exit cost {fmt(inspected.exitCost)}.</p>{rawWeightSum === 0 && <p role="alert" className="mt-2 text-sm text-amber-800">All weights are zero. No vendor can be recommended until a criterion has weight.</p>}<EvidenceTable caption="Criterion scores and contribution to ranking" headings={["Criterion", "Normalized weight", "Vendor score", "Weighted contribution"]} rows={CRITERIA.map((c) => [c.label, `${(w[c.key] / sumW * 100).toFixed(1)}%`, inspected.scores[c.key], (w[c.key] * inspected.scores[c.key] / sumW).toFixed(2)])} /><p className="mt-2 text-xs text-slatey-500">These are authored vendor archetypes. A close ranking calls for stronger evidence and a switching plan before a procurement decision.</p></Panel>
+
         <div className="mt-6">
-          <InsightCard title={`Top pick: ${top.v.label}, exit cost ${fmt(top.v.exitCost)}`} tone={top.v.exitCost > 300000 ? "warn" : "info"}>
+          <InsightCard title={rawWeightSum ? `Leading score: ${top.v.label}, exit cost ${fmt(top.v.exitCost)}` : "No weighted decision yet"} tone={top.v.exitCost > 300000 ? "warn" : "info"}>
             Nudge two or three weights and the ranking can flip, a &ldquo;winner&rdquo; that survives only one weighting isn&apos;t a
             decision, it&apos;s a preference. Pair the pick with its concentration and exit cost before you sign.
           </InsightCard>
@@ -164,7 +160,7 @@ export function VendorMonitor() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a simplified vendor model. Real vendor selection would require procurement terms, security review, architecture fit, legal review, financial analysis, and operational due diligence.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }

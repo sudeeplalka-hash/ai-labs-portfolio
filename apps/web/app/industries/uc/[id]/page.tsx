@@ -11,7 +11,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ALL_USE_CASES, INDUSTRIES, LAB_ROUTES, labHref } from "@labs/kit";
 import { CURRENT_SITE } from "@/lib/site";
 
-export const dynamicParams = false;
+// output: export emits only the registry IDs below; no on-demand dynamic rendering.
 
 export function generateStaticParams() {
   return ALL_USE_CASES.map((uc) => ({ id: uc.id }));
@@ -27,8 +27,9 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
   return {
     title,
     description,
+    alternates: { canonical: `${CURRENT_SITE.domain}/industries/uc/${uc.id}` },
     keywords: [ind.label, uc.labId, prov, "AI delivery", "engagement leadership", "use case"],
-    openGraph: { title: `${title}, AI Labs Portfolio`, description, type: "article", images: [{ url: CURRENT_SITE.ogImage, width: 1200, height: 630 }] },
+    openGraph: { url: `${CURRENT_SITE.domain}/industries/uc/${uc.id}`, title: `${title} · ${CURRENT_SITE.titleDefault}`, description, type: "article", images: [{ url: CURRENT_SITE.ogImage, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title, description, images: [CURRENT_SITE.ogImage] },
   };
 }
@@ -110,7 +111,7 @@ export default function UseCasePage({ params }: { params: { id: string } }) {
         <div className="mt-6 border-t border-line pt-4 text-xs text-slatey-500">
           <p>
             <span className="font-semibold text-slatey-400">{fh ? "Firsthand" : "Studied"}</span> · {route?.collection ?? "Lab"} ·{" "}
-            verified {uc.lastVerified}
+            authored reference date {uc.lastVerified}
           </p>
           <p className="mt-1">Sources: {uc.sources.join("; ")}</p>
           <p className="mt-3">

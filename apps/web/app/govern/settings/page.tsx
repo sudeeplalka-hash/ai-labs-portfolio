@@ -1,13 +1,17 @@
 'use client';
-import { useSettings, setSettings, isLiveModel } from '@gov/lib/settings';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useSettings, setSettings, isLiveModel, type ModelSettings } from '@gov/lib/settings';
 import { KeyRound, ShieldCheck, Cpu, Info } from 'lucide-react';
 
 export default function Settings() {
   const s = useSettings();
   const live = isLiveModel(s);
+  const [notice, setNotice] = useState('');
+  const save = (patch: Partial<ModelSettings>) => setNotice(setSettings(patch) ? 'Saved in this browser. A run result identifies the provider actually used.' : 'Browser storage is unavailable. This change was not saved.');
 
   return (
-    <div className="p-8 max-w-[760px] space-y-6">
+    <div className="p-4 sm:p-8 max-w-[760px] space-y-6">
       <div>
         <p className="text-[11px] font-semibold text-primary uppercase tracking-wider">Settings</p>
         <h2 className="text-2xl font-semibold text-slate-900 mt-1">Model &amp; connection</h2>
@@ -15,20 +19,20 @@ export default function Settings() {
       </div>
 
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-card space-y-5">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Cpu size={18} className="text-primary" />
             <span className="text-sm font-semibold text-slate-800">Model provider</span>
           </div>
           <span className={`inline-flex items-center gap-1.5 text-xs font-medium rounded-full px-2.5 py-0.5 ring-1 ring-inset ${live ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-600 ring-slate-500/15'}`}>
             <span className={`h-1.5 w-1.5 rounded-full ${live ? 'bg-emerald-500' : 'bg-slate-400'}`} />
-            {live ? 'Live model active' : 'Mock mode'}
+            {live ? 'Live provider configured' : 'Deterministic mock configured'}
           </span>
         </div>
 
-        <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-sm">
+        <div className="inline-flex flex-wrap rounded-lg border border-slate-200 bg-white p-0.5 text-sm" role="group" aria-label="Model provider">
           {(['mock', 'openai'] as const).map((p) => (
-            <button key={p} onClick={() => setSettings({ provider: p })}
+            <button key={p} aria-pressed={s.provider === p} onClick={() => save({ provider: p })}
               className={`px-3 py-1.5 rounded-md font-medium transition-colors ${s.provider === p ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-800'}`}>
               {p === 'mock' ? 'Deterministic mock' : 'OpenAI-compatible'}
             </button>
@@ -38,23 +42,25 @@ export default function Settings() {
         {s.provider === 'openai' && (
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-slate-600">API base URL</label>
-              <input value={s.baseUrl} onChange={(e) => setSettings({ baseUrl: e.target.value })}
+              <label htmlFor="gov-base-url" className="text-sm text-slate-600">API base URL</label>
+              <input id="gov-base-url" type="url" value={s.baseUrl} onChange={(e) => save({ baseUrl: e.target.value })}
                 className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-mono" />
             </div>
             <div>
-              <label className="text-sm text-slate-600">Model</label>
-              <input value={s.model} onChange={(e) => setSettings({ model: e.target.value })}
+              <label htmlFor="gov-model" className="text-sm text-slate-600">Model</label>
+              <input id="gov-model" value={s.model} onChange={(e) => save({ model: e.target.value })}
                 className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-mono" />
             </div>
             <div>
-              <label className="text-sm text-slate-600 flex items-center gap-1.5"><KeyRound size={13} /> API key</label>
-              <input type="password" value={s.apiKey} onChange={(e) => setSettings({ apiKey: e.target.value })}
+              <label htmlFor="gov-api-key" className="text-sm text-slate-600 flex items-center gap-1.5"><KeyRound size={13} /> API key</label>
+              <input id="gov-api-key" type="password" autoComplete="off" value={s.apiKey} onChange={(e) => save({ apiKey: e.target.value })}
                 placeholder="sk-…" className="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-mono" />
             </div>
           </div>
         )}
       </div>
+      {notice && <p role="status" className="text-sm text-slate-600">{notice}</p>}
+      <div className="flex flex-wrap items-center gap-3"><Link href="/govern/playground" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">Try a sample in the playground</Link>{s.apiKey && <button onClick={() => save({ apiKey: '', provider: 'mock' })} className="rounded-lg border border-slate-300 px-4 py-2 text-sm">Remove key and use mock</button>}</div>
 
       <div className="bg-blue-50 border border-blue-100 ring-1 ring-inset ring-blue-600/10 rounded-xl p-4 flex gap-3">
         <Info size={18} className="text-blue-600 shrink-0 mt-0.5" />

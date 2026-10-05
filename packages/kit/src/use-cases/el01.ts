@@ -40,7 +40,7 @@ export const EL01_USE_CASES: UseCase<EL01Payload>[] = assertUseCases<EL01Payload
     },
   },
   {
-    id: "el01-contact center-assist",
+    id: "el01-contact-center-assist",
     labId: "EL-01",
     industry: "financial-services",
     provenance: firstHand,

@@ -17,15 +17,22 @@ export function UseCaseRail({
   activeId: string | null;
   onSelect: (id: string | null) => void;
 }) {
+  const select = (id: string | null) => {
+    const url = new URL(location.href);
+    if(id) url.searchParams.set("uc",id); else url.searchParams.delete("uc");
+    url.searchParams.delete("cfg");
+    window.history.replaceState(null,"",url);
+    onSelect(id);
+  };
   return (
     <div className="mb-4">
       <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slatey-500">
-        Same instrument · three industries{" "}
-        <span className="font-normal normal-case text-slatey-400">pick a use case to reconfigure the run</span>
+        Same instrument · {new Set(useCases.map(uc=>uc.industry)).size} industries{" "}
+        <span className="font-normal normal-case text-slatey-400">choosing a scenario replaces its inputs; save or share your current changes first</span>
       </p>
       <div className="flex flex-wrap gap-1.5">
         <button
-          onClick={() => onSelect(null)}
+          onClick={() => select(null)}
           aria-pressed={activeId === null}
           className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
             activeId === null
@@ -42,7 +49,7 @@ export function UseCaseRail({
           return (
             <button
               key={uc.id}
-              onClick={() => onSelect(uc.id)}
+              onClick={() => select(uc.id)}
               aria-pressed={on}
               title={`${ind.label}: ${uc.oneLiner}`}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
@@ -72,11 +79,11 @@ export function UseCaseBrief({ useCase }: { useCase: UseCase }) {
   const ind = INDUSTRIES[useCase.industry];
   const fh = useCase.provenance.kind === "firsthand";
   return (
-    <div
+    <details
       className="mb-4 rounded-xl border bg-white p-4"
       style={{ borderColor: `${ind.accent}55`, borderLeftWidth: 3, borderLeftColor: ind.accent }}
     >
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+      <summary className="mb-2 flex cursor-pointer flex-wrap items-center gap-2">
         <span aria-hidden className="text-base">{ind.emoji}</span>
         <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: ind.accent }}>{ind.label}</span>
         <span className="text-sm font-semibold text-ink">{useCase.title}</span>
@@ -89,7 +96,7 @@ export function UseCaseBrief({ useCase }: { useCase: UseCase }) {
         >
           {fh ? "Firsthand" : "Studied"}
         </span>
-      </div>
+      </summary>
 
       <p className="mb-3 text-sm italic text-slatey-400">{useCase.oneLiner}</p>
 
@@ -108,7 +115,7 @@ export function UseCaseBrief({ useCase }: { useCase: UseCase }) {
       <p className="mt-2 text-[10px] text-slatey-500">
         {fh ? "Firsthand" : "Studied"} · sources: {useCase.sources.join("; ")} · verified {useCase.lastVerified}
       </p>
-    </div>
+    </details>
   );
 }
 

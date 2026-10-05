@@ -9,7 +9,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, X } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { ChangeReceipt, EvidenceTable, signed } from "./AgentExperience";
 import { GAP05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
@@ -54,6 +55,7 @@ function retained(key: SKey, fact: Fact, t: number): boolean {
 
 export function ContextMemory() {
   const [t, setT] = useState(6);
+  const [baselineTurn, setBaselineTurn] = useState(6);
   const [view, setView] = useState<"compare" | "memory">("compare");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? GAP05_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
@@ -61,49 +63,37 @@ export function ContextMemory() {
   const selectUseCase = (id: string | null) => {
     setActiveUcId(id);
     const uc = id ? GAP05_USE_CASES.find((u) => u.id === id) : null;
-    if (uc) { setT(uc.payload.turns); setView(uc.payload.view); }
+    if (uc) { setT(uc.payload.turns); setBaselineTurn(uc.payload.turns); setView(uc.payload.view); } else { setT(6); setBaselineTurn(6); setView("compare"); }
   };
   const facts: Fact[] = activeUc ? activeUc.payload.facts : FACTS;
   const rows = STRATS.map((s) => ({ ...s, ...metrics(s.key, t) }));
   const maxCost = Math.max(...rows.map((r) => r.costPer1k));
   const introduced = facts.filter((f) => f.t <= t);
+  const fullLost = introduced.filter((fact) => !retained("full", fact, t));
+  const changedFacts = STRATS.flatMap((strategy) => facts.filter((fact) => fact.t <= Math.min(t, baselineTurn) && retained(strategy.key, fact, t) !== retained(strategy.key, fact, baselineTurn)).map((fact) => `${strategy.label}: ${fact.f} is now ${retained(strategy.key, fact, t) ? "retained" : "lost"}.`));
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">GAP-05</span>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Agent Architecture and Protocol Strategy Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Context and Memory Strategy Evaluator</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Long running agent workflows need a deliberate context strategy. This artifact compares how different memory
-            approaches affect cost, fidelity, and overflow risk as the task grows.
-          </p>
-        </div>
-
+    <InstrumentShell title="Context and Memory Strategy Evaluator" eyebrow="GAP-05 · Agent architecture" description="Compare the cost of keeping context with the consequences of losing it."
+      breadcrumbs={[{ label: "Portfolio", href: "/" }, { label: "Agent architecture", href: "/#collections" }, { label: "Context and Memory Strategy Evaluator" }]}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Default illustrative scenario"} method="Deterministic memory and cost model" note="Illustrative results support review; they do not establish a production outcome." />}>
+        <DecisionSummary title={fullLost.length ? `${fullLost.length} known facts lost from the full history at turn ${t}` : `All introduced facts fit in the full history at turn ${t}`} explanation="Fidelity and risk are illustrative model scores. Inspect the actual retention rule before choosing the lower-cost strategy." metrics={[{ label: "Working context budget", value: `${WINDOW}k tokens` }, { label: "Full history", value: `${rows[0].ctx}k tokens` }, { label: "Facts introduced", value: introduced.length }]} />
         <UseCaseRail useCases={GAP05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
         {activeUc && <UseCaseBrief useCase={activeUc} />}
         <CaseStudy problem="A naive full history approach may preserve context but can become expensive and fragile. Summarization, compression, and handoff patterns reduce load but introduce fidelity tradeoffs, and the right answer depends on the business task and the risk of losing detail." approach="The evaluator compares full context, summarization, compression, and subagent handoff across the same growing task. It shows how token load, overflow risk, and fidelity change as conversations lengthen." why="This connects context design to unit economics, reliability, accuracy, user experience, and operating scalability." metric="Tokens and cost per call versus answer fidelity, by strategy." tradeoff="Higher fidelity costs tokens; aggressive compression eventually hurts the answer." outcome="The context strategy to run per use case, with the point where compression starts to hurt." />
 
+        <ChangeReceipt title={`Compared with turn ${baselineTurn}`} onPin={() => setBaselineTurn(t)}>
+          <p>Turn change: {signed(t - baselineTurn)}. Compare the same supplied facts; new facts are not counted as memory losses.</p>
+          {changedFacts.length ? <ul className="mt-2 list-disc pl-5">{changedFacts.map((change) => <li key={change}>{change}</li>)}</ul> : <p>No previously introduced fact changed its retention state.</p>}
+        </ChangeReceipt>
         <Panel className="mb-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="min-w-[240px] flex-1">
+            <div className="min-w-0 flex-1">
               <div className="mb-1 flex items-center justify-between"><label className="text-xs font-medium text-slatey-400">Conversation turns</label><span className="font-mono text-xs font-semibold text-ink">{t}</span></div>
               <input type="range" aria-label="Conversation turns" min={1} max={10} step={1} value={t} onChange={(e) => setT(Number(e.target.value))} className="w-full accent-teal-600" />
             </div>
             <div className="flex gap-1.5">
               {(["compare", "memory"] as const).map((v) => (
-                <button key={v} onClick={() => setView(v)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition ${v === view ? "border-teal-600 bg-teal-600 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{v}</button>
+                <button key={v} aria-pressed={v === view} onClick={() => setView(v)} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition ${v === view ? "border-teal-600 bg-teal-600 text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{v}</button>
               ))}
             </div>
           </div>
@@ -132,10 +122,10 @@ export function ContextMemory() {
               <tbody>
                 {introduced.map((f) => (
                   <tr key={f.f}>
-                    <td className="text-ink">{f.f} <span className="text-[10px] text-slatey-500">· t{f.t}</span></td>
+                    <th scope="row" className="text-left font-medium text-ink">{f.f} <span className="text-[10px] text-slatey-500">· t{f.t}</span></th>
                     {STRATS.map((s) => (
                       <td key={s.key} className="text-center">
-                        {retained(s.key, f, t) ? <Check className="mx-auto h-4 w-4 text-emerald-600" /> : <X className="mx-auto h-4 w-4 text-rose-500" />}
+                        {retained(s.key, f, t) ? <Check aria-hidden="true" className="mx-auto h-4 w-4 text-emerald-600" /> : <X aria-hidden="true" className="mx-auto h-4 w-4 text-rose-500" />}<span className="text-xs">{retained(s.key, f, t) ? "Retained" : "Lost"}</span>
                       </td>
                     ))}
                   </tr>
@@ -146,6 +136,7 @@ export function ContextMemory() {
           </Panel>
         )}
 
+        <details className="mt-4 rounded-xl border border-line bg-white p-4"><summary className="cursor-pointer font-semibold">Compare exact strategy values</summary><EvidenceTable caption={`Strategy values at turn ${t}`} headers={["Strategy", "Context", "Cost / 1k calls", "Fidelity (modeled)", "Risk (modeled)"]} rows={rows.map((row) => [row.label, `${row.ctx}k tokens`, `$${row.costPer1k}`, `${row.fidelity}%`, `${row.risk}% ${row.riskLabel}`])} /></details>
         <div className="mt-8 space-y-4 border-t border-line pt-6">
           <OutcomeFrame call="Select context strategy by use case, not by platform default." lift="Reduces runaway token cost and overflow risk while preserving enough fidelity for the task." measure="Token cost per task, overflow events, answer quality, context recall, user rework." />
           <InsightCard title="It's a dial, not a default" tone="info">
@@ -162,8 +153,7 @@ export function ContextMemory() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a modeled comparison. Production use would require actual conversation traces, task level evaluation, memory policies, privacy controls, and retention rules.</p>
         </div>
-      </main>
-    </div>
+    </InstrumentShell>
   );
 }
 
@@ -171,7 +161,7 @@ function Metric({ label, val, pct, tone, sub }: { label: string; val: string; pc
   return (
     <div>
       <div className="mb-0.5 flex items-center justify-between text-[11px]"><span className="text-slatey-400">{label}</span><span className="font-mono font-semibold text-ink">{val}</span></div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${tone}`} style={{ width: `${Math.max(2, Math.min(100, pct))}%` }} /></div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100"><div className={`h-full rounded-full ${tone}`} style={{ width: `${Math.max(0, Math.min(100, pct))}%` }} /></div>
       {sub && <p className="mt-0.5 text-[10px] text-slatey-500">{sub}</p>}
     </div>
   );

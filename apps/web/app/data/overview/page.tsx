@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@data/components/common/PageIntro";
 import { ExecutiveDashboard } from "@data/components/dashboard/ExecutiveDashboard";
 
-export const metadata = { title: "Executive Overview" };
+export const metadata = {
+  ...routeMetadata("Executive Overview", "Inspect executive overview through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/data/overview"), title: "Executive Overview" };
 
 export default function Page() {
   return (

@@ -18,7 +18,7 @@ const STAGE: Record<"data" | "build", { icon: LucideIcon; callback: (h: HandoffP
     icon: Boxes,
     callback: (h) =>
       `In Framing this bet scored Value ${h.scores.value}/100 and Feasibility ${h.scores.feasibility}/100. ` +
-      `Feasibility was a guess. The evaluator below is the real test of whether the engine works.`,
+      `Evaluate it against a document below; the result states the generation mode, quality checks and remaining limitations.`,
   },
 };
 
@@ -33,7 +33,7 @@ export function HandoffBanner({ stage }: { stage: "data" | "build" }) {
   const cfg = STAGE[stage];
   const Icon = cfg.icon;
   return (
-    <div className="mb-6 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/[0.05] p-4 animate-fade-in">
+    <div className="mb-6 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/[0.05] p-4">
       <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-inset ring-primary/20">
         <Icon className="h-4 w-4" />
       </span>

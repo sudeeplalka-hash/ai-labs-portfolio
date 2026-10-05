@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useProgram } from "@labs/program-core";
+import { usePageVisible } from "@labs/design-system";
 import { loadStoredTraces, aggregateLiveMetrics } from "@rag/lib/live-lab/liveMetrics";
 
 // Writes the real RAG evaluator metrics into ProgramState.rag, this is what makes
@@ -9,11 +10,13 @@ import { loadStoredTraces, aggregateLiveMetrics } from "@rag/lib/live-lab/liveMe
 // lab's own aggregation over its persisted traces.
 export function BuildSliceWriter() {
   const { update, hydrated } = useProgram();
+  const visible = usePageVisible();
   const last = useRef<string>("");
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || !visible) return;
     const sync = () => {
+      if (document.visibilityState === "hidden") return;
       const m = aggregateLiveMetrics(loadStoredTraces());
       if (!m.questionsAsked) return;
       const slice = {
@@ -33,7 +36,7 @@ export function BuildSliceWriter() {
     sync();
     const id = setInterval(sync, 3000);
     return () => clearInterval(id);
-  }, [hydrated, update]);
+  }, [hydrated, update, visible]);
 
   return null;
 }

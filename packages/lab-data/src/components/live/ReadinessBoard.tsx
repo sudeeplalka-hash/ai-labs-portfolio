@@ -106,13 +106,14 @@ export function ReadinessBoard({
       </div>
 
       {/* Per-file × category matrix */}
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-4 overflow-x-auto rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" role="region" aria-label="Readiness by file and category, horizontally scrollable" tabIndex={0}>
         <table className="w-full min-w-[640px] border-separate border-spacing-0 text-left">
+          <caption className="sr-only">Readiness score out of 100 by file and category. Select a file to inspect it in the shared file details.</caption>
           <thead>
             <tr>
-              <th className="sticky left-0 bg-white pb-1.5 pr-3 text-[11px] font-semibold uppercase tracking-wide text-slatey-400">File</th>
+              <th scope="col" className="sticky left-0 bg-white pb-1.5 pr-3 text-[11px] font-semibold uppercase tracking-wide text-slatey-400">File</th>
               {rollups.map((r) => (
-                <th key={r.guideline} className="px-1 pb-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slatey-500" title={`${r.name}: ${r.definition}`}>
+                <th scope="col" key={r.guideline} className="px-1 pb-1.5 text-center text-[11px] font-semibold uppercase tracking-wide text-slatey-500" title={`${r.name}: ${r.definition}`}>
                   {SHORT[r.guideline] ?? r.name.split(" ")[0]}
                 </th>
               ))}
@@ -121,13 +122,14 @@ export function ReadinessBoard({
           <tbody>
             {files.map((f) => (
               <tr key={f.id}>
-                <td title={f.name} className="sticky left-0 max-w-[220px] truncate bg-white py-0.5 pr-3 font-mono text-[11px] text-slatey-300">{f.name}</td>
+                <th scope="row" className="sticky left-0 max-w-[180px] bg-white py-0.5 pr-3 text-left font-mono text-xs font-normal text-slatey-300"><button onClick={() => onSelectFile(f.id)} aria-pressed={selectedId === f.id} className="break-all rounded py-2 text-left text-primary underline">{f.name}</button></th>
                 {rollups.map((r) => {
                   const cell = fileCategoryScore(findings, f.id, r.guideline);
                   return (
                     <td key={r.guideline} className="p-0.5">
                       <button
                         onClick={() => onSelectFile(f.id)}
+                        aria-pressed={selectedId === f.id}
                         aria-label={`${f.name}: ${r.name} ${cell.score}/100${cell.open ? `, ${cell.open} open finding${cell.open === 1 ? "" : "s"}` : ""}`}
                         className={cn(
                           "block w-full rounded px-1 py-1 text-center font-mono text-[11px] font-semibold transition-colors hover:ring-1 hover:ring-primary/40",
@@ -146,7 +148,7 @@ export function ReadinessBoard({
         </table>
       </div>
       <p className="mt-2 text-[11px] leading-relaxed text-slatey-500">
-        Cell math: 100 − (watch −{FINDING_WEIGHT.watch} · risk −{FINDING_WEIGHT.risk} · critical −{FINDING_WEIGHT.critical}) per open finding in that
+        Cell math: 100 − (watch −{FINDING_WEIGHT.watch} · risk −{FINDING_WEIGHT.risk} · critical −{FINDING_WEIGHT.critical}) per unresolved or accepted-risk finding in that
         category, floor 0. Fixing a finding in the backlog restores the cell and the file gate together.
       </p>
     </Panel>

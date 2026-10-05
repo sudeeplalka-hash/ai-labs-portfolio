@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { EvaluationsView } from "@rag/components/evaluations/EvaluationsView";
 
-export const metadata = { title: "Evaluation Runs" };
+export const metadata = {
+  ...routeMetadata("Evaluation Runs", "Inspect evaluation runs through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/evaluations"), title: "Evaluation Runs" };
 
 export default function EvaluationsPage() {
   return (

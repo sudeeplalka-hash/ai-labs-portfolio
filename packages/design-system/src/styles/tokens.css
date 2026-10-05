@@ -1,6 +1,23 @@
 /* Lab Suite design tokens (framework-agnostic). Imported by globals.css; also
    exported standalone for any non-Tailwind consumer. Palette: ink + brand blue. */
 :root {
+  --surface-canvas: #f6f7f8;
+  --surface-card: #ffffff;
+  --text-primary: #152433;
+  --text-secondary: #46586b;
+  --text-muted: #616f80;
+  --border-subtle: #e4e7eb;
+  --chart-label: #46586b;
+  --chart-grid: #e4e7eb;
+  --space-panel: 1.25rem;
+  --space-section: 2rem;
+  --text-caption: 0.75rem;
+  --text-body: 0.875rem;
+  --text-decision: 1.5rem;
+  --motion-feedback: 140ms;
+  --motion-disclosure: 180ms;
+  --motion-comparison: 220ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --font-sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
   /* shadcn-style HSL tokens (governance + any shadcn-authored UI) */

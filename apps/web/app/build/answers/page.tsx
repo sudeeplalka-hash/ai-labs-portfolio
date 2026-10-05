@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import { MessageSquareText, GitCompare, AlertTriangle, ShieldCheck } from "lucide-react";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { DataSourceToggle } from "@rag/components/live-views/DataSourceToggle";
@@ -15,12 +16,12 @@ function AnswersDemo() {
 
   return (
     <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {answerMetrics.map((m) => {
           const lower = m.id === "hallucination";
           return (
             <div key={m.id} className="panel p-4">
-              <div className="flex items-start justify-between gap-2">
+              <div className="flex flex-wrap items-start justify-between gap-2">
                 <span className="stat-label">{m.label}</span>
                 <StatusBadge status={m.status} />
               </div>
@@ -68,7 +69,7 @@ function AnswersDemo() {
         <div className="grid gap-4 lg:grid-cols-2">
           {answerFailureExamples.map((ex) => (
             <div key={ex.id} className="rounded-lg border border-line bg-navy-850/50 p-4">
-              <div className="mb-1 flex items-center justify-between gap-2">
+              <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold text-ink">{ex.title}</h3>
                 <RiskBadge level={ex.riskLevel} />
               </div>
@@ -97,7 +98,8 @@ function LabeledBar({ label, value }: { label: string; value: number }) {
   );
 }
 
-export const metadata = { title: "Answer Quality" };
+export const metadata = {
+  ...routeMetadata("Answer Quality", "Inspect answer quality through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/answers"), title: "Answer Quality" };
 
 export default function AnswersPage() {
   return (

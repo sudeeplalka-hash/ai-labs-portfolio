@@ -26,9 +26,13 @@ type SortKey = "severity" | "category" | "file";
 export function RemediationBacklog({
   findings,
   onSetStatus,
+  selectedId,
+  onSelectFile,
 }: {
   findings: CorpusFinding[];
   onSetStatus: (key: string, status: FindingStatus) => void;
+  selectedId?: string | null;
+  onSelectFile?: (id: string) => void;
 }) {
   const [sort, setSort] = useState<SortKey>("severity");
   const [showClosed, setShowClosed] = useState(true);
@@ -97,7 +101,7 @@ export function RemediationBacklog({
 
       {rows.length === 0 ? (
         <p className="rounded-lg border border-dashed border-line bg-slate-50/60 p-3 text-center text-xs text-slatey-400">
-          No findings — this corpus is clean under the current profile.
+          {findings.length === 0 ? "No findings under the current rule profile." : "No open findings in this view. Resolved and accepted-risk records remain in the ledger."}
         </p>
       ) : (
         <ul className="space-y-2">
@@ -132,9 +136,9 @@ export function RemediationBacklog({
               <p className="px-2.5 pt-1.5 text-[11px] leading-snug text-slatey-500">Downstream: {g.downstream}</p>
               <ul className="divide-y divide-line/60 px-2.5 pb-1.5 pt-1">
                 {g.items.map((f) => (
-                  <li key={f.key} className={cn("flex flex-wrap items-center gap-2 py-1.5", f.status !== "open" && "opacity-60")}>
+                  <li key={f.key} className={cn("flex flex-wrap items-center gap-2 rounded py-1.5", selectedId === f.fileId && "bg-primary-soft ring-1 ring-primary/30")}>
                     <span className="min-w-0 flex-1">
-                      <span className="mr-2 truncate font-mono text-[11px] text-slatey-300">{f.fileName}</span>
+                      {onSelectFile ? <button onClick={() => onSelectFile(f.fileId)} aria-pressed={selectedId === f.fileId} className="mr-2 break-all rounded px-1 py-2 text-left font-mono text-xs text-primary underline underline-offset-2">{f.fileName}</button> : <span className="mr-2 break-all font-mono text-xs text-slatey-300">{f.fileName}</span>}
                       <span className="text-xs text-slatey-400">{f.detail}</span>
                     </span>
                     {f.status === "fixed" && <Badge color="emerald">fixed{typeof f.fixDelta === "number" ? ` +${f.fixDelta}` : ""}</Badge>}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion, usePageVisible } from "@labs/design-system";
 import { X } from "lucide-react";
 
 export interface ProjPoint {
@@ -45,6 +46,11 @@ type CardState = { p: ProjPoint; x: number; y: number; pinned: boolean } | null;
 // marker, and pulses that travel along each beam from a retrieved chunk to the query.
 // Hover to inspect on desktop; tap a point to pin an expanded card on mobile.
 export function EmbeddingProjector3D({ points, query, clusterLabels = [], height = 440 }: Props) {
+  const reduceMotion = useReducedMotion();
+  const pageVisible = usePageVisible();
+  const [rotating, setRotating] = useState(false);
+  const [viewTick,setViewTick] = useState(0);
+  useEffect(()=>{if(reduceMotion)setRotating(false);},[reduceMotion]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -56,19 +62,19 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
   const downPos = useRef({ x: 0, y: 0 });
   const moved = useRef(false);
   const screens = useRef<{ i: number; sx: number; sy: number }[]>([]);
-  const appearStart = useRef(0);
   const hoverRef = useRef(-1);
   const pinnedRef = useRef(-1);
 
   const [card, setCard] = useState<CardState>(null);
 
+  const requestDrawRef = useRef<() => void>(() => {});
   const clearPin = () => {
     pinnedRef.current = -1;
     setCard((c) => (c && c.pinned ? null : c));
+    requestDrawRef.current();
   };
 
   useEffect(() => {
-    appearStart.current = performance.now();
     pinnedRef.current = -1;
     setCard(null);
   }, [points.length]);
@@ -81,10 +87,12 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
     if (!ctx) return;
 
     let raf = 0;
+    let onscreen = true;
+    let requestDraw = () => {};
     let W = 0;
     let H = 0;
     const dpr = Math.min(2, typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
-    const reduceMotion = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
 
     const resize = () => {
       W = wrap.clientWidth;
@@ -94,6 +102,8 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
       canvas.style.width = `${W}px`;
       canvas.style.height = `${H}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      vel.current={x:0,y:0};
+      requestDraw();
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -209,12 +219,13 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
     };
 
     const draw = () => {
+      raf = 0;
+      if(!onscreen || !pageVisible) return;
       const now = performance.now();
-      const appear = Math.min(1, (now - appearStart.current) / 800);
-      const ease = 1 - Math.pow(1 - appear, 3);
+      const ease = 1;
 
       // Auto-rotate unless dragging or a point is pinned (so the card stays put).
-      if (!dragging.current && pinnedRef.current < 0) {
+      if (rotating && !reduceMotion && !dragging.current && pinnedRef.current < 0) {
         rot.current.y += vel.current.y + (reduceMotion ? 0 : 0.0014);
         rot.current.x += vel.current.x;
         vel.current.x *= 0.92;
@@ -243,7 +254,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
           ctx.stroke();
         });
         // Pulses travelling from each retrieved chunk to the query.
-        if (!reduceMotion) {
+        if (rotating && !reduceMotion) {
           points.forEach((p, i) => {
             if (!p.retrieved) return;
             const u = ((now / PULSE_PERIOD) + i * 0.17) % 1;
@@ -304,7 +315,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
 
       if (qScreen) {
         // Gentle radar pulse around the query marker.
-        if (!reduceMotion) {
+        if (rotating && !reduceMotion) {
           const ph = (now / 1500) % 1;
           ctx.globalAlpha = 0.3 * (1 - ph);
           ctx.strokeStyle = INK;
@@ -330,9 +341,16 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
         if (s) setCard((c) => (c && c.pinned && (Math.abs(c.x - s.sx) > 1 || Math.abs(c.y - s.sy) > 1) ? { ...c, x: s.sx, y: s.sy } : c));
       }
 
-      raf = requestAnimationFrame(draw);
+      if (rotating && !reduceMotion) raf = requestAnimationFrame(draw);
     };
-    raf = requestAnimationFrame(draw);
+    requestDraw = () => { if(!raf && onscreen && pageVisible) raf=requestAnimationFrame(draw); };
+    requestDrawRef.current = requestDraw;
+    requestDraw();
+    const io = new IntersectionObserver(entries => {
+      onscreen=entries[0]?.isIntersecting ?? false;
+      if(!onscreen) { cancelAnimationFrame(raf); raf=0; } else requestDraw();
+    });
+    io.observe(wrap);
 
     const pickAt = (mx: number, my: number) => {
       let best = -1;
@@ -350,6 +368,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
     };
 
     const onDown = (e: PointerEvent) => {
+      requestDraw();
       dragging.current = true;
       moved.current = false;
       last.current = { x: e.clientX, y: e.clientY };
@@ -357,6 +376,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
       canvas.setPointerCapture(e.pointerId);
     };
     const onMove = (e: PointerEvent) => {
+      requestDraw();
       const rect = canvas.getBoundingClientRect();
       const mx = e.clientX - rect.left;
       const my = e.clientY - rect.top;
@@ -374,7 +394,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
         rot.current.x = Math.max(-1.1, Math.min(0.2, rot.current.x));
         vel.current = { x: dy * 0.01, y: dx * 0.01 };
         hoverRef.current = -1;
-        if (!pinnedRef.current && pinnedRef.current < 0) setCard(null);
+        if (pinnedRef.current < 0) setCard(null);
       } else {
         const idx = pickAt(mx, my);
         hoverRef.current = idx;
@@ -382,6 +402,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
       }
     };
     const onUp = (e: PointerEvent) => {
+      requestDraw();
       dragging.current = false;
       try {
         canvas.releasePointerCapture(e.pointerId);
@@ -401,10 +422,12 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
       }
     };
     const onLeave = () => {
+      requestDraw();
       hoverRef.current = -1;
       if (pinnedRef.current < 0) setCard(null);
     };
     const onWheel = (e: WheelEvent) => {
+      requestDraw();
       e.preventDefault();
       zoom.current = Math.max(0.6, Math.min(2.6, zoom.current * (e.deltaY > 0 ? 0.92 : 1.08)));
       clearPin();
@@ -419,6 +442,7 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      io.disconnect();
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
@@ -426,10 +450,16 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
       canvas.removeEventListener("wheel", onWheel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [points, query, clusterLabels, height]);
+  }, [points, query, clusterLabels, height, reduceMotion, pageVisible, rotating, viewTick]);
 
   return (
-    <div ref={wrapRef} className="relative w-full overflow-hidden rounded-xl border border-line bg-[#faf9f6]" style={{ height }}>
+    <><div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+      <button disabled={reduceMotion} aria-pressed={rotating} onClick={()=>setRotating(v=>!v)} className="rounded-lg border border-line px-3 py-2 disabled:opacity-50">{rotating ? "Pause rotation" : "Rotate view"}</button>
+      <button onClick={()=>{rot.current.y-=0.25;setViewTick(v=>v+1);}} className="rounded-lg border border-line px-3 py-2">Turn left</button>
+      <button onClick={()=>{rot.current.y+=0.25;setViewTick(v=>v+1);}} className="rounded-lg border border-line px-3 py-2">Turn right</button>
+      <label className="flex min-w-0 flex-wrap items-center gap-2">Inspect a point<select className="max-w-full rounded-lg border border-line p-2" value={card?.p.chunkId ?? ""} onChange={e=>{const i=points.findIndex(p=>p.chunkId===e.target.value);pinnedRef.current=i;setCard(i<0?null:{p:points[i],x:30,y:40,pinned:true});setViewTick(v=>v+1);}}><option value="">Select a passage</option>{points.map((p,i)=><option key={p.chunkId+i} value={p.chunkId}>{p.citationLabel ?? p.chunkId} · {p.section}</option>)}</select></label>
+      {reduceMotion&&<span>Static view · reduced motion</span>}
+    </div><div ref={wrapRef} className="relative w-full overflow-hidden rounded-xl border border-line bg-[#faf9f6]" style={{ height }}>
       <canvas
         ref={canvasRef}
         role="img"
@@ -440,9 +470,9 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
         <div
           className="absolute z-10 max-w-[260px] rounded-lg border border-line bg-white p-2.5 text-xs shadow-card"
           style={{
-            left: Math.max(8, Math.min(card.x + 12, (wrapRef.current?.clientWidth ?? 9999) - 12)),
-            top: Math.min(card.y + 12, height - 12),
-            transform: card.x > 220 ? "translateX(-100%)" : undefined,
+            left: Math.max(8, Math.min(card.x + 12, (wrapRef.current?.clientWidth ?? 9999) - 260)),
+            top: Math.max(8, Math.min(card.y + 12, height - 170)),
+
             pointerEvents: card.pinned ? "auto" : "none",
           }}
         >
@@ -465,6 +495,6 @@ export function EmbeddingProjector3D({ points, query, clusterLabels = [], height
         </div>
       )}
       <div className="pointer-events-none absolute bottom-2 right-3 text-[10px] text-slatey-500">drag to orbit · pinch/scroll to zoom · tap a point</div>
-    </div>
+    </div>{card&&<p className="mt-3 text-sm leading-relaxed" role="status"><strong>{card.p.citationLabel ?? card.p.chunkId} · {card.p.section}:</strong> {card.p.preview} {card.p.usedInAnswer?"Cited in the answer.":card.p.retrieved?"Retrieved but not cited.":"Not retrieved."}</p>}</>
   );
 }

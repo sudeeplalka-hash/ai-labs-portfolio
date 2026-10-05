@@ -83,7 +83,7 @@ export function CorpusStarMap({
   return (
     <div>
       <div className="relative mx-auto w-full max-w-[460px]">
-        <svg viewBox="0 0 100 100" className="w-full rounded-xl border border-line bg-gradient-to-br from-slate-50 to-white" preserveAspectRatio="xMidYMid meet">
+        <svg role="group" aria-label="Corpus similarity map; select a document to inspect its readiness" viewBox="0 0 100 100" className="w-full rounded-xl border border-line bg-gradient-to-br from-slate-50 to-white" preserveAspectRatio="xMidYMid meet">
           {/* soft grid */}
           {[20, 40, 60, 80].map((g) => (
             <g key={g}>
@@ -140,14 +140,10 @@ export function CorpusStarMap({
             );
           })}
 
-          {/* soft pulsing ring on the active node (hidden under reduced motion) */}
+          {/* Stable selection ring preserves geometry and requires no animation loop. */}
           {active && (
-            <g className="motion-reduce:hidden">
+            <g aria-hidden="true">
               <circle cx={active.x} cy={active.y} r={4.6} fill="none" stroke={GATE_HEX[active.gate.color]} strokeWidth="0.6" opacity={0.5} />
-              <circle cx={active.x} cy={active.y} r={4.6} fill="none" stroke={GATE_HEX[active.gate.color]} strokeWidth="0.6">
-                <animate attributeName="r" values="4.6;7.4;4.6" dur="2.2s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.2 1;0.4 0 0.2 1" />
-                <animate attributeName="opacity" values="0.5;0;0.5" dur="2.2s" repeatCount="indefinite" />
-              </circle>
             </g>
           )}
 
@@ -157,7 +153,7 @@ export function CorpusStarMap({
             const r = dotR(f, files);
             const stale = isStale(f);
             return (
-              <g key={f.id} className="cursor-pointer" opacity={stale && !on ? 0.5 : 1} onMouseEnter={() => setHover(f.id)} onMouseLeave={() => setHover(null)} onClick={() => onSelect(f.id)}>
+              <g key={f.id} role="button" tabIndex={0} aria-pressed={selectedId === f.id} aria-label={`${f.name}, ${f.gate.gate}, score ${f.score}, ${f.tokens} tokens`} className="cursor-pointer focus:outline focus:outline-1 focus:outline-primary" opacity={stale && !on ? 0.5 : 1} onFocus={() => setHover(f.id)} onBlur={() => setHover(null)} onMouseEnter={() => setHover(f.id)} onMouseLeave={() => setHover(null)} onClick={() => onSelect(f.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(f.id); } }}>
                 {piiHits(f) > 0 && (
                   <circle cx={f.x} cy={f.y} r={r + 1.3} fill="none" stroke="#f43f5e" strokeWidth="0.4" />
                 )}
@@ -167,7 +163,7 @@ export function CorpusStarMap({
           })}
 
           {/* axis hint: this plane spreads documents by content similarity */}
-          <text x="50" y="99" textAnchor="middle" fontSize="2.6" fill="#9aa7b4" fontWeight="600">documents spread by content similarity</text>
+          <text x="50" y="99" textAnchor="middle" fontSize="2.6" fill="#46586b" fontWeight="600">documents spread by content similarity</text>
         </svg>
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slatey-500">
           <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-full" style={{ background: GATE_HEX.emerald }} /> approved</span>

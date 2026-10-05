@@ -10,13 +10,14 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw, X, Plus, PencilLine } from "lucide-react";
-import { Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, pushRecent, loadRecent, saveRecent, ScatterPlot, type ExportAction, type Command, type SortState, type RecentEntry, type BadgeTone } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, KpiCard, InsightCard, LiveBadge, FreshnessStamp, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, parseCsv, svgElementToPng, sortBy, nextSort, pushRecent, loadRecent, saveRecent, ScatterPlot, type ExportAction, type Command, type SortState, type RecentEntry, type BadgeTone } from "@labs/design-system";
 import { C31_USE_CASES, LABS } from "@labs/kit";
 import { greedyFund, reallocateKills, initiativesFromCsvRows, efficientFrontier } from "@labs/engines";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { EvidenceTable, Delta, bounded, validateScenario, oneOf, encodeScenario, decodeScenario } from "./DecisionTools";
 import { downloadMarkdown } from "../artifact/artifact";
 
 type Stage = "discovery" | "pilot" | "scaling" | "production";
@@ -70,7 +71,22 @@ const STAGES_LIST: Stage[] = ["discovery", "pilot", "scaling", "production"];
 type View = "map" | "financials" | "gate" | "fund" | "reallocate";
 const RECENT_KEY = "portfolio-recent";
 
+type PortfolioBaseline = { items: Initiative[]; assumptions: Assumptions; budgetM: number };
+function validBook(value: unknown): value is Initiative[] {
+  return Array.isArray(value) && value.length > 0 && value.length <= 200 && new Set(value.map((v) => v?.id)).size === value.length && value.every((v) => validateScenario(v, {
+    id: (v) => typeof v === "string" && v.length > 0 && v.length < 150, name: (v) => typeof v === "string" && v.length > 0 && v.length < 300,
+    domain: (v) => typeof v === "string" && v.length < 150, stage: oneOf(STAGES_LIST), expValueM: bounded(0,1e6), spendM: bounded(0,1e6), risk: bounded(0,1), planVar: bounded(-1000,1000),
+  }));
+}
+function validAssumptions(value: unknown): value is Assumptions {
+  return validateScenario(value, { prob: (v) => validateScenario(v, Object.fromEntries(STAGES_LIST.map((stage) => [stage,bounded(0,1)]))), scaleMultiple: bounded(0,100), scaleRiskCutoff: bounded(0,1) });
+}
+function validBaseline(value: unknown): value is PortfolioBaseline {
+  return validateScenario(value, {items: validBook, assumptions: validAssumptions, budgetM: bounded(0,1000000)});
+}
+
 export function PortfolioDashboard() {
+  const [baseline, setBaseline] = useState<PortfolioBaseline>({ items: INITIATIVES, assumptions: DEFAULT_ASSUMPTIONS, budgetM: 5 });
   const [view, setView] = useState<View>("map");
   const [scaleMode, setScaleMode] = useState<"linear" | "log">("linear");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
@@ -117,7 +133,13 @@ export function PortfolioDashboard() {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
     try {
-      const cfg = JSON.parse(atob(raw)) as { v?: View; s?: string; a?: Partial<Assumptions>; b?: Initiative[] };
+      const cfg = decodeScenario(raw) as { v?: View; s?: string; a?: Partial<Assumptions>; b?: Initiative[]; budgetM?: number; scaleMode?: "linear" | "log"; domainFilter?: string | null; recFilter?: Rec | null; baseline?: PortfolioBaseline };
+      if (!cfg || typeof cfg !== "object" || (cfg.b !== undefined && !validBook(cfg.b)) || (cfg.v !== undefined && !["map","financials","gate","fund","reallocate"].includes(cfg.v)) || (cfg.a !== undefined && !validAssumptions({ ...DEFAULT_ASSUMPTIONS, ...cfg.a, prob: {...DEFAULT_ASSUMPTIONS.prob,...cfg.a.prob} })) || (cfg.budgetM !== undefined && !bounded(0,1e6)(cfg.budgetM)) || (cfg.baseline !== undefined && !validBaseline(cfg.baseline))) throw new Error("Invalid scenario");
+      if (cfg.budgetM !== undefined) setBudgetM(cfg.budgetM);
+      if (cfg.scaleMode === "linear" || cfg.scaleMode === "log") setScaleMode(cfg.scaleMode);
+      if (typeof cfg.domainFilter === "string" || cfg.domainFilter === null) setDomainFilter(cfg.domainFilter);
+      if (cfg.recFilter === null || ["kill","hold","scale"].includes(cfg.recFilter ?? "")) setRecFilter(cfg.recFilter ?? null);
+      if (cfg.baseline) setBaseline(cfg.baseline);
       if (cfg.b && Array.isArray(cfg.b) && cfg.b.length) setItems(cfg.b);
       if (cfg.v) setView(cfg.v);
       if (cfg.s) setSelId(cfg.s);
@@ -129,16 +151,17 @@ export function PortfolioDashboard() {
           scaleRiskCutoff: a.scaleRiskCutoff ?? DEFAULT_ASSUMPTIONS.scaleRiskCutoff,
         });
       }
-    } catch { /* ignore malformed link */ }
+    } catch { toast("This portfolio link is invalid. The sample book is still available."); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const shareScenario = () => {
-    const cfg = btoa(JSON.stringify({ v: view, s: selId, a: A, b: bookEdited ? items : undefined }));
+    const cfg = encodeScenario({ v: view, s: selId, a: A, b: items, budgetM, scaleMode, domainFilter, recFilter, baseline });
     const nextRecent = pushRecent(loadRecent(RECENT_KEY), { cfg, label: `${items.length} initiatives · ${view}`, at: Date.now() });
     saveRecent(RECENT_KEY, nextRecent);
     setRecent(nextRecent);
     const params = new URLSearchParams(window.location.search);
+    if (activeUcId) params.set("uc", activeUcId); else params.delete("uc");
     params.set("cfg", cfg);
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
@@ -149,7 +172,7 @@ export function PortfolioDashboard() {
     }
   };
   const resetAssumptions = () => { setAssumptions(DEFAULT_ASSUMPTIONS); toast("Assumptions reset to defaults"); };
-  const resetAll = () => { setItems(baseBook); setSelId(baseBook[0].id); setAssumptions(DEFAULT_ASSUMPTIONS); setEditMode(false); toast("Reset to the default book & assumptions"); };
+  const resetAll = () => { const url = new URL(window.location.href); url.searchParams.delete("cfg"); window.history.replaceState(null,"",url); setBudgetM(5); setDomainFilter(null); setRecFilter(null); setScaleMode("linear"); setView("map"); setItems(baseBook); setSelId(baseBook[0].id); setAssumptions(DEFAULT_ASSUMPTIONS); setEditMode(false); toast("Reset to the default book & assumptions"); };
 
   const maxVal = Math.max(...items.map((i) => i.expValueM));
   const totalValue = items.reduce((a, i) => a + i.expValueM, 0);
@@ -170,6 +193,12 @@ export function PortfolioDashboard() {
   const funded = new Set(fund.funded);
   const fundSpent = fund.spent;
   const fundCaptured = fund.captured;
+  const baselineRiskAdj = baseline.items.reduce((sum, i) => sum + riskAdjOf(i, baseline.assumptions), 0);
+  const baselineFund = greedyFund(baseline.items, baseline.budgetM, (i) => riskAdjOf(i, baseline.assumptions));
+  const comparisonRows = [...new Set([...baseline.items.map((i) => i.id), ...items.map((i) => i.id)])].map((id) => {
+    const before = baseline.items.find((i) => i.id === id), after = items.find((i) => i.id === id);
+    return { id, name: after?.name ?? before!.name, before, after, delta: (after ? riskAdj(after) : 0) - (before ? riskAdjOf(before, baseline.assumptions) : 0) };
+  }).sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
   const realloc = reallocateKills(items, riskAdj, (i) => recommend(i) === "scale");
   const sortAccessor: Record<string, (i: Initiative) => number | string> = {
     name: (i) => i.name, stage: (i) => STAGES_LIST.indexOf(i.stage), value: (i) => i.expValueM,
@@ -185,7 +214,7 @@ export function PortfolioDashboard() {
     return rows;
   })();
   const sortTh = (label: string, k: string) => (
-    <th>
+    <th scope="col" aria-sort={sort?.key === k ? (sort.dir === "asc" ? "ascending" : "descending") : "none"}>
       <button onClick={() => setSort((sc) => nextSort(sc, k))} className="inline-flex items-center gap-1 hover:text-ink">
         {label}{sort?.key === k && <span className="text-[8px]">{sort.dir === "asc" ? "▲" : "▼"}</span>}
       </button>
@@ -241,14 +270,21 @@ export function PortfolioDashboard() {
     svgElementToPng(scatterRef.current, `portfolio-map-${slug}`).then((ok) => toast(ok ? "Chart exported as PNG" : "Couldn't render the chart"));
   };
   const exportScenario = () => {
-    downloadJson(`portfolio-scenario-${slug}`, { version: 1, view, selId, assumptions: A, items });
+    downloadJson(`portfolio-scenario-${slug}`, { version: 1, activeUcId, view, selId, assumptions: A, items, budgetM, scaleMode, domainFilter, recFilter, baseline });
     toast("Scenario exported as JSON");
   };
   const importScenario = async () => {
     const text = await pickTextFile();
     if (!text) return;
     try {
-      const cfg = parseScenarioJson<{ view?: View; selId?: string; assumptions?: Partial<Assumptions>; items?: Initiative[] }>(text);
+      const cfg = parseScenarioJson<{ activeUcId?: string | null; view?: View; selId?: string; assumptions?: Partial<Assumptions>; items?: Initiative[]; budgetM?: number; scaleMode?: "linear" | "log"; domainFilter?: string | null; recFilter?: Rec | null; baseline?: PortfolioBaseline }>(text);
+      if ((cfg.items !== undefined && !validBook(cfg.items)) || (cfg.view !== undefined && !["map","financials","gate","fund","reallocate"].includes(cfg.view)) || (cfg.assumptions !== undefined && !validAssumptions({ ...DEFAULT_ASSUMPTIONS, ...cfg.assumptions, prob:{...DEFAULT_ASSUMPTIONS.prob,...cfg.assumptions.prob} })) || (cfg.budgetM !== undefined && !bounded(0,1e6)(cfg.budgetM)) || (cfg.baseline !== undefined && !validBaseline(cfg.baseline))) throw new Error("Invalid portfolio");
+      if (cfg.budgetM !== undefined) setBudgetM(cfg.budgetM);
+      if (cfg.scaleMode === "linear" || cfg.scaleMode === "log") setScaleMode(cfg.scaleMode);
+      if (typeof cfg.domainFilter === "string" || cfg.domainFilter === null) setDomainFilter(cfg.domainFilter);
+      if (cfg.recFilter === null || ["kill","hold","scale"].includes(cfg.recFilter ?? "")) setRecFilter(cfg.recFilter ?? null);
+      if (cfg.baseline) setBaseline(cfg.baseline);
+      setActiveUcId(cfg.activeUcId && C31_USE_CASES.some((uc) => uc.id === cfg.activeUcId) ? cfg.activeUcId : null);
       if (cfg.items && Array.isArray(cfg.items) && cfg.items.length) { setItems(cfg.items); setSelId(cfg.items[0].id); }
       if (cfg.view) setView(cfg.view);
       if (cfg.selId) setSelId(cfg.selId);
@@ -304,33 +340,23 @@ export function PortfolioDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink">
-            <ArrowLeft className="h-4 w-4" /> Portfolio
-          </Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">C3-1</span>
-        </div>
-      </header>
+    <InstrumentShell title="Portfolio capital allocation" eyebrow="AI investment & economics" description="Decide what to fund, hold or stop; inspect the evidence behind each initiative."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "C3-1" }]}
+      decision={<DecisionSummary title={`${killCount} of ${items.length} initiatives have negative risk-adjusted value`} explanation={`Selected: ${sel.name}. ${REC_LABEL[recommend(sel)]} at ${fmtM(riskAdj(sel))} risk-adjusted annual value.`} nextAction="Select an initiative, then compare funding or reallocation against the current book." tone={killCount ? "caution" : "positive"} metrics={[{label:"Portfolio risk-adjusted value",value:fmtM(totalRiskAdj)},{label:"Annual spend",value:fmtM(totalSpend)}]} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={C31_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}</>}
+      method={<CaseStudy problem="Without portfolio discipline, AI funding spreads across initiatives that may never justify their cost. This artifact treats AI initiatives like investment options, each with value, risk, stage probability, spend, and a clear recommendation." approach="The dashboard models a portfolio of AI initiatives through risk adjusted value, stage gate status, funding allocation, efficient frontier analysis, and reallocation from lower return work into stronger scale candidates." why="This connects AI delivery to capital allocation, portfolio governance, budget discipline, value capture, and executive decision rights." metric="Risk adjusted ROI per initiative (expected value × stage probability − run cost) and the efficient frontier of cumulative value vs cumulative spend." tradeoff="Funding the single highest value initiative can starve three efficient ones; the greedy funder and the frontier knee show where diminishing returns begin." outcome="A defensible funding decision within a budget, what to fund, what to kill, and where the freed capital goes, with the value captured quantified." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">AI Investment Strategy and Portfolio Governance</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">AI Portfolio Capital Allocation Dashboard</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            An AI portfolio is not governed because it has many promising ideas. It is governed when leaders can decide
-            what to fund, what to hold, what to scale, and what to stop.
-          </p>
-        </div>
+    >
 
-        <UseCaseRail useCases={C31_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Without portfolio discipline, AI funding spreads across initiatives that may never justify their cost. This artifact treats AI initiatives like investment options, each with value, risk, stage probability, spend, and a clear recommendation." approach="The dashboard models a portfolio of AI initiatives through risk adjusted value, stage gate status, funding allocation, efficient frontier analysis, and reallocation from lower return work into stronger scale candidates." why="This connects AI delivery to capital allocation, portfolio governance, budget discipline, value capture, and executive decision rights." metric="Risk adjusted ROI per initiative (expected value × stage probability − run cost) and the efficient frontier of cumulative value vs cumulative spend." tradeoff="Funding the single highest value initiative can starve three efficient ones; the greedy funder and the frontier knee show where diminishing returns begin." outcome="A defensible funding decision within a budget, what to fund, what to kill, and where the freed capital goes, with the value captured quantified." />
+        <Panel className="mb-5">
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-base font-semibold text-ink">Portfolio change receipt</h2><p className="mt-1 text-sm text-slatey-400">Pinned book {fmtM(baselineRiskAdj)} → current {fmtM(totalRiskAdj)} risk-adjusted annual value. <Delta value={totalRiskAdj - baselineRiskAdj} format={fmtM} />.</p></div><div className="flex flex-wrap gap-2"><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => setBaseline({ items: items.map((i) => ({ ...i })), assumptions: { ...A, prob: { ...A.prob } }, budgetM })}>Pin this book</button><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => { setItems(baseline.items.map((i) => ({...i}))); setAssumptions(baseline.assumptions); setBudgetM(baseline.budgetM); setSelId(baseline.items[0].id); }}>Restore baseline</button></div></div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3"><div className="rounded-lg bg-slate-50 p-3 text-sm">Budget: {fmtM(baseline.budgetM)} → {fmtM(budgetM)}</div><div className="rounded-lg bg-slate-50 p-3 text-sm">Funded: {baselineFund.funded.length} → {fund.funded.length} initiatives</div><div className="rounded-lg bg-slate-50 p-3 text-sm">Captured value: {fmtM(baselineFund.captured)} → {fmtM(fund.captured)}</div></div>
+          <div className="mt-3 flex flex-wrap gap-2">{comparisonRows.filter((row) => Math.abs(row.delta) > 0.00001).slice(0, 4).map((row) => <button key={row.id} disabled={!row.after} onClick={() => setSelId(row.id)} className="rounded-lg border border-line px-3 py-2 text-left text-sm disabled:opacity-60">{row.name}<span className="ml-2"><Delta value={row.delta} format={fmtM} /></span>{!row.after && " · removed"}</button>)}</div>
+          <EvidenceTable caption="Before and after for every initiative" headings={["Initiative", "Baseline call", "Current call", "Risk-adjusted value change", "Funding change"]} rows={comparisonRows.map((row) => [row.after ? <button key={row.id} className="text-left font-medium text-primary underline" onClick={() => setSelId(row.id)}>{row.name}</button> : row.name, row.before ? REC_LABEL[recommendOf(row.before, baseline.assumptions)] : "Added", row.after ? REC_LABEL[recommend(row.after)] : "Removed", <Delta key={`delta-${row.id}`} value={row.delta} format={(n) => `$${n.toFixed(3)}M`} />, `${baselineFund.funded.includes(row.id) ? "Funded" : "Not funded"} → ${funded.has(row.id) ? "Funded" : "Not funded"}`])} />
+          <p className="mt-2 text-xs text-slatey-500">The receipt includes added and removed initiatives and changes to stage probabilities. It compares modeled decisions; it does not claim realized return.</p>
+        </Panel>
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's assumptions">
@@ -348,7 +374,7 @@ export function PortfolioDashboard() {
             <RotateCcw className="h-3.5 w-3.5" /> Reset
           </ToolbarButton>
           <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
-            ⌘K
+            <span className="sr-only">Open command palette</span><span aria-hidden>⌘K</span>
           </ToolbarButton>
           <ExportMenu actions={exportActions} />
         </LabToolbar>
@@ -363,14 +389,14 @@ export function PortfolioDashboard() {
         {/* View toggle */}
         <div className="mb-4 flex flex-wrap gap-1.5">
           {(["map", "financials", "gate", "fund", "reallocate"] as View[]).map((v) => (
-            <button key={v} onClick={() => setView(v)}
+            <button key={v} aria-pressed={view === v} onClick={() => setView(v)}
               className={`rounded-lg border px-3 py-1.5 text-xs font-semibold capitalize transition ${v === view ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>
               {v === "gate" ? "Stage-gate" : v === "fund" ? "Funding" : v === "reallocate" ? "Reallocate" : v}
             </button>
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <div>
             {view === "map" && (
               <Panel>
@@ -378,7 +404,7 @@ export function PortfolioDashboard() {
                   <p className="stat-label">Value × risk · bubble = run rate spend</p>
                   <div className="inline-flex overflow-hidden rounded-md border border-line text-[10px]">
                     {(["linear", "log"] as const).map((m) => (
-                      <button key={m} onClick={() => setScaleMode(m)}
+                      <button key={m} aria-pressed={scaleMode === m} onClick={() => setScaleMode(m)}
                         className={`px-2 py-0.5 font-medium transition ${scaleMode === m ? "bg-teal-600 text-white" : "bg-white text-slatey-400 hover:text-ink"}`}>{m === "linear" ? "Linear" : "Log"} Y</button>
                     ))}
                   </div>
@@ -391,7 +417,8 @@ export function PortfolioDashboard() {
                   return (
                     <ScatterPlot
                       svgRef={scatterRef}
-                      data={items.map((i) => ({ x: i.risk, y: i.expValueM, r: rf(i.spendM), color: REC_HEX[recommend(i)], id: i.id }))}
+                      data={items.map((i) => ({ x: i.risk, y: i.expValueM, r: rf(i.spendM), color: REC_HEX[recommend(i)], id: i.id, label: i.name }))}
+                      xValueLabel="Risk score" yValueLabel="Expected annual value" fmtX={(v) => `${Math.round(v * 100)}%`}
                       xDomain={[0, 1]}
                       yDomain={scaleMode === "log" ? [yFloor, maxVal] : [0, maxVal]}
                       yScale={scaleMode}
@@ -401,7 +428,7 @@ export function PortfolioDashboard() {
                       onSelect={setSelId}
                       onHover={setHoverId}
                       xLabelLeft="low risk"
-                      xLabelRight="high risk \u2192"
+                      xLabelRight="high risk →"
                       ariaLabel="Initiatives plotted by expected value (vertical) against risk (horizontal); bubble size is run rate spend; color is the kill / hold / scale call."
                       overlay={(layout) => (
                         <>
@@ -417,7 +444,7 @@ export function PortfolioDashboard() {
                               <g pointerEvents="none">
                                 <rect x={bx} y={by} width={144} height={32} rx={4} fill="#152433" />
                                 <text x={bx + 7} y={by + 13} fontSize="9" fontWeight="600" fill="#fff">{hov.name}</text>
-                                <text x={bx + 7} y={by + 25} fontSize="8.5" fill="#cbd5e1">{fmtM(riskAdj(hov))} risk-adj \u00b7 {REC_LABEL[recommend(hov)]}</text>
+                                <text x={bx + 7} y={by + 25} fontSize="8.5" fill="#cbd5e1">{fmtM(riskAdj(hov))} risk-adj · {REC_LABEL[recommend(hov)]}</text>
                               </g>
                             );
                           })()}
@@ -430,7 +457,7 @@ export function PortfolioDashboard() {
                   <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Scale</span>
                   <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-amber-500" /> Hold</span>
                   <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-rose-500" /> Kill</span>
-                  <span className="ml-auto">bubble size = spend · hover for detail</span>
+                  <span className="ml-auto">bubble size = spend · select or focus a point for detail</span>
                 </div>
               </Panel>
             )}
@@ -447,12 +474,12 @@ export function PortfolioDashboard() {
                   <div className="mb-3 flex flex-wrap items-center gap-1.5 text-[11px]">
                     <span className="text-slatey-500">Filter</span>
                     {domains.map((d) => (
-                      <button key={d} onClick={() => setDomainFilter((f) => (f === d ? null : d))}
+                      <button key={d} aria-pressed={domainFilter === d} onClick={() => setDomainFilter((f) => (f === d ? null : d))}
                         className={`rounded-full border px-2 py-0.5 font-medium transition ${domainFilter === d ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{d}</button>
                     ))}
                     <span className="mx-1 text-slate-300">|</span>
                     {(["scale", "hold", "kill"] as Rec[]).map((r) => (
-                      <button key={r} onClick={() => setRecFilter((f) => (f === r ? null : r))}
+                      <button key={r} aria-pressed={recFilter === r} onClick={() => setRecFilter((f) => (f === r ? null : r))}
                         className={`rounded-full border px-2 py-0.5 font-medium capitalize transition ${recFilter === r ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:border-primary/40 hover:text-ink"}`}>{REC_LABEL[r]}</button>
                     ))}
                     {(domainFilter || recFilter) && (
@@ -473,7 +500,7 @@ export function PortfolioDashboard() {
                   </thead>
                   <tbody>
                     {financialRows.map((i) => (
-                      <tr key={i.id} className={editMode ? "" : "cursor-pointer"} onClick={editMode ? undefined : () => setSelId(i.id)}>
+                      <tr key={i.id} className={editMode ? "" : "cursor-pointer"} tabIndex={editMode ? undefined : 0} aria-selected={editMode ? undefined : selId === i.id} onKeyDown={editMode ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelId(i.id); } }} onClick={editMode ? undefined : () => setSelId(i.id)}>
                         {editMode ? (
                           <>
                             <td><input value={i.name} onChange={(e) => updateItem(i.id, { name: e.target.value })} className="w-36 rounded border border-line px-1.5 py-0.5 text-xs" /></td>
@@ -516,7 +543,7 @@ export function PortfolioDashboard() {
             )}
 
             {view === "gate" && (
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid min-w-0 items-start gap-3 sm:grid-cols-3">
                 {(["scale", "hold", "kill"] as Rec[]).map((r) => (
                   <div key={r} className="rounded-xl border border-line bg-white p-3">
                     <div className="mb-2 flex items-center gap-1.5"><span className={`h-2.5 w-2.5 rounded-full ${REC_DOT[r]}`} /><p className="text-sm font-semibold text-ink">{REC_LABEL[r]}</p><span className="text-[11px] text-slatey-500">{items.filter((i) => recommend(i) === r).length}</span></div>
@@ -541,7 +568,7 @@ export function PortfolioDashboard() {
                   <input type="range" aria-label="Capital available" min={0} max={Math.ceil(totalSpend)} step={0.1} value={Math.min(budgetM, Math.ceil(totalSpend))} onChange={(e) => setBudgetM(Number(e.target.value))} className="w-full accent-primary" />
                   <div className="mt-1 flex justify-between text-[10px] text-slatey-500"><span>$0</span><span>full book {fmtM(totalSpend)}</span></div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid min-w-0 items-start gap-3 sm:grid-cols-2">
                   <div>
                     <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Fund ({funded.size}) · {fmtM(fundSpent)}</p>
                     <div className="space-y-1">
@@ -616,7 +643,7 @@ export function PortfolioDashboard() {
                   <p className="text-sm text-slatey-400">No initiative carries a negative risk adjusted ROI, nothing to cut. The book is already clean.</p>
                 ) : (
                   <>
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid min-w-0 items-start gap-3 sm:grid-cols-2">
                       <div>
                         <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-rose-700">Cut ({realloc.killed.length}) · frees {fmtM(realloc.freedCapitalM)}</p>
                         <div className="space-y-1">
@@ -659,7 +686,7 @@ export function PortfolioDashboard() {
           </div>
 
           {/* Detail */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Panel>
               <div className="flex items-center justify-between gap-2">
                 <div><h3 className="text-sm font-semibold text-ink">{sel.name}</h3><p className="text-[11px] text-slatey-500">{sel.domain} · {sel.stage}</p></div>
@@ -738,8 +765,8 @@ export function PortfolioDashboard() {
         </Drawer>
         <ToastHost />
         <CommandPalette commands={paletteCommands} />
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 

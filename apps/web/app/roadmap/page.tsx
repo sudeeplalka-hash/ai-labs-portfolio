@@ -1,63 +1,34 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, CircleCheck, ArrowUpRight, Rocket, Ban } from "lucide-react";
+import { routeMetadata, EXPERIENCE_REVISION } from "@/lib/site";
 import { SimulationBoundary } from "@/components/reviewer/Reviewer";
 
-export const metadata: Metadata = { title: "Product Roadmap" };
+export const metadata = routeMetadata("Product roadmap", "Inspect the working portfolio capabilities, their evidence routes and the integrations still to come.", "/roadmap");
 
-const CURRENT = [
-  "Seven stage AI lifecycle with shared contracts", "Strategy intake, scoring, and recommended build path", "Data readiness handoff",
-  "Build/RAG lab: retrieval modes (BM25, vector, hybrid, rerank)", "Agent and tool calling mechanics (schemas, boundaries, approvals, misuse evals)",
-  "Training and fine tuning readiness: decision memo, dataset readiness, overfitting and generalization",
-  "Operate / AI Ops / MLOps spine", "Govern live evidence loop and decision engine", "Realize risk adjusted ROI engine",
-  "Model internals explainer (transformers, attention, embeddings, framework placement)",
+const DELIVERED = [
+  { title: "Seven-stage lifecycle and handoffs", detail: "Frame an initiative, inspect data and build evidence, govern a release and revisit realized value.", href: "/lifecycle" },
+  { title: "Industry scenarios and provenance", detail: "Explore firsthand and studied scenarios, with source context and direct links to each instrument.", href: "/industries" },
+  { title: "Capital allocation and comparison", detail: "Edit a portfolio, constrain the budget and compare funding and recommendation changes against a pinned baseline.", href: "/business/portfolio" },
+  { title: "ROI and sensitivity", detail: "Inspect a discounted cash-flow bridge, exact assumptions and the driver that changes the funding case.", href: "/business/roi-builder" },
+  { title: "Adoption intervention planning", detail: "Separate current scores from a controlled projection of the steps toward a readiness gate.", href: "/engagement/adoption" },
+  { title: "Staffing and mobilization models", detail: "Choose a resolution per skill gap and inspect the modeled cost and delivery consequence.", href: "/engagement/capacity" },
+  { title: "Vendor evaluation", detail: "Change decision weights and inspect vendor fit, concentration, renewal and exit exposure.", href: "/business/vendor-monitor" },
+  { title: "Governance evidence and exports", detail: "Inspect the modeled evidence loop, findings, controls and governance decisions.", href: "/govern" },
+  { title: "EvalBench", detail: "Pressure-test a routing threshold against quality and cost using an authored evaluation dataset.", href: "/builds/eval-bench" },
+  { title: "Guided journeys", detail: "Follow a program through related instruments while keeping the narrative and next decision visible.", href: "/storylines" },
 ];
 const NEXT = [
-  "Real vector retrieval / vector database integration", "Persistent eval run history",
-  "Deeper telemetry integration", "Real tool integrations (APIs, workflow/ticketing engines)", "Real labeling tool plus model registry plus training pipeline integration",
-  "FinOps: cost chargeback and unit economics guardrails", "Operating model: staffing and RACI across the seven stages",
-  "Vendor procurement and third party model risk workflow", "Quarterly benefits tracking (planned vs realized value)",
+  ["External retrieval adapters", "Connect production vector stores and measure retrieval on an independently maintained evaluation set."],
+  ["Durable history across devices", "Add authenticated storage, versioning and permissions beyond browser-local scenarios and exported files."],
+  ["Production telemetry and evidence", "Connect monitoring, evaluation stores, model registries and approved enterprise tools."],
+  ["Realized benefits tracking", "Reconcile modeled ROI with finance-approved quarterly outcomes and attributable adoption evidence."],
 ];
-const FUTURE = [
-  "External eval stores", "Observability tool integrations", "Model registry integration", "Vector DB adapter",
-  "Role based review workflows", "Exportable governance evidence pack",
-];
-const OUT = [
-  "Real enterprise data connectors", "User authentication", "Full MLOps platform replacement", "Full model training framework",
-  "Deep PyTorch / TensorFlow notebooks", "Confidential client data", "Cloud infrastructure provisioning",
-];
-
-function Section({ icon, title, items, tone }: { icon: React.ReactNode; title: string; items: string[]; tone: string }) {
-  return (
-    <section className="rounded-xl border border-line bg-white p-5 shadow-card">
-      <p className={`flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide ${tone}`}>{icon}{title}</p>
-      <ul className="mt-2 grid gap-1.5 sm:grid-cols-2 text-sm text-slatey-300">{items.map((x) => <li key={x} className="flex gap-2"><span className="text-slatey-400">·</span>{x}</li>)}</ul>
-    </section>
-  );
-}
 
 export default function Page() {
-  return (
-    <div className="space-y-6">
-      <header>
-        <Link href="/" className="inline-flex items-center gap-1 text-sm font-medium text-slatey-400 hover:text-primary"><ArrowLeft className="h-4 w-4" /> Home</Link>
-        <p className="eyebrow mt-2">Product roadmap</p>
-        {/* <h2>: the AppShell Header owns this page's <h1>. */}
-        <h2 className="mt-1 text-3xl font-semibold tracking-tight text-ink">What exists now, what comes next, and what&rsquo;s out of scope</h2>
-      </header>
-
-      <Section icon={<CircleCheck className="h-4 w-4 text-emerald-600" />} title="Current capabilities" items={CURRENT} tone="text-emerald-700" />
-      <Section icon={<ArrowUpRight className="h-4 w-4 text-primary" />} title="Next technical upgrades" items={NEXT} tone="text-primary-dark" />
-      <Section icon={<Rocket className="h-4 w-4 text-violet-600" />} title="Future production integrations" items={FUTURE} tone="text-violet-700" />
-      <Section icon={<Ban className="h-4 w-4 text-slatey-400" />} title="Intentionally out of scope for now" items={OUT} tone="text-slatey-500" />
-
-      <p className="max-w-3xl text-sm leading-relaxed text-slatey-400">
-        This roadmap keeps the product focused on enterprise AI program delivery rather than turning it into a generic AI course
-        or a full production platform. It intentionally does not implement a transformer or ship training notebooks. The goal is to
-        demonstrate enterprise AI delivery, not to become a deep learning course.
-      </p>
-
-      <SimulationBoundary />
-    </div>
-  );
+  return <div className="space-y-8">
+    <header><p className="eyebrow">Product roadmap</p><h2 className="mt-2 text-3xl font-semibold tracking-tight text-ink">What you can use now, and what needs a real integration</h2><p className="mt-3 max-w-3xl text-base text-slatey-400">Every delivered item opens its working surface. Future integrations describe direction, without promising a delivery date. Experience revision {EXPERIENCE_REVISION}.</p></header>
+    <section aria-labelledby="delivered"><h3 id="delivered" className="text-xl font-semibold text-ink">Available in this version</h3><div className="mt-4 grid gap-4 md:grid-cols-2">{DELIVERED.map((item) => <Link key={item.href} href={item.href} className="group rounded-xl border border-line bg-white p-5 shadow-card hover:border-primary"><h4 className="font-semibold text-ink group-hover:text-primary">{item.title} →</h4><p className="mt-2 text-sm leading-relaxed text-slatey-400">{item.detail}</p></Link>)}</div></section>
+    <section aria-labelledby="future"><h3 id="future" className="text-xl font-semibold text-ink">Future integrations</h3><div className="mt-4 grid gap-4 md:grid-cols-2">{NEXT.map(([title,detail]) => <article key={title} className="rounded-xl border border-line bg-slate-50 p-5"><h4 className="font-semibold text-ink">{title}</h4><p className="mt-2 text-sm leading-relaxed text-slatey-400">{detail}</p></article>)}</div></section>
+    <section className="rounded-xl border border-line bg-white p-5"><h3 className="font-semibold text-ink">Portfolio boundaries</h3><p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">Confidential client data, cloud provisioning, full model training frameworks and enterprise authentication remain outside this demonstration. Existing scenarios, exports, simulated governance controls and local calculations work without those integrations.</p><Link href="/architecture" className="mt-3 inline-block font-medium text-primary underline">Inspect architecture and handoff contracts</Link></section>
+    <SimulationBoundary />
+  </div>;
 }

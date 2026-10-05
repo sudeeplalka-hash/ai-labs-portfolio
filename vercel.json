@@ -4,5 +4,12 @@
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "pnpm turbo run build --filter=@labs/web --force",
   "outputDirectory": "apps/web/out",
+  "redirects": [
+    {
+      "source": "/industries/uc/el01-contact%20center-assist",
+      "destination": "/industries/uc/el01-contact-center-assist/",
+      "permanent": true
+    }
+  ],
   "git": { "deploymentEnabled": { "main": true } }
 }

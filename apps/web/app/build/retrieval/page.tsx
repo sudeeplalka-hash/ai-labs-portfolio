@@ -1,3 +1,4 @@
+import { routeMetadata } from "@/lib/site";
 import { Layers, FlaskConical, Scissors } from "lucide-react";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { Panel } from "@rag/components/common/Panel";
@@ -16,7 +17,8 @@ function formatMetric(value: number, format: string) {
   return `${value}%`;
 }
 
-export const metadata = { title: "Retrieval Quality" };
+export const metadata = {
+  ...routeMetadata("Retrieval Quality", "Inspect retrieval quality through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/retrieval"), title: "Retrieval Quality" };
 
 export default function RetrievalPage() {
   return (

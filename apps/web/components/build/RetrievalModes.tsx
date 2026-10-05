@@ -17,19 +17,21 @@ import {
 const rdTone = (s: string): "emerald" | "amber" | "rose" | "slate" =>
   s === "Ready" ? "emerald" : s === "Partial" ? "amber" : s === "Missing" ? "rose" : "slate";
 
+const DEFAULT_BLOCKED = ["Raw customer PII export"];
+
 export function RetrievalModes() {
   const { state, mode: appMode, hydrated, update } = useProgram();
   // Mode-aware: demo uses the curated sample's exclusions, never the live list.
-  const blocked = (appMode === "demo" ? undefined : state.data?.handoff?.blockedSources) ?? ["Raw customer PII export"];
+  const blocked = (appMode === "demo" ? undefined : state.data?.handoff?.blockedSources) ?? DEFAULT_BLOCKED;
   const [sel, setSel] = useState<RetrievalMode>((state.rag?.retrievalMode as RetrievalMode) ?? "lexical");
 
-  const result = useMemo(() => runRetrieval(sel, blocked), [sel, blocked.join("|")]);
-  const comparison = useMemo(() => compareModes(blocked), [blocked.join("|")]);
-  const traces = useMemo(() => RETRIEVAL_MODES.map((m) => runRetrieval(m.id, blocked)), [blocked.join("|")]);
+  const result = useMemo(() => runRetrieval(sel, blocked), [sel, blocked]);
+  const comparison = useMemo(() => compareModes(blocked), [blocked]);
+  const traces = useMemo(() => RETRIEVAL_MODES.map((m) => runRetrieval(m.id, blocked)), [blocked]);
   const readiness = useMemo(() => vectorIndexReadiness({
     dataReadinessScore: state.data?.handoff?.dataReadinessScore ?? state.data?.readinessScore,
     blockedCount: blocked.length, hasHandoff: !!state.data?.handoff,
-  }), [state.data]);
+  }), [state.data, blocked.length]);
 
   const pickMode = (id: RetrievalMode) => {
     setSel(id);

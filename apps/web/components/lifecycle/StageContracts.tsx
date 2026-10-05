@@ -11,14 +11,14 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useProgramSource, buildDataReadinessHandoff, buildBuildOutputContract } from "@labs/program-core";
-import { Badge } from "@labs/design-system";
+import { Badge, Provenance } from "@labs/design-system";
 import { Database, Boxes, ArrowRight } from "lucide-react";
 import { LoadSampleInline } from "@/components/reviewer/SampleProgram";
 
 function Shell({ icon, eyebrow, to, children }: { icon: React.ReactNode; eyebrow: string; to?: { label: string; href: string }; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-line bg-white p-4 shadow-card">
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-slatey-500">{icon}{eyebrow}</div>
         {to && (
           <Link href={to.href} className="group inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary-dark">
@@ -78,6 +78,7 @@ export function DataHandoffCard() {
   }
   return (
     <Shell icon={<Database className="h-3.5 w-3.5" />} eyebrow="Data readiness handoff" to={{ label: "Build / RAG", href: "/build" }}>
+      <div className="mb-3"><Provenance mode={isDemo ? "Curated sample program" : "Computed browser program"} input={h.initiativeName || src.initiative?.name || "Current initiative"} method="Data readiness contract" note="Source names and readiness below belong to the program model. Inspect the Data corpus for actual file-level gates. Restrictions and unresolved work travel with this handoff." /></div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Data readiness" value={`${h.dataReadinessScore}/100`} />
         <Stat label="Ingestion-ready" value={`${h.ingestionReadyPercent}%`} />
@@ -88,6 +89,7 @@ export function DataHandoffCard() {
         <p className="mt-2 flex flex-wrap gap-1.5">{h.sensitivityRestrictions!.map((s) => <Badge key={s} tone="amber">{s}</Badge>)}</p>
       )}
       <p className="mt-2 text-xs leading-relaxed text-slatey-400"><b className="text-slatey-300">Recommendation:</b> {h.recommendation}</p>
+      <details className="mt-3 rounded-lg border border-line p-3"><summary className="cursor-pointer py-1 text-sm font-semibold">Sources and unresolved work</summary><div className="mt-3 grid gap-4 sm:grid-cols-2"><div><p className="text-xs font-semibold">Approved sources</p><ul className="mt-1 list-disc pl-4 text-sm text-slatey-400">{(h.approvedSources?.length ? h.approvedSources : ["No approved source recorded"]).map(source => <li key={source}>{source}</li>)}</ul></div><div><p className="text-xs font-semibold">Blocked or rejected</p><ul className="mt-1 list-disc pl-4 text-sm text-slatey-400">{([...new Set([...(h.blockedSources ?? []), ...(h.rejectedSources ?? [])])].length ? [...new Set([...(h.blockedSources ?? []), ...(h.rejectedSources ?? [])])] : ["No excluded source recorded"]).map(source => <li key={source}>{source}</li>)}</ul></div></div><p className="mt-3 text-xs font-semibold">Remediation to carry forward</p><ul className="mt-1 list-disc pl-4 text-sm text-slatey-400">{(h.remediationEntries ? (h.remediationEntries.some(entry => entry.status !== "fixed") ? h.remediationEntries.filter(entry => entry.status !== "fixed").map(entry => `${entry.status === "accepted-risk" ? "Accepted risk: " : "Open: "}${entry.finding} — ${entry.recommendation}`) : ["No unresolved remediation entry recorded"]) : h.remediationBacklog?.length ? h.remediationBacklog : h.knownDataRisks?.length ? h.knownDataRisks : ["No unresolved item recorded by this contract"]).map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}</ul></details>
     </Shell>
   );
 }
@@ -122,6 +124,7 @@ export function BuildContractCard() {
   const tone = rec.startsWith("Ready for") ? "emerald" : rec.startsWith("Ready with") ? "amber" : "rose";
   return (
     <Shell icon={<Boxes className="h-3.5 w-3.5" />} eyebrow="Build output contract" to={{ label: "Operate / AI Ops", href: "/deploy" }}>
+      <div className="mb-3"><Provenance mode={isDemo ? "Curated sample program" : "Computed browser program"} input={src.initiative?.name || "Current build settings"} method="Build output contract" note="This handoff includes modeled estimates and any saved evaluation metrics. Consult the original evaluator run for its actual provider, inputs and measured timings." /></div>
       {(() => { const dh = isDemo ? buildDataReadinessHandoff(src) : state.data?.handoff; return dh && <p className="mb-2 text-[11px] text-slatey-500">Consuming data readiness {dh.dataReadinessScore}/100 · retrieval {c.retrievalModeLabel ?? c.retrievalMode}</p>; })()}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Quality" value={`${c.qualityScore}/100`} />
@@ -134,6 +137,7 @@ export function BuildContractCard() {
         {(c.failedGates?.length ?? 0) > 0 && <span className="text-[11px] text-rose-600">{c.failedGates!.length} gate(s) failing</span>}
         <span className="text-[11px] text-slatey-400">{c.selectedModel} · {c.indexVersion}</span>
       </div>
+      <details className="mt-3 rounded-lg border border-line p-3"><summary className="cursor-pointer py-1 text-sm font-semibold">Gate evidence and remaining failure modes</summary><ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slatey-400">{[...(c.failedGates ?? []).map(gate => `Failing gate: ${gate}`), ...(c.knownFailureModes ?? [])].map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}</ul>{!c.failedGates?.length && !c.knownFailureModes?.length && <p className="mt-2 text-sm text-slatey-400">No failed gate or failure mode is recorded in this contract. That is not a production approval.</p>}<p className="mt-3 text-xs text-slatey-500">Dataset {c.datasetVersion || 'not recorded'} · Prompt {c.promptVersion || 'not recorded'} · Evaluation {c.evalRunId || 'not recorded'}</p></details>
     </Shell>
   );
 }

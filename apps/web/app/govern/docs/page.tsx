@@ -1,10 +1,12 @@
+import { routeMetadata } from "@/lib/site";
+export const metadata = routeMetadata("Governance documentation", "Inspect governance documentation through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/govern/docs");
 export default function Docs() {
   const sections = [
     {
       title: "Product Overview",
       content: `The Enterprise AI Governance Control Plane shows how enterprise GenAI and agentic systems can be registered, risk tiered, governed with policy as code, tested through red team evals, monitored at runtime, escalated to human reviewers, and exported as audit ready evidence.
 
-This is not a chatbot demo, it is the governance operating layer around enterprise AI, built for two audiences: executives who need risk posture and engineers who need inspectable controls. Use the Executive / Technical lens (top bar) to switch density.`
+The sample registry and browser models let executives inspect risk posture and engineers inspect controls. Use the Executive / Technical lens to switch density. Current-program release gates remain separate from the broader sample registry.`
     },
     {
       title: "Architecture",
@@ -35,7 +37,7 @@ Policies live as code in policies/*.yaml; red team suites in evals/*.json; contr
 7. Bias / Protected Class, blocks decisions based on protected attributes
 8. Citation Required, flags RAG answers lacking sources
 
-Detection is deterministic and rule based by default; an optional LLM classifier can be enabled per guardrail (GUARDRAIL_MODE=hybrid). Confidence is calibrated from the number of corroborating signals.`
+This hosted browser model uses deterministic rules. Its confidence values summarize modeled signals; they are not statistical calibration or a guarantee of safety. Backend-only options are separate from the browser implementation.`
     },
     {
       title: "Governance Decisions",
@@ -50,11 +52,11 @@ LOG_ONLY, allowed but flagged for audit`
     },
     {
       title: "Assurance & Evidence",
-      content: `Tamper evident audit, every event is SHA-256 hash chained; the Audit Log Explorer can re verify integrity and flag any altered entry.
-Red team evals, 8 suites / 64 cases run through the live pipeline, with run to run version comparison and a CI eval regression gate.
+      content: `Audit integrity, the static deployment exposes an embedded sample verification record. New browser-session events are inspectable but are not part of that sample hash chain. A connected backend may supply a fresh verification result.
+Red team evals, available suites exercise the rule pipeline. Inspect the run's cases and results; the browser sample does not retain evaluation run history for evidence reports.
 Framework mapping, every policy maps to NIST AI RMF 1.0, the EU AI Act, and ISO/IEC 42001.
-RBAC, Analyst / Reviewer / Auditor / Admin personas gate actions (separation of duties).
-Evidence, one click audit evidence reports with a completeness score.`
+RBAC, Analyst / Reviewer / Auditor / Admin personas demonstrate separation of duties in the browser. They are not authentication or a server authorization boundary.
+Evidence, drafts contain current case and policy snapshots plus event/review records in the requested period. Section coverage counts available records, not controls passed or compliance certification.`
     },
     {
       title: "Interactive Lab",
@@ -73,35 +75,35 @@ Board Brief, generate a screenshot ready one pager for the board.`
 4. Policy Workbench, open a policy; see the YAML and its framework mapping.
 5. Human Review Queue, switch role to Reviewer and action an item.
 6. Eval Lab, run a suite, then Compare runs.
-7. Audit Log Explorer, re verify the hash chain.
+7. Audit Log Explorer, inspect the available verification record and its scope.
 8. Board Brief, generate the one pager.`
     },
     {
       title: "Setup",
-      content: `One command (Docker):  docker compose up --build  → http://localhost:3000
+      content: `The hosted sample needs no API key. Start with a sample prompt in the Runtime Playground.
 
-Or run locally:
-  backend:  pip install -r requirements.txt && uvicorn app.main:app --reload
-  frontend: npm install && npm run dev
+For an optional real model response, open Model & connection, choose an OpenAI-compatible endpoint and enter your own model and key. The key remains in this browser's local storage and is sent to that endpoint. A failed call can fall back to a mock response; check the mode on the actual result.
 
-Static demo build (no backend):  NEXT_OUTPUT=export NEXT_PUBLIC_STATIC_DEMO=1 npm run build
-No API key required (AI_PROVIDER=mock by default).`
+Repository setup and the optional governance service are documented separately in the project's README and operating instructions.`
     },
   ];
 
   return (
-    <div className="p-8 max-w-3xl space-y-8">
+    <article className="p-4 sm:p-8 max-w-3xl space-y-8">
       <div>
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Reference</p>
         <h2 className="text-2xl font-bold text-slate-900 mt-1">Architecture Guide</h2>
-        <p className="text-sm text-slate-500 mt-1">Technical reference</p>
+        <p className="text-sm text-slate-500 mt-1">Follow a case from risk inputs to controls, review and evidence. Start with a sample, then use the reference sections below.</p>
+        <a href="/govern/playground" className="mt-4 inline-block rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">First task: run a sample governance check</a>
       </div>
-      {sections.map(s => (
-        <div key={s.title} className="bg-white border border-slate-200 rounded-xl p-6">
+      <nav aria-label="Architecture guide contents" className="rounded-xl border border-slate-200 bg-white p-4"><h3 className="font-semibold">On this page</h3><ol className="mt-3 grid gap-2 text-sm sm:grid-cols-2">{sections.map((section, index) => <li key={section.title}><a href={`#govern-doc-${index}`} className="text-primary underline">{section.title}</a></li>)}</ol></nav>
+      {sections.map((s, index) => (
+        <section id={`govern-doc-${index}`} key={s.title} className="scroll-mt-28 bg-white border border-slate-200 rounded-xl p-5 sm:p-6 print:break-inside-avoid">
           <h3 className="font-semibold text-slate-800 mb-3">{s.title}</h3>
-          <pre className="text-sm text-slate-600 whitespace-pre-wrap font-sans leading-relaxed">{s.content}</pre>
-        </div>
+          <div className="space-y-3 text-sm text-slate-600 leading-relaxed">{s.content.split('\n\n').map((paragraph, paragraphIndex) => <p key={paragraphIndex} className="whitespace-pre-line">{paragraph}</p>)}</div>
+        </section>
       ))}
-    </div>
+      <a href="/govern/playground" className="inline-block rounded py-2 text-sm font-semibold text-primary underline">Return to the Runtime Playground</a>
+    </article>
   );
 }

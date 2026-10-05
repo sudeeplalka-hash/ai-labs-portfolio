@@ -1,11 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Provenance } from '@labs/design-system';
+import { caseHref, caseContextHref, policyHref, evalSuiteHref } from '@gov/lib/navigation';
+import { useRole, can, roleLabel } from '@gov/lib/rbac';
+import { useSettings, isLiveModel } from '@gov/lib/settings';
 import { api } from '@gov/lib/api';
 import type { UseCase, PlaygroundResponse } from '@gov/lib/types';
 import { DecisionBadge, SeverityBadge } from '@gov/components/shared/Badge';
 import { LoadingSpinner } from '@gov/components/shared/LoadingSpinner';
-import { cn } from '@gov/lib/utils';
+import { cn, confidencePercent } from '@gov/lib/utils';
 import { useLens } from '@gov/lib/lens';
 import { PipelineFlow } from '@gov/components/playground/PipelineFlow';
 import { GUARDRAIL_LINKS } from '@gov/lib/evidence-links';
@@ -33,18 +37,25 @@ export default function Playground() {
   const [result, setResult] = useState<PlaygroundResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resultCaseId, setResultCaseId] = useState('');
+  const role = useRole();
+  const mayRun = can(role, 'playground:run');
+  const modelSettings = useSettings();
   const lens = useLens();
 
   useEffect(() => {
-    api.useCases.list().then(d => { setUseCases(d); if (d.length) setSelectedUC(d[0].id); });
+    let current = true;
+    api.useCases.list().then(d => { if (!current) return; setUseCases(d); const contextId = new URLSearchParams(window.location.search).get('case'); if (d.length) setSelectedUC(d.find(record => record.id === contextId)?.id ?? d[0].id); }).catch(() => { if (current) setError('The case registry could not load. Return to the registry to retry.'); });
+    return () => { current = false; };
   }, []);
 
   const run = async () => {
-    if (!prompt.trim() || !selectedUC) return;
+    if (!prompt.trim() || !selectedUC || !mayRun || loading) return;
     setLoading(true); setError(''); setResult(null);
     try {
       const r = await api.playground.run({ use_case_id: selectedUC, prompt });
       setResult(r);
+      setResultCaseId(selectedUC);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Request failed');
     } finally { setLoading(false); }
@@ -60,33 +71,36 @@ export default function Playground() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-8 space-y-6">
       <div>
         <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Runtime Testing</p>
         <h2 className="text-2xl font-bold text-slate-900 mt-1">Runtime Testing Playground</h2>
         <p className="text-sm text-slate-500 mt-1">Submit prompts and observe simulated guardrail decisions, trace, and audit events</p>
       </div>
+      <Provenance mode={process.env.NEXT_PUBLIC_STATIC_DEMO === '1' ? isLiveModel(modelSettings) ? 'Live response requested; deterministic local guardrails' : 'Deterministic browser example' : 'Governance API'} input="Selected registry case and entered prompt" note="The run result identifies the provider actually used. A provider request can fall back to a mock response. Browser-session events are separate from the embedded sample hash-chain verification." />
+      {!mayRun && <p id="playground-role-note" className="text-sm text-slate-500">{roleLabel(role)} can inspect this page. Running a check requires AI Analyst, Governance Reviewer or Administrator.</p>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input panel */}
         <div className="space-y-4">
           <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Use Case</label>
-              <select className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedUC} onChange={e => setSelectedUC(e.target.value)}>
+              <label htmlFor="playground-case" className="block text-xs font-semibold text-slate-600 mb-1">Use Case</label>
+              <select id="playground-case" disabled={loading} className="w-full border border-slate-200 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectedUC} onChange={e => { setSelectedUC(e.target.value); setResult(null); }}>
                 {useCases.map(uc => <option key={uc.id} value={uc.id}>{uc.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Prompt</label>
+              <label htmlFor="playground-prompt" className="block text-xs font-semibold text-slate-600 mb-1">Prompt</label>
               <textarea
+                id="playground-prompt" disabled={loading}
                 className="w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
                 placeholder="Enter a prompt to test…"
                 value={prompt}
-                onChange={e => setPrompt(e.target.value)}
+                onChange={e => { setPrompt(e.target.value); setResult(null); }}
               />
             </div>
-            <button onClick={run} disabled={loading || !prompt.trim()} className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 w-full justify-center">
+            <button onClick={run} disabled={loading || !prompt.trim() || !selectedUC || !mayRun} aria-describedby={!mayRun ? 'playground-role-note' : undefined} className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 w-full justify-center">
               <Play size={14} /> {loading ? 'Running governance pipeline…' : 'Run Governance Check'}
             </button>
           </div>
@@ -95,7 +109,7 @@ export default function Playground() {
             <p className="text-xs font-semibold text-slate-500 uppercase mb-3">Sample Prompts</p>
             <div className="space-y-1.5">
               {SAMPLE_PROMPTS.map(s => (
-                <button key={s.label} onClick={() => setPrompt(s.prompt)} className="w-full text-left px-3 py-2 text-xs text-slate-600 rounded border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-colors">
+                <button key={s.label} disabled={loading} onClick={() => { setPrompt(s.prompt); setResult(null); }} className="w-full text-left px-3 py-2 text-xs text-slate-600 rounded border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-colors">
                   {s.label}
                 </button>
               ))}
@@ -118,16 +132,17 @@ export default function Playground() {
             <>
               {/* Decision */}
               <div className={cn('border rounded-lg p-5', DECISION_BG[result.decision] || 'border-slate-200 bg-white')}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <DecisionBadge decision={result.decision} />
                     <SeverityBadge severity={result.severity} />
-                    <span className="text-xs text-slate-500">{result.confidence.toFixed(0)}% confidence</span>
+                    <span className="text-xs text-slate-500">{confidencePercent(result.confidence)} confidence</span>
                   </div>
-                  <span className="text-xs text-slate-400">{result.latency_ms.toFixed(0)}ms</span>
-                  {result.model_provider === 'live' && <span className="ml-2 text-[10px] font-semibold bg-emerald-100 text-emerald-700 rounded px-1.5 py-0.5">LIVE MODEL</span>}
+                  <span className="text-xs text-slate-400">{process.env.NEXT_PUBLIC_STATIC_DEMO === '1' ? 'Modeled latency' : 'Recorded latency'}: {result.latency_ms.toFixed(0)}ms</span>
+                  <span className="ml-2 text-xs font-semibold rounded bg-slate-100 px-2 py-1">{result.model_provider === 'live' ? 'Live provider response' : process.env.NEXT_PUBLIC_STATIC_DEMO === '1' ? 'Deterministic mock response' : `Provider: ${result.model_provider || 'not recorded'}`}</span>
                 </div>
                 <p className="text-sm text-slate-700">{result.decision_reason}</p>
+                <nav aria-label="Run source records" className="mt-3 flex flex-wrap gap-3 text-sm"><Link href={caseHref(resultCaseId)} className="text-primary underline">Case and controls</Link><Link href={caseContextHref('/govern/audit-logs', resultCaseId, result.prompt_event_id)} className="text-primary underline">Recorded event</Link>{result.review_item_id && <Link href={caseContextHref('/govern/review-queue', resultCaseId, result.prompt_event_id)} className="text-primary underline">Human review</Link>}</nav>
                 {result.triggered_policies.length > 0 && (
                   <p className="text-xs text-slate-500 mt-2">Policies: {result.triggered_policies.join(', ')}</p>
                 )}
@@ -151,7 +166,7 @@ export default function Playground() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-slate-700">{step.name}</span>
-                          <span className="text-xs text-slate-400">{step.duration_ms.toFixed(0)}ms</span>
+                          <span className="text-xs text-slate-400">{process.env.NEXT_PUBLIC_STATIC_DEMO === '1' ? 'Modeled ' : ''}{step.duration_ms.toFixed(0)}ms</span>
                         </div>
                         {step.details && <p className="text-xs text-slate-500 mt-0.5 truncate">{step.details}</p>}
                         {step.action && <span className="text-xs font-semibold text-orange-600">→ {step.action}</span>}
@@ -166,17 +181,17 @@ export default function Playground() {
                 <p className="text-xs font-semibold text-slate-500 uppercase mb-3">Guardrail Results</p>
                 <div className="space-y-2">
                   {result.guardrail_results.map(g => (
-                    <div key={g.guardrail_type} className={cn('flex items-center gap-3 px-3 py-2 rounded text-xs', g.triggered ? 'bg-red-50 border border-red-100' : 'bg-slate-50')}>
+                    <div key={g.guardrail_type} className={cn('flex flex-wrap items-center gap-3 px-3 py-2 rounded text-xs', g.triggered ? 'bg-red-50 border border-red-100' : 'bg-slate-50')}>
                       <span>{g.triggered ? '🔴' : '🟢'}</span>
                       <span className="font-medium text-slate-700 flex-1">{g.guardrail_name}</span>
                       {lens === 'tech' && g.triggered && g.metadata?.detector === 'hybrid' && <span className="text-[10px] font-semibold bg-indigo-100 text-indigo-700 rounded px-1.5 py-0.5">LLM</span>}
                       {g.triggered && <SeverityBadge severity={g.severity} />}
-                      {lens === 'tech' && g.triggered && <span className="text-slate-400 tabular-nums">{Math.round(g.confidence * 100)}%</span>}
+                      {lens === 'tech' && g.triggered && <span className="text-slate-400 tabular-nums">{confidencePercent(g.confidence)}</span>}
                       <span className="text-slate-500">{g.action}</span>
                       {g.triggered && GUARDRAIL_LINKS[g.guardrail_type] && (
                         <span className="flex items-center gap-2 ml-1">
-                          <Link href={`/policies?policy=${GUARDRAIL_LINKS[g.guardrail_type].policy}`} className="text-[10px] text-primary hover:underline">policy</Link>
-                          <Link href={`/evals?suite=${GUARDRAIL_LINKS[g.guardrail_type].evalCat}`} className="text-[10px] text-primary hover:underline">tests</Link>
+                          <Link href={policyHref(GUARDRAIL_LINKS[g.guardrail_type].policy, resultCaseId)} className="text-[10px] text-primary hover:underline">policy</Link>
+                          <Link href={evalSuiteHref(GUARDRAIL_LINKS[g.guardrail_type].evalCat, resultCaseId)} className="text-[10px] text-primary hover:underline">tests</Link>
                         </span>
                       )}
                     </div>

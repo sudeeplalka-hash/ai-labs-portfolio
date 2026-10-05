@@ -1,29 +1,61 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Info, X } from "lucide-react";
 import { cn } from "../lib/cn";
+import { Modal } from "./Modal";
 
-export function MetricTooltip({ text, className }: { text: string; className?: string }) {
+export function MetricTooltip({ text, label = "this metric", className }: { text: string; label?: string; className?: string }) {
   const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const [position, setPosition] = useState({ left: 8, top: 8 });
+  const [portal, setPortal] = useState<Element | null>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const tip = useRef<HTMLSpanElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const id = useId();
+  const show = () => { if (timer.current) clearTimeout(timer.current); setOpen(true); };
+  const leave = () => { if (!pinned) timer.current = setTimeout(() => setOpen(false), 160); };
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(() => {
+    if (!open) return;
+    setPortal(trigger.current?.closest("dialog") ?? document.body);
+    const place = () => {
+      const bounds = trigger.current?.getBoundingClientRect();
+      if (!bounds) return;
+      const width = Math.min(288, window.innerWidth - 24);
+      const height = tip.current?.getBoundingClientRect().height ?? 100;
+      setPosition({ left: Math.max(12, Math.min(window.innerWidth - width - 12, bounds.left + bounds.width / 2 - width / 2)), top: bounds.top - height - 8 >= 12 ? bounds.top - height - 8 : Math.min(bounds.bottom + 8, window.innerHeight - height - 12) });
+    };
+    place();
+    const frame = requestAnimationFrame(place);
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setOpen(false); setPinned(false); } };
+    const outside = (event: PointerEvent) => { if (!trigger.current?.contains(event.target as Node) && !tip.current?.contains(event.target as Node)) { setOpen(false); setPinned(false); } };
+    document.addEventListener("keydown", onKey, true);
+    document.addEventListener("pointerdown", outside);
+    window.addEventListener("resize", place);
+    window.addEventListener("scroll", place, true);
+    return () => { cancelAnimationFrame(frame); document.removeEventListener("keydown", onKey, true); document.removeEventListener("pointerdown", outside); window.removeEventListener("resize", place); window.removeEventListener("scroll", place, true); };
+  }, [open, text]);
   return (
     <span className={cn("relative inline-flex", className)}>
       <button
+        ref={trigger}
         type="button"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        onFocus={() => setOpen(true)}
-        onBlur={() => setOpen(false)}
-        className="text-slatey-500 transition-colors hover:text-slatey-300"
-        aria-label="More information"
+        onMouseEnter={show}
+        onMouseLeave={leave}
+        onFocus={show}
+        onBlur={leave}
+        onClick={() => { setPinned(!pinned); setOpen(!pinned); }}
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slatey-500 transition-colors hover:bg-primary-soft hover:text-primary"
+        aria-label={`About ${label}`}
+        aria-describedby={id}
       >
-        <Info className="h-3.5 w-3.5" />
+        <Info aria-hidden className="h-4 w-4" />
       </button>
-      {open && (
-        <span className="absolute bottom-full left-1/2 z-30 mb-2 w-56 -translate-x-1/2 rounded-lg border border-line bg-white px-3 py-2 text-xs leading-relaxed text-slatey-300 shadow-card">
-          {text}
-        </span>
-      )}
+      <span id={id} className="sr-only">{text}</span>
+      {open && portal && createPortal(<span ref={tip} role="tooltip" aria-hidden="true" onMouseEnter={show} onMouseLeave={leave} style={position} className="fixed z-[100] max-h-[70dvh] w-72 max-w-[calc(100vw-24px)] overflow-y-auto rounded-lg border border-line bg-white px-3 py-2.5 text-sm leading-relaxed text-slatey-300 shadow-card">{text}</span>, portal)}
     </span>
   );
 }
@@ -36,24 +68,36 @@ export function Tabs({
   className?: string;
 }) {
   const [active, setActive] = useState(tabs[0]?.id);
+  const groupId = useId();
+  const selected = tabs.some((tab) => tab.id === active) ? active : tabs[0]?.id;
   return (
     <div className={className}>
-      <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-line bg-white p-1">
-        {tabs.map((t) => (
+      <div role="tablist" aria-label="Views" className="mb-4 flex flex-wrap gap-1 rounded-lg border border-line bg-white p-1">
+        {tabs.map((t, index) => (
           <button
             key={t.id}
+            type="button"
+            role="tab"
+            id={`${groupId}-tab-${t.id}`}
+            aria-controls={`${groupId}-panel-${t.id}`}
+            tabIndex={selected === t.id ? 0 : -1}
             onClick={() => setActive(t.id)}
-            aria-pressed={active === t.id}
+            aria-selected={selected === t.id}
+            onKeyDown={(event) => {
+              const next = event.key === "ArrowRight" ? (index + 1) % tabs.length : event.key === "ArrowLeft" ? (index + tabs.length - 1) % tabs.length : event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : -1;
+              if (next < 0) return;
+              event.preventDefault(); setActive(tabs[next].id); document.getElementById(`${groupId}-tab-${tabs[next].id}`)?.focus();
+            }}
             className={cn(
               "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              active === t.id ? "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25" : "text-slatey-400 hover:text-ink",
+              selected === t.id ? "bg-primary/10 text-primary ring-1 ring-inset ring-primary/25" : "text-slatey-400 hover:text-ink",
             )}
           >
             {t.label}
           </button>
         ))}
       </div>
-      <div>{tabs.find((t) => t.id === active)?.content}</div>
+      {tabs.map((tab) => <div key={tab.id} role="tabpanel" id={`${groupId}-panel-${tab.id}`} aria-labelledby={`${groupId}-tab-${tab.id}`} tabIndex={0} hidden={selected !== tab.id}>{selected === tab.id ? tab.content : null}</div>)}
     </div>
   );
 }
@@ -76,15 +120,16 @@ export function SectionTabs({
   className?: string;
 }) {
   return (
-    <nav
+    <div role="group"
       className={cn("flex flex-wrap items-center gap-1.5 rounded-xl border border-line bg-white p-2 shadow-card", className)}
       aria-label="Sections"
     >
       {tabs.map((t) => (
         <button
           key={t.key}
+          type="button"
           onClick={() => onChange(t.key)}
-          aria-current={active === t.key ? "page" : undefined}
+          aria-pressed={active === t.key}
           className={cn(
             "rounded-md px-3 py-1.5 text-xs font-semibold transition-colors",
             active === t.key
@@ -95,7 +140,7 @@ export function SectionTabs({
           {t.label}
         </button>
       ))}
-    </nav>
+    </div>
   );
 }
 
@@ -107,25 +152,14 @@ export function Drawer({
 }: {
   open: boolean; onClose: () => void; title: string; children: React.ReactNode;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = ""; window.removeEventListener("keydown", onKey); };
-  }, [open, onClose]);
-  if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-ink/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div role="dialog" aria-label={title} className="animate-fade-in absolute right-0 top-0 flex h-full w-full max-w-sm flex-col border-l border-line bg-white shadow-2xl">
+    <Modal open={open} onClose={onClose} title={title} className="p-0" panelClassName="absolute right-0 top-0 flex h-[100dvh] w-full max-w-md flex-col border-l border-line bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
-          <p className="text-sm font-semibold text-ink">{title}</p>
-          <button onClick={onClose} aria-label="Close" className="rounded-md p-1 text-slatey-400 transition-colors hover:bg-slate-100 hover:text-ink"><X className="h-4 w-4" /></button>
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
+          <button type="button" onClick={onClose} aria-label={`Close ${title}`} className="rounded-md p-2 text-slatey-400 transition-colors hover:bg-slate-100 hover:text-ink"><X className="h-5 w-5" /></button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
-      </div>
-    </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">{children}</div>
+    </Modal>
   );
 }
 

@@ -1,9 +1,11 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { Boxes } from "lucide-react";
 import { PageIntro } from "@labs/design-system";
 import { UnderTheHood } from "@/components/build/UnderTheHood";
 
-export const metadata: Metadata = { title: "Under the Hood" };
+export const metadata: Metadata = {
+  ...routeMetadata("Under the Hood", "Inspect under the hood through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/internals"), title: "Under the Hood" };
 
 export default function Page() {
   return (

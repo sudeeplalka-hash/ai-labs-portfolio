@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Compass, Database, Boxes, Rocket, ShieldCheck, TrendingUp, RefreshCcw, ArrowRight, Workflow, BookOpen, type LucideIcon,
 } from "lucide-react";
-import { Badge } from "@labs/design-system";
+import { Badge, DecisionSummary, Provenance } from "@labs/design-system";
 import { STAGES, useProgram, selectStageHeadlines, type StageKey, type StageHeadline } from "@labs/program-core";
 import { ContractLoop, ReviewerLinks } from "@/components/reviewer/Reviewer";
 import { LoadSampleButton } from "@/components/reviewer/SampleProgram";
@@ -35,6 +35,8 @@ export function Home() {
   const { state, hydrated } = useProgram();
   const framed = state.progress.frame === "done" && state.initiative.name;
   const live = useMemo(() => (hydrated ? liveLines(selectStageHeadlines(state)) : {}), [hydrated, state]);
+  const nextStage = STAGES.find((stage) => state.progress[stage.key] !== "done" && state.progress[stage.key] !== "locked") ?? STAGES[STAGES.length - 1];
+  const completed = STAGES.filter((stage) => state.progress[stage.key] === "done").length;
 
   return (
     <div className="space-y-8">
@@ -62,6 +64,13 @@ export function Home() {
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
+      </div>
+
+      <div className="space-y-3">
+        <Provenance mode="Interactive browser model" input="Current initiative saved in this browser" method="Seven stage contracts, sample or user-entered inputs" note="Stage outputs are demonstrations and planning estimates. They do not represent a production deployment or a completed external approval." />
+        <DecisionSummary label="Program checkpoint" title={framed ? state.initiative.name : "Make one initiative concrete"}
+          explanation={framed ? `${completed} of ${STAGES.length} stage checkpoints are marked done. Continue with ${nextStage.label.toLowerCase()} and inspect the evidence for the next decision.` : "Load the sample to inspect a complete example, or begin with the strategy workshop to define your own problem and constraints."}
+          nextAction={<Link href={nextStage.href} className="font-semibold underline underline-offset-2">{framed ? `Continue: ${nextStage.label}` : "Start the strategy workshop"}</Link>} />
       </div>
 
       {/* The seven stages, one pane: loop framing + lab cards + collapsible contract loop */}

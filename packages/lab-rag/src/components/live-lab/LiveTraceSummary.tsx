@@ -1,3 +1,4 @@
+import { CopyButton } from "@labs/design-system";
 import { ScrollText, UserCheck } from "lucide-react";
 import { Panel } from "@rag/components/common/Panel";
 import { SectionHeader } from "@rag/components/common/SectionHeader";
@@ -24,7 +25,7 @@ export function LiveTraceSummary({ trace }: { trace: LiveRagLabTrace | null }) {
     { label: "Answer engine", value: trace.generatedAnswer.engineLabel ?? (trace.generatedAnswer.mode === "llm" ? "LLM" : "Simulated") },
     { label: "Citations generated", value: String(trace.generatedAnswer.citations.length) },
     { label: "Evaluation completed", value: "Yes" },
-    { label: "Latency", value: `${trace.latencyMs}ms` },
+    { label: "Recorded stage time", value: `${trace.latencyMs}ms` },
     { label: "Estimated cost", value: `$${trace.estimatedCost.toFixed(5)}` },
   ];
 
@@ -36,7 +37,7 @@ export function LiveTraceSummary({ trace }: { trace: LiveRagLabTrace | null }) {
         icon={ScrollText}
       />
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-100 bg-navy-850/40 p-3">
-        <span className="font-mono text-[11px] text-slatey-500">{trace.id}</span>
+        <span className="break-all font-mono text-[11px] text-slatey-500">{trace.id}</span>
         <div className="flex items-center gap-2">
           <EngineBadge mode={trace.generatedAnswer.mode} label={trace.generatedAnswer.engineLabel} />
           {e.humanReviewRequired && (
@@ -47,11 +48,11 @@ export function LiveTraceSummary({ trace }: { trace: LiveRagLabTrace | null }) {
           <GateBadge status={e.qualityGateStatus} />
         </div>
       </div>
-      <dl className="divide-y divide-line">
+      <p className="mb-3 text-xs text-slatey-400">New runs measure computation only. Older saved runs may include presentation waits. Estimated cost is modeled, not a provider invoice.</p><CopyButton text={JSON.stringify(trace,null,2)} label="Copy this trace" /><dl className="divide-y divide-line">
         {rows.map((r) => (
           <div key={r.label} className="flex items-start justify-between gap-4 py-1.5">
             <dt className="text-sm text-slatey-500">{r.label}</dt>
-            <dd className="max-w-[65%] text-right text-sm font-medium text-slatey-300">{r.value}</dd>
+            <dd className="max-w-[65%] break-words text-right text-sm font-medium text-slatey-300">{r.value}</dd>
           </div>
         ))}
       </dl>

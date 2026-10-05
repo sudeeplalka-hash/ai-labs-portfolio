@@ -1,7 +1,9 @@
+import { routeMetadata } from "@/lib/site";
 import { PageIntro } from "@rag/components/common/PageIntro";
 import { TracesWorkspace } from "@rag/components/traces/TracesWorkspace";
 
-export const metadata = { title: "Query Trace Explorer" };
+export const metadata = {
+  ...routeMetadata("Query Trace Explorer", "Inspect query trace explorer through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/build/traces"), title: "Query Trace Explorer" };
 
 export default function TracesPage() {
   return (

@@ -1,8 +1,10 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { TrendingUp, Coins, GitBranch, SlidersHorizontal, Banknote, FileText } from "lucide-react";
 import { LabGuide } from "@/components/shell/LabGuide";
 
-export const metadata: Metadata = { title: "Guide · Realize" };
+export const metadata: Metadata = {
+  ...routeMetadata("Guide \u00b7 Realize", "Inspect guide \u00b7 realize through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/realize/guide"), title: "Guide · Realize" };
 
 export default function Page() {
   return (

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DecisionSummary, Provenance } from "@labs/design-system";
+import { OptionalProjector } from "./OptionalProjector";
 import { Info, Loader2, FileCheck2, RotateCcw, Layers, CheckCircle2, AlertTriangle, XCircle, Circle, Sparkles, Cpu, Settings2 } from "lucide-react";
 import { Panel } from "@rag/components/common/Panel";
 import { SectionHeader } from "@rag/components/common/SectionHeader";
@@ -14,7 +16,7 @@ import { LiveMetricsPanel } from "./LiveMetricsPanel";
 import { LiveTraceSummary } from "./LiveTraceSummary";
 import { LiveTraceHistory } from "./LiveTraceHistory";
 import { QualityVerdictBanner } from "./QualityVerdictBanner";
-import { EmbeddingProjectorPanel } from "./EmbeddingProjectorPanel";
+
 import { TokenExplorer } from "./TokenExplorer";
 import { TokenKpiStrip } from "./TokenKpiStrip";
 import { analyzeTokens } from "@rag/lib/live-lab/tokenAnalysis";
@@ -35,7 +37,6 @@ import { aggregateLiveMetrics, loadStoredTraces, saveStoredTraces, clearStoredTr
 import type { DocumentChunk, LiveLabDocument, LiveRagLabTrace, LiveTraceStep, RetrievedLiveChunk } from "@rag/types/liveLab";
 import { cn } from "@rag/lib/cn";
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const INITIAL_STEPS: LiveTraceStep[] = [
   { step: "Document received", status: "Pending", durationMs: 0, explanation: "" },
@@ -83,14 +84,20 @@ export function LiveLabView() {
   };
 
   const latestTrace = traces[0] ?? null;
-  const activeTrace = traces.find((t) => t.id === selectedTraceId) ?? latestTrace;
+  const selectedTrace = traces.find((t) => t.id === selectedTraceId) ?? null;
+  // A new document starts without a verdict. History remains explicitly
+  // inspectable, including after reload when the source document is not loaded.
+  const documentTrace = doc ? traces.find((t) => t.documentId === doc.id) ?? null : null;
+  const activeTrace = selectedTrace ?? documentTrace ?? (doc ? null : latestTrace);
+  const historicalTrace = !!activeTrace && activeTrace.documentId !== doc?.id;
   const retrieved = activeTrace?.retrievedChunks ?? [];
+  const documentRetrieved = historicalTrace ? [] : retrieved;
 
   const metrics = useMemo(() => aggregateLiveMetrics(traces), [traces]);
   const previousMetrics = useMemo(() => (traces.length > 1 ? aggregateLiveMetrics(traces.slice(1)) : null), [traces]);
   const tokenAnalysis = useMemo(
-    () => (activeTrace && doc ? analyzeTokens(activeTrace, doc.estimatedTokens) : null),
-    [activeTrace, doc],
+    () => (activeTrace && doc && !historicalTrace ? analyzeTokens(activeTrace, doc.estimatedTokens) : null),
+    [activeTrace, doc, historicalTrace],
   );
   const sampleQuestions = useMemo(() => {
     if (!doc) return [];
@@ -108,32 +115,28 @@ export function LiveLabView() {
     flash("Parsing, chunking, and indexing…");
 
     updateStep(0, { status: "Running" });
-    await sleep(150);
-    updateStep(0, { status: "Complete", durationMs: 6, explanation: "Document accepted.", technicalDetail: `${document.characterCount.toLocaleString()} chars, ~${document.estimatedTokens.toLocaleString()} tokens.` });
+    updateStep(0, { status: "Complete", durationMs: 0, explanation: "Document accepted.", technicalDetail: `${document.characterCount.toLocaleString()} chars, ~${document.estimatedTokens.toLocaleString()} tokens.` });
 
     updateStep(1, { status: "Running" });
-    await sleep(170);
     if (document.characterCount < MIN_CHARS) {
-      updateStep(1, { status: "Failed", durationMs: 8, explanation: "Too short to demonstrate retrieval.", technicalDetail: `Only ${document.characterCount} characters.` });
+      updateStep(1, { status: "Failed", durationMs: 0, explanation: "Too short to demonstrate retrieval.", technicalDetail: `Only ${document.characterCount} characters.` });
       setIsProcessing(false);
       flash("That document is too short. Try a longer policy, report, or article.");
       return;
     }
-    updateStep(1, { status: "Complete", durationMs: 11, explanation: "Whitespace normalized; structure detected." });
+    updateStep(1, { status: "Complete", durationMs: 0, explanation: "Whitespace normalized; structure detected." });
 
     updateStep(2, { status: "Running" });
     const t0 = performance.now();
     const created = chunkDocument(document);
-    const chunkMs = Math.max(8, Math.round(performance.now() - t0));
-    await sleep(210);
+    const chunkMs = Number((performance.now() - t0).toFixed(2));
     setChunks(created);
     updateStep(2, { status: "Complete", durationMs: chunkMs, explanation: `Split into ${created.length} chunks.`, technicalDetail: "Sentence aware chunking, 700 char target, 120 overlap." });
 
     updateStep(3, { status: "Running" });
-    await sleep(150);
-    updateStep(3, { status: "Complete", durationMs: 9, explanation: "Indexed for BM25 retrieval.", technicalDetail: "Local BM25 index. Swap in embeddings / a vector DB later." });
+    updateStep(3, { status: "Complete", durationMs: 0, explanation: "Chunks ready for retrieval.", technicalDetail: "BM25 scoring is computed when a question is asked; no separate index timing is measured." });
 
-    updateStep(4, { status: "Complete", durationMs: 1, explanation: "Ready for questions." });
+    updateStep(4, { status: "Complete", durationMs: 0, explanation: "Ready for questions." });
     setReady(true);
     setIsProcessing(false);
     flash(`Ready, ${created.length} chunks. Ask a question on the right.`);
@@ -159,6 +162,7 @@ export function LiveLabView() {
     }
     setLoadError(null);
     const document = makeDocument(name, text, sourceType, fileType);
+    setSelectedTraceId(null);
     setDoc(document);
     runPipeline(document);
   };
@@ -183,6 +187,7 @@ export function LiveLabView() {
     if (!sample) return;
     setLoadError(null);
     const document = makeDocument(sample.name, sample.rawText, "sample", sample.fileType);
+    setSelectedTraceId(null);
     setDoc(document);
     runPipeline(document);
   };
@@ -197,13 +202,13 @@ export function LiveLabView() {
   };
 
   async function onAsk(question: string) {
-    if (!doc || !ready) return;
+    if (!doc || !ready || isAnswering) return;
+    try {
     setIsAnswering(true);
     setQueryStage("retrieving");
     const tR = performance.now();
     const retrievedChunks: RetrievedLiveChunk[] = getRetriever("lexical").retrieve(question, chunks, DEFAULT_TOP_K);
-    await sleep(450);
-    const retrieveMs = Math.max(40, Math.round(performance.now() - tR));
+    const retrieveMs = Number((performance.now() - tR).toFixed(2));
 
     setQueryStage("generating");
     const tG = performance.now();
@@ -222,18 +227,16 @@ export function LiveLabView() {
       }
     } else {
       answer = await getAnswerGenerator().generateAnswer({ question, retrievedChunks });
-      await sleep(520);
     }
     answer = { ...answer, engineLabel };
     const withUsage = retrievedChunks.map((c) => ({ ...c, usedInAnswer: answer.citations.includes(c.citationLabel) }));
-    const generateMs = Math.max(120, Math.round(performance.now() - tG));
+    const generateMs = Number((performance.now() - tG).toFixed(2));
 
     setQueryStage("evaluating");
     const tE = performance.now();
     const evaluation = evaluateLiveAnswer(question, withUsage, answer);
     const cost = estimateCost(question, withUsage, answer.answer);
-    await sleep(430);
-    const evaluateMs = Math.max(60, Math.round(performance.now() - tE));
+    const evaluateMs = Number((performance.now() - tE).toFixed(2));
 
     const trace = buildLiveTrace({
       documentId: doc.id,
@@ -251,6 +254,9 @@ export function LiveLabView() {
     setQueryStage(null);
     setIsAnswering(false);
     flash(`Quality gate: ${evaluation.qualityGateStatus}. Metrics updated below.`);
+    } catch {
+      flash("The question could not be evaluated. Your document and question are retained; try again or choose a sample question.");
+    } finally { setQueryStage(null); setIsAnswering(false); }
   }
 
   const onSaveEngine = (e: Engine, cfg: LlmConfig | null) => {
@@ -276,10 +282,12 @@ export function LiveLabView() {
 
   return (
     <div className="space-y-6">
+      <DecisionSummary label={historicalTrace ? `Saved run · ${activeTrace?.documentName}` : "Ask → Evidence → Verdict"} title={activeTrace ? `${historicalTrace ? "Saved run quality gate" : "Quality gate"}: ${activeTrace.evaluation.qualityGateStatus}` : ready ? "Your document is ready. Ask a specific question." : "Start with a sample or your own document."} explanation={activeTrace ? activeTrace.evaluation.evaluatorSummary : "Inspect the source passages behind each answer, then decide whether the evidence supports it."} nextAction={activeTrace ? <a href="#rag-evidence" className="underline">Inspect cited evidence ↓</a> : undefined} />
+      <Provenance mode={(activeTrace?.generatedAnswer.mode ?? engine) === "llm" ? "API answer engine · local evaluation" : "Simulated answer · real local retrieval"} input={activeTrace ? `${historicalTrace ? "Saved run" : "Current document"}: ${activeTrace.documentName}` : doc ? `${doc.sourceType}: ${doc.name}` : "No document loaded"} method="BM25 retrieval and heuristic evaluation. Computation times exclude presentation delays; displayed costs are estimates." />
       {toast && (
         <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/[0.06] px-3.5 py-2 text-sm text-ink">
           {isProcessing || isAnswering ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" /> : <Info className="h-4 w-4 shrink-0 text-primary" />}
-          <span>{toast}</span>
+          <span role="status">{toast}</span>
         </div>
       )}
 
@@ -287,7 +295,7 @@ export function LiveLabView() {
       <AnswerEnginePanel engine={engine} config={llmConfig} onSave={onSaveEngine} onClear={onClearEngine} />
 
       {/* PRIMARY: document + chat side by side */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         {!doc ? (
           <DocumentIntakePanel
             document={null}
@@ -308,8 +316,10 @@ export function LiveLabView() {
           isAnswering={isAnswering}
           queryStage={queryStage}
           sampleQuestions={sampleQuestions}
-          latestQuestion={latestTrace?.question}
-          latestAnswer={latestTrace?.generatedAnswer}
+          latestQuestion={activeTrace?.question}
+          latestAnswer={activeTrace?.generatedAnswer}
+          historicalDocument={historicalTrace ? activeTrace?.documentName : undefined}
+          currentDocument={doc?.name}
           onAsk={onAsk}
         />
       </div>
@@ -319,23 +329,23 @@ export function LiveLabView() {
       {traces.length > 0 && <LiveMetricsPanel metrics={metrics} previous={previousMetrics} />}
 
       {/* PROJECTOR */}
-      {chunks.length > 0 && <EmbeddingProjectorPanel chunks={chunks} trace={activeTrace} />}
+
 
       {/* BEHIND THE SCENES */}
-      {chunks.length > 0 && (
+      {(chunks.length > 0 || activeTrace) && (
         <div>
           <SectionHeader title="Behind the scenes" description="Retrieved evidence, document chunks, and the processing steps." icon={Layers} />
           <div className="space-y-6">
             {activeTrace && (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <RetrievedEvidencePanel chunks={retrieved} />
+              <div className="grid min-w-0 gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+                <div id="rag-evidence" className="min-w-0 scroll-mt-24"><RetrievedEvidencePanel chunks={retrieved} /></div>
                 <EvaluatorFeedbackPanel evaluation={activeTrace.evaluation} />
               </div>
             )}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <ChunkExplorer chunks={chunks} retrieved={retrieved} />
+            {chunks.length > 0 && <div className="grid min-w-0 gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+              <ChunkExplorer chunks={chunks} retrieved={documentRetrieved} />
               <ProcessingTimeline steps={steps} />
-            </div>
+            </div>}
             {tokenAnalysis && (
               <div className="space-y-4">
                 <TokenKpiStrip analysis={tokenAnalysis} />
@@ -346,6 +356,8 @@ export function LiveLabView() {
           </div>
         </div>
       )}
+
+      {chunks.length > 0 && <OptionalProjector chunks={chunks} trace={historicalTrace ? null : activeTrace} />}
 
       {/* HISTORY */}
       {traces.length > 0 && (

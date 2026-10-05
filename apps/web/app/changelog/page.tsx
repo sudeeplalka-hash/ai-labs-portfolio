@@ -1,16 +1,24 @@
-import type { Metadata } from "next";
+import { routeMetadata, BUILD_ID, EXPERIENCE_REVISION } from "@/lib/site";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Panel, Badge } from "@labs/design-system";
 
-export const metadata: Metadata = {
-  title: "Changelog",
-  description: "What's shipped and what's next on the AI delivery portfolio, dated and honest.",
-};
+export const metadata = routeMetadata("Changelog", "Dated changes to the portfolio, with links to the working instruments and the source build identity.", "/changelog");
 
-interface Entry { date: string; tag: string; tone: "emerald" | "blue" | "amber"; title: string; items: string[] }
+interface Entry { date: string; tag: string; tone: "emerald" | "blue" | "amber"; title: string; items: (string | { text: string; href: string })[] }
 
 const ENTRIES: Entry[] = [
+  {
+    date: "2026-10", tag: "Experience", tone: "emerald", title: "Decision-first instruments and accessible comparison",
+    items: [
+      { text: "Portfolio allocation now includes a pinned baseline, recommendation changes and funding deltas for each initiative.", href: "/business/portfolio" },
+      { text: "ROI includes an exact discounted-cash-flow change receipt, precise inputs and keyboard access from sensitivity rows to assumptions.", href: "/business/roi-builder" },
+      { text: "Adoption separates current scores from a controlled projection of planned interventions, with before-and-after values.", href: "/engagement/adoption" },
+      { text: "Capacity, talent and onboarding rows adapt to narrow screens. Onboarding timeline segments now match the model's excess-access-delay formula.", href: "/engagement/onboarding" },
+      { text: "The family instruments expose scenario links, decision evidence and simulation provenance. Playback has pause, step and reduced-motion behavior.", href: "/engagement/stakeholders" },
+      { text: "The roadmap links available capabilities to their working pages and separates future production integrations.", href: "/roadmap" },
+    ],
+  },
   {
     date: "2026-07", tag: "Data", tone: "emerald", title: "Corpus Intelligence: from file scorer to corpus operating tool",
     items: [
@@ -57,13 +65,8 @@ const ENTRIES: Entry[] = [
     ],
   },
   {
-    date: "Next", tag: "Roadmap", tone: "amber", title: "In flight",
-    items: [
-      "Genuine LIVE calls on the flagship agent labs (once the deploy host is set).",
-      "Use Case Layer: 3 real world, cross industry scenarios per lab plus an Industry Atlas.",
-      "Collection index pages (the toolkit / gallery / control room structures).",
-      "Shareability and accessibility: per lab OG images, sitemap, full accessibility pass.",
-    ],
+    date: "Future", tag: "Roadmap", tone: "amber", title: "Production integrations",
+    items: [{ text: "External retrieval, durable cross-device history, production telemetry and realized-benefits reconciliation remain future integration work.", href: "/roadmap" }],
   },
 ];
 
@@ -79,18 +82,18 @@ export default function Page() {
       <main className="mx-auto max-w-3xl px-4 py-8 md:px-5">
         <p className="eyebrow mb-1">Building in public</p>
         <h1 className="text-2xl font-semibold tracking-tight text-ink">Changelog</h1>
-        <p className="mt-2 text-sm leading-relaxed text-slatey-400">Dated and honest: what&apos;s shipped, what&apos;s corrected, and what&apos;s next. A fuller engineering log lives in the repo&apos;s <span className="font-mono text-[13px]">BUILD-LOG.md</span>.</p>
+        <p className="mt-3 rounded-lg border border-line bg-white p-3 text-xs text-slatey-500">Experience revision {EXPERIENCE_REVISION} · build {BUILD_ID}. Release dates describe source changes; data verification dates stay attached to each instrument.</p><p className="mt-2 text-sm leading-relaxed text-slatey-400">Dated and honest: what&apos;s shipped, what&apos;s corrected, and what&apos;s next. A fuller engineering log lives in the repo&apos;s <span className="font-mono text-[13px]">BUILD-LOG.md</span>.</p>
         <div className="mt-6 space-y-4">
           {ENTRIES.map((e, i) => (
             <Panel key={i}>
-              <div className="mb-2 flex items-center gap-2">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
                 <Badge tone={e.tone}>{e.tag}</Badge>
                 <span className="font-mono text-xs text-slatey-500">{e.date}</span>
                 <h2 className="text-sm font-semibold text-ink">{e.title}</h2>
               </div>
               <ul className="space-y-1.5 text-sm text-slatey-300">
                 {e.items.map((it, j) => (
-                  <li key={j} className="flex gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slatey-500" /><span className="leading-relaxed">{it}</span></li>
+                  <li key={j} className="flex gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slatey-500" /><span className="leading-relaxed">{typeof it === "string" ? it : <Link href={it.href} className="text-primary underline decoration-primary/30 underline-offset-4">{it.text}</Link>}</span></li>
                 ))}
               </ul>
             </Panel>

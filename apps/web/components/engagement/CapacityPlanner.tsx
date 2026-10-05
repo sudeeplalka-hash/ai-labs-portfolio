@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, KpiCard, LiveBadge, FreshnessStamp, InsightCard } from "@labs/design-system";
 import { EL03_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 
 type Res = "none" | "hire" | "contract" | "upskill";
@@ -30,7 +31,7 @@ const SKILLS: Skill[] = [
 
 const LEAD: Record<Exclude<Res, "none">, number> = { hire: 6, contract: 1, upskill: 4 }; // weeks
 const RATE: Record<Exclude<Res, "none">, number> = { hire: 18, contract: 28, upskill: 8 }; // $k / FTE / month
-const RES_OPTS: Res[] = ["hire", "contract", "upskill"];
+const RES_OPTS: Exclude<Res, "none">[] = ["hire", "contract", "upskill"];
 const BASE_WEEKS = 20;
 const BASE_MONTHLY = 30 * 16; // $k (30 FTE × $16k loaded)
 
@@ -54,6 +55,7 @@ export function CapacityPlanner() {
     return { ...s, gap, r, effCap, util };
   });
 
+  const utilizationScale = Math.max(1.5, ...rows.map((row) => row.demand / row.capacity));
   const gapRows = rows.filter((r) => r.gap > 0);
   let slip = 0;
   let addedCost = 0;
@@ -63,36 +65,27 @@ export function CapacityPlanner() {
   }
   const deliveryWeeks = baseWeeks + slip;
   const monthly = baseMonthly + addedCost;
-  const unresolved = gapRows.filter((r) => r.r === "none").length;
-  const totalGap = skills.reduce((a, s) => a + Math.max(0, s.demand - s.capacity), 0);
-  const bottleneck = [...gapRows].sort((a, b) => b.demand / b.capacity - a.demand / a.capacity)[0];
+  const unresolvedRows = gapRows.filter((r) => r.r === "none");
+  const unresolved = unresolvedRows.length;
+  const totalGap = unresolvedRows.reduce((total, row) => total + row.gap, 0);
+  const bottleneck = [...unresolvedRows].sort((a, b) => b.demand / b.capacity - a.demand / a.capacity)[0];
+
+  const savedState = { res };
+  const scenarioLink = useScenarioLink({ id: "EL-03", state: savedState, activeId: activeUcId,
+    restore: (s) => { setRes(s.res); },
+    validate: (v): v is typeof savedState => validateScenario(v, { res: (v) => recordOf(v, ["none","hire","contract","upskill"]) }),
+  });
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-03</span>
-        </div>
-      </header>
+    <InstrumentShell title="Capacity and skills coverage" eyebrow="Operating model & engagement" description="Resolve the specific skill gap and see the schedule and cost consequence."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-03" }]}
+      decision={<DecisionSummary title={unresolved ? `${unresolved} skill gaps still need a decision` : "Every skill gap has a modeled resolution"} explanation={`Delivery ${deliveryWeeks} weeks (${slip} beyond plan); monthly cost $${monthly}k, including $${addedCost}k in added capacity.`} nextAction={bottleneck ? `Start with ${bottleneck.label}; choose hire, contract or upskill for each gap.` : "Review the available capacity against your delivery priorities."} tone={unresolved ? "caution" : "positive"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL03_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="AI portfolios require the right mix of ML engineering, data engineering, platform, delivery, domain, and evaluation capacity. A raw headcount view hides the bottlenecks that delay delivery." approach="The planner maps demand and capacity by skill pool, highlights overallocation, and models the effect of hire, contract, and upskill actions on cost and schedule." why="This connects AI delivery plans to workforce strategy, capacity planning, budget, schedule confidence, and execution risk." metric="Utilization versus target; skill coverage gaps against demand." tradeoff="Hiring is slow and costly; contracting is fast but thin; upskilling is sticky but takes time." outcome="A hire/contract/upskill call per gap, with the date and cost impact." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Capacity and Skills Coverage Planner</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            {activeUc ? activeUc.oneLiner : "A team can look staffed and still be under capable for the work ahead."} The heatmap shows where the portfolio is overallocated;
-            the toggles show what hire, contract, or upskill each does to the date and the cost.{!activeUc && " This one is personal, it mirrors a 31 resource intelligence mapping I ran."}
-          </p>
-        </div>
-
-        <UseCaseRail useCases={EL03_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="AI portfolios require the right mix of ML engineering, data engineering, platform, delivery, domain, and evaluation capacity. A raw headcount view hides the bottlenecks that delay delivery." approach="The planner maps demand and capacity by skill pool, highlights overallocation, and models the effect of hire, contract, and upskill actions on cost and schedule." why="This connects AI delivery plans to workforce strategy, capacity planning, budget, schedule confidence, and execution risk." metric="Utilization versus target; skill coverage gaps against demand." tradeoff="Hiring is slow and costly; contracting is fast but thin; upskilling is sticky but takes time." outcome="A hire/contract/upskill call per gap, with the date and cost impact." />
+    >
 
         <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
           <KpiCard label="Team" value={teamLabel} tone="neutral" interpretation={`${totalGap} FTE short in skills`} />
@@ -106,24 +99,24 @@ export function CapacityPlanner() {
           <p className="stat-label mb-3">Skill utilization <span className="font-normal text-slatey-500">· demand ÷ capacity</span></p>
           <div className="space-y-3">
             {rows.map((r) => {
-              const overP = Math.min(100, r.util * 100);
+              const overP = r.util / utilizationScale * 100;
               const barColor = r.util > 1.05 ? "bg-rose-500" : r.util > 0.9 ? "bg-amber-500" : "bg-emerald-500";
               return (
-                <div key={r.key} className="grid grid-cols-[9rem_1fr_auto] items-center gap-3">
+                <div key={r.key} className="grid min-w-0 grid-cols-1 items-center gap-2 rounded-lg border border-line p-3 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-3">
                   <span className="text-xs font-medium text-ink">{r.label}</span>
                   <div>
                     <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100">
                       <div className={`h-full rounded-full ${barColor}`} style={{ width: `${overP}%` }} />
-                      <div className="absolute inset-y-0 w-px bg-ink/50" style={{ left: `${Math.min(100, (r.capacity / r.demand) * 100)}%` }} />
+                      <div className="absolute inset-y-0 w-px bg-ink/50" style={{ left: `${100 / utilizationScale}%` }} />
                     </div>
                     <p className="mt-0.5 text-[10px] text-slatey-500">demand {r.demand} · capacity {r.effCap}{r.gap > 0 && r.r !== "none" ? ` (+${r.gap})` : ""} · {Math.round(r.util * 100)}%</p>
                   </div>
-                  <div className="w-40 text-right">
+                  <div className="min-w-0 text-left sm:text-right">
                     {r.gap > 0 ? (
                       <div className="inline-flex gap-1">
                         {RES_OPTS.map((o) => (
-                          <button key={o} onClick={() => setRes((cur) => ({ ...cur, [r.key]: cur[r.key] === o ? "none" : o }))}
-                            className={`rounded border px-1.5 py-0.5 text-[10px] font-medium capitalize transition ${r.r === o ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{o}</button>
+                          <button key={o} aria-pressed={r.r === o} aria-label={`${r.label}: ${o}, ${LEAD[o]} weeks, $${RATE[o]}k per FTE per month`} onClick={() => setRes((cur) => ({ ...cur, [r.key]: cur[r.key] === o ? "none" : o }))}
+                            className={`min-h-10 rounded border px-2 py-1 text-xs font-medium capitalize transition ${r.r === o ? "border-primary bg-primary text-white" : "border-line text-slatey-400 hover:text-ink"}`}>{o}</button>
                         ))}
                       </div>
                     ) : (
@@ -134,14 +127,14 @@ export function CapacityPlanner() {
               );
             })}
           </div>
-          <p className="mt-3 text-[11px] text-slatey-500">Tick mark = current capacity line. Bars past it are over allocated. Hire = +6 wk / $18k·FTE · Contract = +1 wk / $28k · Upskill = +4 wk / $8k (draws on slack).</p>
+          <p className="mt-3 text-[11px] text-slatey-500">Every bar uses the same scale. The tick marks 100% utilization; bars beyond it show overload, with the exact percentage below. Hire = +6 wk / $18k·FTE · Contract = +1 wk / $28k · Upskill = +4 wk / $8k (draws on slack).</p>
         </Panel>
 
         <div className="mt-6">
           <InsightCard title={bottleneck ? `Bottleneck: ${bottleneck.label}` : "No bottleneck"} tone={unresolved > 0 ? "danger" : "success"}>
             {unresolved > 0
-              ? <>The plan doesn&apos;t fail on headcount, it fails in {gapRows.map((g) => g.label).join(", ")}. Contract is fastest to the date, upskill is cheapest but leans on the slack in Delivery and SME, hiring is permanent but adds six weeks. Pick per constraint, not per habit.</>
-              : <>Every gap is resolved. Delivery lands at ~{deliveryWeeks} weeks for +${addedCost}k/month, now decide whether the pulled-in date is worth the run rate.</>}
+              ? <>Capacity decisions remain for {unresolvedRows.map((g) => g.label).join(", ")}. Contract is fastest to the date, upskill is cheapest but leans on the slack in Delivery and SME, hiring is permanent but adds six weeks. Pick per constraint, not per habit.</>
+              : <>Every gap has a modeled resolution. Delivery lands at ~{deliveryWeeks} weeks for +${addedCost}k/month, now decide whether the pulled-in date is worth the run rate.</>}
           </InsightCard>
         </div>
 
@@ -158,7 +151,7 @@ export function CapacityPlanner() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a deterministic planner. Real capacity planning would require availability data, role definitions, location constraints, ramp time, vendor constraints, and delivery priorities.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }

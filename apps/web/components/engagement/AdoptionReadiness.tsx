@@ -6,17 +6,18 @@
 // → a two-week adoption plan that rewrites as the weakest factors move. SIMULATED;
 // weighted composite with visible weights and a defended threshold.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, SlidersHorizontal, Share2, RotateCcw } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
-import { EL01_USE_CASES, LABS } from "@labs/kit";
+import { useInViewport, usePlayback, InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, LabToolbar, ToolbarButton, Drawer, toast, ToastHost, CommandPalette, ExportMenu, downloadCsv, downloadJson, parseScenarioJson, pickTextFile, radarVertices, radarAxes, pointsToStr, type ExportAction, type Command, type BadgeTone } from "@labs/design-system";
+import { EL01_USE_CASES, LABS, normalizeUseCaseId } from "@labs/kit";
 import { weightSumOf, readinessComposite, readinessGate, planToReachGate, factorSensitivity, scheduleAdoptionPlan, compareReadiness, readinessTrajectory, type ReadinessVerdict } from "@labs/lab-realize";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
+import { EvidenceTable, Delta, NumericControl, bounded, validateScenario, oneOf, encodeScenario, decodeScenario } from "../business/DecisionTools";
 import { downloadMarkdown } from "../artifact/artifact";
 
 type FactorKey = "sponsorship" | "workflow" | "trust" | "training" | "incentives" | "comms";
@@ -72,7 +73,17 @@ const gateForOf = (c: number, A: Assumptions): { verdict: ReadinessVerdict; tone
   return { verdict, tone: VERDICT_TONE[verdict] };
 };
 
+type AdoptionBaseline = { factors: Factors; assumptions: Assumptions };
+const validFactors = (v: unknown): v is Factors => validateScenario(v, Object.fromEntries(FACTOR_KEYS.map((key) => [key,bounded(0,100)])));
+function validAssumptions(v: unknown): v is Assumptions {
+  if (!validateScenario(v, { weights: (w) => validateScenario(w, Object.fromEntries(FACTOR_KEYS.map((key) => [key,bounded(0,1)]))), scaleCut: bounded(1,100), condCut: bounded(0,100) })) return false;
+  const a = v as Assumptions; return a.condCut <= a.scaleCut && FACTOR_KEYS.some((key) => a.weights[key] > 0);
+}
+const validBaseline = (v: unknown): v is AdoptionBaseline => validateScenario(v, {factors:validFactors,assumptions:validAssumptions});
+
 export function AdoptionReadiness() {
+  const [requestedPreview, setRequestedPreview] = useState<number | null>(null);
+  const [baseline, setBaseline] = useState<AdoptionBaseline>({ factors: SCENARIOS[0].defaults, assumptions: DEFAULT_ASSUMPTIONS });
   const [scenarioKey, setScenarioKey] = useState(SCENARIOS[0].key);
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL01_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
@@ -105,7 +116,11 @@ export function AdoptionReadiness() {
     const raw = new URLSearchParams(window.location.search).get("cfg");
     if (!raw) return;
     try {
-      const cfg = JSON.parse(atob(raw)) as { f?: Factors; a?: Partial<Assumptions>; sc?: string };
+      const cfg = decodeScenario(raw) as { f?: Factors; a?: Partial<Assumptions>; sc?: string; compareKey?: string; baseline?: AdoptionBaseline; previewIndex?: number };
+      if (!cfg || typeof cfg !== "object" || (cfg.f !== undefined && !validFactors(cfg.f)) || (cfg.sc !== undefined && !SCENARIOS.some((s) => s.key === cfg.sc)) || (cfg.a !== undefined && !validAssumptions({...DEFAULT_ASSUMPTIONS,...cfg.a,weights:{...DEFAULT_ASSUMPTIONS.weights,...cfg.a.weights}})) || (cfg.baseline !== undefined && !validBaseline(cfg.baseline))) throw new Error("Invalid scenario");
+      if (cfg.compareKey && POPULATIONS.some((p) => p.key === cfg.compareKey)) setCompareKey(cfg.compareKey);
+      if (cfg.baseline) setBaseline(cfg.baseline);
+      if (cfg.previewIndex !== undefined && Number.isInteger(cfg.previewIndex) && bounded(0,6)(cfg.previewIndex)) setRequestedPreview(cfg.previewIndex);
       if (cfg.sc) setScenarioKey(cfg.sc);
       if (cfg.f) setFactors(cfg.f);
       if (cfg.a) {
@@ -116,13 +131,14 @@ export function AdoptionReadiness() {
           condCut: a.condCut ?? DEFAULT_ASSUMPTIONS.condCut,
         });
       }
-    } catch { /* ignore malformed link */ }
+    } catch { toast("This adoption link is invalid. The sample inputs are still available."); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const shareScenario = () => {
-    const cfg = btoa(JSON.stringify({ f: factors, a: A, sc: activeUc ? undefined : scenarioKey }));
+    const cfg = encodeScenario({ f: factors, a: A, sc: activeUc ? undefined : scenarioKey, compareKey, baseline, previewIndex: preview.index });
     const params = new URLSearchParams(window.location.search);
+    if (activeUcId) params.set("uc", activeUcId); else params.delete("uc");
     params.set("cfg", cfg);
     const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
     window.history.replaceState(null, "", url);
@@ -138,6 +154,15 @@ export function AdoptionReadiness() {
   const gate = gateForOf(c, A);
   const gatePlan = planToReachGate(factors, A.weights, FACTOR_KEYS, A.scaleCut);
   const trajectory = readinessTrajectory(factors, gatePlan.moves.map((m) => ({ key: m.key, from: m.from, to: m.to })), A.weights, FACTOR_KEYS, A.scaleCut);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const previewVisible = useInViewport(previewRef);
+  const preview = usePlayback({ steps: gatePlan.moves.length, intervalMs: 1600, visible: previewVisible });
+  const setPreviewIndex = preview.setIndex;
+  useEffect(() => { if (requestedPreview !== null) { setPreviewIndex(requestedPreview); setRequestedPreview(null); } }, [requestedPreview, setPreviewIndex]);
+  const projectedFactors = { ...factors };
+  gatePlan.moves.slice(0, preview.index).forEach((move) => { projectedFactors[move.key] = move.to; });
+  const projectedReadiness = readinessComposite(projectedFactors, A.weights, FACTOR_KEYS);
+  const baselineReadiness = readinessComposite(baseline.factors, baseline.assumptions.weights, FACTOR_KEYS);
   const levers = factorSensitivity(factors, A.weights, FACTOR_KEYS);
   const popB = POPULATIONS.find((p) => p.key === compareKey) ?? POPULATIONS[0];
   const cmp = compareReadiness(factors, popB.factors, A.weights, FACTOR_KEYS, A.scaleCut, A.condCut);
@@ -189,14 +214,20 @@ export function AdoptionReadiness() {
     toast("Factors exported as CSV");
   };
   const exportScenario = () => {
-    downloadJson(`adoption-scenario-${scen}`, { version: 1, factors, assumptions: A, scenarioKey });
+    downloadJson(`adoption-scenario-${scen}`, { version: 1, activeUcId, factors, assumptions: A, scenarioKey, compareKey, baseline, previewIndex: preview.index });
     toast("Scenario exported as JSON");
   };
   const importScenario = async () => {
     const text = await pickTextFile();
     if (!text) return;
     try {
-      const cfg = parseScenarioJson<{ factors?: Factors; assumptions?: Partial<Assumptions>; scenarioKey?: string }>(text);
+      const cfg = parseScenarioJson<{ activeUcId?: string | null; factors?: Factors; assumptions?: Partial<Assumptions>; scenarioKey?: string; compareKey?: string; baseline?: AdoptionBaseline; previewIndex?: number }>(text);
+      if ((cfg.factors !== undefined && !validFactors(cfg.factors)) || (cfg.scenarioKey !== undefined && !SCENARIOS.some((s) => s.key === cfg.scenarioKey)) || (cfg.assumptions !== undefined && !validAssumptions({...DEFAULT_ASSUMPTIONS,...cfg.assumptions,weights:{...DEFAULT_ASSUMPTIONS.weights,...cfg.assumptions.weights}})) || (cfg.baseline !== undefined && !validBaseline(cfg.baseline))) throw new Error("Invalid adoption inputs");
+      if (cfg.compareKey && POPULATIONS.some((p) => p.key === cfg.compareKey)) setCompareKey(cfg.compareKey);
+      if (cfg.baseline) setBaseline(cfg.baseline);
+      if (cfg.previewIndex !== undefined && Number.isInteger(cfg.previewIndex) && bounded(0,6)(cfg.previewIndex)) setRequestedPreview(cfg.previewIndex);
+      const importedUcId = typeof cfg.activeUcId === "string" ? normalizeUseCaseId(cfg.activeUcId) : null;
+      setActiveUcId(importedUcId && EL01_USE_CASES.some((uc) => uc.id === importedUcId) ? importedUcId : null);
       if (cfg.scenarioKey) setScenarioKey(cfg.scenarioKey);
       if (cfg.factors) setFactors(cfg.factors);
       if (cfg.assumptions) {
@@ -230,31 +261,23 @@ export function AdoptionReadiness() {
   ];
 
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-01</span>
-        </div>
-      </header>
+    <InstrumentShell title="Adoption readiness" eyebrow="Operating model & engagement" description="Find the people constraint before increasing the rollout."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-01" }]}
+      decision={<DecisionSummary title={gate.verdict} explanation={`Readiness ${c}/100. ${weak[0] ? `${weak[0].label} is lowest at ${factors[weak[0].key]}/100.` : "No factor is below 70."}`} nextAction={gatePlan.moves[0] ? `Inspect the modeled move for ${factorLabel(gatePlan.moves[0].key)} before committing effort.` : "Inspect the assumptions and comparison population before scaling."} tone={c >= A.scaleCut ? "positive" : c >= A.condCut ? "caution" : "negative"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}</>}
+      method={<CaseStudy problem="Enterprise AI adoption depends on more than model performance. Sponsors must remain aligned, users must trust the output, workflows must absorb the change, and managers must know what to reinforce. Scaling without readiness creates expensive resistance." approach="The instrument scores six adoption factors, weights them, compares the composite against gate thresholds, and generates the smallest set of moves required to reach scale readiness." why="This connects AI rollout decisions to adoption, trust, behavior change, productivity, support load, and realized value." metric="The composite against the Scale cutoff, and the fewest factor point moves required to clear it, highest leverage factors first." tradeoff="Broad slow change management vs minimal targeted moves; the flip the gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold or scale decision with a dated, sequenced plan to reach the gate, and an honest read on whether the rollout is ready at all." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Adoption Readiness Decision Instrument</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            A technically successful pilot can still fail when the people expected to use it do not trust it, understand
-            it, or see how it fits their work. This artifact turns adoption readiness into a measurable scale decision.
-          </p>
-        </div>
+    >
 
-        <UseCaseRail useCases={EL01_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Enterprise AI adoption depends on more than model performance. Sponsors must remain aligned, users must trust the output, workflows must absorb the change, and managers must know what to reinforce. Scaling without readiness creates expensive resistance." approach="The instrument scores six adoption factors, weights them, compares the composite against gate thresholds, and generates the smallest set of moves required to reach scale readiness." why="This connects AI rollout decisions to adoption, trust, behavior change, productivity, support load, and realized value." metric="The composite against the Scale cutoff, and the fewest factor point moves required to clear it, highest leverage factors first." tradeoff="Broad slow change management vs minimal targeted moves; the flip the gate plan and the projected trajectory show the cheapest path to Scale." outcome="A hold or scale decision with a dated, sequenced plan to reach the gate, and an honest read on whether the rollout is ready at all." />
+        <div ref={previewRef}><Panel className="mb-5">
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-base font-semibold text-ink">Observed inputs and projected intervention</h2><p className="mt-1 text-sm text-slatey-400">Pinned baseline {baselineReadiness}/100 → current inputs {c}/100. <Delta value={c - baselineReadiness} label="points" />. Preview: {projectedReadiness}/100 ({gateForOf(projectedReadiness, A).verdict}).</p></div><div className="flex flex-wrap gap-2"><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => setBaseline({ factors: { ...factors }, assumptions: { ...A, weights: { ...A.weights } } })}>Pin current baseline</button><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={() => { setFactors({ ...baseline.factors }); setAssumptions(baseline.assumptions); preview.reset(); }}>Restore baseline</button></div></div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">{[{label:"Pinned baseline", value:baselineReadiness, color:"bg-slate-500"},{label:"Current inputs",value:c,color:"bg-teal-600"},{label:"Projected after preview",value:projectedReadiness,color:"bg-amber-500"}].map((row) => <div key={row.label} className="rounded-lg border border-line p-3"><p className="text-xs text-slatey-500">{row.label}</p><p className="mt-1 text-xl font-semibold text-ink">{row.value}/100</p><div className="mt-2 h-2 rounded bg-slate-100"><div className={`h-full rounded ${row.color}`} style={{width:`${row.value}%`}} /></div></div>)}</div>
+          {gatePlan.moves.length > 0 ? <><div className="mt-4 flex flex-wrap gap-2"><button onClick={preview.playing ? preview.pause : preview.play} className="rounded-lg border border-line px-3 py-2 text-sm">{preview.playing ? "Pause preview" : "Play intervention steps"}</button><button onClick={preview.next} disabled={preview.index >= gatePlan.moves.length} className="rounded-lg border border-line px-3 py-2 text-sm disabled:opacity-50">Next step</button><button onClick={preview.reset} className="rounded-lg border border-line px-3 py-2 text-sm">Reset preview</button><button onClick={preview.complete} className="rounded-lg border border-line px-3 py-2 text-sm">Show full plan</button></div><div className="mt-3 flex flex-wrap gap-2">{gatePlan.moves.map((move, i) => <button key={move.key} aria-pressed={i < preview.index} onClick={() => { preview.pause(); preview.setIndex(i + 1); }} className={`rounded-lg border px-3 py-2 text-left text-sm ${i < preview.index ? "border-amber-400 bg-amber-50" : "border-line"}`}>{i + 1}. {factorLabel(move.key)} {move.from} → {move.to}</button>)}</div><p className="mt-3 text-sm text-slatey-400" aria-live="polite">{preview.index ? `Preview step ${preview.index}: ${ACTION[gatePlan.moves[Math.min(preview.index, gatePlan.moves.length) - 1].key]}` : "Choose or play a step to preview its impact."}</p></> : <p className="mt-3 text-sm text-slatey-400">No additional move is required by the current gate model.</p>}
+          <p className="mt-3 text-xs text-slatey-500">Preview changes only the projection. Current input scores stay unchanged until you have evidence to edit them. Reduced-motion users can inspect every step without automatic playback.</p>
+          <EvidenceTable caption="Baseline, current and projected factor values" headings={["Factor", "Pinned baseline", "Current inputs", "Projected", "Current normalized weight"]} rows={FACTORS.map((factor) => [factor.label, baseline.factors[factor.key], factors[factor.key], projectedFactors[factor.key], `${Math.round(A.weights[factor.key] / weightSumOf(A.weights, FACTOR_KEYS) * 100)}%`])} />
+        </Panel></div>
 
         <LabToolbar>
           <ToolbarButton onClick={() => setDrawerOpen(true)} active={edited} title="Edit the model's weights and gate cutoffs">
@@ -268,7 +291,7 @@ export function AdoptionReadiness() {
             <RotateCcw className="h-3.5 w-3.5" /> Reset
           </ToolbarButton>
           <ToolbarButton onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }))} className="ml-auto" title="Command palette (⌘K)">
-            ⌘K
+            <span className="sr-only">Open command palette</span><span aria-hidden>⌘K</span>
           </ToolbarButton>
           <ExportMenu actions={exportActions} />
         </LabToolbar>
@@ -280,10 +303,10 @@ export function AdoptionReadiness() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-2">
           {/* Sliders + levers */}
-          <div className="space-y-4">
-            <Panel className="space-y-4">
+          <div className="min-w-0 space-y-4">
+            <Panel className="min-w-0 space-y-4">
             <p className="stat-label">Readiness factors <span className="font-normal text-slatey-500">· weight shown</span></p>
             {FACTORS.map((x) => (
               <div key={x.key}>
@@ -320,7 +343,7 @@ export function AdoptionReadiness() {
           </div>
 
           {/* Verdict + plan */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Panel>
               <div className="flex items-end justify-between">
                 <div>
@@ -371,7 +394,7 @@ export function AdoptionReadiness() {
             <Panel>
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="stat-label">Compare populations</p>
-                <select value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="rounded-md border border-line bg-white px-2 py-1 text-[11px]">
+                <select aria-label="Illustrative comparison population" value={compareKey} onChange={(e) => setCompareKey(e.target.value)} className="rounded-md border border-line bg-white px-2 py-1 text-[11px]">
                   {POPULATIONS.map((pp) => <option key={pp.key} value={pp.key}>vs {pp.label}</option>)}
                 </select>
               </div>
@@ -554,8 +577,8 @@ export function AdoptionReadiness() {
         </Drawer>
         <ToastHost />
         <CommandPalette commands={paletteCommands} />
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 

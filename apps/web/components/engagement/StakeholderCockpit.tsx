@@ -6,14 +6,15 @@
 // the pre-steering briefing, who needs to hear what, from whom, before the meeting.
 // Programs lose sponsors in the silence between meetings, not in them. SIMULATED.
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, TrendingDown } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { useInViewport, usePlayback, InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL02_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { EvidenceTable, NumericControl, useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -56,6 +57,9 @@ function Spark({ traj }: { traj: number[] }) {
 }
 
 export function StakeholderCockpit() {
+  const historyRef = useRef<HTMLDivElement>(null);
+  const historyVisible = useInViewport(historyRef);
+  const weeks = usePlayback({ steps: 5, intervalMs: 1400, initiallyComplete: true, visible: historyVisible });
   const [sel, setSel] = useState("cio");
   const [activeUcId, setActiveUcId] = useState<string | null>(null);
   const activeUc = activeUcId ? EL02_USE_CASES.find((u) => u.id === activeUcId) ?? null : null;
@@ -67,13 +71,15 @@ export function StakeholderCockpit() {
     setSel((uc ? uc.payload.stakeholders : STAKEHOLDERS)[0].key);
   };
   const s = shs.find((x) => x.key === sel) ?? shs[0];
-  const flags = shs.filter((x) => drifting(x.traj));
+  const currentSentiment = (x: SH) => x.traj[Math.min(weeks.index, x.traj.length - 1)];
+  const isDrifting = (x: SH) => currentSentiment(x) < x.traj[0];
+  const flags = shs.filter(isDrifting);
 
   const buildBriefing = (): string => {
     const targets: SH[] = flags.length ? flags : [s];
     const block = (x: SH): string =>
       [
-        `### ${x.name}, ${SENT[last(x.traj)]}${drifting(x.traj) ? " (drifting)" : ""}`,
+        `### ${x.name}, ${SENT[currentSentiment(x)]}${isDrifting(x) ? " (drifting)" : ""}`,
         `- **Why now:** ${x.brief.why}`,
         `- **Who talks to them:** ${x.brief.who}`,
         `- **The message:** ${x.brief.message}`,
@@ -94,34 +100,26 @@ export function StakeholderCockpit() {
   const onGenerate = () =>
     downloadMarkdown("stakeholder-briefing", buildBriefing(), { scenario: activeUc ? activeUc.title : "Default program" });
 
+  const savedState = { sel, week: weeks.index };
+  const scenarioLink = useScenarioLink({ id: "EL-02", state: savedState, activeId: activeUcId,
+    restore: (s) => { setSel(s.sel); weeks.setIndex(s.week); },
+    validate: (v): v is typeof savedState => validateScenario(v, { sel: shortString, week: oneOf([0,1,2,3,4,5]) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-02</span>
-        </div>
-      </header>
+    <InstrumentShell title="Stakeholder alignment" eyebrow="Operating model & engagement" description="Know who needs a conversation, why it matters and what to ask."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-02" }]}
+      decision={<DecisionSummary title={`${flags.length} stakeholders are drifting`} explanation={`Selected: ${s.name}. ${s.brief.why}`} nextAction={s.brief.message} tone={flags.length ? "caution" : "positive"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL02_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="Programs rarely lose executive support all at once. Support erodes when concerns go unaddressed between meetings. A useful alignment view shows influence, interest, sentiment, drift, and the next conversation required." approach="The cockpit maps stakeholders by power and interest, tracks sentiment over six weeks, flags downward drift, and generates a pre steering briefing for the selected stakeholder." why="This connects stakeholder governance to program momentum, decision speed, escalation prevention, and sponsor confidence." metric="Alignment gap per stakeholder; who is drifting and how much influence they hold." tradeoff="Time spent aligning ahead of the meeting versus a blindside inside it." outcome="Who needs to hear what, from whom, before the meeting." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">Stakeholder and Sponsor Alignment Cockpit</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            Stakeholder alignment is not a static map. It is a trajectory. This artifact shows how sponsor sentiment moves
-            over time and flags the people who can quietly shift a program&apos;s outcome. {activeUc ? activeUc.payload.drivingLine : `Currently, ${flags.length} are drifting, including the sponsor.`}
-          </p>
-        </div>
+    >
 
-        <UseCaseRail useCases={EL02_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="Programs rarely lose executive support all at once. Support erodes when concerns go unaddressed between meetings. A useful alignment view shows influence, interest, sentiment, drift, and the next conversation required." approach="The cockpit maps stakeholders by power and interest, tracks sentiment over six weeks, flags downward drift, and generates a pre steering briefing for the selected stakeholder." why="This connects stakeholder governance to program momentum, decision speed, escalation prevention, and sponsor confidence." metric="Alignment gap per stakeholder; who is drifting and how much influence they hold." tradeoff="Time spent aligning ahead of the meeting versus a blindside inside it." outcome="Who needs to hear what, from whom, before the meeting." />
+        <div ref={historyRef}><Panel className="mb-5"><div className="grid gap-4 sm:grid-cols-[1fr_auto]"><NumericControl label="Historical sentiment snapshot" value={weeks.index + 1} min={1} max={6} onChange={(v) => { weeks.pause(); weeks.setIndex(v - 1); }} format={(v) => `Week ${v} of 6`} /><div className="flex flex-wrap items-center gap-2"><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={weeks.playing ? weeks.pause : weeks.replay}>{weeks.playing ? "Pause history" : "Replay six weeks"}</button><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={weeks.next} disabled={weeks.index >= 5}>Next week</button><button className="rounded-lg border border-line px-3 py-2 text-sm" onClick={weeks.complete}>Latest</button></div></div><p className="mt-3 text-sm text-slatey-400" aria-live="polite">Week {weeks.index + 1}: {flags.length} stakeholders are below their starting sentiment. The briefing is authored from the latest six-week context.</p><EvidenceTable caption="All stakeholder sentiment values" headings={["Stakeholder", "Week 1", "Week 2", "Week 3", "Week 4", "Week 5", "Week 6"]} rows={shs.map((x) => [x.name, ...x.traj.map((value) => SENT[value])])} /></Panel>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-2">
           {/* Grid */}
           <Panel>
             <p className="stat-label mb-2">Power × interest</p>
@@ -133,17 +131,17 @@ export function StakeholderCockpit() {
               <span className="absolute bottom-1 left-2 text-[10px] text-slatey-500">Monitor</span>
               <span className="absolute bottom-1 right-2 text-[10px] text-slatey-500">Keep informed</span>
               {shs.map((x) => {
-                const cur = last(x.traj);
+                const cur = currentSentiment(x);
                 const on = x.key === sel;
                 return (
-                  <button key={x.key} onClick={() => setSel(x.key)} aria-label={`${x.name}: ${SENT[last(x.traj)]}`} title={x.name}
-                    className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${x.interest * 86 + 7}%`, top: `${(1 - x.power) * 82 + 8}%` }}>
-                    <span className={`block rounded-full ring-2 ring-white ${on ? "h-4 w-4 outline outline-2 outline-ink" : "h-3 w-3"} ${drifting(x.traj) ? "outline outline-2 outline-rose-500/70" : ""}`} style={{ background: SENT_HEX[cur] }} />
+                  <button key={x.key} aria-pressed={x.key === sel} onClick={() => setSel(x.key)} aria-label={`${x.name}: ${SENT[currentSentiment(x)]}`} title={x.name}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full p-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary" style={{ left: `${x.interest * 86 + 7}%`, top: `${(1 - x.power) * 82 + 8}%` }}>
+                    <span className={`block rounded-full ring-2 ring-white ${on ? "h-4 w-4 outline outline-2 outline-ink" : "h-3 w-3"} ${isDrifting(x) ? "outline outline-2 outline-rose-500/70" : ""}`} style={{ background: SENT_HEX[cur] }} />
                   </button>
                 );
               })}
             </div>
-            <p className="mt-2 text-[11px] text-slatey-500">Dot color = current sentiment; rose outline = drifting. X = interest, Y = power.</p>
+            <p className="mt-2 text-[11px] text-slatey-500">Dot color = selected-week sentiment; rose outline = drifting. X = interest, Y = power.</p>
           </Panel>
 
           {/* List */}
@@ -151,17 +149,17 @@ export function StakeholderCockpit() {
             <p className="stat-label mb-2">Stakeholders <span className="font-normal text-slatey-500">· 6-week trajectory</span></p>
             <div className="space-y-1">
               {shs.map((x) => {
-                const cur = last(x.traj);
+                const cur = currentSentiment(x);
                 const on = x.key === sel;
                 return (
-                  <button key={x.key} onClick={() => setSel(x.key)} className={`flex w-full items-center gap-3 rounded-md border px-2.5 py-1.5 text-left transition ${on ? "border-primary bg-primary-soft" : "border-transparent hover:bg-slate-50"}`}>
-                    <div className="min-w-0 flex-1">
+                  <button key={x.key} aria-pressed={x.key === sel} onClick={() => setSel(x.key)} className={`flex w-full flex-wrap items-center gap-2 rounded-md border px-2.5 py-1.5 text-left transition ${on ? "border-primary bg-primary-soft" : "border-transparent hover:bg-slate-50"}`}>
+                    <div className="min-w-0 basis-28 flex-1">
                       <p className="truncate text-xs font-medium text-ink">{x.name}</p>
                       <p className="text-[10px] text-slatey-500">{x.role}</p>
                     </div>
                     <Spark traj={x.traj} />
                     <Badge tone={SENT_TONE[cur]}>{SENT[cur]}</Badge>
-                    {drifting(x.traj) && <TrendingDown className="h-4 w-4 shrink-0 text-rose-600" />}
+                    {isDrifting(x) && <TrendingDown className="h-4 w-4 shrink-0 text-rose-600" />}
                   </button>
                 );
               })}
@@ -169,16 +167,17 @@ export function StakeholderCockpit() {
           </Panel>
         </div>
 
+        </div>
         {/* Briefing */}
         <Panel className="mt-4">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <p className="stat-label">Pre steering briefing</p>
             <span className="text-sm font-semibold text-ink">{s.name}</span>
-            <Badge tone={SENT_TONE[last(s.traj)]}>{SENT[last(s.traj)]}</Badge>
-            {drifting(s.traj) && <Badge tone="rose">drifting</Badge>}
+            <Badge tone={SENT_TONE[currentSentiment(s)]}>{SENT[currentSentiment(s)]}</Badge>
+            {isDrifting(s) && <Badge tone="rose">drifting</Badge>}
             <span className="ml-auto"><ArtifactButton label="Download the briefing" onClick={onGenerate} title="Download the pre steering briefing as Markdown" /></span>
           </div>
-          <div className="grid gap-2 text-sm sm:grid-cols-2">
+          <div className="grid min-w-0 items-start gap-2 text-sm sm:grid-cols-2">
             <Field k="Why now" v={s.brief.why} />
             <Field k="Who talks to them" v={s.brief.who} />
             <Field k="The message" v={s.brief.message} />
@@ -203,8 +202,8 @@ export function StakeholderCockpit() {
           </details>
           <p className="text-xs text-slatey-500"><span className="font-semibold text-slatey-400">Limitations:</span> this is a simulated stakeholder model. Real use would require stakeholder interviews, relationship context, meeting history, sentiment inputs, and judgment from the delivery lead.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 

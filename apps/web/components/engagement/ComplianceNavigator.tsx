@@ -9,11 +9,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Circle } from "lucide-react";
-import { Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
+import { InstrumentShell, DecisionSummary, Provenance, Panel, Badge, LiveBadge, FreshnessStamp, InsightCard, type BadgeTone } from "@labs/design-system";
 import { EL05_USE_CASES } from "@labs/kit";
 import { UseCaseRail, UseCaseBrief } from "../use-case/UseCaseRail";
 import { CaseStudy } from "../reviewer/CaseStudy";
 import { OutcomeFrame } from "../reviewer/OutcomeFrame";
+import { useScenarioLink, ScenarioActions, validateScenario, oneOf, bounded, bool, shortString, recordOf } from "../business/DecisionTools";
 import { useUseCaseDeepLink } from "../use-case/useDeepLink";
 import { downloadMarkdown, ArtifactButton } from "../artifact/artifact";
 
@@ -140,37 +141,28 @@ export function ComplianceNavigator() {
       note: "Illustrative simplified compliance model as of July 2026, not legal advice.",
     });
 
+  const savedState = { fn, autonomy, data, impact, override };
+  const scenarioLink = useScenarioLink({ id: "EL-05", state: savedState, activeId: activeUcId,
+    restore: (s) => { setFn(s.fn); setAutonomy(s.autonomy); setData(s.data); setImpact(s.impact); setOverride(s.override); },
+    validate: (v): v is typeof savedState => validateScenario(v, { fn: oneOf(FUNCTIONS.map((f) => f.key)), autonomy: oneOf(AUTONOMY.map((o) => o.v)), data: oneOf(DATA.map((o) => o.v)), impact: oneOf(IMPACT.map((o) => o.v)), override: (v) => recordOf(v,[true,false]) }),
+  });
+
   return (
-    <div className="min-h-screen bg-canvas font-sans text-ink">
-      <header className="sticky top-0 z-20 border-b border-line bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 md:px-5">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-medium text-slatey-400 hover:text-ink"><ArrowLeft className="h-4 w-4" /> Portfolio</Link>
-          <span className="ml-1 font-mono text-xs text-slatey-500">EL-05</span>
-        </div>
-      </header>
+    <InstrumentShell title="Compliance readiness" eyebrow="Operating model & engagement" description="Classify the modeled use case, inspect its controls and keep evidence gaps visible."
+      breadcrumbs={[{ label: "Portfolio", href: "/#collections" }, { label: "EL-05" }]}
+      decision={<DecisionSummary title={tier === "prohibited" ? "Stop: prohibited in this illustrative model" : `${tier[0].toUpperCase() + tier.slice(1)} risk · ${controls.length - met} control gaps`} explanation={rationaleFull} nextAction={tier === "prohibited" ? "Rescope the use case; checking controls cannot authorize a prohibited activity." : "Review each modeled obligation, mark evidence status and download the packet for qualified review."} tone={tier === "prohibited" ? "negative" : readiness === 100 ? "positive" : "caution"} />}
+      provenance={<Provenance mode="SIMULATED" input={activeUc ? activeUc.title : "Authored sample with editable assumptions"} method="Deterministic browser model" note={`Authored sample reference date: ${activeUc?.lastVerified ?? "2026-07-02"}. Projected outcomes; no live telemetry or independent verification.`} />}
+      controls={<><UseCaseRail useCases={EL05_USE_CASES} activeId={activeUcId} onSelect={(id) => { scenarioLink.clear(); selectUseCase(id); }} />
+        {activeUc && <UseCaseBrief useCase={activeUc} />}<ScenarioActions {...scenarioLink} reset={() => { selectUseCase(activeUcId); scenarioLink.clear(); }} /></>}
+      method={<CaseStudy problem="AI initiatives need control requirements early enough to influence scope, data handling, review design, documentation, and release planning. Treating compliance as an end gate creates avoidable rework and risk." approach="The navigator classifies representative AI functions into simplified risk tiers, applies selected overlays, maps required controls, identifies gaps, and produces an audit readiness view." why="This connects AI delivery to regulatory exposure, auditability, control design, release readiness, and risk ownership." metric="Risk tier; control coverage versus what the tier requires." tradeoff="Control burden and time to market versus regulatory and reputational exposure." outcome="A risk tier and required controls map with the gap to close before go live." />}
 
-      <main className="mx-auto max-w-6xl px-4 py-6 md:px-5 md:py-8">
-        <div className="mb-5">
-          <p className="eyebrow mb-1">Operating Model and Transformation Leadership Artifacts</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink">AI Compliance Readiness Navigator</h1>
-            <LiveBadge mode="SIMULATED" />
-            <FreshnessStamp freshness={{ lastVerified: "2026-07-02", asOf: "2026-07", note: "EU AI Act obligations phasing in" }} />
-          </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slatey-400">
-            AI compliance is most expensive when it is discovered late. This artifact shows how risk tiering, autonomy,
-            data sensitivity, rights impact, and industry context can shape required controls before delivery proceeds too far. Bridges the{" "}
-            <Link href="/govern" className="font-medium text-primary hover:underline">Govern stage</Link>.
-          </p>
-        </div>
+    >
 
-        <UseCaseRail useCases={EL05_USE_CASES} activeId={activeUcId} onSelect={selectUseCase} />
-        {activeUc && <UseCaseBrief useCase={activeUc} />}
-        <CaseStudy problem="AI initiatives need control requirements early enough to influence scope, data handling, review design, documentation, and release planning. Treating compliance as an end gate creates avoidable rework and risk." approach="The navigator classifies representative AI functions into simplified risk tiers, applies selected overlays, maps required controls, identifies gaps, and produces an audit readiness view." why="This connects AI delivery to regulatory exposure, auditability, control design, release readiness, and risk ownership." metric="Risk tier; control coverage versus what the tier requires." tradeoff="Control burden and time to market versus regulatory and reputational exposure." outcome="A risk tier and required controls map with the gap to close before go live." />
+        <Panel className="mb-4"><h2 className="text-base font-semibold text-ink">Next evidence action</h2><p className="mt-2 text-sm text-slatey-400">{tier === "prohibited" ? "This modeled classification requires rescoping. Control completion cannot change the prohibited classification." : controls.find((control) => !control.met)?.label ?? "All controls are marked met in this model. Validate the supporting evidence before a deployment decision."}</p><p className="mt-2 text-xs text-slatey-500">Controls are self-declared scenario inputs. A marked checkbox is not an independently verified control or legal approval. The evidence reference date above remains visible.</p></Panel>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid min-w-0 items-start gap-6 lg:grid-cols-2">
           {/* Inputs */}
-          <Panel className="space-y-4">
+          <Panel className="min-w-0 space-y-4">
             <div>
               <p className="mb-1 text-xs font-medium text-slatey-400">Function</p>
               {activeUc ? (
@@ -178,7 +170,7 @@ export function ComplianceNavigator() {
               ) : (
                 <div className="grid grid-cols-2 gap-1">
                   {FUNCTIONS.map((f) => (
-                    <button key={f.key} onClick={() => setFn(f.key)} className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${fn === f.key ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{f.label}</button>
+                    <button key={f.key} aria-pressed={fn === f.key} onClick={() => setFn(f.key)} className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${fn === f.key ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{f.label}</button>
                   ))}
                 </div>
               )}
@@ -189,7 +181,7 @@ export function ComplianceNavigator() {
           </Panel>
 
           {/* Result */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <Panel>
               <div className="flex items-center justify-between">
                 <p className="stat-label">Classification</p>
@@ -209,7 +201,7 @@ export function ComplianceNavigator() {
               <ul className="space-y-1">
                 {controls.map((c) => (
                   <li key={c.label}>
-                    <button onClick={() => setOverride((o) => ({ ...o, [c.label]: !c.met }))} className="flex w-full items-start gap-2 rounded-md px-1.5 py-1 text-left text-xs hover:bg-slate-50">
+                    <button aria-pressed={c.met} aria-label={`${c.label}: ${c.met ? "marked met" : "evidence gap"}`} disabled={tier === "prohibited"} onClick={() => setOverride((o) => ({ ...o, [c.label]: !c.met }))} className="flex w-full items-start gap-2 rounded-md px-1.5 py-1 text-left text-xs hover:bg-slate-50">
                       {c.met ? <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" /> : <Circle className="mt-0.5 h-4 w-4 shrink-0 text-slatey-500" />}
                       <span className={c.met ? "text-slatey-300" : "text-ink"}>{c.label}</span>
                       {!c.met && tier !== "prohibited" && <Badge tone="rose" className="ml-auto shrink-0">gap</Badge>}
@@ -219,7 +211,7 @@ export function ComplianceNavigator() {
               </ul>
               {tier !== "prohibited" && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <ArtifactButton label="Download the audit packet" onClick={onGenerate} title="Download this audit readiness packet as Markdown" />
+                  <ArtifactButton label="Download the review packet" onClick={onGenerate} title="Download this audit readiness packet as Markdown" />
                   <span className="text-[11px] text-slatey-500">or print this page (⌘/Ctrl P) for a PDF.</span>
                 </div>
               )}
@@ -248,8 +240,8 @@ export function ComplianceNavigator() {
           </details>
           <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"><span className="font-semibold">Illustrative, not legal advice.</span> The tiering and controls are simplified for portfolio demonstration and should be validated with counsel, risk, compliance, and policy owners for any real deployment.</p>
         </div>
-      </main>
-    </div>
+
+    </InstrumentShell>
   );
 }
 
@@ -259,7 +251,7 @@ function Seg({ label, value, onChange, opts }: { label: string; value: string; o
       <p className="mb-1 text-xs font-medium text-slatey-400">{label}</p>
       <div className="flex gap-1">
         {opts.map((o) => (
-          <button key={o.v} onClick={() => onChange(o.v)} className={`flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${value === o.v ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{o.l}</button>
+          <button key={o.v} aria-pressed={value === o.v} aria-label={`${label}: ${o.l}`} onClick={() => onChange(o.v)} className={`flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${value === o.v ? "border-primary bg-primary text-white" : "border-line bg-white text-slatey-400 hover:text-ink"}`}>{o.l}</button>
         ))}
       </div>
     </div>

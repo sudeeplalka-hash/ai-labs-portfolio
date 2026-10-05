@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Compass, Sparkles, Target, FileText, ArrowRight, PlayCircle, Layers, Wand2, RotateCcw, ShieldCheck, Cpu, Route, Activity, TrendingUp } from "lucide-react";
-import { Panel, SectionHeader, Badge, InsightCard, cn } from "@labs/design-system";
+import { Panel, SectionHeader, Badge, InsightCard, cn, scrollToElement } from "@labs/design-system";
 import { useProgram } from "@labs/program-core";
 import type { InitiativeMeta } from "@labs/program-core";
 import {
@@ -15,7 +15,7 @@ import { ScorePanel } from "./ScorePanel";
 import { InitiativeBrief } from "./InitiativeBrief";
 import { IdeaGenerator } from "./IdeaGenerator";
 
-const scrollTo = (id: string) => { if (typeof document !== "undefined") document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+const scrollTo = (id: string) => { if (typeof document !== "undefined") scrollToElement(document.getElementById(id), { block: "start" }); };
 
 export function StrategyPlanningView() {
   const { state, update, addToPortfolio, hydrated } = useProgram();

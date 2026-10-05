@@ -1,8 +1,10 @@
+import { routeMetadata } from "@/lib/site";
 import type { Metadata } from "next";
 import { RefreshCcw, Activity, TrendingDown, AlertTriangle, GitBranch, FileDown } from "lucide-react";
 import { LabGuide } from "@/components/shell/LabGuide";
 
-export const metadata: Metadata = { title: "Guide \u00b7 Operate" };
+export const metadata: Metadata = {
+  ...routeMetadata("Guide \u00b7 Operate", "Inspect guide \u00b7 operate through the enterprise AI portfolio: visible evidence, interactive scenarios and stated assumptions.", "/operate/guide"), title: "Guide \u00b7 Operate" };
 
 export default function Page() {
   return (

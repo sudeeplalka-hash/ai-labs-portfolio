@@ -19,13 +19,13 @@ export function RetrievedEvidencePanel({ chunks }: { chunks: RetrievedLiveChunk[
         <div className="max-h-[420px] space-y-2.5 overflow-y-auto pr-1">
           {chunks.map((c) => (
             <div
-              key={c.id}
+              key={c.id} id={`evidence-${c.citationLabel}`} tabIndex={-1}
               className={cn(
-                "rounded-lg border p-3",
+                "scroll-mt-24 rounded-lg border p-3 target:ring-2 target:ring-primary",
                 c.usedInAnswer ? "border-emerald-500/25 bg-emerald-500/[0.04]" : "border-line bg-navy-850/40",
               )}
             >
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="flex h-6 w-7 items-center justify-center rounded-md bg-accent/15 text-[11px] font-bold text-accent-cyan">
                     {c.citationLabel}
@@ -45,11 +45,11 @@ export function RetrievedEvidencePanel({ chunks }: { chunks: RetrievedLiveChunk[
                   <span key={i} className="rounded bg-slate-50 px-1.5 py-0.5 text-xs text-slatey-300">{r}</span>
                 ))}
               </div>
-              <div className="mt-2 flex items-center gap-3 text-[11px]">
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px]">
                 <span className={cn("inline-flex items-center gap-1", c.usedInAnswer ? "text-emerald-700" : "text-slatey-500")}>
-                  {c.usedInAnswer ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} Used in answer
+                  {c.usedInAnswer ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />} {c.usedInAnswer ? "Cited by the answer" : "Retrieved, not cited"}
                 </span>
-                <span className="font-mono text-slatey-600">{c.id} · rank {c.rank}</span>
+                <a href="#rag-answer" className="text-primary underline">Back to answer</a><span className="break-all font-mono text-slatey-600">{c.id} · rank {c.rank}</span>
               </div>
             </div>
           ))}

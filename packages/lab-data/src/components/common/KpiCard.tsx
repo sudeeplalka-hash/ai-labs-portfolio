@@ -44,7 +44,7 @@ export function KpiCard({
       <div className="p-4">
         <div className="flex items-center gap-1">
           <span className="stat-label">{label}</span>
-          {tooltip && <MetricTooltip text={tooltip} />}
+          {tooltip && <MetricTooltip text={tooltip} label={label} />}
         </div>
         <div className="mt-1.5 flex items-end gap-2">
           <div className="text-2xl font-semibold tracking-tight text-ink">
