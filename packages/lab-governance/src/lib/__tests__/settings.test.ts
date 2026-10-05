@@ -7,7 +7,7 @@ describe('model settings snapshots', () => {
     vi.stubGlobal('window', {});
     vi.stubGlobal('localStorage', { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value) });
   });
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => { vi.unstubAllGlobals(); });
   it('keeps snapshot identity stable until a stored setting actually changes', async () => {
     const { getSettings, setSettings } = await import('../settings');
     const before = getSettings();

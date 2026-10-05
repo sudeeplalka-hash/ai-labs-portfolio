@@ -3,7 +3,7 @@ let api: typeof import('../api').api;
 
 describe('sample governance workflow contracts', () => {
   beforeAll(async () => { vi.stubEnv('NEXT_PUBLIC_STATIC_DEMO', '1'); api = (await import('../api')).api; });
-  afterAll(() => vi.unstubAllEnvs());
+  afterAll(() => { vi.unstubAllEnvs(); });
   it('returns the confirmed policy value, including when the prior list shared mutable records', async () => {
     const policies = await api.policies.list();
     const initial = policies[0].enabled;
