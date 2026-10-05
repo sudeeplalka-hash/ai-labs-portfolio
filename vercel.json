@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "pnpm install --frozen-lockfile --force --store-dir \"$(mktemp -d /tmp/portfolio-pnpm-store.XXXXXX)\"",
   "buildCommand": "pnpm turbo run build --filter=@labs/web --force",
   "outputDirectory": "apps/web/out",
   "redirects": [
